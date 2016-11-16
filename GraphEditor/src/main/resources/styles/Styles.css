@@ -1,0 +1,6 @@
+.button {
+    -fx-font-weight: bold;
+}
+.scroll-pane > .viewport {
+   -fx-background-color: white;
+}
