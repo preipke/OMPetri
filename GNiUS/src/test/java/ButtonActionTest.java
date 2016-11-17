@@ -1,4 +1,6 @@
 
+import edu.unibi.agbi.gnius.Main;
+import edu.unibi.agbi.gravisfx.pane.ActionPane;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import org.junit.Assert;
@@ -20,23 +22,49 @@ import org.testfx.matcher.base.NodeMatchers;
  */
 public class ButtonActionTest extends TestFXBase
 {
-    final String TEST_BUTTON_FXID = "#graphTestButton";
-    final String TEST_LABEL_FXID = "#graphTestLabel";
+    final String buttonLoad = "#buttonLoad";
+    final String buttonConnect = "#buttonConnect";
+    final String buttonCreate = "#buttonCreate";
+    final String choicesCreate = "#choicesCreate";
     
-    final String GRAPH_VIEW_FXID = "#graphPane";
+    final String buttonAlign = "#buttonAlign";
+    final String choicesAlign = "#choicesAlign";
+    
+    final String GRAPH_VIEW = "#viewGraph";
     
     /**
      * Expects the given ID not to exist.
      */
-    @Test(expected = FxRobotException.class)
+    //@Test(expected = FxRobotException.class)
     public void clickOnButton() {
         clickOn("#sector9");
     }
     
     @Test
-    public void ensureButtonChangesLabel() {
+    public void ensureButtonAddsExampleNodes() {
+        
+        ActionPane graphView = find(GRAPH_VIEW);
+        Assert.assertNotNull(graphView);
+        Assert.assertEquals(0 , graphView.getChildren().size());
+        Assert.assertEquals(0, Main.getGraph().getNodes().length);
+        
+        clickOn(buttonLoad);
+        
+        Assert.assertTrue(Main.getGraph().getNodes().length != 0);
+        Assert.assertTrue(graphView.getChildren().size() != 0);
+    }
+    
+    public void ensureButtonConnectsNodes() {
+        Assert.assertEquals(this , this);
+        clickOn(buttonConnect);
+        Assert.assertEquals(this , this);
+    }
+    
+    /*
+    @Test
+    public void ensureButtonLoadsGraph() {
         sleep(1000);
-        FxAssert.verifyThat(TEST_LABEL_FXID, (Label label) -> { // Hamcrest Matcher
+        FxAssert.verifyThat(buttonLoad, (Label label) -> { // Hamcrest Matcher
             return label.getText().contains("Press the button!");
         });
         clickOn(TEST_BUTTON_FXID);
@@ -48,7 +76,8 @@ public class ButtonActionTest extends TestFXBase
     
     @Test
     public void verifyGraphViewIsEmpty() {
-        verifyThat(GRAPH_VIEW_FXID, NodeMatchers.isNotNull());
+        verifyThat(viewPane, NodeMatchers.isNotNull());
+        
         clickOn(TEST_BUTTON_FXID);
         
         Pane graphView = find(GRAPH_VIEW_FXID);
@@ -61,5 +90,5 @@ public class ButtonActionTest extends TestFXBase
         clickOn("");
         moveTo(""); // moves the mouse
         sleep(1000); // just for visualization
-    }
+    }*/
 }

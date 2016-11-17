@@ -11,7 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mainClass>edu.unibi.agbi.gnius.MainApp</mainClass>
+        <mainClass>edu.unibi.agbi.gnius.Main</mainClass>
     </properties>
 
     <organization>
@@ -20,6 +20,12 @@
     </organization>
     
     <dependencies>
+        
+        <dependency>
+            <groupId>edu.unibi.agbi</groupId>
+            <artifactId>GraVisFX</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
         
         <!-- run as if it was on an embedded system -->
         <dependency>

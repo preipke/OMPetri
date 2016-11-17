@@ -3,37 +3,39 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity.nodes;
+package edu.unibi.agbi.gravisfx.graph.entity.node;
 
 import edu.unibi.agbi.gravisfx.controller.PropertiesController;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Shape;
 
 /**
- * 
+ *
  * @author PR
  */
-public class GravisRectangle extends Rectangle implements IGravisNode
+public class GravisCircle implements IGravisNode
 {
+    private final String id;
+    
+    private final Circle circle;
+    
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     
-    public GravisRectangle(String nodeId) {
-        super();
+    public GravisCircle(String nodeId) {
+        id = nodeId;
+        circle = new Circle();
+        circle.setId(id);
     }
-
+    
     @Override
-    public void initialize(String id, double centerX , double centerY , double scaling) {
-        this.setId(id);
-        // TODO care for values not to be negative! might cause problems
-        this.setX(centerX - PropertiesController.RECTANGLE_WIDTH / 2 * scaling);
-        this.setY(centerY - PropertiesController.RECTANGLE_HEIGHT / 2 * scaling);
-        this.setWidth(PropertiesController.RECTANGLE_WIDTH * scaling);
-        this.setHeight(PropertiesController.RECTANGLE_HEIGHT * scaling);
-        this.setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scaling);
-        this.setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scaling);
+    public void init(double centerX , double centerY , double scaling) {
+        circle.setCenterX(centerX);
+        circle.setCenterY(centerY);
+        circle.setRadius(PropertiesController.CIRCLE_RADIUS * scaling);
     }
     
     @Override
@@ -58,11 +60,26 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 
     @Override
     public void setFill(Color color) {
-        super.setFill(color);
+        circle.setFill(color);
     }
 
     @Override
     public void setStroke(Color color) {
-        super.setStroke(color);
+        circle.setStroke(color);
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return circle;
+    }
+
+    @Override
+    public void relocate(double positionX , double positionY) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

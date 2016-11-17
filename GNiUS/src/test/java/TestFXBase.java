@@ -1,5 +1,5 @@
 
-import edu.unibi.agbi.gnius.MainApp;
+import edu.unibi.agbi.gnius.Main;
 import java.util.concurrent.TimeoutException;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
@@ -36,7 +36,7 @@ public class TestFXBase extends ApplicationTest
     
     @Before
     public void setUpClass() throws Exception {
-        ApplicationTest.launch(MainApp.class); // verifies that MainApp is a JavaFX application (extends Application)
+        ApplicationTest.launch(Main.class); // verifies that MainApp is a JavaFX application (extends Application)
     }
     
     @Override 

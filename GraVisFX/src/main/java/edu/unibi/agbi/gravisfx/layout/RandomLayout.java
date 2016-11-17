@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gravisfx.layout;
 
-import edu.unibi.agbi.gravisfx.entity.Graph;
-import edu.unibi.agbi.gravisfx.entity.nodes.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
 import java.util.List;
 import java.util.Random;
 
@@ -22,7 +22,7 @@ public class RandomLayout
      */
     public static void applyOn(Graph graph) {
 
-        List<IGravisNode> nodes = graph.getModel().getAllNodes();
+        IGravisNode[] nodes = graph.getNodes();
         
         Random rnd = new Random();
 
