@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.entity.node.GravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,9 +15,9 @@ import java.util.Map;
  */
 public class Model
 {
-    private final Map<String, GravisNode> nodes = new HashMap();
+    private final Map<String, IGravisNode> nodes = new HashMap();
     
-    public boolean addNode(GravisNode node) {
+    public boolean addNode(IGravisNode node) {
         if (nodes.containsKey(node.getId())) {
             return false;
         } else {
@@ -26,27 +26,27 @@ public class Model
         }
     }
     
-    public boolean removeNode(GravisNode node) {
+    public boolean removeNode(IGravisNode node) {
         node = nodes.remove(node.getId());
         return node != null;
     }
     
-    public GravisNode getNode(String id) {
+    public IGravisNode getNode(String id) {
         return nodes.get(id);
     }
     
-    public GravisNode[] getNodes() {
-        GravisNode[] nodesArray = new GravisNode[nodes.size()];
+    public IGravisNode[] getNodes() {
+        IGravisNode[] nodesArray = new IGravisNode[nodes.size()];
         
         int index = 0;
-        for (Map.Entry<String , GravisNode> entrySet : nodes.entrySet()) {
+        for (Map.Entry<String , IGravisNode> entrySet : nodes.entrySet()) {
             nodesArray[index] = entrySet.getValue();
             index++;
         }
         return nodesArray;
     }
     
-    public void connectNodes(GravisNode parent, GravisNode child) {
+    public void connectNodes(IGravisNode parent, IGravisNode child) {
         nodes.get(parent.getId()).addChildNode(child);
     }
     

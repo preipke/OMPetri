@@ -33,17 +33,19 @@ public class GraphMenuController implements Initializable
     
     @FXML
     private void buttonLoadAllClicked(ActionEvent event) {
-        
-        Main.getGraph().addNode(new GravisCircle("A", Color.DODGERBLUE));
-        Main.getGraph().addNode(new GravisCircle("B", Color.DODGERBLUE));
-        Main.getGraph().addNode(new GravisCircle("C", Color.DODGERBLUE));
-        Main.getGraph().addNode(new GravisRectangle("A_B", Color.RED));
-        Main.getGraph().addNode(new GravisRectangle("A_C", Color.RED));
-        Main.getGraph().addNode(new GravisRectangle("A_D", Color.RED));
-        Main.getGraph().addNode(new GravisCircle("D", Color.DODGERBLUE));
-        Main.getGraph().addNode(new GravisCircle("E", Color.DODGERBLUE));
-        Main.getGraph().addNode(new GravisRectangle("D_E", Color.RED));
-        Main.getGraph().addNode(new GravisRectangle("E_D", Color.RED));
+        int count = 1000;
+        for (int i = 0; i < count; i++) {
+            Main.getGraph().addNode(new GravisCircle("A" + i , Color.YELLOWGREEN));
+            Main.getGraph().addNode(new GravisCircle("B" + i , Color.YELLOWGREEN));
+            Main.getGraph().addNode(new GravisCircle("C" + i , Color.YELLOWGREEN));
+            Main.getGraph().addNode(new GravisRectangle("A_B" + i , Color.RED));
+            Main.getGraph().addNode(new GravisRectangle("A_C" + i , Color.RED));
+            Main.getGraph().addNode(new GravisRectangle("A_D" + i , Color.RED));
+            Main.getGraph().addNode(new GravisCircle("D" + i , Color.DODGERBLUE));
+            Main.getGraph().addNode(new GravisCircle("E" + i , Color.DODGERBLUE));
+            Main.getGraph().addNode(new GravisRectangle("D_E" + i , Color.PURPLE));
+            Main.getGraph().addNode(new GravisRectangle("E_D" + i , Color.PURPLE));
+        }
     }
     
     @FXML

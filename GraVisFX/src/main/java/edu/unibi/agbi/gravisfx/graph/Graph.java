@@ -6,12 +6,10 @@
 package edu.unibi.agbi.gravisfx.graph;
 
 import edu.unibi.agbi.gravisfx.graph.entity.edge.GravisEdge;
-import edu.unibi.agbi.gravisfx.graph.entity.node.GravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javafx.scene.transform.Scale;
 
 /**
@@ -49,27 +47,28 @@ public class Graph
         return scaling;
     }
     
-    public void addNode(GravisNode node) {
+    public void addNode(IGravisNode node) {
+        node.setScale(scaling);
         if (model.addNode(node)) {
             topLayer.getNodeLayer().getChildren().add(node.getShape());
         }
     }
     
-    public void removeNode(GravisNode node) {
+    public void removeNode(IGravisNode node) {
         if (model.removeNode(node)) {
             topLayer.getChildren().remove(node.getShape());
         }
     }
     
-    public GravisNode getNode(String id) {
+    public IGravisNode getNode(String id) {
         return model.getNode(id);
     }
     
-    public GravisNode[] getNodes() {
+    public IGravisNode[] getNodes() {
         return model.getNodes();
     }
     
-    public void connectNodes(GravisNode parent, GravisNode child) {
+    public void connectNodes(IGravisNode parent, IGravisNode child) {
         model.connectNodes(parent , child);
     }
     

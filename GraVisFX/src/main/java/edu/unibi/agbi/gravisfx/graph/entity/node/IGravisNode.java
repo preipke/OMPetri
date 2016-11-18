@@ -6,8 +6,9 @@
 package edu.unibi.agbi.gravisfx.graph.entity.node;
 
 import java.util.List;
-import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Shape;
+import javafx.scene.transform.Scale;
 
 /**
  *
@@ -15,23 +16,29 @@ import javafx.scene.shape.Shape;
  */
 public interface IGravisNode
 {
-    public void init(double centerX , double centerY , double scaling);
+    public void init(double centerX , double centerY , Scale scaling);
+    
+    public void setPosition(double positionX, double positionY);
+    
+    public void setScale(Scale scale);
     
     public void addParentNode(IGravisNode parent);
     
     public void addChildNode(IGravisNode child);
     
+    public void addEdge(GravisEdge edge);
+    
     public List<IGravisNode> getParents();
     
     public List<IGravisNode> getChildren();
     
-    public void setFill(Color color);
+    public List<GravisEdge> getEdges();
     
-    public void setStroke(Color color);
+    public void setFill(Paint color);
+    
+    public void setStroke(Paint color);
     
     public String getId();
     
     public Shape getShape();
-    
-    public void relocate(double positionX, double positionY);
 }

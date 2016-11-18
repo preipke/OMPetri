@@ -8,7 +8,7 @@ package edu.unibi.agbi.gravisfx.graph.entity.node;
 import edu.unibi.agbi.gravisfx.controller.PropertiesController;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
@@ -17,29 +17,81 @@ import javafx.scene.transform.Scale;
  * 
  * @author PR
  */
-public class GravisRectangle extends GravisNode implements IGravisNode
+public class GravisRectangle extends Rectangle implements IGravisNode
 {
+    private final List<IGravisNode> children = new ArrayList();
+    private final List<IGravisNode> parents = new ArrayList();
+    private final List<GravisEdge> edges = new ArrayList();
+    
     public GravisRectangle(String id) {
-        super(id, new Rectangle());
-    }
-    public GravisRectangle(String id, Color color) {
-        super(id, new Rectangle(), color);
+        super();
+        setId(id);
     }
     
-    /*
-    @Override
-    public void init(double centerX , double centerY , Scale scaling) {
-        
-        shape.setX(centerX - PropertiesController.RECTANGLE_WIDTH / 2 * scaling.getX());
-        shape.setY(centerY - PropertiesController.RECTANGLE_HEIGHT / 2 * scaling.getY());
-        shape.setWidth(PropertiesController.RECTANGLE_WIDTH * scaling.getX());
-        shape.setHeight(PropertiesController.RECTANGLE_HEIGHT * scaling.getY());
-        shape.setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scaling.getX());
-        shape.setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scaling.getY());
+    public GravisRectangle(String id, Paint color) {
+        super();
+        setId(id);
+        setStroke(color);
+        setFill(color);
     }
-
-    public void relocate(double centerX , double centerY, Scale scaling) {
-        shape.setX(centerX - PropertiesController.RECTANGLE_WIDTH * scaling.getX());
-        shape.setY(centerY - PropertiesController.RECTANGLE_HEIGHT * scaling.getY());
-    }*/
+    
+    @Override
+    public void init(double centerX , double centerY , Scale scale) {
+        setScale(scale);
+        setPosition(centerX, centerY);
+    }
+    
+    /**
+     * Position the center of the node at the given coordinates.
+     * @param centerX
+     * @param centerY 
+     */
+    @Override
+    public void setPosition(double centerX , double centerY) {
+        setX(centerX - this.getWidth() / 2);
+        setY(centerY - this.getHeight() / 2);
+    }
+    
+    @Override
+    public void setScale(Scale scale) {
+        setWidth(PropertiesController.RECTANGLE_WIDTH * scale.getX());
+        setHeight(PropertiesController.RECTANGLE_HEIGHT * scale.getY());
+        setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scale.getX());
+        setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scale.getY());
+    }
+    
+    @Override
+    public void addParentNode(IGravisNode parent) {
+        parents.add(parent);
+    }
+    
+    @Override
+    public List<IGravisNode> getParents() {
+        return parents;
+    }
+    
+    @Override
+    public void addChildNode(IGravisNode child) {
+        children.add(child);
+    }
+    
+    @Override
+    public List<IGravisNode> getChildren() {
+        return children;
+    }
+    
+    @Override
+    public void addEdge(GravisEdge edge) {
+        edges.add(edge);
+    }
+    
+    @Override
+    public List<GravisEdge> getEdges() {
+        return edges;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
 }

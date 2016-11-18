@@ -11,7 +11,7 @@ package edu.unibi.agbi.gravisfx.controller;
  */
 public class PropertiesController
 {
-    public static final double BASE_SIZE = 20;
+    public static final double BASE_SIZE = 4;
     
     public static final double CIRCLE_RADIUS = BASE_SIZE * 2.5d;
     

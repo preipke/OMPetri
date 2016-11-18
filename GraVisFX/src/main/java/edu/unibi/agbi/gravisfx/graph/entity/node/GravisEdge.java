@@ -5,18 +5,16 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.node;
 
-import javafx.scene.shape.Shape;
-
 /**
  *
  * @author PR
  */
 public class GravisEdge
 {
-    private GravisNode source;
-    private GravisNode target;
+    private IGravisNode source;
+    private IGravisNode target;
     
-    public GravisEdge(GravisNode source, GravisNode target) {
+    public GravisEdge(IGravisNode source, IGravisNode target) {
         
     }
 }
