@@ -6,9 +6,10 @@
 package edu.unibi.agbi.gravisfx.layout;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
-import java.util.List;
+import edu.unibi.agbi.gravisfx.graph.entity.node.GravisNode;
+import edu.unibi.agbi.gravisfx.pane.GraphPane;
 import java.util.Random;
+import javafx.scene.transform.Scale;
 
 /**
  *
@@ -21,17 +22,24 @@ public class RandomLayout
      * @param graph 
      */
     public static void applyOn(Graph graph) {
+        
+        GraphPane graphPane = (GraphPane) graph.getTopLayer().getParent();
+        Scale scaling = graph.getScaling();
+        
+        double layoutX = graphPane.getWidth();
+        double layoutY = graphPane.getHeight();
 
-        IGravisNode[] nodes = graph.getNodes();
+        GravisNode[] nodes = graph.getNodes();
         
         Random rnd = new Random();
 
-        for (IGravisNode node : nodes) {
+        for (GravisNode node : nodes) {
 
-            double x = rnd.nextDouble() * 500;
-            double y = rnd.nextDouble() * 500;
+            double x = rnd.nextDouble() * layoutX;
+            double y = rnd.nextDouble() * layoutY;
 
-            node.relocate(x, y);
+            node.setPosition(x, y);
+            node.setScale(scaling);
         }
     }
 }

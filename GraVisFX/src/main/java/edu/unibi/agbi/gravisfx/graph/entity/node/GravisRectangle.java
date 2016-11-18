@@ -11,79 +11,35 @@ import java.util.List;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import javafx.scene.transform.Scale;
 
 /**
  * 
  * @author PR
  */
-public class GravisRectangle implements IGravisNode
+public class GravisRectangle extends GravisNode implements IGravisNode
 {
-    private final String id;
-    
-    private final Rectangle rectangle;
-    
-    private final List<IGravisNode> children = new ArrayList();
-    private final List<IGravisNode> parents = new ArrayList();
-    
-    public GravisRectangle(String nodeId) {
-        id = nodeId;
-        rectangle = new Rectangle();
-        rectangle.setId(id);
+    public GravisRectangle(String id) {
+        super(id, new Rectangle());
+    }
+    public GravisRectangle(String id, Color color) {
+        super(id, new Rectangle(), color);
     }
     
+    /*
     @Override
-    public void init(double centerX , double centerY , double scaling) {
+    public void init(double centerX , double centerY , Scale scaling) {
         
-        rectangle.setX(centerX - PropertiesController.RECTANGLE_WIDTH / 2 * scaling);
-        rectangle.setY(centerY - PropertiesController.RECTANGLE_HEIGHT / 2 * scaling);
-        rectangle.setWidth(PropertiesController.RECTANGLE_WIDTH * scaling);
-        rectangle.setHeight(PropertiesController.RECTANGLE_HEIGHT * scaling);
-        rectangle.setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scaling);
-        rectangle.setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scaling);
-    }
-    
-    @Override
-    public void addParentNode(IGravisNode parent) {
-        parents.add(parent);
-    }
-    
-    @Override
-    public List<IGravisNode> getParents() {
-        return parents;
-    }
-    
-    @Override
-    public void addChildNode(IGravisNode child) {
-        children.add(child);
-    }
-    
-    @Override
-    public List<IGravisNode> getChildren() {
-        return children;
+        shape.setX(centerX - PropertiesController.RECTANGLE_WIDTH / 2 * scaling.getX());
+        shape.setY(centerY - PropertiesController.RECTANGLE_HEIGHT / 2 * scaling.getY());
+        shape.setWidth(PropertiesController.RECTANGLE_WIDTH * scaling.getX());
+        shape.setHeight(PropertiesController.RECTANGLE_HEIGHT * scaling.getY());
+        shape.setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scaling.getX());
+        shape.setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scaling.getY());
     }
 
-    @Override
-    public void setFill(Color color) {
-        rectangle.setFill(color);
-    }
-
-    @Override
-    public void setStroke(Color color) {
-        rectangle.setStroke(color);
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-    
-    @Override
-    public Shape getShape() {
-        return rectangle;
-    }
-
-    @Override
-    public void relocate(double positionX , double positionY) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void relocate(double centerX , double centerY, Scale scaling) {
+        shape.setX(centerX - PropertiesController.RECTANGLE_WIDTH * scaling.getX());
+        shape.setY(centerY - PropertiesController.RECTANGLE_HEIGHT * scaling.getY());
+    }*/
 }

@@ -11,75 +11,33 @@ import java.util.List;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import javafx.scene.transform.Scale;
 
 /**
  *
  * @author PR
  */
-public class GravisCircle implements IGravisNode
+public class GravisCircle extends GravisNode
 {
-    private final String id;
     
-    private final Circle circle;
-    
-    private final List<IGravisNode> children = new ArrayList();
-    private final List<IGravisNode> parents = new ArrayList();
-    
-    public GravisCircle(String nodeId) {
-        id = nodeId;
-        circle = new Circle();
-        circle.setId(id);
+    public GravisCircle(String id) {
+        super(id , new Circle());
     }
     
-    @Override
-    public void init(double centerX , double centerY , double scaling) {
-        circle.setCenterX(centerX);
-        circle.setCenterY(centerY);
-        circle.setRadius(PropertiesController.CIRCLE_RADIUS * scaling);
+    public GravisCircle(String id, Color color) {
+        super(id , new Circle(), color);
     }
     
-    @Override
-    public void addParentNode(IGravisNode parent) {
-        parents.add(parent);
-    }
-    
-    @Override
-    public List<IGravisNode> getParents() {
-        return parents;
-    }
-    
-    @Override
-    public void addChildNode(IGravisNode child) {
-        children.add(child);
-    }
-    
-    @Override
-    public List<IGravisNode> getChildren() {
-        return children;
+    /*
+    public void init(double centerX , double centerY , Scale scaling) {
+        shape.setCenterX(centerX);
+        shape.setCenterY(centerY);
+        shape.setRadius(PropertiesController.CIRCLE_RADIUS * scaling.getX());
     }
 
-    @Override
-    public void setFill(Color color) {
-        circle.setFill(color);
-    }
-
-    @Override
-    public void setStroke(Color color) {
-        circle.setStroke(color);
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-    
-    @Override
-    public Shape getShape() {
-        return circle;
-    }
-
-    @Override
-    public void relocate(double positionX , double positionY) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    public void relocate(double centerX , double centerY, Scale scaling) {
+        shape.setCenterX(centerX);
+        shape.setCenterY(centerY);
+        shape.setRadius(PropertiesController.CIRCLE_RADIUS * scaling.getX());
+    }*/
 }

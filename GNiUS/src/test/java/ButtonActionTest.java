@@ -1,6 +1,8 @@
 
 import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gravisfx.pane.ActionPane;
+import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.gravisfx.pane.GraphPane;
+import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import org.junit.Assert;
@@ -30,7 +32,7 @@ public class ButtonActionTest extends TestFXBase
     final String buttonAlign = "#buttonAlign";
     final String choicesAlign = "#choicesAlign";
     
-    final String GRAPH_VIEW = "#viewGraph";
+    final String GRAPH_PANE_ID = "#graphPane";
     
     /**
      * Expects the given ID not to exist.
@@ -40,19 +42,30 @@ public class ButtonActionTest extends TestFXBase
         clickOn("#sector9");
     }
     
-    @Test
+    //@Test
     public void ensureButtonAddsExampleNodes() {
         
-        ActionPane graphView = find(GRAPH_VIEW);
-        Assert.assertNotNull(graphView);
-        Assert.assertEquals(0 , graphView.getChildren().size());
-        Assert.assertEquals(0, Main.getGraph().getNodes().length);
+        Graph graph = Main.getGraph();
+        
+        Group nodeLayer =  graph.getTopLayer().getNodeLayer();
+        Group edgeLayer = graph.getTopLayer().getEdgeLayer();
+        Group selectionLayer = graph.getTopLayer().getSelectionLayer();
+        
+        GraphPane graphPane = find(GRAPH_PANE_ID);
+        Assert.assertNotNull(graphPane);
+        
+        Assert.assertEquals(1 , graphPane.getChildren().size());
+        Assert.assertEquals(0, graph.getNodes().length);
+        Assert.assertEquals(0, nodeLayer.getChildren().size());
+        Assert.assertEquals(graph.getNodes().length, nodeLayer.getChildren().size());
         
         clickOn(buttonLoad);
         
-        Assert.assertTrue(Main.getGraph().getNodes().length != 0);
-        Assert.assertTrue(graphView.getChildren().size() != 0);
+        Assert.assertTrue(graph.getNodes().length != 0);
+        Assert.assertTrue(nodeLayer.getChildren().size() != 0);
+        Assert.assertEquals(graph.getNodes().length, nodeLayer.getChildren().size());
     }
+    
     
     public void ensureButtonConnectsNodes() {
         Assert.assertEquals(this , this);

@@ -1,7 +1,7 @@
 package edu.unibi.agbi.gnius;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.pane.ActionPane;
+import edu.unibi.agbi.gravisfx.pane.GraphPane;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -29,14 +29,14 @@ public class Main extends Application {
         
         graph = new Graph();
         
-        ActionPane viewGraph = new ActionPane();
-        viewGraph.setId("viewGraph");
-        viewGraph.setStyle("-fx-background-color: white");
-        viewGraph.getChildren().add(graph.getTopLayer());
+        GraphPane graphPane = new GraphPane();
+        graphPane.setId("graphPane");
+        graphPane.setStyle("-fx-background-color: white");
+        graphPane.getChildren().add(graph.getTopLayer());
         
         BorderPane viewPane;
         viewPane = (BorderPane) scene.lookup("#viewPane");
-        viewPane.setCenter(viewGraph);
+        viewPane.setCenter(graphPane);
     }
     
     public static Graph getGraph() {

@@ -11,7 +11,7 @@ import javafx.scene.layout.Pane;
  *
  * @author PR
  */
-public class ActionPane extends Pane
+public class GraphPane extends Pane
 {
     
 }

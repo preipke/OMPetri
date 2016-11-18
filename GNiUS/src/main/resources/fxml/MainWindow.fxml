@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.controller.VisualizationController">
+<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.controller.GraphMenuController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -57,8 +57,8 @@
                      <children>
                         <VBox alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0" spacing="5.0" HBox.hgrow="NEVER">
                            <children>
-                              <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#addExampleNodes" text="Load Nodes" />
-                              <Button fx:id="buttonConnect" mnemonicParsing="false" onAction="#connectExampleNodes" text="Connect Nodes" />
+                              <Button fx:id="buttonLoad" mnemonicParsing="false" onAction="#buttonLoadAllClicked" text="Load Nodes" />
+                              <Button fx:id="buttonConnect" mnemonicParsing="false" onAction="#buttonConnectAllClicked" text="Connect Nodes" />
                               <HBox alignment="CENTER" spacing="5.0">
                                  <children>
                                     <Button fx:id="buttonCreate" mnemonicParsing="false" text="Create Node" />
@@ -67,7 +67,7 @@
                               </HBox>
                               <HBox alignment="CENTER" spacing="5.0">
                                  <children>
-                                    <Button fx:id="buttonAlign" mnemonicParsing="false" text="Align Nodes" />
+                                    <Button fx:id="buttonAlign" mnemonicParsing="false" onAction="#buttonAlignNodes" text="Align Nodes" />
                                     <ChoiceBox fx:id="choicesAlignment" />
                                  </children>
                               </HBox>
