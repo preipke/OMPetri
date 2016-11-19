@@ -1,7 +1,7 @@
 package edu.unibi.agbi.gnius;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.pane.GraphPane;
+import edu.unibi.agbi.gravisfx.gui.GraphScene;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -14,6 +14,9 @@ import javafx.stage.Stage;
 public class Main extends Application {
     
     private static Graph graph;
+    public static Graph getGraph() {
+        return graph;
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -23,24 +26,20 @@ public class Main extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         
-        stage.setTitle("JavaFX and Maven");
+        stage.setTitle("GraVisFX");
         stage.setScene(scene);
         stage.show();
         
-        graph = new Graph();
-        
-        GraphPane graphPane = new GraphPane();
-        graphPane.setId("graphPane");
-        graphPane.setStyle("-fx-background-color: white");
-        graphPane.getChildren().add(graph.getTopLayer());
+        GraphScene graphScene = new GraphScene();
+        graphScene.setId("graphScene");
+        graph = graphScene.getGraph();
         
         BorderPane viewPane;
         viewPane = (BorderPane) scene.lookup("#viewPane");
-        viewPane.setCenter(graphPane);
-    }
-    
-    public static Graph getGraph() {
-        return graph;
+        viewPane.setCenter(graphScene);
+        
+        graphScene.widthProperty().bind(viewPane.widthProperty());
+        graphScene.heightProperty().bind(viewPane.heightProperty());
     }
 
     /**

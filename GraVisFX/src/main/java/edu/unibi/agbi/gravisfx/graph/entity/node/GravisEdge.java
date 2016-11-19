@@ -5,16 +5,37 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.node;
 
+import javafx.scene.shape.Line;
+
 /**
  *
  * @author PR
  */
-public class GravisEdge
+public class GravisEdge extends Line
 {
-    private IGravisNode source;
-    private IGravisNode target;
+    private final IGravisNode source;
+    private final IGravisNode target;
     
     public GravisEdge(IGravisNode source, IGravisNode target) {
         
+        super();
+        
+        this.source = source;
+        this.target = target;
+        
+        startXProperty().bind(source.getShape().translateXProperty().add(source.getOffsetX()));
+        startYProperty().bind(source.getShape().translateYProperty().add(source.getOffsetY()));
+
+        endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
+        endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+        
+    }
+    
+    public IGravisNode getSource() {
+        return source;
+    }
+    
+    public IGravisNode getTarget() {
+        return target;
     }
 }

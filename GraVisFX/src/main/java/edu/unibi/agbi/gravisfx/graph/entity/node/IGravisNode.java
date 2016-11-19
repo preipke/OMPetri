@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gravisfx.graph.entity.node;
 
 import java.util.List;
+import javafx.beans.property.DoubleProperty;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
@@ -19,6 +20,10 @@ public interface IGravisNode
     public void init(double centerX , double centerY , Scale scaling);
     
     public void setPosition(double positionX, double positionY);
+    
+    public double getOffsetX();
+    
+    public double getOffsetY();
     
     public void setScale(Scale scale);
     

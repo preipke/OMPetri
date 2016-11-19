@@ -31,10 +31,11 @@ public class GraphMenuController implements Initializable
     @FXML private ChoiceBox choicesNodes;
     @FXML private ChoiceBox choicesAlignment;
     
+    private int elements = 1000;
+    
     @FXML
     private void buttonLoadAllClicked(ActionEvent event) {
-        int count = 1000;
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < elements; i++) {
             Main.getGraph().addNode(new GravisCircle("A" + i , Color.YELLOWGREEN));
             Main.getGraph().addNode(new GravisCircle("B" + i , Color.YELLOWGREEN));
             Main.getGraph().addNode(new GravisCircle("C" + i , Color.YELLOWGREEN));
@@ -50,18 +51,18 @@ public class GraphMenuController implements Initializable
     
     @FXML
     private void buttonConnectAllClicked(ActionEvent event) {
-        
-        Main.getGraph().connectNodes("A" , "A_B");
-        Main.getGraph().connectNodes("A_B" , "B");
-        Main.getGraph().connectNodes("A" , "A_C");
-        Main.getGraph().connectNodes("A_C" , "C");
-        Main.getGraph().connectNodes("A" , "A_D");
-        Main.getGraph().connectNodes("A_D" , "D");
-        
-        Main.getGraph().connectNodes("D" , "D_E");
-        Main.getGraph().connectNodes("D_E" , "E");
-        Main.getGraph().connectNodes("E" , "E_D");
-        Main.getGraph().connectNodes("E_D" , "D");
+        for (int i = 0; i < elements; i++) {
+            Main.getGraph().createEdge("A" + i , "A_B" + i);
+            Main.getGraph().createEdge("A_B" + i , "B" + i);
+            Main.getGraph().createEdge("A" + i , "A_C" + i);
+            Main.getGraph().createEdge("A_C" + i , "C" + i);
+            Main.getGraph().createEdge("A" + i , "A_D" + i);
+            Main.getGraph().createEdge("A_D" + i , "D" + i);
+            Main.getGraph().createEdge("D" + i , "D_E" + i);
+            Main.getGraph().createEdge("D_E" + i , "E" + i);
+            Main.getGraph().createEdge("E" + i , "E_D" + i);
+            Main.getGraph().createEdge("E_D" + i , "D" + i);
+        }
     }
     
     @FXML

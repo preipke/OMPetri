@@ -7,7 +7,7 @@ package edu.unibi.agbi.gravisfx.layout;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.pane.GraphPane;
+import edu.unibi.agbi.gravisfx.gui.GraphPane;
 import java.util.Random;
 
 /**
@@ -30,6 +30,9 @@ public class RandomLayout
         IGravisNode[] nodes = graph.getNodes();
         
         Random rnd = new Random();
+        
+        graph.getTopLayer().setTranslateX(0);
+        graph.getTopLayer().setTranslateY(0);
 
         for (IGravisNode node : nodes) {
 

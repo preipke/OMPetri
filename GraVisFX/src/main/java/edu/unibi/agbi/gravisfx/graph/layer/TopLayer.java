@@ -13,17 +13,18 @@ import javafx.scene.Group;
  */
 public class TopLayer extends Group
 {
-    private final NodeLayer nodeLayer;
     private final EdgeLayer edgeLayer;
+    private final NodeLayer nodeLayer;
     private final SelectionLayer selectionLayer;
     
     public TopLayer() {
-        nodeLayer = new NodeLayer();
         edgeLayer = new EdgeLayer();
+        nodeLayer = new NodeLayer();
         selectionLayer = new SelectionLayer();
         
-        getChildren().add(nodeLayer);
+        // order matters!
         getChildren().add(edgeLayer);
+        getChildren().add(nodeLayer);
         getChildren().add(selectionLayer);
     }
 

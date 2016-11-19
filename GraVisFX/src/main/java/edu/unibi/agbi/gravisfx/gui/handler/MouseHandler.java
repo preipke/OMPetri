@@ -3,15 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.pane;
-
-import javafx.scene.layout.Pane;
+package edu.unibi.agbi.gravisfx.gui.handler;
 
 /**
  *
  * @author PR
  */
-public class GraphPane extends Pane
+public class MouseHandler
 {
     
 }

@@ -1,7 +1,8 @@
 
 import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.pane.GraphPane;
+import edu.unibi.agbi.gravisfx.gui.GraphPane;
+import edu.unibi.agbi.gravisfx.gui.GraphScene;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
@@ -32,8 +33,6 @@ public class ButtonActionTest extends TestFXBase
     final String buttonAlign = "#buttonAlign";
     final String choicesAlign = "#choicesAlign";
     
-    final String GRAPH_PANE_ID = "#graphPane";
-    
     /**
      * Expects the given ID not to exist.
      */
@@ -45,14 +44,14 @@ public class ButtonActionTest extends TestFXBase
     //@Test
     public void ensureButtonAddsExampleNodes() {
         
-        Graph graph = Main.getGraph();
+        GraphScene graphScene = find("#graphScene");
         
-        Group nodeLayer =  graph.getTopLayer().getNodeLayer();
-        Group edgeLayer = graph.getTopLayer().getEdgeLayer();
-        Group selectionLayer = graph.getTopLayer().getSelectionLayer();
+        GraphPane graphPane = graphScene.getGraphPane();
+        Graph graph = graphScene.getGraph();
         
-        GraphPane graphPane = find(GRAPH_PANE_ID);
-        Assert.assertNotNull(graphPane);
+        Group nodeLayer =  graphPane.getTopLayer().getNodeLayer();
+        Group edgeLayer = graphPane.getTopLayer().getEdgeLayer();
+        Group selectionLayer = graphPane.getTopLayer().getSelectionLayer();
         
         Assert.assertEquals(1 , graphPane.getChildren().size());
         Assert.assertEquals(0, graph.getNodes().length);

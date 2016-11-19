@@ -5,9 +5,11 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.node;
 
-import edu.unibi.agbi.gravisfx.controller.PropertiesController;
+import edu.unibi.agbi.gravisfx.PropertiesController;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -37,6 +39,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     
     @Override
     public void init(double centerX , double centerY , Scale scale) {
+        
         setScale(scale);
         setPosition(centerX, centerY);
     }
@@ -48,8 +51,18 @@ public class GravisRectangle extends Rectangle implements IGravisNode
      */
     @Override
     public void setPosition(double centerX , double centerY) {
-        setX(centerX - this.getWidth() / 2);
-        setY(centerY - this.getHeight() / 2);
+        
+        centerX = centerX - getOffsetX();
+        centerY = centerY - getOffsetY();
+        
+        //posX.set(centerX - getWidth() / 2);
+        //posY.set(centerY - getHeight() / 2);
+        
+        //setX(centerX - getWidth() / 2);
+        //setY(centerY - getHeight() / 2);
+        
+        setTranslateX(centerX);
+        setTranslateY(centerY);
     }
     
     @Override
@@ -58,6 +71,16 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         setHeight(PropertiesController.RECTANGLE_HEIGHT * scale.getY());
         setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scale.getX());
         setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scale.getY());
+    }
+
+    @Override
+    public double getOffsetX() {
+        return getBoundsInParent().getWidth() / 2;
+    }
+
+    @Override
+    public double getOffsetY() {
+        return getBoundsInParent().getHeight() / 2;
     }
     
     @Override

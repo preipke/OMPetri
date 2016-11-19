@@ -5,24 +5,20 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.entity.edge.GravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.node.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.scene.transform.Scale;
 
 /**
  *
  * @author PR
  */
-public class Graph
+public final class Graph
 {
     private final Model model;
     private final Scale scaling;
     private final TopLayer topLayer;
-    
-    private final List<GravisEdge> edges;
     
     public Graph() {
         model = new Model();
@@ -31,8 +27,6 @@ public class Graph
         
         topLayer = new TopLayer();
         topLayer.getTransforms().add(scaling);
-        
-        edges = new ArrayList();
     }
     
     public Model getModel() {
@@ -56,7 +50,7 @@ public class Graph
     
     public void removeNode(IGravisNode node) {
         if (model.removeNode(node)) {
-            topLayer.getChildren().remove(node.getShape());
+            topLayer.getNodeLayer().getChildren().remove(node.getShape());
         }
     }
     
@@ -68,11 +62,24 @@ public class Graph
         return model.getNodes();
     }
     
-    public void connectNodes(IGravisNode parent, IGravisNode child) {
-        model.connectNodes(parent , child);
+    public void createEdge(IGravisNode parent, IGravisNode child) {
+        createEdge(parent.getId() , child.getId());
     }
     
-    public void connectNodes(String parentId, String childId) {
-        model.connectNodes(parentId , childId);
+    public void createEdge(String parentId, String childId) {
+        
+        if (model.connectNodes(parentId , childId)) {
+
+            GravisEdge edge = new GravisEdge(model.getNode(parentId) , model.getNode(childId));
+            
+            topLayer.getEdgeLayer().getChildren().add(edge);
+        }
+    }
+    
+    public void removeEdge(GravisEdge edge) {
+        
+        model.disconnectNodes(edge);
+        
+        topLayer.getEdgeLayer().getChildren().remove(edge);
     }
 }
