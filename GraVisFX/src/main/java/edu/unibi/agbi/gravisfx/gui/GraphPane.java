@@ -18,19 +18,16 @@ public final class GraphPane extends Pane
 {
     private final TopLayer topLayer;
     
-    private MouseEvent eventMousePressed;
     private Double eventMousePressedX = null;
     private Double eventMousePressedY = null;
     
     public void setHandler() {
         
         setOnMousePressed(( MouseEvent event ) -> {
-            eventMousePressed = event;
             eventMousePressedX = event.getX();
             eventMousePressedY = event.getY();
         });
         setOnMouseReleased((MouseEvent event) -> {
-            eventMousePressed = null;
             eventMousePressedX = null;
             eventMousePressedY = null;
         });
@@ -57,15 +54,6 @@ public final class GraphPane extends Pane
                 eventMousePressedX = event.getX();
                 eventMousePressedY = event.getY();
             }
-        });
-        setOnMouseDragEntered(( MouseEvent event ) -> {
-            System.out.println("Drag event entered : " + event.getTarget());
-        });
-        setOnMouseDragExited(( MouseEvent event ) -> {
-            System.out.println("Drag event exited : " + event.getTarget());
-        });
-        setOnMouseDragReleased(( MouseEvent event ) -> {
-            System.out.println("Drag event released : " + event.getTarget());
         });
     }
     

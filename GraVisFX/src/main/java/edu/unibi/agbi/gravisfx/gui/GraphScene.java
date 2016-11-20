@@ -44,10 +44,11 @@ public final class GraphScene extends SubScene
                 + "-fx-border-width: 2;"
         //        + "-fx-border-style: dashed;"
         ;
-        
         graphPane.setStyle(css);
         
         setRoot(graphPane);
+        
+        setManaged(false); // must be set, otherwise scene will upscale parent and will thereby not size down again on resizing the window
     }
     
     public GraphScene() {

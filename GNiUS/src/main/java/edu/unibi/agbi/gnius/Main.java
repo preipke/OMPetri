@@ -32,14 +32,15 @@ public class Main extends Application {
         
         GraphScene graphScene = new GraphScene();
         graphScene.setId("graphScene");
+        
+        BorderPane borderPane = (BorderPane) scene.lookup("#viewPane");
+        
+        graphScene.widthProperty().bind(borderPane.widthProperty());
+        graphScene.heightProperty().bind(borderPane.heightProperty());
+        
+        borderPane.setCenter(graphScene);
+        
         graph = graphScene.getGraph();
-        
-        BorderPane viewPane;
-        viewPane = (BorderPane) scene.lookup("#viewPane");
-        viewPane.setCenter(graphScene);
-        
-        graphScene.widthProperty().bind(viewPane.widthProperty());
-        graphScene.heightProperty().bind(viewPane.heightProperty());
     }
 
     /**
