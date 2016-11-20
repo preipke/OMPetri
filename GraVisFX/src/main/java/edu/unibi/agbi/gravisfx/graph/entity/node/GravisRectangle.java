@@ -8,18 +8,15 @@ package edu.unibi.agbi.gravisfx.graph.entity.node;
 import edu.unibi.agbi.gravisfx.PropertiesController;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import javafx.scene.transform.Scale;
 
 /**
  * 
  * @author PR
  */
-public class GravisRectangle extends Rectangle implements IGravisNode
+public final class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
@@ -28,6 +25,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     public GravisRectangle(String id) {
         super();
         setId(id);
+        init();
     }
     
     public GravisRectangle(String id, Paint color) {
@@ -35,13 +33,14 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         setId(id);
         setStroke(color);
         setFill(color);
+        init();
     }
     
-    @Override
-    public void init(double centerX , double centerY , Scale scale) {
-        
-        setScale(scale);
-        setPosition(centerX, centerY);
+    public void init() {
+        setWidth(PropertiesController.RECTANGLE_WIDTH);
+        setHeight(PropertiesController.RECTANGLE_HEIGHT);
+        setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH);
+        setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT);
     }
     
     /**
@@ -55,22 +54,8 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         centerX = centerX - getOffsetX();
         centerY = centerY - getOffsetY();
         
-        //posX.set(centerX - getWidth() / 2);
-        //posY.set(centerY - getHeight() / 2);
-        
-        //setX(centerX - getWidth() / 2);
-        //setY(centerY - getHeight() / 2);
-        
         setTranslateX(centerX);
         setTranslateY(centerY);
-    }
-    
-    @Override
-    public void setScale(Scale scale) {
-        setWidth(PropertiesController.RECTANGLE_WIDTH * scale.getX());
-        setHeight(PropertiesController.RECTANGLE_HEIGHT * scale.getY());
-        setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH * scale.getX());
-        setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT * scale.getY());
     }
 
     @Override

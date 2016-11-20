@@ -8,6 +8,7 @@ package edu.unibi.agbi.gravisfx.gui;
 import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Pane;
 
 /**
@@ -18,11 +19,23 @@ public final class GraphPane extends Pane
 {
     private final TopLayer topLayer;
     
+    double scaleValue = 1.0;
+    double scaleDelta = 0.1;
+    
     private Double eventMousePressedX = null;
     private Double eventMousePressedY = null;
     
     public void setHandler() {
         
+        setOnScroll(( ScrollEvent event ) -> {
+            if (event.getDeltaY() < 0) {
+                scaleValue -= scaleDelta;
+            } else {
+                scaleValue += scaleDelta;
+            }
+            topLayer.getScaleTransform().setX(scaleValue);
+            topLayer.getScaleTransform().setY(scaleValue);
+        });
         setOnMousePressed(( MouseEvent event ) -> {
             eventMousePressedX = event.getX();
             eventMousePressedY = event.getY();
@@ -32,24 +45,18 @@ public final class GraphPane extends Pane
             eventMousePressedY = null;
         });
         setOnMouseDragged(( MouseEvent event ) -> {
-            
             if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
+                
                 IGravisNode node = (IGravisNode) event.getTarget();
-                //TopLayer topLayer = (TopLayer) node.getShape().getParent().getParent();
                 node.setPosition(
-                        event.getX() - topLayer.translateXProperty().get() , 
-                        event.getY() - topLayer.translateYProperty().get()
+                        (event.getX() - topLayer.translateXProperty().get()) / topLayer.getScaleTransform().getX() , 
+                        (event.getY() - topLayer.translateYProperty().get()) / topLayer.getScaleTransform().getX()
                 );
             }
             else if (GraphPane.class.isAssignableFrom(event.getTarget().getClass())) {
                 
-                //GraphPane pane = (GraphPane) event.getTarget();
-                
-                //pane.getTopLayer().setTranslateX(event.getX() - eventMousePressedX + pane.getTopLayer().translateXProperty().get());
-                //pane.getTopLayer().setTranslateY(event.getY() - eventMousePressedY + pane.getTopLayer().translateYProperty().get());
-                
-                topLayer.setTranslateX(event.getX() - eventMousePressedX + topLayer.translateXProperty().get());
-                topLayer.setTranslateY(event.getY() - eventMousePressedY + topLayer.translateYProperty().get());
+                topLayer.setTranslateX((event.getX() - eventMousePressedX + topLayer.translateXProperty().get()));
+                topLayer.setTranslateY((event.getY() - eventMousePressedY + topLayer.translateYProperty().get()));
 
                 eventMousePressedX = event.getX();
                 eventMousePressedY = event.getY();
@@ -58,8 +65,11 @@ public final class GraphPane extends Pane
     }
     
     public GraphPane(TopLayer topLayer) {
+        
         super();
+        
         this.topLayer = topLayer;
+        
         getChildren().add(topLayer);
         
         setHandler();

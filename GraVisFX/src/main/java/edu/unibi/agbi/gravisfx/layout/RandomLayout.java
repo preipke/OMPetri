@@ -26,6 +26,8 @@ public class RandomLayout
         
         double layoutX = graphPane.getWidth();
         double layoutY = graphPane.getHeight();
+        
+        double scale = graphPane.getTopLayer().getScaleTransform().getX();
 
         IGravisNode[] nodes = graph.getNodes();
         
@@ -36,8 +38,8 @@ public class RandomLayout
 
         for (IGravisNode node : nodes) {
 
-            double x = rnd.nextDouble() * layoutX;
-            double y = rnd.nextDouble() * layoutY;
+            double x = rnd.nextDouble() * layoutX / scale;
+            double y = rnd.nextDouble() * layoutY / scale;
 
             node.setPosition(x, y);
         }

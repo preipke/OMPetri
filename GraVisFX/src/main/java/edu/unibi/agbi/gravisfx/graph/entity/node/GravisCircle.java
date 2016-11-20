@@ -8,12 +8,9 @@ package edu.unibi.agbi.gravisfx.graph.entity.node;
 import edu.unibi.agbi.gravisfx.PropertiesController;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
-import javafx.scene.transform.Scale;
 
 /**
  *
@@ -28,6 +25,7 @@ public class GravisCircle extends Circle implements IGravisNode
     public GravisCircle(String id) {
         super();
         setId(id);
+        setRadius(PropertiesController.CIRCLE_RADIUS);
     }
     
     public GravisCircle(String id, Paint color) {
@@ -35,13 +33,7 @@ public class GravisCircle extends Circle implements IGravisNode
         setId(id);
         setStroke(color);
         setFill(color);
-    }
-    
-    @Override
-    public void init(double centerX , double centerY , Scale scale) {
-        
-        setPosition(centerX , centerY);
-        setScale(scale);
+        setRadius(PropertiesController.CIRCLE_RADIUS);
     }
     
     /**
@@ -52,16 +44,8 @@ public class GravisCircle extends Circle implements IGravisNode
     @Override
     public void setPosition(double centerX , double centerY) {
         
-        //setCenterX(centerX);
-        //setCenterY(centerY);
-        
         setTranslateX(centerX);
         setTranslateY(centerY);
-    }
-    
-    @Override
-    public void setScale(Scale scaling) {
-        setRadius(PropertiesController.CIRCLE_RADIUS * scaling.getX());
     }
 
     @Override

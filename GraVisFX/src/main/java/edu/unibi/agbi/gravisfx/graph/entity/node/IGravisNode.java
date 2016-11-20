@@ -17,15 +17,11 @@ import javafx.scene.transform.Scale;
  */
 public interface IGravisNode
 {
-    public void init(double centerX , double centerY , Scale scaling);
-    
     public void setPosition(double positionX, double positionY);
     
     public double getOffsetX();
     
     public double getOffsetY();
-    
-    public void setScale(Scale scale);
     
     public void addParentNode(IGravisNode parent);
     

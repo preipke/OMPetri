@@ -17,16 +17,11 @@ import javafx.scene.transform.Scale;
 public final class Graph
 {
     private final Model model;
-    private final Scale scaling;
     private final TopLayer topLayer;
     
     public Graph() {
         model = new Model();
-        
-        scaling = new Scale(1.0d , 1.0d);
-        
         topLayer = new TopLayer();
-        topLayer.getTransforms().add(scaling);
     }
     
     public Model getModel() {
@@ -37,12 +32,7 @@ public final class Graph
         return topLayer;
     }
     
-    public Scale getScaling() {
-        return scaling;
-    }
-    
     public void addNode(IGravisNode node) {
-        node.setScale(scaling);
         if (model.addNode(node)) {
             topLayer.getNodeLayer().getChildren().add(node.getShape());
         }
