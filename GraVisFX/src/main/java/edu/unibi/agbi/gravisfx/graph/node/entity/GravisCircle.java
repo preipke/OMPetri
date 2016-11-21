@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.node;
+package edu.unibi.agbi.gravisfx.graph.node.entity;
 
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.PropertiesController;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +43,7 @@ public class GravisCircle extends Circle implements IGravisNode
      * @param centerY 
      */
     @Override
-    public void setPosition(double centerX , double centerY) {
+    public void setTranslate(double centerX , double centerY) {
         
         setTranslateX(centerX);
         setTranslateY(centerY);

@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.node;
+package edu.unibi.agbi.gravisfx.graph.node.entity;
 
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import javafx.scene.shape.Line;
 
 /**

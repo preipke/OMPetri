@@ -6,8 +6,8 @@
 package edu.unibi.agbi.gnius.controller;
 
 import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gravisfx.graph.entity.node.GravisCircle;
-import edu.unibi.agbi.gravisfx.graph.entity.node.GravisRectangle;
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
 import edu.unibi.agbi.gravisfx.layout.RandomLayout;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -31,7 +31,7 @@ public class GraphMenuController implements Initializable
     @FXML private ChoiceBox choicesNodes;
     @FXML private ChoiceBox choicesAlignment;
     
-    private int elements = 1000;
+    private int elements = 1;
     
     @FXML
     private void buttonLoadAllClicked(ActionEvent event) {

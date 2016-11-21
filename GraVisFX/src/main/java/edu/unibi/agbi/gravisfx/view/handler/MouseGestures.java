@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.view.handler;
 
-import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.view.GraphPane;
 import javafx.geometry.Bounds;
 
@@ -20,9 +20,9 @@ public class MouseGestures
 {
     //private static double scaleValue = 1.0;
     //private static double scaleDelta = 0.1;
-    private static double scaleBase = 1.0;
-    private static double scaleFactor = 1.1;
-    private static int scalePowerFactor = 0;
+    private final static double scaleBase = 1.0;
+    private final static double scaleFactor = 1.1;
+    private static int scalePower = 0;
     
     private static double SCALE_MAX = 10.d;
     private static double SCALE_MIN = .01d;
@@ -38,66 +38,63 @@ public class MouseGestures
         
         graphPane.setOnScroll(( ScrollEvent event ) -> {
             
-            if (event.getDeltaY() > 0) { // zoom in
-                scalePowerFactor++;
-            } else { // zoom out
-                scalePowerFactor--;
+            double scale_t1, scale_t0;
+            
+            scale_t0 = scaleBase * Math.pow(scaleFactor , scalePower);
+            
+            if (event.getDeltaY() > 0) {
+                scalePower++;
+            } else {
+                scalePower--;
             }
             
-            double oldScale = graphPane.getTopLayer().getScaleX();
-            double scale = scaleBase * Math.pow(scaleFactor , scalePowerFactor);
+            scale_t1 = scaleBase * Math.pow(scaleFactor , scalePower);
             
-            graphPane.getTopLayer().getScaleTransform().setX(scale);
-            graphPane.getTopLayer().getScaleTransform().setY(scale);
+            graphPane.getTopLayer().getScaleTransform().setX(scale_t1);
+            graphPane.getTopLayer().getScaleTransform().setY(scale_t1);
             
-            // NEW
-            /*if (Double.compare(scale , SCALE_MIN) < 0) {
-                scale = SCALE_MIN;
-            } else if (Double.compare(scale , SCALE_MAX) > 0) {
-                scale = SCALE_MAX;
-            }
-            
-            double f = (scale / oldScale) - 1;
-            Bounds bounds = graphPane.getTopLayer().localToScene(graphPane.getTopLayer().getBoundsInLocal());
-            double dx = (event.getX() - (bounds.getWidth() / 2 + bounds.getMinX()));
-            double dy = (event.getY() - (bounds.getHeight() / 2 + bounds.getMinY()));
-            
-            System.out.println("f=" + f);
-            System.out.println("dx=" + dx);
-            System.out.println("dy=" + dy);
-            
-            graphPane.getTopLayer().setTranslateX(graphPane.getTopLayer().getTranslateX() + f * dx);
-            graphPane.getTopLayer().setTranslateY(graphPane.getTopLayer().getTranslateY() + f * dy);
-            
-            System.out.println("translateX =" + f * dx);
-            System.out.println("translateY =" + f * dy);
-            */
-            
-            /*
+            /**
+             * Following is used to make sure focus is kept on the mouse pointer location.
+             * TODO zooming out feels not perfect yet, find a solution.
+             */
+            double startX, startY, endX, endY;
             double translateX, translateY;
             
+            startX = event.getX() - graphPane.getTopLayer().translateXProperty().get();
+            startY = event.getY() - graphPane.getTopLayer().translateYProperty().get();
+            
             if (event.getDeltaY() > 0) { // zoom in
                 
-                translateX = event.getX() - event.getX() * scale;
-                translateY = event.getY() - event.getY() * scale;
+                endX = startX * scale_t1 / scale_t0;
+                endY = startY * scale_t1 / scale_t0;
+                
+                translateX = startX - endX;
+                translateY = startY - endY;
                 
             } else { // zoom out
                 
-                translateX = event.getX() - event.getX() / scale;
-                translateY = event.getY() - event.getY() / scale;
+                endX = startX * scale_t0 / scale_t1;
+                endY = startY * scale_t0 / scale_t1;
+                
+                translateX = endX - startX;
+                translateY = endY - startY;
             }
-
+            /*
+            System.out.println("Scale t_0: " + scale_t0);
+            System.out.println("Scale t_1: " + scale_t1);
+            System.out.println("P(t_0) | X=" + startX + " Y=" + startY);
+            System.out.println("P(t_1) | X=" + endX + " Y=" + endY);
+            System.out.println("translate| X=" + translateX);
+            System.out.println("translate| Y=" + translateY);
+            System.out.println("");
+            */
             graphPane.getTopLayer().setTranslateX(graphPane.getTopLayer().translateXProperty().get() + translateX);
             graphPane.getTopLayer().setTranslateY(graphPane.getTopLayer().translateYProperty().get() + translateY);
-            */
         });
 
         graphPane.setOnMousePressed(( MouseEvent event ) -> {
             eventMousePressedX = event.getX();
             eventMousePressedY = event.getY();
-            System.out.println("Event: X=" + event.getX() + " Y=" + event.getY());
-            System.out.println("TopLayer Translate: X=" + ((GraphPane)event.getTarget()).getTopLayer().getTranslateX()+ " Y=" + ((GraphPane)event.getTarget()).getTopLayer().getTranslateX() );
-            System.out.println("Scale: " + scaleBase * Math.pow(scaleFactor , scalePowerFactor));
         });
 
         graphPane.setOnMouseReleased(( MouseEvent event ) -> {
@@ -109,7 +106,7 @@ public class MouseGestures
             if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
 
                 IGravisNode node = (IGravisNode)event.getTarget();
-                node.setPosition(
+                node.setTranslate(
                         (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
                         (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
                 );

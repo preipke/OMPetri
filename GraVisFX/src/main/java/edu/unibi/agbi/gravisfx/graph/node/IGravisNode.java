@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.node;
+package edu.unibi.agbi.gravisfx.graph.node;
 
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import java.util.List;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.paint.Paint;
@@ -17,7 +18,7 @@ import javafx.scene.transform.Scale;
  */
 public interface IGravisNode
 {
-    public void setPosition(double positionX, double positionY);
+    public void setTranslate(double positionX, double positionY);
     
     public double getOffsetX();
     

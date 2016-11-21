@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gravisfx.layout;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.view.GraphPane;
 import java.util.Random;
 
@@ -41,7 +41,7 @@ public class RandomLayout
             double x = rnd.nextDouble() * layoutX / scale;
             double y = rnd.nextDouble() * layoutY / scale;
 
-            node.setPosition(x, y);
+            node.setTranslate(x, y);
         }
     }
 }
