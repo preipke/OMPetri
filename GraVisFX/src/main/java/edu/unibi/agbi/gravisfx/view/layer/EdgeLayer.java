@@ -3,13 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.gui.handler;
+package edu.unibi.agbi.gravisfx.view.layer;
+
+import javafx.scene.Group;
 
 /**
  *
  * @author PR
  */
-public class MouseHandler
+public class EdgeLayer extends Group
 {
     
 }

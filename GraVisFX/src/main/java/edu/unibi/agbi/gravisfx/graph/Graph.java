@@ -7,8 +7,7 @@ package edu.unibi.agbi.gravisfx.graph;
 
 import edu.unibi.agbi.gravisfx.graph.entity.node.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.entity.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
-import javafx.scene.transform.Scale;
+import edu.unibi.agbi.gravisfx.view.layer.TopLayer;
 
 /**
  *

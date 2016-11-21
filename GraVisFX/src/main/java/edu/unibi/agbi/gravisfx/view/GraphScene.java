@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.gui;
+package edu.unibi.agbi.gravisfx.view;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
 
