@@ -3,11 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.view.handler;
+package edu.unibi.agbi.gnius.handler;
 
+import edu.unibi.agbi.gnius.Main;
+import edu.unibi.agbi.gnius.controller.GraphMenuController;
+import edu.unibi.agbi.gravisfx.graph.node.GravisNodeType;
+import edu.unibi.agbi.gravisfx.graph.node.GravisNodeType.NodeType;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
 import edu.unibi.agbi.gravisfx.view.GraphPane;
-import javafx.geometry.Bounds;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -18,23 +25,36 @@ import javafx.scene.input.ScrollEvent;
  */
 public class MouseGestures
 {
-    //private static double scaleValue = 1.0;
-    //private static double scaleDelta = 0.1;
-    private final static double scaleBase = 1.0;
-    private final static double scaleFactor = 1.1;
+    private static final double scaleBase = 1.0;
+    private static final double scaleFactor = 1.1;
     private static int scalePower = 0;
     
-    private static double SCALE_MAX = 10.d;
-    private static double SCALE_MIN = .01d;
+    private static final double SCALE_MAX = 10.d;
+    private static final double SCALE_MIN = .01d;
     
     private static Double eventMousePressedX = null;
     private static Double eventMousePressedY = null;
+    
+    private static final BooleanProperty isDraggingEnabled = new SimpleBooleanProperty(true);
+    private static final BooleanProperty isCreatingNode = new SimpleBooleanProperty(false);
+    
+    public static GraphMenuController controller;
+    
+    public static void setDraggingEnabled(boolean value) {
+        isCreatingNode.set(!value);
+        isDraggingEnabled.set(value);
+    }
+    
+    public static void setCreatingNode(boolean value) {
+        isDraggingEnabled.set(!value);
+        isCreatingNode.set(value);
+    }
     
     /**
      * Registers several mouse and scroll event handlers.
      * @param graphPane 
      */
-    public static void register(GraphPane graphPane) {
+    public static void registerTo(GraphPane graphPane) {
         
         graphPane.setOnScroll(( ScrollEvent event ) -> {
             
@@ -93,8 +113,15 @@ public class MouseGestures
         });
 
         graphPane.setOnMousePressed(( MouseEvent event ) -> {
+            
             eventMousePressedX = event.getX();
             eventMousePressedY = event.getY();
+            
+            if (event.isPrimaryButtonDown()) {
+                if (isCreatingNode.get()) {
+                    controller.createNode(event);
+                }
+            }
         });
 
         graphPane.setOnMouseReleased(( MouseEvent event ) -> {
@@ -103,20 +130,29 @@ public class MouseGestures
         });
 
         graphPane.setOnMouseDragged(( MouseEvent event ) -> {
-            if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
+            
+            if (event.isPrimaryButtonDown()) {
+                
+                if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
 
-                IGravisNode node = (IGravisNode)event.getTarget();
-                node.setTranslate(
-                        (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
-                        (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
-                );
-            } else if (GraphPane.class.isAssignableFrom(event.getTarget().getClass())) {
+                    IGravisNode node = (IGravisNode)event.getTarget();
+                    node.setTranslate(
+                            (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
+                            (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
+                    );
+                }
+                
+            } else if (event.isSecondaryButtonDown()) {
 
-                graphPane.getTopLayer().setTranslateX((event.getX() - eventMousePressedX + graphPane.getTopLayer().translateXProperty().get()));
-                graphPane.getTopLayer().setTranslateY((event.getY() - eventMousePressedY + graphPane.getTopLayer().translateYProperty().get()));
+                if (GraphPane.class.isAssignableFrom(event.getTarget().getClass())) {
 
-                eventMousePressedX = event.getX();
-                eventMousePressedY = event.getY();
+                    graphPane.getTopLayer().setTranslateX((event.getX() - eventMousePressedX + graphPane.getTopLayer().translateXProperty().get()));
+                    graphPane.getTopLayer().setTranslateY((event.getY() - eventMousePressedY + graphPane.getTopLayer().translateYProperty().get()));
+
+                    eventMousePressedX = event.getX();
+                    eventMousePressedY = event.getY();
+                }
+
             }
         });
     }

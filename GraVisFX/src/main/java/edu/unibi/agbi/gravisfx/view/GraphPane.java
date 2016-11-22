@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gravisfx.view;
 
-import edu.unibi.agbi.gravisfx.view.handler.MouseGestures;
 import edu.unibi.agbi.gravisfx.view.layer.TopLayer;
 import javafx.scene.layout.Pane;
 
@@ -24,8 +23,6 @@ public final class GraphPane extends Pane
         this.topLayer = topLayer;
         
         getChildren().add(topLayer);
-        
-        MouseGestures.register(this);
     }
     
     public TopLayer getTopLayer() {

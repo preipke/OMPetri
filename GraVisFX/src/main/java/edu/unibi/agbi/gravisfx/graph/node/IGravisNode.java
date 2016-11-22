@@ -7,10 +7,8 @@ package edu.unibi.agbi.gravisfx.graph.node;
 
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import java.util.List;
-import javafx.beans.property.DoubleProperty;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Shape;
-import javafx.scene.transform.Scale;
 
 /**
  *

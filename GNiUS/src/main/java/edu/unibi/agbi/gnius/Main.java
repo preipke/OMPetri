@@ -1,5 +1,6 @@
 package edu.unibi.agbi.gnius;
 
+import edu.unibi.agbi.gnius.handler.MouseGestures;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.view.GraphScene;
 import javafx.application.Application;
@@ -41,6 +42,8 @@ public class Main extends Application {
         borderPane.setCenter(graphScene);
         
         graph = graphScene.getGraph();
+        
+        MouseGestures.registerTo(graphScene.getGraphPane());
     }
 
     /**
