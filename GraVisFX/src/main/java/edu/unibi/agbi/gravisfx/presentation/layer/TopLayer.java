@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.view.layer;
+package edu.unibi.agbi.gravisfx.presentation.layer;
 
 import javafx.scene.Group;
 import javafx.scene.transform.Scale;

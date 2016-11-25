@@ -7,7 +7,7 @@ package edu.unibi.agbi.gravisfx.graph;
 
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.view.layer.TopLayer;
+import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
 
 /**
  *

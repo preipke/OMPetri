@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.view;
+package edu.unibi.agbi.gravisfx.presentation;
 
-import edu.unibi.agbi.gravisfx.view.layer.TopLayer;
+import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
 import javafx.scene.layout.Pane;
 
 /**
