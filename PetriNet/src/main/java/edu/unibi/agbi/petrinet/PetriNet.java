@@ -3,14 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.node;
+package edu.unibi.agbi.petrinet;
 
 /**
  *
  * @author PR
  */
-public class Transition
+public class PetriNet
 {
-    private Place node1;
-    private Place node2;
+    
 }

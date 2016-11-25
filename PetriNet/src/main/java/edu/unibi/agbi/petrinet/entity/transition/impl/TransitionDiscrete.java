@@ -3,13 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.node;
+package edu.unibi.agbi.petrinet.entity.transition.impl;
+
+import edu.unibi.agbi.petrinet.entity.transition.Transition;
 
 /**
  *
- * @author PR
+ * @author pr
  */
-public class Arc
-{
+public class TransitionDiscrete extends Transition {
     
 }

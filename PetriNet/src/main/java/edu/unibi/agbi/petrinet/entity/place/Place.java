@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.node;
+package edu.unibi.agbi.petrinet.entity.place;
 
 /**
  *
