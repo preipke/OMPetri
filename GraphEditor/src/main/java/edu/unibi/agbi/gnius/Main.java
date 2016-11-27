@@ -2,7 +2,7 @@ package edu.unibi.agbi.gnius;
 
 import edu.unibi.agbi.gnius.handler.MouseGestures;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.view.GraphScene;
+import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +27,7 @@ public class Main extends Application {
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         
-        stage.setTitle("GraVisFX");
+        stage.setTitle("GraVisFX - PetriNet Editor");
         stage.setScene(scene);
         stage.show();
         

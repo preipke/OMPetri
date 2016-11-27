@@ -22,6 +22,16 @@ public interface IGravisNode
     
     public double getOffsetY();
     
+    public void setFill(Paint color);
+    
+    public void setStroke(Paint color);
+    
+    public String getId();
+    
+    public Shape getShape();
+    
+    public Object getRelatedObject();
+    
     public void addParentNode(IGravisNode parent);
     
     public void addChildNode(IGravisNode child);
@@ -33,12 +43,4 @@ public interface IGravisNode
     public List<IGravisNode> getChildren();
     
     public List<GravisEdge> getEdges();
-    
-    public void setFill(Paint color);
-    
-    public void setStroke(Paint color);
-    
-    public String getId();
-    
-    public Shape getShape();
 }

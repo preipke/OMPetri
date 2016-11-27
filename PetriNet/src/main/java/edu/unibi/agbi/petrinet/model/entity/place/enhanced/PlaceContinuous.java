@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.place;
+package edu.unibi.agbi.petrinet.model.entity.place.enhanced;
 
 /**
  *
- * @author PR
+ * @author pr
  */
-public class Place
-{
+public class PlaceContinuous {
     
 }

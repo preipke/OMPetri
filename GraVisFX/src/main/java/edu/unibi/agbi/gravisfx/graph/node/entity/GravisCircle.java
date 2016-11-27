@@ -23,18 +23,38 @@ public class GravisCircle extends Circle implements IGravisNode
     private final List<IGravisNode> parents = new ArrayList();
     private final List<GravisEdge> edges = new ArrayList();
     
+    private Object relatedObject;
+    
     public GravisCircle(String id) {
         super();
         setId(id);
         setRadius(PropertiesController.CIRCLE_RADIUS);
     }
     
+    public GravisCircle(String id, Object relatedObject) {
+        this(id);
+        this.relatedObject = relatedObject;
+    }
+    
     public GravisCircle(String id, Paint color) {
-        super();
-        setId(id);
+        this(id);
         setStroke(color);
         setFill(color);
-        setRadius(PropertiesController.CIRCLE_RADIUS);
+    }
+    
+    public GravisCircle(String id, Paint color, Object relatedObject) {
+        this(id, color);
+        this.relatedObject = relatedObject;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public Object getRelatedObject() {
+        return relatedObject;
     }
     
     /**
@@ -65,18 +85,8 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public List<IGravisNode> getParents() {
-        return parents;
-    }
-    
-    @Override
     public void addChildNode(IGravisNode child) {
         children.add(child);
-    }
-    
-    @Override
-    public List<IGravisNode> getChildren() {
-        return children;
     }
     
     @Override
@@ -85,12 +95,17 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public List<GravisEdge> getEdges() {
-        return edges;
+    public List<IGravisNode> getParents() {
+        return parents;
     }
     
     @Override
-    public Shape getShape() {
-        return this;
+    public List<IGravisNode> getChildren() {
+        return children;
+    }
+    
+    @Override
+    public List<GravisEdge> getEdges() {
+        return edges;
     }
 }

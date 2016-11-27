@@ -1,4 +1,4 @@
-package edu.unibi.agbi.petrinet.entity.place.impl;
+package edu.unibi.agbi.petrinet.model.entity.place.enhanced;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

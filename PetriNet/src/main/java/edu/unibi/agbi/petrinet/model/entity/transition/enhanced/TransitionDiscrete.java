@@ -3,12 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.place.impl;
+package edu.unibi.agbi.petrinet.model.entity.transition.enhanced;
+
+import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
 
 /**
  *
  * @author pr
  */
-public class PlaceContinuous {
+public class TransitionDiscrete extends Transition {
     
 }

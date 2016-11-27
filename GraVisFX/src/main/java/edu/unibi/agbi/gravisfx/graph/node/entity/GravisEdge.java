@@ -17,6 +17,12 @@ public class GravisEdge extends Line
     private final IGravisNode source;
     private final IGravisNode target;
     
+    private Object relatedObject;
+    
+    public Object getRelatedObject() {
+        return relatedObject;
+    }
+    
     public GravisEdge(IGravisNode source, IGravisNode target) {
         
         super();
@@ -30,6 +36,11 @@ public class GravisEdge extends Line
         endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
         endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
         
+    }
+    
+    public GravisEdge(IGravisNode source, IGravisNode target, Object relatedObject) {
+        this(source , target);
+        this.relatedObject = relatedObject;
     }
     
     public IGravisNode getSource() {

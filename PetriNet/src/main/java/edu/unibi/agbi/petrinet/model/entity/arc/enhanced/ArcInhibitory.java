@@ -3,14 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.transition.impl;
-
-import edu.unibi.agbi.petrinet.entity.transition.Transition;
+package edu.unibi.agbi.petrinet.model.entity.arc.enhanced;
 
 /**
  *
  * @author pr
  */
-public class TransitionStochastic extends Transition {
+public class ArcInhibitory {
     
 }

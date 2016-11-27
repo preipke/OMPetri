@@ -3,14 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.transition.impl;
-
-import edu.unibi.agbi.petrinet.entity.transition.Transition;
+package edu.unibi.agbi.petrinet.model;
 
 /**
  *
- * @author pr
+ * @author PR
  */
-public class TransitionDiscrete extends Transition {
-    
+public class Parameter
+{
+    private String name;
+    private String description;
+    private double value;
 }

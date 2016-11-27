@@ -1,8 +1,8 @@
 
 import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.view.GraphPane;
-import edu.unibi.agbi.gravisfx.view.GraphScene;
+import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;

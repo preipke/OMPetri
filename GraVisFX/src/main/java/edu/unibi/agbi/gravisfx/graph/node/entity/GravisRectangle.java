@@ -23,25 +23,31 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
     private final List<IGravisNode> parents = new ArrayList();
     private final List<GravisEdge> edges = new ArrayList();
     
+    private Object relatedObject;
+    
     public GravisRectangle(String id) {
         super();
         setId(id);
-        init();
-    }
-    
-    public GravisRectangle(String id, Paint color) {
-        super();
-        setId(id);
-        setStroke(color);
-        setFill(color);
-        init();
-    }
-    
-    public void init() {
         setWidth(PropertiesController.RECTANGLE_WIDTH);
         setHeight(PropertiesController.RECTANGLE_HEIGHT);
         setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH);
         setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT);
+    }
+    
+    public GravisRectangle(String id, Paint color) {
+        this(id);
+        setStroke(color);
+        setFill(color);
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public Object getRelatedObject() {
+        return relatedObject;
     }
     
     /**
@@ -75,18 +81,8 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     @Override
-    public List<IGravisNode> getParents() {
-        return parents;
-    }
-    
-    @Override
     public void addChildNode(IGravisNode child) {
         children.add(child);
-    }
-    
-    @Override
-    public List<IGravisNode> getChildren() {
-        return children;
     }
     
     @Override
@@ -95,12 +91,17 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     @Override
-    public List<GravisEdge> getEdges() {
-        return edges;
+    public List<IGravisNode> getParents() {
+        return parents;
     }
     
     @Override
-    public Shape getShape() {
-        return this;
+    public List<IGravisNode> getChildren() {
+        return children;
+    }
+    
+    @Override
+    public List<GravisEdge> getEdges() {
+        return edges;
     }
 }

@@ -5,14 +5,9 @@
  */
 package edu.unibi.agbi.gnius.handler;
 
-import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gnius.controller.GraphMenuController;
-import edu.unibi.agbi.gravisfx.graph.node.GravisNodeType;
-import edu.unibi.agbi.gravisfx.graph.node.GravisNodeType.NodeType;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
-import edu.unibi.agbi.gravisfx.view.GraphPane;
+import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
