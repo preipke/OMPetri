@@ -23,6 +23,7 @@ public class Transition
     
     private String function;
     private List<Parameter> parameter;
+    private boolean isEnabled;
     
     private List<Place> incomingPlaces;
     private List<Place> outgoingPlaces;

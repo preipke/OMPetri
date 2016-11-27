@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.handler;
 
-import edu.unibi.agbi.gnius.controller.GraphMenuController;
+import edu.unibi.agbi.gnius.controller.fxml.GraphMenuController;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.beans.property.BooleanProperty;

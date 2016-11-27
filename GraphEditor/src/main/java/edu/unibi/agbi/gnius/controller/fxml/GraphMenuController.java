@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.controller;
+package edu.unibi.agbi.gnius.controller.fxml;
 
 import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gnius.handler.MouseGestures;
