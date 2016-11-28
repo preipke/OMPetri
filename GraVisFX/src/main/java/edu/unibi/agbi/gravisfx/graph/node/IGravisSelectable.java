@@ -12,4 +12,5 @@ package edu.unibi.agbi.gravisfx.graph.node;
 public interface IGravisSelectable
 {
     public void setHighlight(boolean value);
+    public void putOnTop();
 }

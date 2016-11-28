@@ -5,16 +5,17 @@
  */
 package edu.unibi.agbi.gravisfx.graph.node.entity;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+import edu.unibi.agbi.gravisfx.presentation.layer.NodeLayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.css.PseudoClass;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
@@ -22,11 +23,11 @@ import javafx.scene.shape.Shape;
  * 
  * @author PR
  */
-public final class GravisRectangle extends Rectangle implements IGravisNode, IGravisSelectable
+public final class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
-    private final List<GravisEdge> edges = new ArrayList();
+    private final List<IGravisEdge> edges = new ArrayList();
     
     private static final String PSEUDO_CLASS_IDENT = "selected";
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
@@ -54,12 +55,6 @@ public final class GravisRectangle extends Rectangle implements IGravisNode, IGr
         setHeight(PropertiesController.RECTANGLE_HEIGHT);
         setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH);
         setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT);
-    }
-    
-    public GravisRectangle(String id, Paint color) {
-        this();
-        setStroke(color);
-        setFill(color);
     }
     
     @Override
@@ -113,8 +108,23 @@ public final class GravisRectangle extends Rectangle implements IGravisNode, IGr
     }
     
     @Override
-    public void addEdge(GravisEdge edge) {
+    public void addEdge(IGravisEdge edge) {
         edges.add(edge);
+    }
+    
+    @Override
+    public boolean removeChild(IGravisNode node) {
+        return children.remove(node);
+    }
+    
+    @Override
+    public boolean removeParent(IGravisNode node) {
+        return parents.remove(node);
+    }
+    
+    @Override
+    public boolean removeEdge(IGravisEdge edge) {
+        return edges.remove(edge);
     }
     
     @Override
@@ -128,12 +138,19 @@ public final class GravisRectangle extends Rectangle implements IGravisNode, IGr
     }
     
     @Override
-    public List<GravisEdge> getEdges() {
+    public List<IGravisEdge> getEdges() {
         return edges;
     }
 
     @Override
     public void setHighlight(boolean value) {
         isSelected.set(value);
+    }
+    
+    @Override
+    public void putOnTop() {
+        NodeLayer nodeLayer = (NodeLayer) getParent();
+        nodeLayer.getChildren().remove(this);
+        nodeLayer.getChildren().add(this);
     }
 }

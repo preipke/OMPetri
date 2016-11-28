@@ -5,16 +5,17 @@
  */
 package edu.unibi.agbi.gravisfx.graph.node.entity;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+import edu.unibi.agbi.gravisfx.presentation.layer.NodeLayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.css.PseudoClass;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 
@@ -26,7 +27,7 @@ public class GravisCircle extends Circle implements IGravisNode, IGravisSelectab
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
-    private final List<GravisEdge> edges = new ArrayList();
+    private final List<IGravisEdge> edges = new ArrayList();
     
     private static final String PSEUDO_CLASS_IDENT = "selected";
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
@@ -55,17 +56,6 @@ public class GravisCircle extends Circle implements IGravisNode, IGravisSelectab
     
     public GravisCircle(Object relatedObject) {
         this();
-        this.relatedObject = relatedObject;
-    }
-    
-    public GravisCircle(Paint color) {
-        this();
-        setStroke(color);
-        setFill(color);
-    }
-    
-    public GravisCircle(Paint color, Object relatedObject) {
-        this(color);
         this.relatedObject = relatedObject;
     }
     
@@ -117,8 +107,23 @@ public class GravisCircle extends Circle implements IGravisNode, IGravisSelectab
     }
     
     @Override
-    public void addEdge(GravisEdge edge) {
+    public void addEdge(IGravisEdge edge) {
         edges.add(edge);
+    }
+    
+    @Override
+    public boolean removeChild(IGravisNode node) {
+        return children.remove(node);
+    }
+    
+    @Override
+    public boolean removeParent(IGravisNode node) {
+        return parents.remove(node);
+    }
+    
+    @Override
+    public boolean removeEdge(IGravisEdge edge) {
+        return edges.remove(edge);
     }
     
     @Override
@@ -132,12 +137,19 @@ public class GravisCircle extends Circle implements IGravisNode, IGravisSelectab
     }
     
     @Override
-    public List<GravisEdge> getEdges() {
+    public List<IGravisEdge> getEdges() {
         return edges;
     }
 
     @Override
     public void setHighlight(boolean value) {
         isSelected.set(value);
+    }
+    
+    @Override
+    public void putOnTop() {
+        NodeLayer nodeLayer = (NodeLayer) getParent();
+        nodeLayer.getChildren().remove(this);
+        nodeLayer.getChildren().add(this);
     }
 }

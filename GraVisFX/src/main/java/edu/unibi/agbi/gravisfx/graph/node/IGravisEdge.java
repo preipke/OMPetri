@@ -11,7 +11,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public interface IGravisEdge
+public interface IGravisEdge extends IGravisSelectable
 {
     public IGravisNode getSource();
     public IGravisNode getTarget();

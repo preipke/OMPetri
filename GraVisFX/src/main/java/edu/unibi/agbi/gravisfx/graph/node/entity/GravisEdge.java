@@ -8,6 +8,7 @@ package edu.unibi.agbi.gravisfx.graph.node.entity;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+import edu.unibi.agbi.gravisfx.presentation.layer.EdgeLayer;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
@@ -85,5 +86,12 @@ public class GravisEdge extends Line implements IGravisEdge, IGravisSelectable
     @Override
     public void setHighlight(boolean value) {
         isSelected.set(value);
+    }
+    
+    @Override
+    public void putOnTop() {
+        EdgeLayer edgeLayer = (EdgeLayer) getParent();
+        edgeLayer.getChildren().remove(this);
+        edgeLayer.getChildren().add(this);
     }
 }

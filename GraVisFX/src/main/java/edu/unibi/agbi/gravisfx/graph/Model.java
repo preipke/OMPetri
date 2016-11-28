@@ -46,12 +46,57 @@ public class Model
     }
     
     public boolean remove(IGravisNode node) {
+        disconnect(node);
         return nodes.remove(node);
     }
     
     public boolean remove(IGravisEdge edge) {
         disconnect(edge);
         return edges.remove(edge);
+    }
+    
+    private boolean connect(IGravisEdge edge) {
+        
+        if (nodes.contains(edge.getTarget()) && nodes.contains(edge.getSource())) {
+            
+            if (!edge.getSource().getChildren().contains(edge.getTarget())) {
+                
+                if (!edge.getTarget().getParents().contains(edge.getSource())) {
+
+                    edge.getSource().addChildNode(edge.getTarget());
+                    edge.getTarget().addParentNode(edge.getSource());
+
+                    edge.getSource().addEdge(edge);
+                    edge.getTarget().addEdge(edge);
+                    
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    private void disconnect(IGravisEdge edge) {
+        
+        edge.getSource().getChildren().remove(edge.getTarget());
+        edge.getTarget().getParents().remove(edge.getSource());
+
+        edge.getSource().removeEdge(edge);
+        edge.getTarget().removeEdge(edge);
+    }
+    
+    private void disconnect(IGravisNode node) {
+        
+        for (IGravisEdge edge : node.getEdges()) {
+            
+            if (edge.getSource() == node) {
+                edge.getTarget().removeParent(node);
+            } else {
+                edge.getSource().removeChild(node);
+            }
+            edge.getSource().removeEdge(edge);
+            edge.getTarget().removeEdge(edge);
+        }
     }
     
     public IGravisNode[] getNodes() {
@@ -74,19 +119,5 @@ public class Model
         }
         
         return edges;
-    }
-    
-    private boolean connect(IGravisEdge edge) {
-        if (nodes.contains(edge.getTarget()) && nodes.contains(edge.getSource())) {
-            edge.getSource().addChildNode(edge.getTarget());
-            edge.getTarget().addParentNode(edge.getSource());
-            return true;
-        }
-        return false;
-    }
-    
-    private void disconnect(IGravisEdge edge) {
-        edge.getSource().getChildren().remove(edge.getTarget());
-        edge.getTarget().getParents().remove(edge.getSource());
     }
 }
