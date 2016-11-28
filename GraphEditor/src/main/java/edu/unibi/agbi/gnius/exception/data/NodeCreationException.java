@@ -3,23 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.exception.controller;
+package edu.unibi.agbi.gnius.exception.data;
 
 /**
  *
- * @author pr
+ * @author PR
  */
-public class GraphNotNullException extends Exception {
+public class NodeCreationException extends Exception {
     
-    public GraphNotNullException() {
+    public NodeCreationException() {
         super();
     }
     
-    public GraphNotNullException(String msg) {
+    public NodeCreationException(String msg) {
         super(msg);
     }
     
-    public GraphNotNullException(Throwable thr) {
+    public NodeCreationException(Throwable thr) {
         super(thr);
     }
 }

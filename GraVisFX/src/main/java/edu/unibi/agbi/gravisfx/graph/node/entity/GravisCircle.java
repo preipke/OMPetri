@@ -7,8 +7,13 @@ package edu.unibi.agbi.gravisfx.graph.node.entity;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
+import javafx.css.PseudoClass;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
@@ -17,39 +22,61 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisCircle extends Circle implements IGravisNode
+public class GravisCircle extends Circle implements IGravisNode, IGravisSelectable
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<GravisEdge> edges = new ArrayList();
     
+    private static final String PSEUDO_CLASS_IDENT = "selected";
+    private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
+    
+    private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
+        @Override 
+        protected void invalidated() {
+            pseudoClassStateChanged(SELECTED_PSEUDO_CLASS , get());
+        }
+        @Override
+        public Object getBean() {
+            return GravisCircle.this;
+        }
+        @Override
+        public String getName() {
+            return PSEUDO_CLASS_IDENT;
+        }
+    };
+    
     private Object relatedObject;
     
-    public GravisCircle(String id) {
+    public GravisCircle() {
         super();
-        setId(id);
         setRadius(PropertiesController.CIRCLE_RADIUS);
     }
     
-    public GravisCircle(String id, Object relatedObject) {
-        this(id);
+    public GravisCircle(Object relatedObject) {
+        this();
         this.relatedObject = relatedObject;
     }
     
-    public GravisCircle(String id, Paint color) {
-        this(id);
+    public GravisCircle(Paint color) {
+        this();
         setStroke(color);
         setFill(color);
     }
     
-    public GravisCircle(String id, Paint color, Object relatedObject) {
-        this(id, color);
+    public GravisCircle(Paint color, Object relatedObject) {
+        this(color);
         this.relatedObject = relatedObject;
     }
     
     @Override
     public Shape getShape() {
         return this;
+    }
+    
+    @Override
+    public void setRelatedObject(Object object) {
+        relatedObject = object;
     }
     
     @Override
@@ -107,5 +134,10 @@ public class GravisCircle extends Circle implements IGravisNode
     @Override
     public List<GravisEdge> getEdges() {
         return edges;
+    }
+
+    @Override
+    public void setHighlight(boolean value) {
+        isSelected.set(value);
     }
 }

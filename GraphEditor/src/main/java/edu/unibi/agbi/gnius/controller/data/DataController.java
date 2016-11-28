@@ -5,9 +5,18 @@
  */
 package edu.unibi.agbi.gnius.controller.data;
 
+import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
+import edu.unibi.agbi.gnius.model.NodeType;
+
+import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+
 import edu.unibi.agbi.petrinet.model.PNNode;
-import edu.unibi.agbi.gnius.exception.controller.ControllerNotNullException;
+import edu.unibi.agbi.petrinet.model.entity.place.Place;
+import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,23 +25,41 @@ import java.util.Map;
  */
 public class DataController
 {
-    private Map<String,PNNode> petriNodeMap;
+    private static final Map<String,PNNode> pnNodesInternalIds = new HashMap();
+    private static final Map<String,ArrayList<PNNode>> pnNodesUserIds = new HashMap();
     
-    private static DataController controller;
-    
-    public static DataController get() {
-        return controller;
-    }
-    
-    public DataController() throws ControllerNotNullException {
-        if (controller != null) {
-            throw new ControllerNotNullException("DataController has already been initialized!");
-        }
-        controller = this;
+    public static PNNode createNode(NodeType.Type type) throws NodeCreationException {
         
-        petriNodeMap = new HashMap();
+        PNNode node;
+        
+        switch(type) {
+            case PLACE:
+                node = new Place();
+                break;
+            case TRANSITION:
+                node = new Transition();
+                break;
+            default:
+                throw new NodeCreationException("No suitable node type selected!");
+        }
+        
+        pnNodesInternalIds.put(node.getInternalId(), node);
+        
+        return node;
     }
     
+    public static void connectNodes(IGravisNode source, IGravisNode target) {
+        
+    }
+    
+    public static void copyNodes(List<IGravisNode> nodes) {
+        
+    }
+    
+    public static void deleteNodes() {
+        
+        
+    }
     
     
     /**
@@ -44,5 +71,8 @@ public class DataController
      * copy node(s)
      * clone node(s)
      * delete node(s)
+     * connect nodes
+     * 
+     * right clicking node: options for...
      */
 }

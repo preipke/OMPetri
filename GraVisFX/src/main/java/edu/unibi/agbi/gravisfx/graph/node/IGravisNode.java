@@ -30,6 +30,8 @@ public interface IGravisNode
     
     public Shape getShape();
     
+    public void setRelatedObject(Object object);
+    
     public Object getRelatedObject();
     
     public void addParentNode(IGravisNode parent);

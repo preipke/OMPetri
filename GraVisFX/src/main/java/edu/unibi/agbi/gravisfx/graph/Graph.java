@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
 
@@ -32,43 +32,40 @@ public final class Graph
     }
     
     public void addNode(IGravisNode node) {
-        if (model.addNode(node)) {
+        if (model.add(node)) {
             topLayer.getNodeLayer().getChildren().add(node.getShape());
         }
     }
     
-    public void removeNode(IGravisNode node) {
-        if (model.removeNode(node)) {
-            topLayer.getNodeLayer().getChildren().remove(node.getShape());
+    public void addEdge(IGravisEdge edge) {
+        if (model.add(edge)){
+            topLayer.getEdgeLayer().getChildren().add(edge.getShape());
         }
     }
     
-    public IGravisNode getNode(String id) {
-        return model.getNode(id);
+    public boolean containsNode(IGravisNode node) {
+        return model.contains(node);
+    }
+    
+    public boolean containsEdge(IGravisEdge edge) {
+        return model.contains(edge);
+    }
+    
+    public void removeNode(IGravisNode node) {
+        model.remove(node);
+        topLayer.getNodeLayer().getChildren().remove(node.getShape());
+    }
+    
+    public void removeEdge(IGravisEdge edge) {
+        model.remove(edge);
+        topLayer.getEdgeLayer().getChildren().remove(edge.getShape());
     }
     
     public IGravisNode[] getNodes() {
         return model.getNodes();
     }
     
-    public void createEdge(IGravisNode parent, IGravisNode child) {
-        createEdge(parent.getId() , child.getId());
-    }
-    
-    public void createEdge(String parentId, String childId) {
-        
-        if (model.connectNodes(parentId , childId)) {
-
-            GravisEdge edge = new GravisEdge(model.getNode(parentId) , model.getNode(childId));
-            
-            topLayer.getEdgeLayer().getChildren().add(edge);
-        }
-    }
-    
-    public void removeEdge(GravisEdge edge) {
-        
-        model.disconnectNodes(edge);
-        
-        topLayer.getEdgeLayer().getChildren().remove(edge);
+    public IGravisEdge[] getEdges() {
+        return model.getEdges();
     }
 }

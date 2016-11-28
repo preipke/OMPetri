@@ -17,7 +17,7 @@ public abstract class PNNode {
     private static final String IDENT = "petriNode_";
     private static int COUNT = 0;
     
-    private final String id;
+    private final String internalId;
     
     private String name;
     private String label;
@@ -28,13 +28,13 @@ public abstract class PNNode {
     public PNNode() {
         synchronized (IDENT) {
             COUNT++;
-            id = IDENT + COUNT;
+            internalId = IDENT + COUNT;
         }
         shapes = new ArrayList();
     }
     
-    public String getId() {
-        return id;
+    public String getInternalId() {
+        return internalId;
     }
 
     /**

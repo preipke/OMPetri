@@ -7,8 +7,13 @@ package edu.unibi.agbi.gravisfx.graph.node.entity;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+
 import java.util.ArrayList;
 import java.util.List;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.BooleanPropertyBase;
+import javafx.css.PseudoClass;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
@@ -17,17 +22,34 @@ import javafx.scene.shape.Shape;
  * 
  * @author PR
  */
-public final class GravisRectangle extends Rectangle implements IGravisNode
+public final class GravisRectangle extends Rectangle implements IGravisNode, IGravisSelectable
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<GravisEdge> edges = new ArrayList();
     
+    private static final String PSEUDO_CLASS_IDENT = "selected";
+    private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
+    
+    private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
+        @Override 
+        protected void invalidated() {
+            pseudoClassStateChanged(SELECTED_PSEUDO_CLASS , get());
+        }
+        @Override
+        public Object getBean() {
+            return GravisRectangle.this;
+        }
+        @Override
+        public String getName() {
+            return PSEUDO_CLASS_IDENT;
+        }
+    };
+    
     private Object relatedObject;
     
-    public GravisRectangle(String id) {
+    public GravisRectangle() {
         super();
-        setId(id);
         setWidth(PropertiesController.RECTANGLE_WIDTH);
         setHeight(PropertiesController.RECTANGLE_HEIGHT);
         setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH);
@@ -35,7 +57,7 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     public GravisRectangle(String id, Paint color) {
-        this(id);
+        this();
         setStroke(color);
         setFill(color);
     }
@@ -43,6 +65,11 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
     @Override
     public Shape getShape() {
         return this;
+    }
+    
+    @Override
+    public void setRelatedObject(Object object) {
+        relatedObject = object;
     }
     
     @Override
@@ -103,5 +130,10 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
     @Override
     public List<GravisEdge> getEdges() {
         return edges;
+    }
+
+    @Override
+    public void setHighlight(boolean value) {
+        isSelected.set(value);
     }
 }

@@ -5,10 +5,10 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 
@@ -16,72 +16,77 @@ import java.util.Map;
  */
 public class Model
 {
-    private final Map<String, IGravisNode> nodes = new HashMap();
+    private final List<IGravisNode> nodes = new ArrayList();
+    private final List<IGravisEdge> edges = new ArrayList();
     
-    public boolean addNode(IGravisNode node) {
-        if (nodes.containsKey(node.getId())) {
-            return false;
-        } else {
-            nodes.put(node.getId() , node);
-            return true;
-        }
-    }
-    
-    public boolean removeNode(IGravisNode node) {
-        node = nodes.remove(node.getId());
-        return node != null;
-    }
-    
-    public boolean connectNodes(IGravisNode parent, IGravisNode child) {
-        
-        if (parent != null && child != null) {
-            parent.addChildNode(child);
-            child.addParentNode(parent);
+    public boolean add(IGravisNode node) {
+        if (!nodes.contains(node)) {
+            nodes.add(node);
             return true;
         }
         return false;
     }
     
-    public boolean connectNodes(String parentId, String childId) {
-        
-        IGravisNode parent = nodes.get(parentId);
-        IGravisNode child = nodes.get(childId);
-        
-        return connectNodes(parent, child);
+    public boolean add(IGravisEdge edge) {
+        if (!edges.contains(edge)) {
+            if (connect(edge)) {
+                edges.add(edge);
+                return true;
+            }
+        }
+        return false;
     }
     
-    public void disconnectNodes(IGravisNode parent, IGravisNode child) {
-        
-        parent.getChildren().remove(child);
-        child.getParents().remove(parent);
+    public boolean contains(IGravisNode node) {
+        return nodes.contains(node);
     }
     
-    public void disconnectNodes(GravisEdge edge) {
-        
-        disconnectNodes(edge.getSource(), edge.getTarget());
+    public boolean contains(IGravisEdge edge) {
+        return edges.contains(edge);
     }
     
-    public void disconnectNodes(String parentId, String childId) {
-        
-        IGravisNode parent = nodes.get(parentId);
-        IGravisNode child = nodes.get(childId);
-        
-        disconnectNodes(parent, child);
+    public boolean remove(IGravisNode node) {
+        return nodes.remove(node);
     }
     
-    public IGravisNode getNode(String id) {
-        return nodes.get(id);
+    public boolean remove(IGravisEdge edge) {
+        disconnect(edge);
+        return edges.remove(edge);
     }
     
     public IGravisNode[] getNodes() {
         
-        IGravisNode[] nodesArray = new IGravisNode[nodes.size()];
+        IGravisNode[] nodes = new IGravisNode[this.nodes.size()];
         
-        int index = 0;
-        for (Map.Entry<String , IGravisNode> entrySet : nodes.entrySet()) {
-            nodesArray[index] = entrySet.getValue();
-            index++;
+        for (int i = 0; i < nodes.length; i++) {
+            nodes[i] = this.nodes.get(i);
         }
-        return nodesArray;
+        
+        return nodes;
+    }
+    
+    public IGravisEdge[] getEdges() {
+        
+        IGravisEdge[] edges = new IGravisEdge[this.edges.size()];
+        
+        for (int i = 0; i < edges.length; i++) {
+            edges[i] = this.edges.get(i);
+        }
+        
+        return edges;
+    }
+    
+    private boolean connect(IGravisEdge edge) {
+        if (nodes.contains(edge.getTarget()) && nodes.contains(edge.getSource())) {
+            edge.getSource().addChildNode(edge.getTarget());
+            edge.getTarget().addParentNode(edge.getSource());
+            return true;
+        }
+        return false;
+    }
+    
+    private void disconnect(IGravisEdge edge) {
+        edge.getSource().getChildren().remove(edge.getTarget());
+        edge.getTarget().getParents().remove(edge.getSource());
     }
 }

@@ -1,0 +1,51 @@
+.gravisRectangle {
+    -fx-fill: orange;
+    -fx-stroke: darkorange;
+    -fx-stroke-width: 1;
+    -fx-stroke-type: outside;
+}
+
+.gravisRectangle:hover {
+    -fx-stroke: red;
+    -fx-stroke-width: 2;
+}
+
+.gravisRectangle:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 2;
+}
+
+
+
+.gravisCircle {
+    -fx-fill: yellowgreen;
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 1;
+    -fx-stroke-type: outside;
+}
+
+.gravisCircle:hover {
+    -fx-stroke: darkgreen;
+    -fx-stroke-width: 2;
+}
+
+.gravisCircle:selected {
+    -fx-stroke: darkgreen;
+    -fx-stroke-width: 2;
+}
+
+
+
+.gravisEdge {
+    -fx-stroke: red;
+}
+
+.gravisEdge:hover {
+    -fx-stroke: darkred;
+    -fx-stroke-width: 2;
+}
+
+.gravisEdge:selected {
+    -fx-stroke: darkred;
+    -fx-stroke-width: 2;
+}

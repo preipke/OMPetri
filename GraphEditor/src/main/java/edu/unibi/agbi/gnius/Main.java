@@ -1,7 +1,10 @@
 package edu.unibi.agbi.gnius;
 
+import edu.unibi.agbi.gnius.controller.data.DataController;
+import edu.unibi.agbi.gnius.controller.fxml.PresentationController;
+import edu.unibi.agbi.gnius.exception.controller.GraphNotNullException;
 import edu.unibi.agbi.gnius.handler.MouseGestures;
-import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.gnius.handler.ZoomHandler;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
@@ -13,11 +16,6 @@ import javafx.stage.Stage;
 
 
 public class Main extends Application {
-    
-    private static Graph graph;
-    public static Graph getGraph() {
-        return graph;
-    }
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -26,6 +24,7 @@ public class Main extends Application {
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
+        scene.getStylesheets().add("/styles/gravis/nodes.css");
         
         stage.setTitle("GraVisFX - PetriNet Editor");
         stage.setScene(scene);
@@ -40,8 +39,14 @@ public class Main extends Application {
         graphScene.heightProperty().bind(borderPane.heightProperty());
         
         borderPane.setCenter(graphScene);
+        try {
+            PresentationController.setGraph(graphScene.getGraph());
+        } catch (GraphNotNullException ex) {
+            System.out.println(ex);
+        }
         
-        graph = graphScene.getGraph();
+        // register mouse actions
+        ZoomHandler.applyZoomHandler(graphScene.getGraphPane());
         
         MouseGestures.registerTo(graphScene.getGraphPane());
     }
