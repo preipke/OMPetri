@@ -10,11 +10,10 @@ import edu.unibi.agbi.gnius.exception.data.EdgeCreationException;
 import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
 import edu.unibi.agbi.gnius.handler.MouseGestures;
 import edu.unibi.agbi.gnius.model.EdgeType;
+import edu.unibi.agbi.gnius.model.LayoutType;
 import edu.unibi.agbi.gnius.model.NodeType;
 
-import edu.unibi.agbi.gravisfx.graph.layout.GravisLayoutType;
-import edu.unibi.agbi.gravisfx.graph.layout.GravisLayoutType.LayoutType;
-import edu.unibi.agbi.gravisfx.graph.layout.algorithm.RandomLayout;
+import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 
 import edu.unibi.agbi.petrinet.model.PNNode;
@@ -44,9 +43,9 @@ public class GraphMenuController implements Initializable
     
     public void addChoices() {
         
-        ObservableList<GravisLayoutType> alignChoices = FXCollections.observableArrayList();
-        alignChoices.add(new GravisLayoutType(LayoutType.RANDOM, "Random"));
-        alignChoices.add(new GravisLayoutType(LayoutType.DEFAULT, "..."));
+        ObservableList<LayoutType> alignChoices = FXCollections.observableArrayList();
+        alignChoices.add(new LayoutType(LayoutType.Type.RANDOM, "Random"));
+        alignChoices.add(new LayoutType(LayoutType.Type.DEFAULT, "..."));
         
         choicesAlignNodes.setItems(alignChoices);
         choicesAlignNodes.getSelectionModel().selectFirst();
@@ -70,7 +69,7 @@ public class GraphMenuController implements Initializable
     @FXML
     private void buttonAlignNodes() {
         
-        LayoutType type = ((GravisLayoutType) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
+        LayoutType.Type type = ((LayoutType) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
         
         switch(type) {
             case RANDOM:

@@ -3,23 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.layout;
+package edu.unibi.agbi.gnius.model;
 
 /**
  *
  * @author PR
  */
-public class GravisLayoutType
+public class LayoutType
 {
-    private final LayoutType type;
+    private final Type type;
     private final String typeName;
 
-    public GravisLayoutType(LayoutType type , String typeName) {
+    public LayoutType(Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }
 
-    public LayoutType getType() {
+    public Type getType() {
         return type;
     }
 
@@ -28,7 +28,7 @@ public class GravisLayoutType
         return typeName;
     }
 
-    public enum LayoutType
+    public enum Type
     {
         RANDOM, DEFAULT;
     }
