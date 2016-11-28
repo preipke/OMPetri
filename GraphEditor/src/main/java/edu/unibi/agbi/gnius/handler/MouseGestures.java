@@ -6,18 +6,21 @@
 package edu.unibi.agbi.gnius.handler;
 
 import edu.unibi.agbi.gnius.controller.fxml.GraphMenuController;
+import edu.unibi.agbi.gnius.controller.fxml.PresentationController;
+import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
+import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
 
 /**
  *
@@ -28,8 +31,13 @@ public class MouseGestures
     private static Double eventMousePressedX = null;
     private static Double eventMousePressedY = null;
     
-    private static List<IGravisSelectable> selectedNodes = new ArrayList();
-    private static IGravisSelectable[] selectedNodesCopy;
+    private static MouseEvent eventLatestMousePos;
+    
+    private static List<IGravisNode> selectedNodes = new ArrayList();
+    private static List<IGravisEdge> selectedEdges = new ArrayList();
+    
+    private static IGravisNode[] selectedNodesCopy = new IGravisNode[0];
+    private static IGravisEdge[] selectedEdgesCopy = new IGravisEdge[0];
     
     private static final BooleanProperty isCreatingNodes = new SimpleBooleanProperty(false);
     private static final BooleanProperty isDraggingEnabled = new SimpleBooleanProperty(true);
@@ -55,7 +63,25 @@ public class MouseGestures
      * @param graphPane 
      */
     public static void registerTo(GraphPane graphPane) {
+        
+        /**
+         * Used to determine the paste position for copying / cloning.
+         */
+        graphPane.setOnMouseMoved((MouseEvent event) -> {
+            eventLatestMousePos = event;
+        });
 
+        /**
+         * Used to determine relative position for dragging.
+         */
+        graphPane.setOnMouseReleased(( MouseEvent event ) -> {
+            eventMousePressedX = null;
+            eventMousePressedY = null;
+        });
+
+        /**
+         * Interacting with nodes.
+         */
         graphPane.setOnMousePressed(( MouseEvent event ) -> {
             
             eventMousePressedX = event.getX();
@@ -67,24 +93,49 @@ public class MouseGestures
                  * Clicking node objects.
                  */
                 if (IGravisSelectable.class.isAssignableFrom(event.getTarget().getClass())) {
-
-                    IGravisSelectable selectable = (IGravisSelectable) event.getTarget();
-
-                    // select multiple nodes
-                    if (event.isControlDown()) {
+                    
+                    /**
+                     * Way #1
+                     */
+                    if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
                         
-                        selectedNodes.add(selectable);
-                        selectable.setHighlight(true);
-
-                    } else {
+                        IGravisNode selectableNode = (IGravisNode) event.getTarget();
                         
-                        for (IGravisSelectable selected : selectedNodes) {
-                            selected.setHighlight(false);
+                        // select multiple nodes
+                        if (event.isControlDown()) {
+                            selectedNodes.add(selectableNode);
+                        } else {
+                            for (IGravisNode selected : selectedNodes) {
+                                selected.setHighlight(false);
+                            }
+                            for (IGravisEdge selected : selectedEdges) {
+                                selected.setHighlight(false);
+                            }
+                            selectedNodes = new ArrayList();
+                            selectedNodes.add(selectableNode);
                         }
-                        selectedNodes = new ArrayList();
-                        selectedNodes.add(selectable);
+                        selectableNode.setHighlight(true);
+                        selectableNode.putOnTop();
                         
-                        selectable.setHighlight(true);
+                    } else if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {
+                        
+                        IGravisEdge selectableEdge = (IGravisEdge) event.getTarget();
+                        
+                        // select multiple nodes
+                        if (event.isControlDown()) {
+                            selectedEdges.add(selectableEdge);
+                        } else {
+                            for (IGravisNode selected : selectedNodes) {
+                                selected.setHighlight(false);
+                            }
+                            for (IGravisEdge selected : selectedEdges) {
+                                selected.setHighlight(false);
+                            }
+                            selectedEdges = new ArrayList();
+                            selectedEdges.add(selectableEdge);
+                        }
+                        selectableEdge.setHighlight(true);
+                        selectableEdge.putOnTop();
                     }
                 } 
                 /**
@@ -93,10 +144,14 @@ public class MouseGestures
                 else if (!IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
 
                     if (!event.isControlDown()) {
-                        for (IGravisSelectable selected : selectedNodes) {
-                            selected.setHighlight(false);
+                        for (IGravisNode node : selectedNodes) {
+                            node.setHighlight(false);
                         }
                         selectedNodes = new ArrayList();
+                        for (IGravisEdge edge : selectedEdges) {
+                            edge.setHighlight(false);
+                        }
+                        selectedEdges = new ArrayList();
                     }
 
                     if (isCreatingNodes.get()) {
@@ -113,47 +168,59 @@ public class MouseGestures
             }
         });
         
-        graphPane.setOnKeyPressed((KeyEvent event) -> {
+        /**
+         * Node copying and deleting.
+         */
+        graphPane.getScene().setOnKeyPressed((KeyEvent event) -> {
             
             /**
              * Delete selected nodes.
              */
             if (event.getCode().equals(KeyCode.DELETE)) {
-                
-                for (int i = 0; i < selectedNodes.size(); i++) {
-                    
-                    // deleting
-                    
+                for (IGravisEdge edge : selectedEdges) {
+                    PresentationController.remove(edge);
                 }
-
+                for (IGravisNode node : selectedNodes) {
+                    PresentationController.remove(node);
+                }
             }
             /**
-             * Copying nodes.
+             * Copying selected nodes.
              */
             else if (event.isControlDown()) {
                 
                 if (event.getCode().equals(KeyCode.C)) {
-                
-                    selectedNodesCopy = (IGravisSelectable[]) selectedNodes.toArray();
+                    
+                    selectedNodesCopy = new IGravisNode[selectedNodes.size()];
+                    for (int i = 0; i < selectedEdgesCopy.length; i++) {
+                        selectedNodesCopy[i] = selectedNodes.get(i);
+                    }
+                    selectedEdgesCopy = new IGravisEdge[selectedEdges.size()];
+                    for (int i = 0; i < selectedEdgesCopy.length; i++) {
+                        selectedEdgesCopy[i] = selectedEdges.get(i);
+                    }
                     
                 } else if (event.getCode().equals(KeyCode.V)) {
                     
-                    for (int i = 0; i < selectedNodesCopy.length; i++) {
-                        
-                        // copying
-                        
-                    }
+                    List<IGravisNode> nodes;
                     
+                    try {
+                        nodes = PresentationController.copy(selectedNodesCopy , eventLatestMousePos);
+                        if (true) { // copying, create new pn object
+                            // TODO
+                        } else { // cloning, reference the same pn object
+                            // TODO
+                        }
+                        
+                        for (IGravisNode node : nodes) {
+                            selectedNodes.add(node);
+                            node.setHighlight(true);
+                        }
+                    } catch (NodeCreationException ex) {
+                        System.out.println(ex.toString());
+                    }
                 }
             }
-            
-        });
-        
-        
-
-        graphPane.setOnMouseReleased(( MouseEvent event ) -> {
-            eventMousePressedX = null;
-            eventMousePressedY = null;
         });
 
         graphPane.setOnMouseDragged(( MouseEvent event ) -> {
@@ -161,12 +228,13 @@ public class MouseGestures
             if (event.isPrimaryButtonDown()) {
                 
                 // TODO
-                // take mouse pointer position relative to object center*scale into account (looks more smooth)
+                // take mouse pointer position relative to object position * scale (looks more smooth)
                 if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
 
                     IGravisNode node = (IGravisNode)event.getTarget();
+                    
                     node.setTranslate(
-                            (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
+                            (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX(),
                             (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
                     );
                 }
@@ -174,8 +242,7 @@ public class MouseGestures
             } else if (event.isSecondaryButtonDown()) {
 
                 // TODO
-                // properly activate dragging
-                
+                // somehow activate dragging, not passively active
                 //if (GraphPane.class.isAssignableFrom(event.getTarget().getClass())) {
 
                     graphPane.getTopLayer().setTranslateX((event.getX() - eventMousePressedX + graphPane.getTopLayer().translateXProperty().get()));
@@ -184,7 +251,6 @@ public class MouseGestures
                     eventMousePressedX = event.getX();
                     eventMousePressedY = event.getY();
                 //}
-
             }
         });
     }
