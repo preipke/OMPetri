@@ -7,6 +7,7 @@ package edu.unibi.agbi.petrinet.model.entity.arc;
 
 import edu.unibi.agbi.petrinet.model.entity.place.Place;
 import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
+import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
 
 /**
  *

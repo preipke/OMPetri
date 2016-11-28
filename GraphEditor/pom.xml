@@ -26,6 +26,11 @@
             <artifactId>GraVisFX</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>edu.unibi.agbi</groupId>
+            <artifactId>PetriNet</artifactId>
+            <version>0.1-SNAPSHOT</version>
+        </dependency>
         
         <!-- run as if it was on an embedded system -->
         <dependency>

@@ -5,6 +5,9 @@
  */
 package edu.unibi.agbi.petrinet.model.entity.place;
 
+import edu.unibi.agbi.petrinet.model.PNNode;
+import edu.unibi.agbi.petrinet.model.PNNode;
+import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
 import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
 import java.util.List;
 
@@ -12,13 +15,8 @@ import java.util.List;
  *
  * @author PR
  */
-public class Place
+public class Place extends PNNode
 {
-    private String name;
-    private String description;
-    
-    private Object shape;
-    
     private double token;
     private double tokenCapacity;
     

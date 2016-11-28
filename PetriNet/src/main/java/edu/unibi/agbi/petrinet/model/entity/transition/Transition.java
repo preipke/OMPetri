@@ -5,22 +5,18 @@
  */
 package edu.unibi.agbi.petrinet.model.entity.transition;
 
-import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.entity.place.Place;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.List;
+import edu.unibi.agbi.petrinet.model.PNNode;
+import edu.unibi.agbi.petrinet.model.PNNode;
 
 /**
  *
  * @author PR
  */
-public class Transition
+public class Transition extends PNNode
 {
-    private String name;
-    private String label;
-    private String description;
-    
-    private Object shape;
-    
     private String function;
     private List<Parameter> parameter;
     private boolean isEnabled;
