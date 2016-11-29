@@ -21,7 +21,7 @@ public class ZoomHandler
     private static final double SCALE_MAX = 10.d;
     private static final double SCALE_MIN = .01d;
     
-    public static void applyZoomHandler(GraphPane graphPane) {
+    public static void registerTo(GraphPane graphPane) {
         
         graphPane.setOnScroll(( ScrollEvent event ) -> {
             

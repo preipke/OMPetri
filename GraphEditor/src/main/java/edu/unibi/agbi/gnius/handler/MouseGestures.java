@@ -42,8 +42,6 @@ public class MouseGestures
     private static final BooleanProperty isCreatingNodes = new SimpleBooleanProperty(false);
     private static final BooleanProperty isDraggingEnabled = new SimpleBooleanProperty(true);
     
-    private static final BooleanProperty isHoldingControl = new SimpleBooleanProperty(false);
-    
     public static GraphMenuController controller;
     
     public static void setDraggingEnabled(boolean value) {
@@ -225,21 +223,45 @@ public class MouseGestures
 
         graphPane.setOnMouseDragged(( MouseEvent event ) -> {
             
+            /**
+             * Drag selected nodes.
+             */
             if (event.isPrimaryButtonDown()) {
                 
-                // TODO
-                // take mouse pointer position relative to object position * scale (looks more smooth)
                 if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
 
-                    IGravisNode node = (IGravisNode)event.getTarget();
+                    double offsetX = event.getX() - eventMousePressedX;
+                    double offsetY = event.getY() - eventMousePressedY;
                     
-                    node.setTranslate(
-                            (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX(),
-                            (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
-                    );
+                    double transformX;
+                    double transformY;
+                    
+                    for (IGravisNode node : selectedNodes) {
+                        
+                        /*
+                        transformX = node.getShape().getTranslateX();
+                        transformY = node.getShape().getTranslateY();
+                        
+                        transformX = transformX - graphPane.getTopLayer().translateXProperty().get();
+                        transformY = transformY - graphPane.getTopLayer().translateYProperty().get();
+                        
+                        node.setTranslate(
+                                transformX / graphPane.getTopLayer().getScaleTransform().getX() , 
+                                transformY / graphPane.getTopLayer().getScaleTransform().getX()
+                        );
+                        */
+                        
+                        node.setTranslate(
+                                (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
+                                (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
+                        );
+                    }
                 }
-                
-            } else if (event.isSecondaryButtonDown()) {
+            } 
+            /**
+             * Drag all nodes.
+             */
+            else if (event.isSecondaryButtonDown()) {
 
                 // TODO
                 // somehow activate dragging, not passively active
@@ -252,6 +274,9 @@ public class MouseGestures
                     eventMousePressedY = event.getY();
                 //}
             }
+
+            eventMousePressedX = event.getX();
+            eventMousePressedY = event.getY();
         });
     }
 }

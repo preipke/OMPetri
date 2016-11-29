@@ -45,9 +45,8 @@ public class Main extends Application {
             System.out.println(ex);
         }
         
-        // register mouse actions
-        ZoomHandler.applyZoomHandler(graphScene.getGraphPane());
-        
+        // register handler
+        ZoomHandler.registerTo(graphScene.getGraphPane());
         MouseGestures.registerTo(graphScene.getGraphPane());
     }
 

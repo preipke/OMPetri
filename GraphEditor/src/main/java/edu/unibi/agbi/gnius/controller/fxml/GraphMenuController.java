@@ -79,8 +79,6 @@ public class GraphMenuController implements Initializable
                 textLogArea.appendText("Align Nodes: no method selected!"); 
                 return;
         }
-        
-        //RandomLayout.applyOn(Main.getGraph());
     }
     
     @FXML
