@@ -24,6 +24,7 @@ import java.util.ArrayList;
 
 import java.util.List;
 import javafx.application.Platform;
+import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -146,6 +147,30 @@ public class PresentationController
         }
         
         return nodesCopied;
+    }
+    
+    /**
+     * Schwerpunkt von Punktwolke relativ zur Szene berechnen. 
+     * Benutzen zum Verschieben, Kopieren, Einfügen usw.
+     * 
+     * @return 
+     */
+    private Point2D ComputeCenter(IGravisNode[] nodes) {
+        
+        double x = 0;
+        double y = 0;
+        
+        double offsetX = graph.getTopLayer().getTranslateX();
+        double offsetY = graph.getTopLayer().getTranslateY();
+        
+        for (IGravisNode node : nodes) {
+            x += node.getTranslateX();
+            y += node.getTranslateY();
+        }
+        
+        System.out.println("X=" + x + " | Y=" + y);
+        
+        return new Point2D(x , y);
     }
     
     /**
