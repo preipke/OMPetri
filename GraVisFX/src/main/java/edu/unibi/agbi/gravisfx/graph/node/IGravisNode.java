@@ -6,7 +6,6 @@
 package edu.unibi.agbi.gravisfx.graph.node;
 
 import java.util.List;
-import javafx.scene.shape.Shape;
 
 /**
  *
@@ -14,8 +13,6 @@ import javafx.scene.shape.Shape;
  */
 public interface IGravisNode extends IGravisSelectable
 {
-    public Shape getShape();
-    
     public void setTranslate(double positionX, double positionY);
     
     public double getOffsetX();

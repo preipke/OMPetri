@@ -5,8 +5,6 @@
  */
 package edu.unibi.agbi.gravisfx.graph.node;
 
-import javafx.scene.shape.Shape;
-
 /**
  *
  * @author PR
@@ -15,5 +13,4 @@ public interface IGravisEdge extends IGravisSelectable
 {
     public IGravisNode getSource();
     public IGravisNode getTarget();
-    public Shape getShape();
 }

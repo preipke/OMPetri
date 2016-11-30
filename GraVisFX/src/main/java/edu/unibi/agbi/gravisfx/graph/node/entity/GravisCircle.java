@@ -8,7 +8,6 @@ package edu.unibi.agbi.gravisfx.graph.node.entity;
 import edu.unibi.agbi.gravisfx.PropertiesController;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 import edu.unibi.agbi.gravisfx.presentation.layer.NodeLayer;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisCircle extends Circle implements IGravisNode, IGravisSelectable
+public class GravisCircle extends Circle implements IGravisNode
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();

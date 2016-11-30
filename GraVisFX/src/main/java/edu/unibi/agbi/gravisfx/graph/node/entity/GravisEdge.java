@@ -20,7 +20,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisEdge extends Line implements IGravisEdge, IGravisSelectable
+public class GravisEdge extends Line implements IGravisEdge
 {
     private final IGravisNode source;
     private final IGravisNode target;
