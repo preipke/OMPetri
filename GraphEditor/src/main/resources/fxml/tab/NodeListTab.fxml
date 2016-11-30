@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+
+<Tab fx:id="nodeListTab" text="Node List" xmlns:fx="http://javafx.com/fxml/1" 
+     xmlns="http://javafx.com/javafx/8" 
+     fx:controller="edu.unibi.agbi.gnius.controller.tab.NodeListTabController">
+               <content>
+                  <ListView/>
+               </content>
+          </Tab>

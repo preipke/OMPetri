@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.handler;
 
-import edu.unibi.agbi.gnius.controller.fxml.GraphMenuController;
-import edu.unibi.agbi.gnius.controller.fxml.PresentationController;
+import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationOptionsController;
+import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationPaneController;
 import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -42,7 +42,7 @@ public class MouseGestures
     private static final BooleanProperty isCreatingNodes = new SimpleBooleanProperty(false);
     private static final BooleanProperty isDraggingEnabled = new SimpleBooleanProperty(true);
     
-    public static GraphMenuController controller;
+    public static PresentationOptionsController controller;
     
     public static void setDraggingEnabled(boolean value) {
         isCreatingNodes.set(!value);
@@ -176,10 +176,10 @@ public class MouseGestures
              */
             if (event.getCode().equals(KeyCode.DELETE)) {
                 for (IGravisEdge edge : selectedEdges) {
-                    PresentationController.remove(edge);
+                    PresentationPaneController.remove(edge);
                 }
                 for (IGravisNode node : selectedNodes) {
-                    PresentationController.remove(node);
+                    PresentationPaneController.remove(node);
                 }
             }
             /**
@@ -190,7 +190,7 @@ public class MouseGestures
                 if (event.getCode().equals(KeyCode.C)) {
                     
                     selectedNodesCopy = new IGravisNode[selectedNodes.size()];
-                    for (int i = 0; i < selectedEdgesCopy.length; i++) {
+                    for (int i = 0; i < selectedNodesCopy.length; i++) {
                         selectedNodesCopy[i] = selectedNodes.get(i);
                     }
                     selectedEdgesCopy = new IGravisEdge[selectedEdges.size()];
@@ -203,7 +203,7 @@ public class MouseGestures
                     List<IGravisNode> nodes;
                     
                     try {
-                        nodes = PresentationController.copy(selectedNodesCopy , eventLatestMousePos);
+                        nodes = PresentationPaneController.copy(selectedNodesCopy , eventLatestMousePos);
                         if (true) { // copying, create new pn object
                             // TODO
                         } else { // cloning, reference the same pn object
@@ -237,6 +237,9 @@ public class MouseGestures
                     double transformY;
                     
                     for (IGravisNode node : selectedNodes) {
+                        
+                        // TODO
+                        // translate relative to mouse pointer and point cloud center position
                         
                         /*
                         transformX = node.getShape().getTranslateX();

@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.controller.fxml;
+package edu.unibi.agbi.gnius.controller.tab.presentation;
 
-import edu.unibi.agbi.gnius.model.EdgeType;
-import edu.unibi.agbi.gnius.model.NodeType;
-import edu.unibi.agbi.gnius.exception.controller.GraphNotNullException;
 import edu.unibi.agbi.gnius.exception.data.EdgeCreationException;
 import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
-
+import edu.unibi.agbi.gnius.handler.MouseGestures;
+import edu.unibi.agbi.gnius.handler.ZoomHandler;
+import edu.unibi.agbi.gnius.model.EdgeType;
+import edu.unibi.agbi.gnius.model.NodeType;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -18,22 +18,45 @@ import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
+import java.net.URL;
 import java.util.ArrayList;
-
 import java.util.List;
+import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
 
 /**
  *
  * @author PR
  */
-public class PresentationController
+public class PresentationPaneController implements Initializable
 {
+    @FXML private BorderPane presentationPane;
+    
     private static Graph graph = null;
+
+    @Override
+    public void initialize(URL location , ResourceBundle resources) {
+        
+        GraphScene graphScene = new GraphScene();
+        graphScene.setId("presentationScene");
+        graphScene.widthProperty().bind(presentationPane.widthProperty());
+        graphScene.heightProperty().bind(presentationPane.heightProperty());
+        
+        presentationPane.setCenter(graphScene);
+        
+        PresentationPaneController.graph = (graphScene.getGraph());
+            
+        // register handler
+        ZoomHandler.registerTo(graphScene.getGraphPane());
+        MouseGestures.registerTo(graphScene.getGraphPane());
+    }
     
     /**
      * 
@@ -212,61 +235,7 @@ public class PresentationController
         });
     }
     
-    public static void setGraph(Graph graph) throws GraphNotNullException {
-        if (PresentationController.graph != null) {
-            throw new GraphNotNullException("Graph has already been initialized!");
-        } 
-        PresentationController.graph = graph;
-    }
-    
     public static Graph getGraph() {
         return graph;
-    }
-    
-    /**
-     * 
-     * @param selectables
-     * @param event
-     * @return
-     * @throws NodeCreationException 
-     */
-    @Deprecated
-    public static List<IGravisSelectable> copy(IGravisSelectable[] selectables, MouseEvent event) throws NodeCreationException {
-        
-        List<IGravisSelectable> nodesCopied = new ArrayList();
-        IGravisNode nodeCopy;
-        
-        double mouseX = event.getX();
-        double mouseY = event.getY();
-        
-        TopLayer topLayer = null;
-
-        for (int i = 0; i < selectables.length; i++) {
-
-            if (GravisCircle.class.isAssignableFrom(selectables[i].getClass())) {
-                nodeCopy = new GravisCircle();
-                nodeCopy.getShape().getStyleClass().add("gravisCircle");
-            } else if (GravisRectangle.class.isAssignableFrom(selectables[i].getClass())) {
-                nodeCopy = new GravisRectangle();
-                nodeCopy.getShape().getStyleClass().add("gravisRectangle");
-            } else {
-                throw new NodeCreationException("Node type cannot be recovered while copying!");
-            }
-            
-            if (topLayer == null) {
-                topLayer = ((TopLayer)((IGravisNode)selectables[i]).getShape().getParent().getParent());
-            }
-
-            nodeCopy.setTranslate(
-                    (mouseX - topLayer.translateXProperty().get()) / topLayer.getScaleTransform().getX() ,
-                    (mouseY - topLayer.translateYProperty().get()) / topLayer.getScaleTransform().getX()
-            );
-
-            graph.add(nodeCopy);
-
-            nodesCopied.add((IGravisSelectable)nodeCopy);
-        }
-        
-        return nodesCopied;
     }
 }

@@ -1,17 +1,10 @@
 package edu.unibi.agbi.gnius;
 
-import edu.unibi.agbi.gnius.controller.data.DataController;
-import edu.unibi.agbi.gnius.controller.fxml.PresentationController;
-import edu.unibi.agbi.gnius.exception.controller.GraphNotNullException;
-import edu.unibi.agbi.gnius.handler.MouseGestures;
-import edu.unibi.agbi.gnius.handler.ZoomHandler;
-import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 
@@ -20,7 +13,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/MainWindow.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
@@ -29,25 +22,6 @@ public class Main extends Application {
         stage.setTitle("GraVisFX - PetriNet Editor");
         stage.setScene(scene);
         stage.show();
-        
-        GraphScene graphScene = new GraphScene();
-        graphScene.setId("graphScene");
-        
-        BorderPane borderPane = (BorderPane) scene.lookup("#viewPane");
-        
-        graphScene.widthProperty().bind(borderPane.widthProperty());
-        graphScene.heightProperty().bind(borderPane.heightProperty());
-        
-        borderPane.setCenter(graphScene);
-        try {
-            PresentationController.setGraph(graphScene.getGraph());
-        } catch (GraphNotNullException ex) {
-            System.out.println(ex);
-        }
-        
-        // register handler
-        ZoomHandler.registerTo(graphScene.getGraphPane());
-        MouseGestures.registerTo(graphScene.getGraphPane());
     }
 
     /**
@@ -61,5 +35,4 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.controller.fxml;
+package edu.unibi.agbi.gnius.controller.tab.presentation;
 
 import edu.unibi.agbi.gnius.controller.data.DataController;
 import edu.unibi.agbi.gnius.exception.data.EdgeCreationException;
@@ -12,12 +12,9 @@ import edu.unibi.agbi.gnius.handler.MouseGestures;
 import edu.unibi.agbi.gnius.model.EdgeType;
 import edu.unibi.agbi.gnius.model.LayoutType;
 import edu.unibi.agbi.gnius.model.NodeType;
-
-import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-
+import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
 import edu.unibi.agbi.petrinet.model.PNNode;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
@@ -32,8 +29,8 @@ import javafx.scene.input.MouseEvent;
  *
  * @author PR
  */
-public class GraphMenuController implements Initializable
-{   
+public class PresentationOptionsController implements Initializable
+{
     @FXML private ChoiceBox choicesAlignNodes;
     @FXML private ChoiceBox choicesCreateNode;
     
@@ -73,7 +70,7 @@ public class GraphMenuController implements Initializable
         
         switch(type) {
             case RANDOM:
-                RandomLayout.applyOn(PresentationController.getGraph());
+                RandomLayout.applyOn(PresentationPaneController.getGraph());
                 break;
             default:
                 textLogArea.appendText("Align Nodes: no method selected!"); 
@@ -95,7 +92,7 @@ public class GraphMenuController implements Initializable
         NodeType.Type type = ((NodeType) choicesCreateNode.getSelectionModel().getSelectedItem()).getType();
         
         try {
-            IGravisNode shape = PresentationController.create(type , target);
+            IGravisNode shape = PresentationPaneController.create(type , target);
             PNNode node = DataController.createNode(type);
             
             node.addShape(shape);
@@ -123,33 +120,33 @@ public class GraphMenuController implements Initializable
         IGravisNode place, transition;
         try {
             for (int i = 0; i < elements; i++) {
-                place = PresentationController.create(NodeType.Type.PLACE , null);
-                transition = PresentationController.create(NodeType.Type.TRANSITION , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
+                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationController.create(NodeType.Type.PLACE , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                transition = PresentationController.create(NodeType.Type.TRANSITION , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationController.create(NodeType.Type.PLACE , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationController.create(NodeType.Type.PLACE , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                transition = PresentationController.create(NodeType.Type.TRANSITION , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                transition = PresentationController.create(NodeType.Type.TRANSITION , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationController.create(NodeType.Type.PLACE , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationController.create(NodeType.Type.PLACE , null);
-                PresentationController.create(EdgeType.Type.EDGE , place , transition);
+                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
+                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
             }
         } catch (NodeCreationException | EdgeCreationException ex) {
             System.out.println(ex.toString());

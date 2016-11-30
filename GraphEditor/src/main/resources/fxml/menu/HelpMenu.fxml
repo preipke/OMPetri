@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+        <Menu mnemonicParsing="false" text="Help"
+				xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
+				fx:id="helpMenu" fx:controller="edu.unibi.agbi.gnius.controller.menu.HelpMenuController">
+          <items>
+            <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
+          </items>
+        </Menu>

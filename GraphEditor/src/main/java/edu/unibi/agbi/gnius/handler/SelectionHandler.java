@@ -21,12 +21,12 @@ public class SelectionHandler
 {
     private class RubberBandSelection
     {
-        final DragContext dragContext = new DragContext();
+        //final DragContext dragContext = new DragContext();
         Rectangle rect;
 
         Pane group;
         boolean enabled = false;
-
+/*
         public RubberBandSelection(Pane group) {
 
             this.group = group;
@@ -127,7 +127,7 @@ public class SelectionHandler
             }
 
             event.consume();
-        };
+        };*/
     }
 
     private final class DragContext
