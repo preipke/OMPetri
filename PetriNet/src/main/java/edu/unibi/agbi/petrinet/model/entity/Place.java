@@ -3,12 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.place;
+package edu.unibi.agbi.petrinet.model.entity;
 
 import edu.unibi.agbi.petrinet.model.PNNode;
-import edu.unibi.agbi.petrinet.model.PNNode;
-import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
-import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
 import java.util.List;
 
 /**
@@ -18,7 +15,9 @@ import java.util.List;
 public class Place extends PNNode
 {
     private double token;
-    private double tokenCapacity;
+    private double token_t0;
+    private double tokenMinimum;
+    private double tokenMaximum;
     
     private List<Transition> incomingTransitions;
     private List<Transition> outgoingTransitions;

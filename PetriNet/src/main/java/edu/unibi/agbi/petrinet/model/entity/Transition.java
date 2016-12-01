@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.transition;
+package edu.unibi.agbi.petrinet.model.entity;
 
-import edu.unibi.agbi.petrinet.model.entity.place.Place;
-import edu.unibi.agbi.petrinet.model.Parameter;
+import edu.unibi.agbi.petrinet.model.Function;
+import edu.unibi.agbi.petrinet.model.PNNode;
 import java.util.List;
-import edu.unibi.agbi.petrinet.model.PNNode;
-import edu.unibi.agbi.petrinet.model.PNNode;
 
 /**
  *
@@ -17,9 +15,9 @@ import edu.unibi.agbi.petrinet.model.PNNode;
  */
 public class Transition extends PNNode
 {
-    private String function;
-    private List<Parameter> parameter;
     private boolean isEnabled;
+    
+    private Function function;
     
     private List<Place> incomingPlaces;
     private List<Place> outgoingPlaces;

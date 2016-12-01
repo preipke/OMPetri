@@ -11,8 +11,8 @@ import edu.unibi.agbi.gnius.model.NodeType;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 
 import edu.unibi.agbi.petrinet.model.PNNode;
-import edu.unibi.agbi.petrinet.model.entity.place.Place;
-import edu.unibi.agbi.petrinet.model.entity.transition.Transition;
+import edu.unibi.agbi.petrinet.model.entity.Place;
+import edu.unibi.agbi.petrinet.model.entity.Transition;
 
 import java.util.ArrayList;
 import java.util.HashMap;

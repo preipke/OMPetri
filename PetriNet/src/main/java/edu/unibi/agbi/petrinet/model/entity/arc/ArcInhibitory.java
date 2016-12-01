@@ -3,13 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.arc.enh;
+package edu.unibi.agbi.petrinet.model.entity.arc;
 
 /**
  *
- * @author PR
+ * @author pr
  */
-public class ArcEqual
-{
+public class ArcInhibitory {
     
 }
