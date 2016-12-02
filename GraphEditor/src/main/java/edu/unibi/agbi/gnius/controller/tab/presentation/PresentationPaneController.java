@@ -7,10 +7,12 @@ package edu.unibi.agbi.gnius.controller.tab.presentation;
 
 import edu.unibi.agbi.gnius.exception.data.EdgeCreationException;
 import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
+import edu.unibi.agbi.gnius.handler.KeyStrokeHandler;
 import edu.unibi.agbi.gnius.handler.MouseGestures;
 import edu.unibi.agbi.gnius.handler.ZoomHandler;
 import edu.unibi.agbi.gnius.model.EdgeType;
 import edu.unibi.agbi.gnius.model.NodeType;
+import edu.unibi.agbi.gnius.model.SelectionModel;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -25,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
@@ -40,11 +44,17 @@ public class PresentationPaneController implements Initializable
     @FXML private BorderPane presentationPane;
     
     private static Graph graph = null;
+    private static GraphScene graphScene = null;
+    
+    private static final SelectionModel selectionModel = new SelectionModel();
+    
+    private static final DoubleProperty eventLatestMousePosX = new SimpleDoubleProperty();
+    private static final DoubleProperty eventLatestMousePosY = new SimpleDoubleProperty();
 
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        GraphScene graphScene = new GraphScene();
+        graphScene = new GraphScene();
         graphScene.setId("presentationScene");
         graphScene.widthProperty().bind(presentationPane.widthProperty());
         graphScene.heightProperty().bind(presentationPane.heightProperty());
@@ -55,7 +65,16 @@ public class PresentationPaneController implements Initializable
             
         // register handler
         ZoomHandler.registerTo(graphScene.getGraphPane());
+        
         MouseGestures.registerTo(graphScene.getGraphPane());
+        MouseGestures.setSelectionModel(selectionModel);
+        MouseGestures.setLatestMousePosX(eventLatestMousePosX);
+        MouseGestures.setLatestMousePosY(eventLatestMousePosY);
+        
+        KeyStrokeHandler.setGraphPane(graphScene.getGraphPane());
+        KeyStrokeHandler.setSelectionModel(selectionModel);
+        KeyStrokeHandler.setLatestMousePosX(eventLatestMousePosX);
+        KeyStrokeHandler.setLatestMousePosY(eventLatestMousePosY);
     }
     
     /**
@@ -129,17 +148,15 @@ public class PresentationPaneController implements Initializable
      * The translation applied to the new nodes is the current mouse pointer position.
      * 
      * @param nodes
-     * @param event
+     * @param mouseX
+     * @param mouseY
      * @return
      * @throws NodeCreationException 
      */
-    public static List<IGravisNode> copy(IGravisNode[] nodes, MouseEvent event) throws NodeCreationException {
+    public static List<IGravisNode> copy(IGravisNode[] nodes, double mouseX, double mouseY) throws NodeCreationException {
         
         List<IGravisNode> nodesCopied = new ArrayList();
         IGravisNode nodeCopy;
-        
-        double mouseX = event.getX();
-        double mouseY = event.getY();
         
         TopLayer topLayer = null;
 

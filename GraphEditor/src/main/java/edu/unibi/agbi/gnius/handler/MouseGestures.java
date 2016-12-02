@@ -6,21 +6,23 @@
 package edu.unibi.agbi.gnius.handler;
 
 import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationOptionsController;
-import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationPaneController;
-import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
+import edu.unibi.agbi.gnius.model.SelectionModel;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 
-import java.util.ArrayList;
-import java.util.List;
+import javafx.application.Platform;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.StrokeLineCap;
 
 /**
  *
@@ -28,33 +30,54 @@ import javafx.scene.input.MouseEvent;
  */
 public class MouseGestures
 {
-    private static Double eventMousePressedX = null;
-    private static Double eventMousePressedY = null;
+    private static SelectionModel selectionModel;
+    private static DoubleProperty eventLatestMousePosX;
+    private static DoubleProperty eventLatestMousePosY;
     
-    private static MouseEvent eventLatestMousePos;
+    public static void setSelectionModel(SelectionModel model) {
+        selectionModel = model;
+    }
+    public static void setLatestMousePosX(DoubleProperty posX) {
+        eventLatestMousePosX = posX;
+    }
+    public static void setLatestMousePosY(DoubleProperty posY) {
+        eventLatestMousePosY = posY;
+    }
     
-    private static List<IGravisNode> selectedNodes = new ArrayList();
-    private static List<IGravisEdge> selectedEdges = new ArrayList();
+    private static Double eventMousePressedStartPosX = null;
+    private static Double eventMousePressedStartPosY = null;
     
-    private static IGravisNode[] selectedNodesCopy = new IGravisNode[0];
-    private static IGravisEdge[] selectedEdgesCopy = new IGravisEdge[0];
+    private static Double eventPreviousMousePosX = null;
+    private static Double eventPreviousMousePosY = null;
     
     private static final BooleanProperty isCreatingNodes = new SimpleBooleanProperty(false);
     private static final BooleanProperty isDraggingEnabled = new SimpleBooleanProperty(true);
+    private static final BooleanProperty isRectangleActive = new SimpleBooleanProperty(false);
     
     public static PresentationOptionsController controller;
     
     public static void setDraggingEnabled(boolean value) {
         isCreatingNodes.set(!value);
+        isRectangleActive.set(!value);
         
         isDraggingEnabled.set(value);
     }
     
     public static void setCreatingNodes(boolean value) {
         isDraggingEnabled.set(!value);
+        isRectangleActive.set(!value);
         
         isCreatingNodes.set(value);
     }
+    
+    public static void setRectangleActive(boolean value) {
+        isDraggingEnabled.set(!value);
+        isCreatingNodes.set(!value);
+        
+        isRectangleActive.set(value);
+    }
+    
+    private static Rectangle rect;
     
     /**
      * Registers several mouse and scroll event handlers.
@@ -63,18 +86,21 @@ public class MouseGestures
     public static void registerTo(GraphPane graphPane) {
         
         /**
-         * Used to determine the paste position for copying / cloning.
+         * Preparing selection rectangle.
+         */
+        
+        rect = new Rectangle(0 , 0 , 0 , 0);
+        rect.setStroke(Color.BLUE);
+        rect.setStrokeWidth(1);
+        rect.setStrokeLineCap(StrokeLineCap.ROUND);
+        rect.setFill(Color.LIGHTBLUE.deriveColor(0 , 1.2 , 1 , 0.6));
+        
+        /**
+         * Used for multiple actions.
          */
         graphPane.setOnMouseMoved((MouseEvent event) -> {
-            eventLatestMousePos = event;
-        });
-
-        /**
-         * Used to determine relative position for dragging.
-         */
-        graphPane.setOnMouseReleased(( MouseEvent event ) -> {
-            eventMousePressedX = null;
-            eventMousePressedY = null;
+            eventLatestMousePosX.set(event.getX());
+            eventLatestMousePosY.set(event.getY());
         });
 
         /**
@@ -82,9 +108,16 @@ public class MouseGestures
          */
         graphPane.setOnMousePressed(( MouseEvent event ) -> {
             
-            eventMousePressedX = event.getX();
-            eventMousePressedY = event.getY();
+            eventMousePressedStartPosX = event.getX();
+            eventMousePressedStartPosY = event.getY();
             
+            // used for toplayer dragging
+            eventPreviousMousePosX = event.getX();
+            eventPreviousMousePosY = event.getY();
+            
+            /**
+             * Left clicking.
+             */
             if (event.isPrimaryButtonDown()) {
 
                 /**
@@ -92,172 +125,146 @@ public class MouseGestures
                  */
                 if (IGravisSelectable.class.isAssignableFrom(event.getTarget().getClass())) {
                     
-                    /**
-                     * Way #1
-                     */
                     if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
-                        
                         IGravisNode selectableNode = (IGravisNode) event.getTarget();
                         
-                        // select multiple nodes
-                        if (event.isControlDown()) {
-                            selectedNodes.add(selectableNode);
-                        } else {
-                            for (IGravisNode selected : selectedNodes) {
-                                selected.setHighlight(false);
-                            }
-                            for (IGravisEdge selected : selectedEdges) {
-                                selected.setHighlight(false);
-                            }
-                            selectedNodes = new ArrayList();
-                            selectedNodes.add(selectableNode);
-                        }
-                        selectableNode.setHighlight(true);
-                        selectableNode.putOnTop();
-                        
-                    } else if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {
-                        
+                        if (!event.isControlDown()) {
+                                selectionModel.clear();
+                        } 
+                        selectionModel.add(selectableNode);
+                    } else 
+                    if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {
                         IGravisEdge selectableEdge = (IGravisEdge) event.getTarget();
                         
-                        // select multiple nodes
-                        if (event.isControlDown()) {
-                            selectedEdges.add(selectableEdge);
-                        } else {
-                            for (IGravisNode selected : selectedNodes) {
-                                selected.setHighlight(false);
-                            }
-                            for (IGravisEdge selected : selectedEdges) {
-                                selected.setHighlight(false);
-                            }
-                            selectedEdges = new ArrayList();
-                            selectedEdges.add(selectableEdge);
+                        if (!event.isControlDown()) {
+                                selectionModel.clear();
                         }
-                        selectableEdge.setHighlight(true);
-                        selectableEdge.putOnTop();
+                        selectionModel.add(selectableEdge);
                     }
                 } 
                 /**
-                 * Clicking the graph pane.
+                 * Clicking the pane.
                  */
-                else if (!IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
-
-                    if (!event.isControlDown()) {
-                        for (IGravisNode node : selectedNodes) {
-                            node.setHighlight(false);
-                        }
-                        selectedNodes = new ArrayList();
-                        for (IGravisEdge edge : selectedEdges) {
-                            edge.setHighlight(false);
-                        }
-                        selectedEdges = new ArrayList();
-                    }
+                else if (!IGravisSelectable.class.isAssignableFrom(event.getTarget().getClass())) {
 
                     if (isCreatingNodes.get()) {
 
                         // TODO
                         // pop type menu on holding ctrl?
                         controller.createNode(event);
-                    }
+                        
+                    } else {
 
+                        /**
+                         * Clearing current selection.
+                         */
+                        if (!event.isControlDown()) {
+                            selectionModel.clear();
+                        }
+                        
+                        /**
+                         * Selection rectangle.
+                         */
+                        // TODO
+                        // use min offset to activate rectangle
+                        if (event.isShiftDown()) {
+
+                            // TODO
+                            // apply translation and scaling
+                            rect.setX(eventMousePressedStartPosX);
+                            rect.setY(eventMousePressedStartPosY);
+                            rect.setWidth(0);
+                            rect.setHeight(0);
+                            
+                            setRectangleActive(true);
+                            graphPane.getTopLayer().getChildren().add(rect);
+                        }
+                    }
                 }
 
             } else if (event.isSecondaryButtonDown()) {
                 // TODO
             }
-        });
-        
-        /**
-         * Node copying and deleting.
-         */
-        graphPane.getScene().setOnKeyPressed((KeyEvent event) -> {
-            
-            /**
-             * Delete selected nodes.
-             */
-            if (event.getCode().equals(KeyCode.DELETE)) {
-                for (IGravisEdge edge : selectedEdges) {
-                    PresentationPaneController.remove(edge);
-                }
-                for (IGravisNode node : selectedNodes) {
-                    PresentationPaneController.remove(node);
-                }
-            }
-            /**
-             * Copying selected nodes.
-             */
-            else if (event.isControlDown()) {
-                
-                if (event.getCode().equals(KeyCode.C)) {
-                    
-                    selectedNodesCopy = new IGravisNode[selectedNodes.size()];
-                    for (int i = 0; i < selectedNodesCopy.length; i++) {
-                        selectedNodesCopy[i] = selectedNodes.get(i);
-                    }
-                    selectedEdgesCopy = new IGravisEdge[selectedEdges.size()];
-                    for (int i = 0; i < selectedEdgesCopy.length; i++) {
-                        selectedEdgesCopy[i] = selectedEdges.get(i);
-                    }
-                    
-                } else if (event.getCode().equals(KeyCode.V)) {
-                    
-                    List<IGravisNode> nodes;
-                    
-                    try {
-                        nodes = PresentationPaneController.copy(selectedNodesCopy , eventLatestMousePos);
-                        if (true) { // copying, create new pn object
-                            // TODO
-                        } else { // cloning, reference the same pn object
-                            // TODO
-                        }
-                        
-                        for (IGravisNode node : nodes) {
-                            selectedNodes.add(node);
-                            node.setHighlight(true);
-                        }
-                    } catch (NodeCreationException ex) {
-                        System.out.println(ex.toString());
-                    }
-                }
-            }
+
+            event.consume();
         });
 
         graphPane.setOnMouseDragged(( MouseEvent event ) -> {
             
-            /**
-             * Drag selected nodes.
-             */
             if (event.isPrimaryButtonDown()) {
                 
-                if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
+                if (isRectangleActive.get()) {
+                    
+                    /**
+                     * Resizing the selection rectangle.
+                     */
+                    
+                    // TODO
+                    // apply translation!
+                    
+                    double offsetX = event.getX() - eventMousePressedStartPosX;
+                    double offsetY = event.getY() - eventMousePressedStartPosY;
 
-                    double offsetX = event.getX() - eventMousePressedX;
-                    double offsetY = event.getY() - eventMousePressedY;
+                    if (offsetX > 0) {
+                        rect.setWidth(offsetX);
+                    } else {
+                        rect.setX(event.getX());
+                        rect.setWidth(eventLatestMousePosX.get() - rect.getX());
+                    }
+
+                    if (offsetY > 0) {
+                        rect.setHeight(offsetY);
+                    } else {
+                        rect.setY(event.getY());
+                        rect.setHeight(eventLatestMousePosY.get() - rect.getY());
+                    }
                     
-                    double transformX;
-                    double transformY;
+                } else {
+
+                    /**
+                     * Drag selected node(s).
+                     */
                     
-                    for (IGravisNode node : selectedNodes) {
+                    if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
+
+                        double offsetX = event.getX() - eventLatestMousePosX.get();
+                        double offsetY = event.getY() - eventLatestMousePosY.get();
+
+                        double transformX;
+                        double transformY;
+                        
+                        IGravisNode node = (IGravisNode) event.getTarget();
                         
                         // TODO
                         // translate relative to mouse pointer and point cloud center position
+                        //for (IGravisNode node : selectedNodes) {
+
+                            /*
+                             transformX = node.getShape().getTranslateX();
+                             transformY = node.getShape().getTranslateY();
                         
-                        /*
-                        transformX = node.getShape().getTranslateX();
-                        transformY = node.getShape().getTranslateY();
+                             transformX = transformX - graphPane.getTopLayer().translateXProperty().get();
+                             transformY = transformY - graphPane.getTopLayer().translateYProperty().get();
                         
-                        transformX = transformX - graphPane.getTopLayer().translateXProperty().get();
-                        transformY = transformY - graphPane.getTopLayer().translateYProperty().get();
+                             node.setTranslate(
+                             transformX / graphPane.getTopLayer().getScaleTransform().getX() , 
+                             transformY / graphPane.getTopLayer().getScaleTransform().getX()
+                             );
+                             */
+                            node.setTranslate(
+                                    (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
+                                    (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
+                            );
+                        //}
+                    } else if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {
+
+                        /**
+                         * TODO
+                         * Apply dragging edges to connect places
+                         */
                         
-                        node.setTranslate(
-                                transformX / graphPane.getTopLayer().getScaleTransform().getX() , 
-                                transformY / graphPane.getTopLayer().getScaleTransform().getX()
-                        );
-                        */
-                        
-                        node.setTranslate(
-                                (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
-                                (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
-                        );
+                    } else {
+
                     }
                 }
             } 
@@ -269,17 +276,61 @@ public class MouseGestures
                 // TODO
                 // somehow activate dragging, not passively active
                 //if (GraphPane.class.isAssignableFrom(event.getTarget().getClass())) {
-
-                    graphPane.getTopLayer().setTranslateX((event.getX() - eventMousePressedX + graphPane.getTopLayer().translateXProperty().get()));
-                    graphPane.getTopLayer().setTranslateY((event.getY() - eventMousePressedY + graphPane.getTopLayer().translateYProperty().get()));
-
-                    eventMousePressedX = event.getX();
-                    eventMousePressedY = event.getY();
+                    graphPane.getTopLayer().setTranslateX((event.getX() - eventPreviousMousePosX + graphPane.getTopLayer().translateXProperty().get()));
+                    graphPane.getTopLayer().setTranslateY((event.getY() - eventPreviousMousePosY + graphPane.getTopLayer().translateYProperty().get()));
                 //}
+                eventPreviousMousePosX = event.getX();
+                eventPreviousMousePosY = event.getY();
             }
 
-            eventMousePressedX = event.getX();
-            eventMousePressedY = event.getY();
+            event.consume();
+        });
+
+        /**
+         * Used to determine relative position for dragging.
+         */
+        graphPane.setOnMouseReleased(( MouseEvent event ) -> {
+            
+            eventMousePressedStartPosX = null;
+            eventMousePressedStartPosY = null;
+
+            if (isRectangleActive.get()) {
+                
+                if (!event.isShiftDown() && !event.isControlDown()) {
+                    Platform.runLater(() -> {
+                        selectionModel.clear();
+                    });
+                }
+
+                for (Node node : graphPane.getTopLayer().getNodeLayer().getChildren()) {
+
+                    if (node instanceof IGravisNode) {
+
+                        if (node.getBoundsInParent().intersects(rect.getBoundsInParent())) {
+
+                            if (event.isControlDown()) {
+
+                                if (selectionModel.contains((IGravisNode)node)) {
+                                    Platform.runLater(() -> {
+                                        selectionModel.remove((IGravisNode)node);
+                                    });
+                                } else {
+                                    Platform.runLater(() -> {
+                                        selectionModel.add((IGravisNode)node);
+                                    });
+                                }
+                            }
+                            Platform.runLater(() -> {
+                                selectionModel.add((IGravisNode)node);
+                            });
+                        }
+                    }
+                }
+                graphPane.getTopLayer().getChildren().remove(rect);
+                isRectangleActive.set(false);
+            }
+
+            event.consume();
         });
     }
 }

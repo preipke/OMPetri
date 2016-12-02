@@ -38,14 +38,15 @@
 
 .gravisEdge {
     -fx-stroke: red;
+    -fx-stroke-width: 2;
 }
 
 .gravisEdge:hover {
     -fx-stroke: darkred;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 3;
 }
 
 .gravisEdge:selected {
     -fx-stroke: darkred;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 3;
 }

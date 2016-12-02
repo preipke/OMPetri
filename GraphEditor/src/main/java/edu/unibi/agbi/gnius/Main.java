@@ -1,5 +1,6 @@
 package edu.unibi.agbi.gnius;
 
+import edu.unibi.agbi.gnius.handler.KeyStrokeHandler;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -22,6 +23,8 @@ public class Main extends Application {
         stage.setTitle("GraVisFX - PetriNet Editor");
         stage.setScene(scene);
         stage.show();
+        
+        KeyStrokeHandler.register();
     }
 
     /**
