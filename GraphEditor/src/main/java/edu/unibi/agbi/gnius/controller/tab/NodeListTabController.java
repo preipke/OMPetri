@@ -8,11 +8,13 @@ package edu.unibi.agbi.gnius.controller.tab;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author PR
  */
+@Component
 public class NodeListTabController implements Initializable
 {
 

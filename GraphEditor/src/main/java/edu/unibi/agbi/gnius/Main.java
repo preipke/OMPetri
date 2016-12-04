@@ -7,15 +7,31 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.springframework.boot.SpringApplication;
 
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
+/**
+ * Boot and configuration class.
+ * @author PR
+ */
+@SpringBootApplication // worth three annotations: @Configuration @ComponentScan @EnableAutoConfig
 public class Main extends Application {
+    
+    private ConfigurableApplicationContext springContext;
+    private Parent root;
+    
+    @Override
+    public void init() throws Exception {
+        springContext = SpringApplication.run(Main.class);  // main configuration class
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
+        fxmlLoader.setControllerFactory(springContext::getBean); // tell fxml loader who is in charge of instantiating controllers, java 8 method reference to spring
+        root = fxmlLoader.load();
+    }
 
     @Override
     public void start(Stage stage) throws Exception {
-        
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Main.fxml"));
-        
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
         scene.getStylesheets().add("/styles/gravis/nodes.css");
@@ -25,6 +41,11 @@ public class Main extends Application {
         stage.show();
         
         KeyStrokeHandler.register();
+    }
+    
+    @Override
+    public void stop() throws Exception {
+        springContext.close();
     }
 
     /**

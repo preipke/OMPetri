@@ -8,11 +8,13 @@ package edu.unibi.agbi.gnius.controller.menu;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author PR
  */
+@Component
 public class FileMenuController implements Initializable
 {
 

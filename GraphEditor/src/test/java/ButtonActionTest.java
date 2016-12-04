@@ -51,7 +51,7 @@ public class ButtonActionTest extends TestFXBase
         
         Group nodeLayer =  graphPane.getTopLayer().getNodeLayer();
         Group edgeLayer = graphPane.getTopLayer().getEdgeLayer();
-        Group selectionLayer = graphPane.getTopLayer().getSelectionLayer();
+        Group selectionLayer = graphPane.getTopLayer().getLabelLayer();
         
         Assert.assertEquals(1 , graphPane.getChildren().size());
         Assert.assertEquals(0, graph.getNodes().length);

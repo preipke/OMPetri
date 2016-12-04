@@ -24,11 +24,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author PR
  */
+@Component
 public class PresentationOptionsController implements Initializable
 {
     @FXML private ChoiceBox choicesAlignNodes;

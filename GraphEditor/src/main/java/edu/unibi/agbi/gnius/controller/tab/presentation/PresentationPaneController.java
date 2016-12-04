@@ -12,7 +12,7 @@ import edu.unibi.agbi.gnius.handler.MouseGestures;
 import edu.unibi.agbi.gnius.handler.ZoomHandler;
 import edu.unibi.agbi.gnius.model.EdgeType;
 import edu.unibi.agbi.gnius.model.NodeType;
-import edu.unibi.agbi.gnius.model.SelectionModel;
+
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -21,11 +21,14 @@ import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
-import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
+
 import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -35,18 +38,19 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
+import org.springframework.stereotype.Component;
+
 /**
  *
  * @author PR
  */
+@Component
 public class PresentationPaneController implements Initializable
 {
     @FXML private BorderPane presentationPane;
     
     private static Graph graph = null;
     private static GraphScene graphScene = null;
-    
-    private static final SelectionModel selectionModel = new SelectionModel();
     
     private static final DoubleProperty eventLatestMousePosX = new SimpleDoubleProperty();
     private static final DoubleProperty eventLatestMousePosY = new SimpleDoubleProperty();
@@ -61,18 +65,18 @@ public class PresentationPaneController implements Initializable
         
         presentationPane.setCenter(graphScene);
         
-        PresentationPaneController.graph = (graphScene.getGraph());
+        PresentationPaneController.graph = graphScene.getGraph();
             
         // register handler
         ZoomHandler.registerTo(graphScene.getGraphPane());
         
         MouseGestures.registerTo(graphScene.getGraphPane());
-        MouseGestures.setSelectionModel(selectionModel);
+        MouseGestures.setSelectionModel(graph.getSelectionModel());
         MouseGestures.setLatestMousePosX(eventLatestMousePosX);
         MouseGestures.setLatestMousePosY(eventLatestMousePosY);
         
         KeyStrokeHandler.setGraphPane(graphScene.getGraphPane());
-        KeyStrokeHandler.setSelectionModel(selectionModel);
+        KeyStrokeHandler.setSelectionModel(graph.getSelectionModel());
         KeyStrokeHandler.setLatestMousePosX(eventLatestMousePosX);
         KeyStrokeHandler.setLatestMousePosY(eventLatestMousePosY);
     }
@@ -103,8 +107,8 @@ public class PresentationPaneController implements Initializable
         
         if (event != null) {
             node.setTranslate(
-                    (event.getX() - graph.getTopLayer().translateXProperty().get()) / graph.getTopLayer().getScaleTransform().getX() ,
-                    (event.getY() - graph.getTopLayer().translateYProperty().get()) / graph.getTopLayer().getScaleTransform().getX()
+                    (event.getX() - graph.getTopLayer().translateXProperty().get()) / graph.getTopLayer().getScale().getX() ,
+                    (event.getY() - graph.getTopLayer().translateYProperty().get()) / graph.getTopLayer().getScale().getX()
             );
         }
         
@@ -177,8 +181,8 @@ public class PresentationPaneController implements Initializable
             }
 
             nodeCopy.setTranslate(
-                    (mouseX - topLayer.translateXProperty().get()) / topLayer.getScaleTransform().getX() ,
-                    (mouseY - topLayer.translateYProperty().get()) / topLayer.getScaleTransform().getX()
+                    (mouseX - topLayer.translateXProperty().get()) / topLayer.getScale().getX() ,
+                    (mouseY - topLayer.translateYProperty().get()) / topLayer.getScale().getX()
             );
 
             graph.add(nodeCopy);
@@ -191,7 +195,7 @@ public class PresentationPaneController implements Initializable
     
     /**
      * Schwerpunkt von Punktwolke relativ zur Szene berechnen. 
-     * Benutzen zum Verschieben, Kopieren, Einfügen usw.
+     * Benutzen zum Verschieben, Kopieren, EinfÃ¼gen usw.
      * 
      * @return 
      */

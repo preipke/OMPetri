@@ -6,7 +6,8 @@
 package edu.unibi.agbi.gnius.handler;
 
 import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationOptionsController;
-import edu.unibi.agbi.gnius.model.SelectionModel;
+
+import edu.unibi.agbi.gravisfx.graph.model.SelectionModel;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
@@ -17,7 +18,6 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
@@ -252,8 +252,8 @@ public class MouseGestures
                              );
                              */
                             node.setTranslate(
-                                    (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX() ,
-                                    (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScaleTransform().getX()
+                                    (event.getX() - graphPane.getTopLayer().translateXProperty().get()) / graphPane.getTopLayer().getScale().getX() ,
+                                    (event.getY() - graphPane.getTopLayer().translateYProperty().get()) / graphPane.getTopLayer().getScale().getX()
                             );
                         //}
                     } else if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {

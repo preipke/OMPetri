@@ -37,8 +37,8 @@ public class ZoomHandler
             
             scale_t1 = scaleBase * Math.pow(scaleFactor , scalePower);
             
-            graphPane.getTopLayer().getScaleTransform().setX(scale_t1);
-            graphPane.getTopLayer().getScaleTransform().setY(scale_t1);
+            graphPane.getTopLayer().getScale().setX(scale_t1);
+            graphPane.getTopLayer().getScale().setY(scale_t1);
             
             /**
              * Following is used to make sure focus is kept on the mouse pointer location.

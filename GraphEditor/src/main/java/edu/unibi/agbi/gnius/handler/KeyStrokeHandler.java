@@ -7,15 +7,16 @@ package edu.unibi.agbi.gnius.handler;
 
 import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationPaneController;
 import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
-import edu.unibi.agbi.gnius.model.SelectionModel;
+
+import edu.unibi.agbi.gravisfx.graph.model.SelectionModel;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+
 import java.util.List;
+
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
-import javafx.scene.Scene;
-import javafx.scene.SubScene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
