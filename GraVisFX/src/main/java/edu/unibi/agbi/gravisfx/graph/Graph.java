@@ -5,11 +5,14 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
+import edu.unibi.agbi.gravisfx.graph.model.SelectionModel;
+import edu.unibi.agbi.gravisfx.graph.model.DataModel;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.presentation.layer.EdgeLayer;
-import edu.unibi.agbi.gravisfx.presentation.layer.NodeLayer;
-import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 
 /**
  *
@@ -17,25 +20,33 @@ import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
  */
 public final class Graph
 {
-    private final Model model;
+    private final DataModel dataModel;
+    private final SelectionModel selectionModel;
     
     private final TopLayer topLayer;
     
+    private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
     private final EdgeLayer edgeLayer;
     
     public Graph() {
         
-        model = new Model();
+        dataModel = new DataModel();
+        selectionModel = new SelectionModel();
         
         topLayer = new TopLayer();
         
+        labelLayer = topLayer.getLabelLayer();
         nodeLayer = topLayer.getNodeLayer();
         edgeLayer = topLayer.getEdgeLayer();
     }
     
-    public Model getModel() {
-        return model;
+    public DataModel getDataModel() {
+        return dataModel;
+    }
+    
+    public SelectionModel getSelectionModel() {
+        return selectionModel;
     }
     
     public TopLayer getTopLayer() {
@@ -43,40 +54,40 @@ public final class Graph
     }
     
     public void add(IGravisNode node) {
-        if (model.add(node)) {
+        if (dataModel.add(node)) {
             nodeLayer.getChildren().add(node.getShape());
         }
     }
     
     public void add(IGravisEdge edge) {
-        if (model.add(edge)){
+        if (dataModel.add(edge)){
             edgeLayer.getChildren().add(edge.getShape());
         }
     }
     
     public boolean containsNode(IGravisNode node) {
-        return model.contains(node);
+        return dataModel.contains(node);
     }
     
     public boolean containsEdge(IGravisEdge edge) {
-        return model.contains(edge);
+        return dataModel.contains(edge);
     }
     
     public IGravisNode[] getNodes() {
-        return model.getNodes();
+        return dataModel.getNodes();
     }
     
     public IGravisEdge[] getEdges() {
-        return model.getEdges();
+        return dataModel.getEdges();
     }
     
     public void remove(IGravisNode node) {
-        model.remove(node);
+        dataModel.remove(node);
         nodeLayer.getChildren().remove(node.getShape());
     }
     
     public void remove(IGravisEdge edge) {
-        model.remove(edge);
+        dataModel.remove(edge);
         edgeLayer.getChildren().remove(edge.getShape());
     }
 }

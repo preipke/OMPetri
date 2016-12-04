@@ -8,7 +8,7 @@ package edu.unibi.agbi.gravisfx.graph.node.entity;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
-import edu.unibi.agbi.gravisfx.presentation.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;

@@ -27,7 +27,7 @@ public class RandomLayout
         double layoutX = graphPane.getWidth();
         double layoutY = graphPane.getHeight();
         
-        double scale = graphPane.getTopLayer().getScaleTransform().getX();
+        double scale = graphPane.getTopLayer().getScale().getX();
 
         IGravisNode[] nodes = graph.getNodes();
         

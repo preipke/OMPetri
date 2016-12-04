@@ -3,28 +3,29 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.model;
+package edu.unibi.agbi.gravisfx.graph.model;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Model used to store currently selected nodes within the graph.
  * @author PR
  */
 public class SelectionModel
 {
     private List<IGravisNode> selectedNodes;
     private List<IGravisEdge> selectedEdges;
-    private List<IGravisSelectable> selectables;
+    private List<IGravisSelectable> selectedSelectables;
     
     public SelectionModel() {
         selectedNodes = new ArrayList();
         selectedEdges = new ArrayList();
-        selectables = new ArrayList();
+        selectedSelectables = new ArrayList();
     }
     
     public synchronized void add(IGravisNode node) {
@@ -40,7 +41,7 @@ public class SelectionModel
     }
     
     public synchronized void add(IGravisSelectable node) {
-        selectables.add(node);
+        selectedSelectables.add(node);
         node.setHighlight(true);
         node.putOnTop();
     }
@@ -75,6 +76,14 @@ public class SelectionModel
         return edges;
     }
     
+    public synchronized IGravisSelectable[]  getSelectedSelectables() {
+        IGravisSelectable[] selectables = new IGravisSelectable[selectedSelectables.size()];
+        for (int i = 0; i < selectables.length; i++) {
+            selectables[i] = selectedSelectables.get(i);
+        }
+        return selectables;
+    }
+    
     public synchronized void remove(IGravisNode node) {
         selectedNodes.remove(node);
         node.setHighlight(false);
@@ -86,7 +95,7 @@ public class SelectionModel
     }
     
     public synchronized void remove(IGravisSelectable edge) {
-        selectables.remove(edge);
+        selectedSelectables.remove(edge);
         edge.setHighlight(false);
     }
     
@@ -99,7 +108,7 @@ public class SelectionModel
     }
     
     public synchronized boolean contains(IGravisSelectable edge) {
-        return selectables.contains(edge);
+        return selectedSelectables.contains(edge);
     }
     
     public synchronized void clear() {
@@ -113,9 +122,9 @@ public class SelectionModel
         }
         selectedEdges = new ArrayList();
         
-        for (IGravisSelectable selected : selectables) {
+        for (IGravisSelectable selected : selectedSelectables) {
             selected.setHighlight(false);
         }
-        selectables = new ArrayList();
+        selectedSelectables = new ArrayList();
     }
 }

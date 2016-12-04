@@ -8,7 +8,7 @@ package edu.unibi.agbi.gravisfx.graph.node.entity;
 import edu.unibi.agbi.gravisfx.PropertiesController;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.presentation.layer.NodeLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 
 import java.util.ArrayList;
 import java.util.List;

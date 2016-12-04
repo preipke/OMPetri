@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.presentation.layer;
+package edu.unibi.agbi.gravisfx.graph.layer;
 
 import javafx.scene.Group;
 import javafx.scene.transform.Scale;
@@ -14,25 +14,32 @@ import javafx.scene.transform.Scale;
  */
 public class TopLayer extends Group
 {
+    private final Scale scale;
+    
     private final EdgeLayer edgeLayer;
     private final NodeLayer nodeLayer;
-    private final SelectionLayer selectionLayer;
-    
-    private final Scale scaleTransform;
+    private final LabelLayer labelLayer;
     
     public TopLayer() {
+        scale = new Scale(1.0d, 1.0d);
+        getTransforms().add(scale);
         
         edgeLayer = new EdgeLayer();
         nodeLayer = new NodeLayer();
-        selectionLayer = new SelectionLayer();
-        
-        scaleTransform = new Scale(1.0d, 1.0d);
-        getTransforms().add(scaleTransform);
+        labelLayer = new LabelLayer();
         
         // order matters!
         getChildren().add(edgeLayer);
         getChildren().add(nodeLayer);
-        getChildren().add(selectionLayer);
+        getChildren().add(labelLayer);
+    }
+    
+    /**
+     * Get the scale applied to the layer.
+     * @return 
+     */
+    public Scale getScale() {
+        return scale;
     }
 
     public NodeLayer getNodeLayer() {
@@ -43,11 +50,7 @@ public class TopLayer extends Group
         return edgeLayer;
     }
 
-    public SelectionLayer getSelectionLayer() {
-        return selectionLayer;
-    }
-    
-    public Scale getScaleTransform() {
-        return scaleTransform;
+    public LabelLayer getLabelLayer() {
+        return labelLayer;
     }
 }

@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.presentation.layer;
+package edu.unibi.agbi.gravisfx.graph.layer;
 
 import javafx.scene.Group;
 
 /**
- * Stores objects highlighting the 'selection' of objects in the NodeLayer.
+ *
  * @author PR
  */
-public class SelectionLayer extends Group
+public class EdgeLayer extends Group
 {
     
 }

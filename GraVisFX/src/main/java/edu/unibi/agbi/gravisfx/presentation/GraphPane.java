@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.presentation;
 
-import edu.unibi.agbi.gravisfx.presentation.layer.TopLayer;
+import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import javafx.scene.layout.Pane;
 
 /**

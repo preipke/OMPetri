@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph;
+package edu.unibi.agbi.gravisfx.graph.model;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 
+ * Model used to store all nodes within the graph.
  * @author PR
  */
-public class Model
+public class DataModel
 {
     private final List<IGravisNode> nodes = new ArrayList();
     private final List<IGravisEdge> edges = new ArrayList();
@@ -101,23 +101,23 @@ public class Model
     
     public IGravisNode[] getNodes() {
         
-        IGravisNode[] nodes = new IGravisNode[this.nodes.size()];
+        IGravisNode[] nodesArray = new IGravisNode[this.nodes.size()];
         
-        for (int i = 0; i < nodes.length; i++) {
-            nodes[i] = this.nodes.get(i);
+        for (int i = 0; i < nodesArray.length; i++) {
+            nodesArray[i] = this.nodes.get(i);
         }
         
-        return nodes;
+        return nodesArray;
     }
     
     public IGravisEdge[] getEdges() {
         
-        IGravisEdge[] edges = new IGravisEdge[this.edges.size()];
+        IGravisEdge[] edgesArray = new IGravisEdge[this.edges.size()];
         
-        for (int i = 0; i < edges.length; i++) {
-            edges[i] = this.edges.get(i);
+        for (int i = 0; i < edgesArray.length; i++) {
+            edgesArray[i] = this.edges.get(i);
         }
         
-        return edges;
+        return edgesArray;
     }
 }
