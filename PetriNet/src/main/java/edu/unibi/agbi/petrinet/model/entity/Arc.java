@@ -5,11 +5,13 @@
  */
 package edu.unibi.agbi.petrinet.model.entity;
 
+import edu.unibi.agbi.petrinet.model.PNNode;
+
 /**
  *
  * @author PR
  */
-public class Arc
+public class Arc extends PNNode
 {
     private Place place;
     private Transition transition;

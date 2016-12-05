@@ -8,6 +8,7 @@ package edu.unibi.agbi.petrinet.model;
 import edu.unibi.agbi.petrinet.model.entity.Arc;
 import edu.unibi.agbi.petrinet.model.entity.Place;
 import edu.unibi.agbi.petrinet.model.entity.Transition;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,4 +24,22 @@ public class PetriNet
     private List<Place> places;
     private List<Transition> transitions;
     private List<Arc> arcs;
+    
+    public PetriNet() {
+        places = new ArrayList();
+        transitions = new ArrayList();
+        arcs = new ArrayList();
+    }
+    
+    public void add(Place place) {
+        places.add(place);
+    }
+    
+    public void add(Transition transition) {
+        transitions.add(transition);
+    }
+    
+    public void add(Arc arc) {
+        arcs.add(arc);
+    }
 }
