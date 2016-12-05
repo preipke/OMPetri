@@ -3,7 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.service.model;
+package edu.unibi.agbi.gnius.selection;
+
+import edu.unibi.agbi.gnius.entity.GraphNode;
 
 /**
  *
@@ -11,25 +13,20 @@ package edu.unibi.agbi.gnius.service.model;
  */
 public class NodeSelectionChoice
 {
-    private final Type type;
+    private final GraphNode.Type type;
     private final String typeName;
 
-    public NodeSelectionChoice(Type type , String typeName) {
+    public NodeSelectionChoice(GraphNode.Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }
 
-    public Type getType() {
+    public GraphNode.Type getType() {
         return type;
     }
 
     @Override
     public String toString() {
         return typeName;
-    }
-
-    public enum Type
-    {
-        PLACE, TRANSITION, DEFAULT;
     }
 }

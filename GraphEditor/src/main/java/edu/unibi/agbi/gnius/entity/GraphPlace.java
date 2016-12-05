@@ -5,23 +5,24 @@
  */
 package edu.unibi.agbi.gnius.entity;
 
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
+import edu.unibi.agbi.petrinet.model.entity.Place;
 
 /**
  *
  * @author PR
  */
-public class Place extends GravisRectangle implements GraphNode
+public class GraphPlace extends Place implements GraphNode
 {
     private final GraphNode.Type nodeType;
+    private Type placeType;
     
-    public Place() {
+    public GraphPlace() {
         super();
         nodeType = GraphNode.Type.PLACE;
     }
     
     @Override
-    public GraphNode.Type getGraphNodeType() {
+    public GraphNode.Type getType() {
         return nodeType;
     }
     

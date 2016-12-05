@@ -5,13 +5,17 @@
  */
 package edu.unibi.agbi.gnius.entity;
 
+import java.util.List;
+
 /**
  *
  * @author PR
  */
 public interface GraphNode
 {
-    public Type getGraphNodeType();
+    public Type getType();
+    public void addShape(Object shape);
+    public List<Object> getShapes();
     
     public enum Type {
         EDGE, PLACE, TRANSITION;

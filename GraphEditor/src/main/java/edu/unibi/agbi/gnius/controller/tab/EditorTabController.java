@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.controller.tab;
 
 import edu.unibi.agbi.gnius.controller.tab.editor.EditorPaneController;
 import edu.unibi.agbi.gnius.controller.tab.editor.EditorToolsController;
+import edu.unibi.agbi.gnius.entity.GraphNode;
 import edu.unibi.agbi.gnius.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.service.DataService;
 import edu.unibi.agbi.gnius.service.SelectionService;
@@ -61,41 +62,37 @@ public class EditorTabController implements Initializable
         double offsetX, offsetY;
         
         IGravisNode node;
+        GraphNode graphNode;
+        GraphNode.Type type;
+        
         for (int i = 0; i < nodes.length; i++) {
-            
-            offsetX = (nodes[i].getTranslateX() - center.getX());
-            offsetY = (nodes[i].getTranslateY() - center.getY());
+            try {
+                offsetX = (nodes[i].getTranslateX() - center.getX());
+                offsetY = (nodes[i].getTranslateY() - center.getY());
 
-            if (isCopying) {
-                
-                
-                
-                Object pnNode = nodes[i].getRelatedObject();
-                node = nodes[i].getCopy();
-                
-                
-                if (GravisCircle.class.isAssignableFrom(pnNode.getClass())) {
-                    
-                } else if (GravisRectangle.class.isAssignableFrom(pnNode.getClass())) {
-                    
+                type = ((GraphNode)nodes[i].getRelatedObject()).getType();
+
+                if (isCopying) {
+                    node = dataService.copy(nodes[i]);
+                } else {
+                    node = dataService.clone(nodes[i]);
                 }
-            } else {
-                node = nodes[i].getClone();
-                ((PNNode)node.getRelatedObject()).addShape(node);
+                node.setActiveStyleClass(nodes[i].getActiveStyleClass());
+
+                if (topLayer == null) {
+                    topLayer = ((TopLayer)nodes[i].getShape().getParent().getParent());
+                }
+
+                node.setTranslate(
+                        offsetX + (mouseEventHandler.getLatestMovedMouseEvent().getX() - topLayer.translateXProperty().get()) / topLayer.getScale().getX() ,
+                        offsetY + (mouseEventHandler.getLatestMovedMouseEvent().getY() - topLayer.translateYProperty().get()) / topLayer.getScale().getX()
+                );
+
+                dataService.add(node);
+                selectionService.addAll(node);
+            } catch (NodeCreationException ex) {
+
             }
-            node.setActiveStyleClass(nodes[i].getActiveStyleClass());
-
-            if (topLayer == null) {
-                topLayer = ((TopLayer)nodes[i].getShape().getParent().getParent());
-            }
-
-            node.setTranslate(
-                    offsetX + (mouseEventHandler.getLatestMovedMouseEvent().getX() - topLayer.translateXProperty().get()) / topLayer.getScale().getX() ,
-                    offsetY + (mouseEventHandler.getLatestMovedMouseEvent().getY() - topLayer.translateYProperty().get()) / topLayer.getScale().getX()
-            );
-
-            dataService.add(node);
-            selectionService.add(node);
         }
     }
     

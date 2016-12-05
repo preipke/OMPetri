@@ -6,10 +6,10 @@
 package edu.unibi.agbi.gnius.service;
 
 import edu.unibi.agbi.gnius.dao.SelectionDao;
+import edu.unibi.agbi.gnius.entity.GraphNode;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.petrinet.model.entity.PNNode;
 
 import java.util.List;
 
@@ -34,10 +34,12 @@ public class SelectionService
     }
     
     public void add(IGravisNode node) {
-        
-        PNNode pnNode = (PNNode) node.getRelatedObject();
-        
-        List<Object> relatedShapes = pnNode.getShapes();
+        selectionDao.add(node);
+    }
+    
+    public void addAll(IGravisNode node) {
+        GraphNode graphNode = (GraphNode) node.getRelatedObject();
+        List<Object> relatedShapes = graphNode.getShapes();
         for (Object shape : relatedShapes) {
             selectionDao.add((IGravisNode)shape);
         }

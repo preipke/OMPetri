@@ -5,25 +5,23 @@
  */
 package edu.unibi.agbi.gnius.entity;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
+import edu.unibi.agbi.petrinet.model.entity.Arc;
 
 /**
  *
  * @author PR
  */
-public class Edge extends GravisEdge implements GraphNode
+public class GraphEdge extends Arc implements GraphNode
 {
     private final GraphNode.Type nodeType;
     private Type edgeType;
 
-    public Edge(IGravisNode source , IGravisNode target) {
-        super(source , target);
+    public GraphEdge() {
         nodeType = GraphNode.Type.EDGE;
     }
     
     @Override
-    public GraphNode.Type getGraphNodeType() {
+    public GraphNode.Type getType() {
         return nodeType;
     }
     

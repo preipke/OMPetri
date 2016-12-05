@@ -132,18 +132,21 @@ public class MouseEventHandler
                     if (IGravisNode.class.isAssignableFrom(event.getTarget().getClass())) {
                         IGravisNode node = (IGravisNode) event.getTarget();
                         if (!event.isControlDown()) {
-                                selectionService.clear();
-                        } 
-                        selectionService.add(node);
-                    } else 
-                    if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {
-                        IGravisEdge edge = (IGravisEdge) event.getTarget();
+                            selectionService.clear();
+                            selectionService.addAll(node);
+                        } else {
+                            if (!selectionService.remove(node)) {
+                                selectionService.add(node);
+                            }
+                        }
+                    } else if (IGravisEdge.class.isAssignableFrom(event.getTarget().getClass())) {
+                        IGravisEdge edge = (IGravisEdge)event.getTarget();
                         if (!event.isControlDown()) {
-                                selectionService.clear();
+                            selectionService.clear();
                         }
                         selectionService.add(edge);
                     }
-                } 
+                }
                 /**
                  * Clicking the pane.
                  */
@@ -308,10 +311,10 @@ public class MouseEventHandler
                             Platform.runLater(() -> {
                                 if (event.isControlDown()) {
                                     if (!selectionService.remove((IGravisNode)node)) {
-                                        selectionService.add((IGravisNode)node);
+                                        selectionService.addAll((IGravisNode)node);
                                     }
                                 }
-                                selectionService.add((IGravisNode)node);
+                                selectionService.addAll((IGravisNode)node);
                             });
                         }
                     }
