@@ -43,10 +43,10 @@
 
 .gravisEdge:hover {
     -fx-stroke: darkred;
-    -fx-stroke-width: 3;
+    -fx-stroke-width: 2;
 }
 
 .gravisEdge:selected {
     -fx-stroke: darkred;
-    -fx-stroke-width: 3;
+    -fx-stroke-width: 2;
 }

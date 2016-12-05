@@ -9,12 +9,12 @@ package edu.unibi.agbi.gnius.service.model;
  *
  * @author PR
  */
-public class NodeType
+public class NodeSelectionChoice
 {
     private final Type type;
     private final String typeName;
 
-    public NodeType(Type type , String typeName) {
+    public NodeSelectionChoice(Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }

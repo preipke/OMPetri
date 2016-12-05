@@ -9,12 +9,12 @@ package edu.unibi.agbi.gnius.service.model;
  *
  * @author PR
  */
-public class LayoutType
+public class LayoutSelectionChoice
 {
     private final Type type;
     private final String typeName;
 
-    public LayoutType(Type type , String typeName) {
+    public LayoutSelectionChoice(Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }

@@ -9,9 +9,8 @@ import edu.unibi.agbi.gnius.dao.GraphDao;
 import edu.unibi.agbi.gnius.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.service.model.EdgeType;
-import edu.unibi.agbi.gnius.service.model.LayoutType;
-import edu.unibi.agbi.gnius.service.model.NodeType;
+import edu.unibi.agbi.gnius.service.model.LayoutSelectionChoice;
+import edu.unibi.agbi.gnius.service.model.NodeSelectionChoice;
 import edu.unibi.agbi.gnius.service.DataService;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -49,28 +48,28 @@ public class EditorToolsController implements Initializable
     
     int elements = 10;
     
-    public LayoutType getLayoutChoice() {
-        return (LayoutType) choicesAlignNodes.getSelectionModel().getSelectedItem();
+    public LayoutSelectionChoice getLayoutChoice() {
+        return (LayoutSelectionChoice) choicesAlignNodes.getSelectionModel().getSelectedItem();
     }
     
-    public NodeType getNodeChoice() {
-        return (NodeType) choicesCreateNode.getSelectionModel().getSelectedItem();
+    public NodeSelectionChoice getNodeChoice() {
+        return (NodeSelectionChoice) choicesCreateNode.getSelectionModel().getSelectedItem();
     }
 
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        ObservableList<LayoutType> alignChoices = FXCollections.observableArrayList();
-        alignChoices.add(new LayoutType(LayoutType.Type.RANDOM, "Random"));
-        alignChoices.add(new LayoutType(LayoutType.Type.DEFAULT, "..."));
+        ObservableList<LayoutSelectionChoice> alignChoices = FXCollections.observableArrayList();
+        alignChoices.add(new LayoutSelectionChoice(LayoutSelectionChoice.Type.RANDOM, "Random"));
+        alignChoices.add(new LayoutSelectionChoice(LayoutSelectionChoice.Type.DEFAULT, "..."));
         
         choicesAlignNodes.setItems(alignChoices);
         choicesAlignNodes.getSelectionModel().selectFirst();
         
-        ObservableList<NodeType> nodeChoices = FXCollections.observableArrayList();
-        nodeChoices.add(new NodeType(NodeType.Type.PLACE, "Place"));
-        nodeChoices.add(new NodeType(NodeType.Type.TRANSITION, "Transition"));
-        nodeChoices.add(new NodeType(NodeType.Type.DEFAULT, "..."));
+        ObservableList<NodeSelectionChoice> nodeChoices = FXCollections.observableArrayList();
+        nodeChoices.add(new NodeSelectionChoice(NodeSelectionChoice.Type.PLACE, "Place"));
+        nodeChoices.add(new NodeSelectionChoice(NodeSelectionChoice.Type.TRANSITION, "Transition"));
+        nodeChoices.add(new NodeSelectionChoice(NodeSelectionChoice.Type.DEFAULT, "..."));
         
         choicesCreateNode.setItems(nodeChoices);
         choicesCreateNode.getSelectionModel().selectFirst();
@@ -79,7 +78,7 @@ public class EditorToolsController implements Initializable
     @FXML
     private void buttonAlignNodes() {
         
-        LayoutType.Type type = ((LayoutType) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
+        LayoutSelectionChoice.Type type = ((LayoutSelectionChoice) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
         
         switch(type) {
             case RANDOM:
@@ -102,33 +101,33 @@ public class EditorToolsController implements Initializable
         IGravisNode place, transition;
         try {
             for (int i = 0; i < elements; i++) {
-                place = dataService.create(NodeType.Type.PLACE , null, null);
-                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeSelectionChoice.Type.PLACE , null, null);
+                transition = dataService.create(NodeSelectionChoice.Type.TRANSITION , null, null);
+                dataService.create(place , transition);
                 
-                place = dataService.create(NodeType.Type.PLACE , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeSelectionChoice.Type.PLACE , null, null);
+                dataService.create(place , transition);
                 
-                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                transition = dataService.create(NodeSelectionChoice.Type.TRANSITION , null, null);
+                dataService.create(place , transition);
                 
-                place = dataService.create(NodeType.Type.PLACE , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeSelectionChoice.Type.PLACE , null, null);
+                dataService.create(place , transition);
                 
-                place = dataService.create(NodeType.Type.PLACE , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeSelectionChoice.Type.PLACE , null, null);
+                dataService.create(place , transition);
                 
-                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                transition = dataService.create(NodeSelectionChoice.Type.TRANSITION , null, null);
+                dataService.create(place , transition);
                 
-                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                transition = dataService.create(NodeSelectionChoice.Type.TRANSITION , null, null);
+                dataService.create(place , transition);
                 
-                place = dataService.create(NodeType.Type.PLACE , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeSelectionChoice.Type.PLACE , null, null);
+                dataService.create(place , transition);
                 
-                place = dataService.create(NodeType.Type.PLACE , null, null);
-                dataService.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeSelectionChoice.Type.PLACE , null, null);
+                dataService.create(place , transition);
             }
         } catch (NodeCreationException | EdgeCreationException ex) {
             System.out.println(ex.toString());

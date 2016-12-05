@@ -16,6 +16,9 @@ import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
+import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
+import edu.unibi.agbi.petrinet.model.entity.PNNode;
 
 import java.net.URL;
 
@@ -50,38 +53,45 @@ public class EditorTabController implements Initializable
         }
     }
     
-    public void PasteNodes() {
-        
+    public void PasteNodes(boolean isCopying) {
         IGravisNode[] nodes = selectionService.getNodesCopy();
+        TopLayer topLayer = null;
         
         Point2D center = Calculator.getCenter(nodes);
-        
         double offsetX, offsetY;
-
-        TopLayer topLayer = null;
-
+        
         IGravisNode node;
         for (int i = 0; i < nodes.length; i++) {
+            
+            offsetX = (nodes[i].getTranslateX() - center.getX());
+            offsetY = (nodes[i].getTranslateY() - center.getY());
 
-            node = nodes[i].getCopy();
+            if (isCopying) {
+                
+                
+                
+                Object pnNode = nodes[i].getRelatedObject();
+                node = nodes[i].getCopy();
+                
+                
+                if (GravisCircle.class.isAssignableFrom(pnNode.getClass())) {
+                    
+                } else if (GravisRectangle.class.isAssignableFrom(pnNode.getClass())) {
+                    
+                }
+            } else {
+                node = nodes[i].getClone();
+                ((PNNode)node.getRelatedObject()).addShape(node);
+            }
             node.setActiveStyleClass(nodes[i].getActiveStyleClass());
 
             if (topLayer == null) {
                 topLayer = ((TopLayer)nodes[i].getShape().getParent().getParent());
             }
-            
-            offsetX = node.getTranslateX() - center.getX();
-            offsetY = node.getTranslateY() - center.getY();
-            
-            System.out.println("OffsetX = " + offsetX);
-            System.out.println("OffsetY = " + offsetY);
-            
-            System.out.println("TranslateX = " + (mouseEventHandler.getLatestMovedMouseEvent().getX() - topLayer.translateXProperty().get()) / topLayer.getScale().getX());
-            System.out.println("TranslateY = " + (mouseEventHandler.getLatestMovedMouseEvent().getY() - topLayer.translateYProperty().get()) / topLayer.getScale().getX());
 
             node.setTranslate(
-                    (mouseEventHandler.getLatestMovedMouseEvent().getX() - topLayer.translateXProperty().get() + offsetX) / topLayer.getScale().getX() ,
-                    (mouseEventHandler.getLatestMovedMouseEvent().getY() - topLayer.translateYProperty().get() + offsetY) / topLayer.getScale().getX()
+                    offsetX + (mouseEventHandler.getLatestMovedMouseEvent().getX() - topLayer.translateXProperty().get()) / topLayer.getScale().getX() ,
+                    offsetY + (mouseEventHandler.getLatestMovedMouseEvent().getY() - topLayer.translateYProperty().get()) / topLayer.getScale().getX()
             );
 
             dataService.add(node);

@@ -8,9 +8,8 @@ package edu.unibi.agbi.gnius.handler;
 import edu.unibi.agbi.gnius.controller.tab.EditorTabController;
 import edu.unibi.agbi.gnius.service.SelectionService;
 
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.application.Platform;
-
+import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
@@ -27,14 +26,11 @@ public class KeyEventHandler
     @Autowired private SelectionService selectionService;
     @Autowired private EditorTabController editorTabController;
     
-    private GraphPane pane;
-    public void setGraphPane(GraphPane pane) {
-        this.pane = pane;
-    }
+    private boolean isCopying;
     
-    public void register() {
+    public void registerTo(Scene scene) {
         
-        pane.getScene().setOnKeyPressed((KeyEvent event) -> {
+        scene.setOnKeyPressed((KeyEvent event) -> {
             
             /**
              * Delete selected nodes.
@@ -52,15 +48,17 @@ public class KeyEventHandler
                 if (event.getCode().equals(KeyCode.C)) {
                     
                     selectionService.copy();
+                    isCopying = true;
+                    
+                } else if (event.getCode().equals(KeyCode.X)) {
+                    
+                    selectionService.copy();
+                    isCopying = false;
                     
                 } else if (event.getCode().equals(KeyCode.V)) {
 
-                    if (true) { // copying, create new objects
-                        selectionService.clear();
-                    } else { // cloning, reference the same pn object, keep selection
-                        // TODO
-                    }
-                    editorTabController.PasteNodes();
+                    selectionService.clear();
+                    editorTabController.PasteNodes(isCopying);
                 }
             }
 

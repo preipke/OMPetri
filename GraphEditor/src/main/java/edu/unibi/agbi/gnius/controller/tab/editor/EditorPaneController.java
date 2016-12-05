@@ -35,7 +35,6 @@ public class EditorPaneController implements Initializable
     @Autowired private GraphDao graph;
     
     @Autowired private MouseEventHandler mouseEventHandler;
-    @Autowired private KeyEventHandler keyEventHandler;
     @Autowired private ScrollEventHandler scrollEventHandler;
     
     private static GraphScene graphScene = null;
@@ -44,23 +43,14 @@ public class EditorPaneController implements Initializable
     public void initialize(URL location , ResourceBundle resources) {
         
         graphScene = new GraphScene(graph);
-        graphScene.setId("editorScene");
         graphScene.widthProperty().bind(editorPane.widthProperty());
         graphScene.heightProperty().bind(editorPane.heightProperty());
+        graphScene.getGraphPane().getStyleClass().add("editorPane");
         
         editorPane.setCenter(graphScene);
-        
-        String css = "-fx-background-color: white;"
-                + "-fx-border-color: grey;"
-        //        + "-fx-border-insets: 5;"
-                + "-fx-border-width: 2;"
-        //        + "-fx-border-style: dashed;"
-        ;
-        graphScene.getGraphPane().setStyle(css);
             
         // register handler
         mouseEventHandler.registerTo(graphScene.getGraphPane());
         scrollEventHandler.registerTo(graphScene.getGraphPane());
-        keyEventHandler.setGraphPane(graphScene.getGraphPane());
     }
 }

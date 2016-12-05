@@ -21,6 +21,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -91,12 +92,13 @@ public class MouseEventHandler
         rect.setFill(Color.LIGHTBLUE.deriveColor(0 , 1.2 , 1 , 0.6));
         
         /**
-         * Used for multiple actions.
+         * Register key events. Must be done after showing stage (Scene is null
+         * before).
          */
         graphPane.setOnMouseMoved((MouseEvent event) -> {
             movedMouseEventLatest = event;
             if (!keyEventsRegistered) {
-                keyEventHandler.register();
+                keyEventHandler.registerTo(graphPane.getScene());
                 keyEventsRegistered = true;
             }
         });

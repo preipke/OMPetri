@@ -7,8 +7,7 @@ package edu.unibi.agbi.gnius.service;
 
 import edu.unibi.agbi.gnius.dao.GraphDao;
 import edu.unibi.agbi.gnius.dao.PetriNetDao;
-import edu.unibi.agbi.gnius.service.model.EdgeType;
-import edu.unibi.agbi.gnius.service.model.NodeType;
+import edu.unibi.agbi.gnius.service.model.NodeSelectionChoice;
 import edu.unibi.agbi.gnius.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.service.exception.NodeCreationException;
 
@@ -17,11 +16,12 @@ import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
-
-import edu.unibi.agbi.petrinet.model.PNNode;
 import edu.unibi.agbi.petrinet.model.entity.Arc;
-import edu.unibi.agbi.petrinet.model.entity.Place;
-import edu.unibi.agbi.petrinet.model.entity.Transition;
+
+import edu.unibi.agbi.petrinet.model.entity.PNNode;
+import edu.unibi.agbi.petrinet.model.entity.arc.ArcDefault;
+import edu.unibi.agbi.petrinet.model.entity.place.PlaceDefault;
+import edu.unibi.agbi.petrinet.model.entity.transition.TransitionDefault;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -36,39 +36,46 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataService
 {
-    @Autowired
-    private GraphDao graphDao;
+    private final GraphDao graphDao;
+    private final PetriNetDao petriNetDao;
     
     @Autowired
-    private PetriNetDao petriNetDao;
+    public DataService(GraphDao graphDao, PetriNetDao petriNetDao) {
+        this.graphDao = graphDao;
+        this.petriNetDao = petriNetDao;
+    }
     
+    /**
+     * Adds a IGravisNode to the graph.
+     * @param node 
+     */
     public void add(IGravisNode node) {
         graphDao.add(node);
     }
     
     /**
-     * Creates a node of the given NodeType at the MouseEvent target location.
+     * Creates a IGravisNode of the given NodeType at the MouseEvent target location.
      * 
      * @param type
      * @param target
      * @param position
      * @throws NodeCreationException 
      */
-    public IGravisNode create(NodeType.Type type, MouseEvent target, Point2D position) throws NodeCreationException {
+    public IGravisNode create(NodeSelectionChoice.Type type, MouseEvent target, Point2D position) throws NodeCreationException {
         
         PNNode node;
         IGravisNode shape;
         
         switch(type) {
             case PLACE:
-                node = new Place();
+                node = new PlaceDefault();
                 shape = new GravisCircle(node);
-                shape.getShape().getStyleClass().add("gravisCircle");
+                shape.setActiveStyleClass("gravisCircle");
                 break;
             case TRANSITION:
-                node = new Transition();
+                node = new TransitionDefault();
                 shape = new GravisRectangle(node);
-                shape.getShape().getStyleClass().add("gravisRectangle");
+                shape.setActiveStyleClass("gravisRectangle");
                 break;
             default:
                 throw new NodeCreationException("No suitable node type selected!");
@@ -91,38 +98,42 @@ public class DataService
     /**
      * Creates an edge of type EdgyType connecting source and target IGravisNode.
      * 
-     * @param type
      * @param source
      * @param target
      * @throws EdgeCreationException 
      */
-    public void create(EdgeType.Type type, IGravisNode source, IGravisNode target) throws EdgeCreationException {
+    public void create(IGravisNode source, IGravisNode target) throws EdgeCreationException {
         
-        PNNode node;
+        Arc node;
         IGravisEdge shape;
-        
-        switch(type) {
-            case EDGE:
-                node = new Arc();
-                shape = new GravisEdge(source, target, node);
-                shape.getShape().getStyleClass().add("gravisEdge");
-                break;
-            case ARC:
-                node = new Arc();
-                shape = new GravisEdge(source, target, node);
-                shape.getShape().getStyleClass().add("gravisArc");
-                break;
-            default:
-                throw new EdgeCreationException("No suitable edge type selected!");
-        }
+
+        node = new ArcDefault();
+        shape = new GravisEdge(source , target , node);
+        shape.setActiveStyleClass("gravisEdge");
         node.addShape(shape);
         
         graphDao.add(shape);
-        petriNetDao.add(node, type);
+        petriNetDao.add(node);
     }
     
     public void connect(IGravisNode source, IGravisNode target) {
         
+    }
+    
+    public void copy(IGravisNode node) {
+        
+        /*NodeSelectionChoice.Type type;
+        
+        switch(type) {
+            case PLACE:
+                
+                break;
+            case TRANSITION:
+                
+                break;
+            default:
+                throw new EdgeCreationException("No suitable edge type selected!");
+        }*/
     }
     
     public boolean remove(IGravisEdge edge) {

@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.dao.SelectionDao;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
+import edu.unibi.agbi.petrinet.model.entity.PNNode;
 
 import java.util.List;
 
@@ -23,14 +23,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class SelectionService
 {
-    @Autowired
-    private SelectionDao selectionDao;
+    private final SelectionDao selectionDao;
     
     private IGravisNode[] nodesCopy;
     private IGravisEdge[] edgeCopy;
     
+    @Autowired
+    public SelectionService(SelectionDao selectionDao) {
+        this.selectionDao = selectionDao;
+    }
+    
     public void add(IGravisNode node) {
-        selectionDao.add(node);
+        
+        PNNode pnNode = (PNNode) node.getRelatedObject();
+        
+        List<Object> relatedShapes = pnNode.getShapes();
+        for (Object shape : relatedShapes) {
+            selectionDao.add((IGravisNode)shape);
+        }
     }
     
     public void add(IGravisEdge edge) {
