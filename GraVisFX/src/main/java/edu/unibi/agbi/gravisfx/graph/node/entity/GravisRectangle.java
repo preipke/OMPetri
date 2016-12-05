@@ -23,7 +23,7 @@ import javafx.scene.shape.Shape;
  * 
  * @author PR
  */
-public final class GravisRectangle extends Rectangle implements IGravisNode
+public class GravisRectangle extends Rectangle implements IGravisNode
 {
     private Object relatedObject;
     

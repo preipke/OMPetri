@@ -61,24 +61,6 @@ public class GravisCircle extends Circle implements IGravisNode
         this.relatedObject = relatedObject;
     }
     
-    @Override
-    public Shape getShape() {
-        return this;
-    }
-    
-    @Override
-    public Object getRelatedObject() {
-        return relatedObject;
-    }
-
-    @Override
-    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException {
-        if (this.relatedObject != null) {
-            throw new RelationChangeDeniedException("Relation object has already been assigned!");
-        }
-        this.relatedObject = relatedObject;
-    }
-    
     /**
      * Position the center of the node at the given coordinates.
      * @param centerX
@@ -159,16 +141,6 @@ public class GravisCircle extends Circle implements IGravisNode
     }
 
     @Override
-    public IGravisNode getCopy() {
-        return new GravisCircle(null);
-    }
-    
-    @Override
-    public IGravisNode getClone() {
-        return new GravisCircle(relatedObject);
-    }
-
-    @Override
     public void setActiveStyleClass(String name) {
         getShape().getStyleClass().remove(activeStyleClass);
         activeStyleClass = name;
@@ -178,5 +150,33 @@ public class GravisCircle extends Circle implements IGravisNode
     @Override
     public String getActiveStyleClass() {
         return activeStyleClass;
+    }
+    
+    @Override
+    public Object getRelatedObject() {
+        return relatedObject;
+    }
+
+    @Override
+    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException {
+        if (this.relatedObject != null) {
+            throw new RelationChangeDeniedException("Relation object has already been assigned!");
+        }
+        this.relatedObject = relatedObject;
+    }
+
+    @Override
+    public IGravisNode getCopy() {
+        return new GravisCircle(null);
+    }
+    
+    @Override
+    public IGravisNode getClone() {
+        return new GravisCircle(relatedObject);
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
     }
 }
