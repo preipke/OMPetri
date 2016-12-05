@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gravisfx.graph.node.entity;
 
 import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
@@ -24,9 +25,13 @@ import javafx.scene.shape.Shape;
  */
 public class GravisCircle extends Circle implements IGravisNode
 {
+    private Object relatedObject;
+    
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<IGravisEdge> edges = new ArrayList();
+    
+    private String activeStyleClass;
     
     private static final String PSEUDO_CLASS_IDENT = "selected";
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
@@ -46,8 +51,6 @@ public class GravisCircle extends Circle implements IGravisNode
         }
     };
     
-    private Object relatedObject;
-    
     public GravisCircle() {
         super();
         setRadius(PropertiesController.CIRCLE_RADIUS);
@@ -64,13 +67,16 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public void setRelatedObject(Object object) {
-        relatedObject = object;
-    }
-    
-    @Override
     public Object getRelatedObject() {
         return relatedObject;
+    }
+
+    @Override
+    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException {
+        if (this.relatedObject != null) {
+            throw new RelationChangeDeniedException("Relation object has already been assigned!");
+        }
+        this.relatedObject = relatedObject;
     }
     
     /**
@@ -150,5 +156,27 @@ public class GravisCircle extends Circle implements IGravisNode
         NodeLayer nodeLayer = (NodeLayer) getParent();
         nodeLayer.getChildren().remove(this);
         nodeLayer.getChildren().add(this);
+    }
+
+    @Override
+    public IGravisNode getCopy() {
+        return new GravisCircle(null);
+    }
+    
+    @Override
+    public IGravisNode getClone() {
+        return new GravisCircle(relatedObject);
+    }
+
+    @Override
+    public void setActiveStyleClass(String name) {
+        getShape().getStyleClass().remove(activeStyleClass);
+        activeStyleClass = name;
+        getShape().getStyleClass().add(name);
+    }
+
+    @Override
+    public String getActiveStyleClass() {
+        return activeStyleClass;
     }
 }

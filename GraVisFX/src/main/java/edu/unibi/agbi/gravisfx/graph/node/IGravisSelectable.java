@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.graph.node;
 
+import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
 import javafx.scene.shape.Shape;
 
 /**
@@ -14,8 +15,16 @@ import javafx.scene.shape.Shape;
 public interface IGravisSelectable
 {
     public Shape getShape();
+    
     public double getTranslateX();
     public double getTranslateY();
+    
+    public Object getRelatedObject();
+    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException;
+    
     public void setHighlight(boolean value);
     public void putOnTop();
+    
+    public void setActiveStyleClass(String name);
+    public String getActiveStyleClass();
 }

@@ -5,9 +5,9 @@
  */
 package edu.unibi.agbi.gravisfx.graph.node.entity;
 
+import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 
 import javafx.beans.property.BooleanProperty;
@@ -24,6 +24,8 @@ public class GravisEdge extends Line implements IGravisEdge
 {
     private final IGravisNode source;
     private final IGravisNode target;
+    
+    private String activeStyleClass;
     
     private static final String PSEUDO_CLASS_IDENT = "selected";
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
@@ -43,12 +45,6 @@ public class GravisEdge extends Line implements IGravisEdge
         }
     };
     
-    private Object relatedObject;
-    
-    public Object getRelatedObject() {
-        return relatedObject;
-    }
-    
     public GravisEdge(IGravisNode source, IGravisNode target) {
         
         super();
@@ -65,6 +61,21 @@ public class GravisEdge extends Line implements IGravisEdge
     
     public GravisEdge(IGravisNode source, IGravisNode target, Object relatedObject) {
         this(source , target);
+        this.relatedObject = relatedObject;
+    }
+    
+    private Object relatedObject;
+    
+    @Override
+    public Object getRelatedObject() {
+        return relatedObject;
+    }
+
+    @Override
+    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException {
+        if (this.relatedObject != null) {
+            throw new RelationChangeDeniedException("Relation object has already been assigned!");
+        }
         this.relatedObject = relatedObject;
     }
     
@@ -93,5 +104,17 @@ public class GravisEdge extends Line implements IGravisEdge
         EdgeLayer edgeLayer = (EdgeLayer) getParent();
         edgeLayer.getChildren().remove(this);
         edgeLayer.getChildren().add(this);
+    }
+
+    @Override
+    public void setActiveStyleClass(String name) {
+        getShape().getStyleClass().remove(activeStyleClass);
+        activeStyleClass = name;
+        getShape().getStyleClass().add(name);
+    }
+
+    @Override
+    public String getActiveStyleClass() {
+        return activeStyleClass;
     }
 }

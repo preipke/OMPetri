@@ -17,8 +17,36 @@ import javafx.scene.SubScene;
  */
 public final class GraphScene extends SubScene
 {
-    private Graph graph;
-    private GraphPane graphPane;
+    private final Graph graph;
+    private final GraphPane graphPane;
+    
+    public GraphScene(Graph graph) {
+        super(null , 0 , 0);
+        this.graph = graph;
+        this.graphPane = new GraphPane(graph.getTopLayer());
+        init();
+    }
+    
+    public GraphScene(Graph graph, Parent root , double width , double height) {
+        super(root , width , height);
+        this.graph = graph;
+        this.graphPane = new GraphPane(graph.getTopLayer());
+        init();
+    }
+
+    public GraphScene(Graph graph, Parent root , double width , double height , boolean depthBuffer , SceneAntialiasing antiAliasing) {
+        super(root , width , height , depthBuffer , antiAliasing);
+        this.graph = graph;
+        this.graphPane = new GraphPane(graph.getTopLayer());
+        init();
+    }
+    
+    public void init() {
+        setRoot(graphPane);
+        graphPane.maxHeightProperty().bind(heightProperty());
+        graphPane.maxWidthProperty().bind(widthProperty());
+        setManaged(false); // must be set, otherwise scene will upscale parent and will thereby not size down again on resizing the window
+    }
     
     public Graph getGraph() {
         return graph;
@@ -26,43 +54,5 @@ public final class GraphScene extends SubScene
     
     public GraphPane getGraphPane() {
         return graphPane;
-    }
-    
-    public void init() {
-        
-        graph = new Graph();
-        
-        graphPane = new GraphPane(graph.getTopLayer());
-        
-        // TODO scale window down again after maximizing size
-        graphPane.maxHeightProperty().bind(heightProperty());
-        graphPane.maxWidthProperty().bind(widthProperty());
-        
-        String css = "-fx-background-color: white;"
-                + "-fx-border-color: grey;"
-        //        + "-fx-border-insets: 5;"
-                + "-fx-border-width: 2;"
-        //        + "-fx-border-style: dashed;"
-        ;
-        graphPane.setStyle(css);
-        
-        setRoot(graphPane);
-        
-        setManaged(false); // must be set, otherwise scene will upscale parent and will thereby not size down again on resizing the window
-    }
-    
-    public GraphScene() {
-        super(null , 0 , 0);
-        init();
-    }
-    
-    public GraphScene(Parent root , double width , double height) {
-        super(root , width , height);
-        init();
-    }
-
-    public GraphScene(Parent root , double width , double height , boolean depthBuffer , SceneAntialiasing antiAliasing) {
-        super(root , width , height , depthBuffer , antiAliasing);
-        init();
     }
 }

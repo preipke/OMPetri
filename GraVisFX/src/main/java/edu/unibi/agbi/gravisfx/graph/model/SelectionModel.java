@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Model used to store currently selected nodes within the graph.
+ * Model used to store currently selected nodes within a graph.
  * @author PR
  */
 public class SelectionModel
@@ -84,19 +84,19 @@ public class SelectionModel
         return selectables;
     }
     
-    public synchronized void remove(IGravisNode node) {
-        selectedNodes.remove(node);
+    public synchronized boolean remove(IGravisNode node) {
         node.setHighlight(false);
+        return selectedNodes.remove(node);
     }
     
-    public synchronized void remove(IGravisEdge edge) {
-        selectedEdges.remove(edge);
+    public synchronized boolean remove(IGravisEdge edge) {
         edge.setHighlight(false);
+        return selectedEdges.remove(edge);
     }
     
-    public synchronized void remove(IGravisSelectable edge) {
-        selectedSelectables.remove(edge);
+    public synchronized boolean remove(IGravisSelectable edge) {
         edge.setHighlight(false);
+        return selectedSelectables.remove(edge);
     }
     
     public synchronized boolean contains(IGravisNode node) {

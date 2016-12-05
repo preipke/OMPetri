@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.model.SelectionModel;
 import edu.unibi.agbi.gravisfx.graph.model.DataModel;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -13,15 +12,15 @@ import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
+import java.util.List;
 
 /**
- *
+ * The Graph. Serves as a service to access the underlying data models.
  * @author PR
  */
-public final class Graph
+public class Graph
 {
     private final DataModel dataModel;
-    private final SelectionModel selectionModel;
     
     private final TopLayer topLayer;
     
@@ -32,7 +31,6 @@ public final class Graph
     public Graph() {
         
         dataModel = new DataModel();
-        selectionModel = new SelectionModel();
         
         topLayer = new TopLayer();
         
@@ -43,10 +41,6 @@ public final class Graph
     
     public DataModel getDataModel() {
         return dataModel;
-    }
-    
-    public SelectionModel getSelectionModel() {
-        return selectionModel;
     }
     
     public TopLayer getTopLayer() {
@@ -81,13 +75,16 @@ public final class Graph
         return dataModel.getEdges();
     }
     
-    public void remove(IGravisNode node) {
-        dataModel.remove(node);
+    public boolean remove(IGravisNode node) {
+        for (IGravisEdge edge : node.getEdges()) {
+            edgeLayer.getChildren().remove(edge.getShape());
+        }
         nodeLayer.getChildren().remove(node.getShape());
+        return dataModel.remove(node);
     }
     
-    public void remove(IGravisEdge edge) {
-        dataModel.remove(edge);
+    public boolean remove(IGravisEdge edge) {
         edgeLayer.getChildren().remove(edge.getShape());
+        return dataModel.remove(edge);
     }
 }

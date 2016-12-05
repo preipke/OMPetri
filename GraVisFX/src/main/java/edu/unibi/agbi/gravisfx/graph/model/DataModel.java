@@ -37,24 +37,6 @@ public class DataModel
         return false;
     }
     
-    public boolean contains(IGravisNode node) {
-        return nodes.contains(node);
-    }
-    
-    public boolean contains(IGravisEdge edge) {
-        return edges.contains(edge);
-    }
-    
-    public boolean remove(IGravisNode node) {
-        disconnect(node);
-        return nodes.remove(node);
-    }
-    
-    public boolean remove(IGravisEdge edge) {
-        disconnect(edge);
-        return edges.remove(edge);
-    }
-    
     private boolean connect(IGravisEdge edge) {
         
         if (nodes.contains(edge.getTarget()) && nodes.contains(edge.getSource())) {
@@ -76,48 +58,61 @@ public class DataModel
         return false;
     }
     
+    public boolean contains(IGravisNode node) {
+        return nodes.contains(node);
+    }
+    
+    public boolean contains(IGravisEdge edge) {
+        return edges.contains(edge);
+    }
+    
     private void disconnect(IGravisEdge edge) {
+        IGravisNode source = edge.getSource();
+        IGravisNode target = edge.getTarget();
         
-        edge.getSource().getChildren().remove(edge.getTarget());
-        edge.getTarget().getParents().remove(edge.getSource());
+        source.getChildren().remove(target);
+        target.getParents().remove(source);
 
-        edge.getSource().removeEdge(edge);
-        edge.getTarget().removeEdge(edge);
+        source.removeEdge(edge);
+        target.removeEdge(edge);
     }
     
     private void disconnect(IGravisNode node) {
-        
         for (IGravisEdge edge : node.getEdges()) {
-            
             if (edge.getSource() == node) {
                 edge.getTarget().removeParent(node);
+                edge.getTarget().removeEdge(edge);
             } else {
                 edge.getSource().removeChild(node);
+                edge.getSource().removeEdge(edge);
             }
-            edge.getSource().removeEdge(edge);
-            edge.getTarget().removeEdge(edge);
         }
+        node.getEdges().clear();
+    }
+    
+    public boolean remove(IGravisNode node) {
+        disconnect(node);
+        return nodes.remove(node);
+    }
+    
+    public boolean remove(IGravisEdge edge) {
+        disconnect(edge);
+        return edges.remove(edge);
     }
     
     public IGravisNode[] getNodes() {
-        
         IGravisNode[] nodesArray = new IGravisNode[this.nodes.size()];
-        
         for (int i = 0; i < nodesArray.length; i++) {
             nodesArray[i] = this.nodes.get(i);
         }
-        
         return nodesArray;
     }
     
     public IGravisEdge[] getEdges() {
-        
         IGravisEdge[] edgesArray = new IGravisEdge[this.edges.size()];
-        
         for (int i = 0; i < edgesArray.length; i++) {
             edgesArray[i] = this.edges.get(i);
         }
-        
         return edgesArray;
     }
 }

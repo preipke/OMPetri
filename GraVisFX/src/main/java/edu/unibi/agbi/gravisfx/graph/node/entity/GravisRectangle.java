@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gravisfx.graph.node.entity;
 
 import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
@@ -24,13 +25,16 @@ import javafx.scene.shape.Shape;
  */
 public final class GravisRectangle extends Rectangle implements IGravisNode
 {
+    private Object relatedObject;
+    
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<IGravisEdge> edges = new ArrayList();
     
+    private String activeStyleClass;
+    
     private static final String PSEUDO_CLASS_IDENT = "selected";
     private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
-    
     private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
         @Override 
         protected void invalidated() {
@@ -46,8 +50,6 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
         }
     };
     
-    private Object relatedObject;
-    
     public GravisRectangle() {
         super();
         setWidth(PropertiesController.RECTANGLE_WIDTH);
@@ -56,19 +58,27 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
         setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT);
     }
     
+    public GravisRectangle(Object relatedObject) {
+        this();
+        this.relatedObject = relatedObject;
+    }
+    
     @Override
     public Shape getShape() {
         return this;
     }
     
     @Override
-    public void setRelatedObject(Object object) {
-        relatedObject = object;
-    }
-    
-    @Override
     public Object getRelatedObject() {
         return relatedObject;
+    }
+
+    @Override
+    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException {
+        if (this.relatedObject != null) {
+            throw new RelationChangeDeniedException("Relation object has already been assigned!");
+        }
+        this.relatedObject = relatedObject;
     }
     
     /**
@@ -151,5 +161,27 @@ public final class GravisRectangle extends Rectangle implements IGravisNode
         NodeLayer nodeLayer = (NodeLayer) getParent();
         nodeLayer.getChildren().remove(this);
         nodeLayer.getChildren().add(this);
+    }
+
+    @Override
+    public IGravisNode getCopy() {
+        return new GravisRectangle(null);
+    }
+    
+    @Override
+    public IGravisNode getClone() {
+        return new GravisRectangle(relatedObject);
+    }
+
+    @Override
+    public void setActiveStyleClass(String name) {
+        getShape().getStyleClass().remove(activeStyleClass);
+        activeStyleClass = name;
+        getShape().getStyleClass().add(name);
+    }
+
+    @Override
+    public String getActiveStyleClass() {
+        return activeStyleClass;
     }
 }
