@@ -5,11 +5,15 @@
  */
 package edu.unibi.agbi.petrinet.model.entity.arc;
 
+import edu.unibi.agbi.petrinet.model.entity.Arc;
+
 /**
  *
  * @author PR
  */
-public class ArcReset
+public class ArcReset extends Arc
 {
-    
+    public ArcReset() {
+        super(Arc.Type.RESET);
+    }
 }

@@ -6,14 +6,13 @@
 package edu.unibi.agbi.petrinet.model.entity;
 
 import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.PNNode;
 import java.util.List;
 
 /**
  *
  * @author PR
  */
-public class Transition extends PNNode
+public abstract class Transition extends PNNode
 {
     private boolean isEnabled;
     
@@ -21,4 +20,19 @@ public class Transition extends PNNode
     
     private List<Place> incomingPlaces;
     private List<Place> outgoingPlaces;
+    
+    private final Type transitionType;
+    
+    public Transition(Transition.Type type) {
+        this.nodeType = PNNode.Type.TRANSITION;
+        this.transitionType = type;
+    }
+    
+    public Type getTransitionType() {
+        return transitionType;
+    }
+    
+    public enum Type {
+        CONTINUOUS, DEFAULT, DISCRETE, STOCHASTIC;
+    }
 }

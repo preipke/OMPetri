@@ -5,14 +5,14 @@
  */
 package edu.unibi.agbi.petrinet.model.entity;
 
-import edu.unibi.agbi.petrinet.model.PNNode;
+
 import java.util.List;
 
 /**
  *
  * @author PR
  */
-public class Place extends PNNode
+public abstract class Place extends PNNode
 {
     private double token;
     private double token_t0;
@@ -21,4 +21,19 @@ public class Place extends PNNode
     
     private List<Transition> incomingTransitions;
     private List<Transition> outgoingTransitions;
+    
+    private final Type placeType;
+    
+    public Place(Place.Type type) {
+        this.nodeType = PNNode.Type.PLACE;
+        this.placeType = type;
+    }
+    
+    public Type getPlaceType() {
+        return placeType;
+    }
+    
+    public enum Type {
+        CONTINUOUS, DEFAULT, DISCRETE;
+    }
 }

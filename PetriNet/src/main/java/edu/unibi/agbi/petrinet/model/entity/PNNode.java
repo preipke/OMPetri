@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model;
+package edu.unibi.agbi.petrinet.model.entity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +24,15 @@ public abstract class PNNode {
     private String description;
     
     private final List<Object> shapes;
+    
+    protected Type nodeType;
+    
+    public enum Type {
+        ARC, PLACE, TRANSITION;
+    }
+    public Type getNodeType() {
+        return nodeType;
+    }
     
     public PNNode() {
         synchronized (IDENT) {
@@ -100,5 +109,4 @@ public abstract class PNNode {
     public void removeShape(Object shape) {
         this.shapes.remove(shape);
     }
-    
 }

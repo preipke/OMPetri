@@ -1,5 +1,7 @@
 package edu.unibi.agbi.petrinet.model.entity.place;
 
+import edu.unibi.agbi.petrinet.model.entity.Place;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -10,6 +12,9 @@ package edu.unibi.agbi.petrinet.model.entity.place;
  *
  * @author pr
  */
-public class PlaceDiscrete {
-    
+public class PlaceDiscrete extends Place
+{
+    public PlaceDiscrete() {
+        super(Place.Type.DISCRETE);
+    }
 }

@@ -11,9 +11,9 @@ import edu.unibi.agbi.petrinet.model.entity.Arc;
  *
  * @author PR
  */
-public class ArcEqual extends Arc
+public class ArcDefault extends Arc
 {
-    public ArcEqual() {
-        super(Arc.Type.EQUAL);
+    public ArcDefault() {
+        super(Type.DEFAULT);
     }
 }

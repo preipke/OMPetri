@@ -9,11 +9,11 @@ import edu.unibi.agbi.petrinet.model.entity.Place;
 
 /**
  *
- * @author pr
+ * @author PR
  */
-public class PlaceContinuous extends Place
+public class PlaceDefault extends Place
 {
-    public PlaceContinuous() {
-        super(Place.Type.CONTINUOUS);
+    public PlaceDefault() {
+        super(Type.DEFAULT);
     }
 }

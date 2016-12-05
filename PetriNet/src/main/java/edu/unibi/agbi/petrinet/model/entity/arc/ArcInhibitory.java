@@ -5,10 +5,15 @@
  */
 package edu.unibi.agbi.petrinet.model.entity.arc;
 
+import edu.unibi.agbi.petrinet.model.entity.Arc;
+
 /**
  *
  * @author pr
  */
-public class ArcInhibitory {
-    
+public class ArcInhibitory extends Arc
+{
+    public ArcInhibitory() {
+        super(Arc.Type.INHIBITORY);
+    }
 }

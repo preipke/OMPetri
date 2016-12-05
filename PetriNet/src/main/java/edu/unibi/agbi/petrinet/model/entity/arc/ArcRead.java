@@ -5,10 +5,15 @@
  */
 package edu.unibi.agbi.petrinet.model.entity.arc;
 
+import edu.unibi.agbi.petrinet.model.entity.Arc;
+
 /**
  *
  * @author pr
  */
-public class ArcRead {
-    
+public class ArcRead extends Arc
+{
+    public ArcRead() {
+        super(Arc.Type.READ);
+    }
 }

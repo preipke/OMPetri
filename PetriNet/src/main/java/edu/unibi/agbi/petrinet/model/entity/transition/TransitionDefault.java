@@ -9,10 +9,11 @@ import edu.unibi.agbi.petrinet.model.entity.Transition;
 
 /**
  *
- * @author pr
+ * @author PR
  */
-public class TransitionStochastic extends Transition {
-    public TransitionStochastic() {
-        super(Type.STOCHASTIC);
+public class TransitionDefault extends Transition
+{
+    public TransitionDefault() {
+        super(Type.DEFAULT);
     }
 }
