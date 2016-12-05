@@ -9,17 +9,17 @@
 
 <Tab fx:id="presentationTab" text="Presentation" xmlns:fx="http://javafx.com/fxml/1" 
      xmlns="http://javafx.com/javafx/8" 
-     fx:controller="edu.unibi.agbi.gnius.controller.tab.PresentationTabController">
-               <content>
-                  <HBox spacing="5.0">
-                     <children>
-						<fx:include fx:id="presentationOptions" source="presentation/Options.fxml" />
-						<fx:include fx:id="presentationPane" source="presentation/Pane.fxml" />
-						<fx:include fx:id="presentationInfo" source="presentation/Info.fxml" />
-                     </children>
-                     <padding>
-                        <Insets left="5.0" right="5.0" top="5.0" />
-                     </padding>
-                  </HBox>
-               </content>
-          </Tab>
+     fx:controller="edu.unibi.agbi.gnius.controller.tab.EditorTabController">
+    <content>
+        <HBox spacing="5.0">
+            <children>
+                <fx:include fx:id="editorTools" source="editor/Tools.fxml" />
+                <fx:include fx:id="editorPane" source="editor/Pane.fxml" />
+                <fx:include fx:id="editorDetails" source="editor/Details.fxml" />
+            </children>
+            <padding>
+                <Insets left="5.0" right="5.0" top="5.0" />
+            </padding>
+        </HBox>
+    </content>
+</Tab>

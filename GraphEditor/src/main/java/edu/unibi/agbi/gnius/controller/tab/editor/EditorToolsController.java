@@ -3,27 +3,31 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.controller.tab.presentation;
+package edu.unibi.agbi.gnius.controller.tab.editor;
 
-import edu.unibi.agbi.gnius.controller.data.DataController;
-import edu.unibi.agbi.gnius.exception.data.EdgeCreationException;
-import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
-import edu.unibi.agbi.gnius.handler.MouseGestures;
-import edu.unibi.agbi.gnius.model.EdgeType;
-import edu.unibi.agbi.gnius.model.LayoutType;
-import edu.unibi.agbi.gnius.model.NodeType;
+import edu.unibi.agbi.gnius.dao.GraphDao;
+import edu.unibi.agbi.gnius.service.exception.EdgeCreationException;
+import edu.unibi.agbi.gnius.service.exception.NodeCreationException;
+import edu.unibi.agbi.gnius.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.service.model.EdgeType;
+import edu.unibi.agbi.gnius.service.model.LayoutType;
+import edu.unibi.agbi.gnius.service.model.NodeType;
+import edu.unibi.agbi.gnius.service.DataService;
+
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
-import edu.unibi.agbi.petrinet.model.PNNode;
+
 import java.net.URL;
 import java.util.ResourceBundle;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.MouseEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -31,16 +35,30 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class PresentationOptionsController implements Initializable
+public class EditorToolsController implements Initializable
 {
     @FXML private ChoiceBox choicesAlignNodes;
     @FXML private ChoiceBox choicesCreateNode;
     
     @FXML private TextArea textLogArea;
     
+    @Autowired private DataService dataService;
+    @Autowired private GraphDao graphDao;
+    
+    @Autowired private MouseEventHandler mouseEventHandler;
+    
     int elements = 10;
     
-    public void addChoices() {
+    public LayoutType getLayoutChoice() {
+        return (LayoutType) choicesAlignNodes.getSelectionModel().getSelectedItem();
+    }
+    
+    public NodeType getNodeChoice() {
+        return (NodeType) choicesCreateNode.getSelectionModel().getSelectedItem();
+    }
+
+    @Override
+    public void initialize(URL location , ResourceBundle resources) {
         
         ObservableList<LayoutType> alignChoices = FXCollections.observableArrayList();
         alignChoices.add(new LayoutType(LayoutType.Type.RANDOM, "Random"));
@@ -57,13 +75,6 @@ public class PresentationOptionsController implements Initializable
         choicesCreateNode.setItems(nodeChoices);
         choicesCreateNode.getSelectionModel().selectFirst();
     }
-
-    @Override
-    public void initialize(URL location , ResourceBundle resources) {
-        
-        MouseGestures.controller = this;
-        addChoices();
-    }
     
     @FXML
     private void buttonAlignNodes() {
@@ -72,7 +83,7 @@ public class PresentationOptionsController implements Initializable
         
         switch(type) {
             case RANDOM:
-                RandomLayout.applyOn(PresentationPaneController.getGraph());
+                RandomLayout.applyOn(graphDao);
                 break;
             default:
                 textLogArea.appendText("Align Nodes: no method selected!"); 
@@ -82,38 +93,7 @@ public class PresentationOptionsController implements Initializable
     
     @FXML
     public void buttonCreateNodeEnable() {
-        MouseGestures.setCreatingNodes(true);
-    }
-    
-    /**
-     * Invoked by clicking in the scene.
-     * @param target 
-     */
-    public void createNode(MouseEvent target) {
-        
-        NodeType.Type type = ((NodeType) choicesCreateNode.getSelectionModel().getSelectedItem()).getType();
-        
-        try {
-            IGravisNode shape = PresentationPaneController.create(type , target);
-            PNNode node = DataController.createNode(type);
-            
-            node.addShape(shape);
-            shape.setRelatedObject(node);
-            
-        } catch (NodeCreationException ex) {
-            textLogArea.appendText(ex.toString());
-        }
-        
-        MouseGestures.setCreatingNodes(false);
-    }
-    
-    public void copyNode(IGravisNode node, MouseEvent target) {
-        
-        if (IGravisNode.class.isAssignableFrom(target.getTarget().getClass())) {
-            
-            IGravisNode shape = (IGravisNode) target.getTarget();
-            
-        }
+        mouseEventHandler.setCreatingNodes(true);
     }
     
     @FXML
@@ -122,33 +102,33 @@ public class PresentationOptionsController implements Initializable
         IGravisNode place, transition;
         try {
             for (int i = 0; i < elements; i++) {
-                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
-                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeType.Type.PLACE , null, null);
+                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeType.Type.PLACE , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeType.Type.PLACE , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeType.Type.PLACE , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                transition = PresentationPaneController.create(NodeType.Type.TRANSITION , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                transition = dataService.create(NodeType.Type.TRANSITION , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeType.Type.PLACE , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
                 
-                place = PresentationPaneController.create(NodeType.Type.PLACE , null);
-                PresentationPaneController.create(EdgeType.Type.EDGE , place , transition);
+                place = dataService.create(NodeType.Type.PLACE , null, null);
+                dataService.create(EdgeType.Type.EDGE , place , transition);
             }
         } catch (NodeCreationException | EdgeCreationException ex) {
             System.out.println(ex.toString());

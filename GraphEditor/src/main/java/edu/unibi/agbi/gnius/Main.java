@@ -1,12 +1,15 @@
 package edu.unibi.agbi.gnius;
 
-import edu.unibi.agbi.gnius.handler.KeyStrokeHandler;
+import edu.unibi.agbi.gnius.handler.KeyEventHandler;
+import edu.unibi.agbi.gnius.service.DataService;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -39,8 +42,14 @@ public class Main extends Application {
         stage.setTitle("GraVisFX - PetriNet Editor");
         stage.setScene(scene);
         stage.show();
-        
-        KeyStrokeHandler.register();
+    }
+    
+    /**
+     * Called by Spring once it has created an instance of 
+     * Application and injected any dependencies.
+     */
+    @PostConstruct
+    public void register() {
     }
     
     @Override

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.controller.tab.presentation;
+package edu.unibi.agbi.gnius.controller.tab.editor;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class PresentationInfoController implements Initializable
+public class EditorDetailsController implements Initializable
 {
 
     @Override

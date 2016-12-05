@@ -5,96 +5,62 @@
  */
 package edu.unibi.agbi.gnius.handler;
 
-import edu.unibi.agbi.gnius.controller.tab.presentation.PresentationPaneController;
-import edu.unibi.agbi.gnius.exception.data.NodeCreationException;
+import edu.unibi.agbi.gnius.controller.tab.EditorTabController;
+import edu.unibi.agbi.gnius.service.SelectionService;
 
-import edu.unibi.agbi.gravisfx.graph.model.SelectionModel;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
-
-import java.util.List;
-
 import javafx.application.Platform;
-import javafx.beans.property.DoubleProperty;
+
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author PR
  */
-public class KeyStrokeHandler
+@Component
+public class KeyEventHandler
 {
-    private static GraphPane pane;
-    public static void setGraphPane(GraphPane pane) {
-        KeyStrokeHandler.pane = pane;
+    @Autowired private SelectionService selectionService;
+    @Autowired private EditorTabController editorTabController;
+    
+    private GraphPane pane;
+    public void setGraphPane(GraphPane pane) {
+        this.pane = pane;
     }
     
-    private static SelectionModel selectionModel;
-    private static DoubleProperty eventLatestMousePosX;
-    private static DoubleProperty eventLatestMousePosY;
-    
-    public static void setSelectionModel(SelectionModel model) {
-        selectionModel = model;
-    }
-    public static void setLatestMousePosX(DoubleProperty posX) {
-        eventLatestMousePosX = posX;
-    }
-    public static void setLatestMousePosY(DoubleProperty posY) {
-        eventLatestMousePosY = posY;
-    }
-    
-    private static IGravisNode[] selectedNodesCopy = new IGravisNode[0];
-    private static IGravisEdge[] selectedEdgesCopy = new IGravisEdge[0];
-    
-    public static void register() {
+    public void register() {
         
-        /**
-         * Node copying and deleting.
-         */
         pane.getScene().setOnKeyPressed((KeyEvent event) -> {
             
             /**
              * Delete selected nodes.
              */
             if (event.getCode().equals(KeyCode.DELETE)) {
-                for (IGravisEdge edge : selectionModel.getSelectedEdges()) {
-                    PresentationPaneController.remove(edge);
-                }
-                for (IGravisNode node : selectionModel.getSelectedNodes()) {
-                    PresentationPaneController.remove(node);
-                }
+                Platform.runLater(() -> {
+                    editorTabController.RemoveSelected();
+                });
             }
             /**
-             * Copying selected nodes.
+             * Copy, clone or paste selected nodes.
              */
             else if (event.isControlDown()) {
                 
                 if (event.getCode().equals(KeyCode.C)) {
                     
-                    selectedNodesCopy = selectionModel.getSelectedNodesArray();
-                    selectedEdgesCopy = selectionModel.getSelectedEdgesArray();
+                    selectionService.copy();
                     
                 } else if (event.getCode().equals(KeyCode.V)) {
-                    
-                    List<IGravisNode> nodes;
-                    try {
-                        nodes = PresentationPaneController.copy(selectedNodesCopy , eventLatestMousePosX.get(), eventLatestMousePosY.get());
-                        if (true) { // copying, create new pn object
-                            // TODO
-                            Platform.runLater(() -> {
-                                selectionModel.clear();
-                            });
-                        } else { // cloning, reference the same pn object
-                            // TODO
-                        }
-                        Platform.runLater(() -> {
-                            selectionModel.add(nodes);
-                        });
-                    } catch (NodeCreationException ex) {
-                        System.out.println(ex.toString());
+
+                    if (true) { // copying, create new objects
+                        selectionService.clear();
+                    } else { // cloning, reference the same pn object, keep selection
+                        // TODO
                     }
+                    editorTabController.PasteNodes();
                 }
             }
 

@@ -7,21 +7,23 @@ package edu.unibi.agbi.gnius.handler;
 
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.scene.input.ScrollEvent;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author PR
  */
-public class ZoomHandler
+@Component
+public class ScrollEventHandler
 {
-    private static final double scaleBase = 1.0;
-    private static final double scaleFactor = 1.1;
-    private static int scalePower = 0;
+    private final double scaleBase = 1.0;
+    private final double scaleFactor = 1.1;
+    private int scalePower = 0;
     
-    private static final double SCALE_MAX = 10.d;
-    private static final double SCALE_MIN = .01d;
+    private final double SCALE_MAX = 10.d;
+    private final double SCALE_MIN = .01d;
     
-    public static void registerTo(GraphPane graphPane) {
+    public void registerTo(GraphPane graphPane) {
         
         graphPane.setOnScroll(( ScrollEvent event ) -> {
             

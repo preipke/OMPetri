@@ -8,12 +8,12 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-                        <VBox alignment="CENTER" prefWidth="200.0" spacing="5.0"
-								xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-								fx:id="presentationInfo" fx:controller="edu.unibi.agbi.gnius.controller.tab.presentation.PresentationInfoController">
-                           <children>
-                              <Label text="Label" />
-                              <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
-                              <Label text="Label" />
-                           </children>
-                        </VBox>
+<VBox alignment="CENTER" prefWidth="200.0" spacing="5.0"
+                              xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
+                              fx:id="editorDetails" fx:controller="edu.unibi.agbi.gnius.controller.tab.editor.EditorDetailsController">
+    <children>
+        <Label text="Label" />
+        <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
+        <Label text="Label" />
+    </children>
+</VBox>
