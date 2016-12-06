@@ -44,7 +44,7 @@ public class EditorTabController implements Initializable
     
     @Autowired private EditorToolsController editorToolsController;
     
-    @Autowired private MouseEventHandler mouseEventHandler;
+    @Autowired private Calculator calculator;
     
     public void CreateNode(MouseEvent target) {
         try {
@@ -56,22 +56,13 @@ public class EditorTabController implements Initializable
     
     public void PasteNodes(boolean isCopying) {
         IGravisNode[] nodes = selectionService.getNodesCopy();
-        TopLayer topLayer = null;
-        
-        Point2D center = Calculator.getCenter(nodes);
-        double offsetX, offsetY;
-        
         IGravisNode node;
-        GraphNode graphNode;
-        GraphNode.Type type;
         
-        for (int i = 0; i < nodes.length; i++) {
-            try {
-                offsetX = (nodes[i].getTranslateX() - center.getX());
-                offsetY = (nodes[i].getTranslateY() - center.getY());
-
-                type = ((GraphNode)nodes[i].getRelatedObject()).getType();
-
+        Point2D center = calculator.getCenter(nodes);
+        Point2D position = calculator.getCorrectedMousePositionLatest();
+        
+        try {
+            for (int i = 0; i < nodes.length; i++) {
                 if (isCopying) {
                     node = dataService.copy(nodes[i]);
                 } else {
@@ -79,20 +70,16 @@ public class EditorTabController implements Initializable
                 }
                 node.setActiveStyleClass(nodes[i].getActiveStyleClass());
 
-                if (topLayer == null) {
-                    topLayer = ((TopLayer)nodes[i].getShape().getParent().getParent());
-                }
-
-                node.setTranslate(
-                        offsetX + (mouseEventHandler.getLatestMovedMouseEvent().getX() - topLayer.translateXProperty().get()) / topLayer.getScale().getX() ,
-                        offsetY + (mouseEventHandler.getLatestMovedMouseEvent().getY() - topLayer.translateYProperty().get()) / topLayer.getScale().getX()
-                );
-
                 dataService.add(node);
                 selectionService.addAll(node);
-            } catch (NodeCreationException ex) {
-
+                
+                node.setTranslate(
+                        nodes[i].getTranslateX() - center.getX() + position.getX() ,
+                        nodes[i].getTranslateY() - center.getY() + position.getY()
+                );
             }
+        } catch (NodeCreationException ex) {
+
         }
     }
     

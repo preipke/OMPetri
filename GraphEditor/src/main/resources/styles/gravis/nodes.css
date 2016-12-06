@@ -6,7 +6,7 @@
 }
 
 .gravisRectangle:hover {
-    -fx-stroke: red;
+    -fx-stroke: yellow;
     -fx-stroke-width: 2;
 }
 
@@ -25,7 +25,7 @@
 }
 
 .gravisCircle:hover {
-    -fx-stroke: darkgreen;
+    -fx-stroke: lightgreen;
     -fx-stroke-width: 2;
 }
 
@@ -42,7 +42,7 @@
 }
 
 .gravisEdge:hover {
-    -fx-stroke: darkred;
+    -fx-stroke: lightgoldenrodyellow;
     -fx-stroke-width: 2;
 }
 

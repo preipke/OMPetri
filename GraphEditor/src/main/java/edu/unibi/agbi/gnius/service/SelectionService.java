@@ -39,8 +39,7 @@ public class SelectionService
     
     public void addAll(IGravisNode node) {
         GraphNode graphNode = (GraphNode) node.getRelatedObject();
-        List<Object> relatedShapes = graphNode.getShapes();
-        for (Object shape : relatedShapes) {
+        for (Object shape : graphNode.getShapes()) {
             selectionDao.add((IGravisNode)shape);
         }
     }
@@ -52,6 +51,10 @@ public class SelectionService
     public void copy() {
         nodesCopy = selectionDao.getSelectedNodesArray();
         edgeCopy = selectionDao.getSelectedEdgesArray();
+    }
+    
+    public boolean contains(IGravisNode node) {
+        return selectionDao.contains(node);
     }
     
     public void clear() {

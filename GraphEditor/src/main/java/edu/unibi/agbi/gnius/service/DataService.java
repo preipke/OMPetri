@@ -11,9 +11,9 @@ import edu.unibi.agbi.gnius.entity.GraphEdge;
 import edu.unibi.agbi.gnius.entity.GraphNode;
 import edu.unibi.agbi.gnius.entity.GraphPlace;
 import edu.unibi.agbi.gnius.entity.GraphTransition;
-import edu.unibi.agbi.gnius.selection.NodeSelectionChoice;
 import edu.unibi.agbi.gnius.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.service.exception.NodeCreationException;
+import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -34,6 +34,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataService
 {
+    @Autowired private Calculator calculator;
+    
     private final GraphDao graphDao;
     private final PetriNetDao petriNetDao;
     
@@ -80,11 +82,14 @@ public class DataService
         }
         node.addShape(shape);
         
+        //Point2D pos = calculator.getCorrectedMousePosition(target);
+        
         if (target != null) { // remove later - for testing purposes
-            double posX = (target.getX() - graphDao.getTopLayer().translateXProperty().get()) / graphDao.getTopLayer().getScale().getX();
-            double posY = (target.getY() - graphDao.getTopLayer().translateYProperty().get()) / graphDao.getTopLayer().getScale().getY();
-
-            shape.setTranslate(posX , posY);
+            //shape.setTranslate(pos.getX(), pos.getY());
+            shape.setTranslate(
+                    (target.getX() - graphDao.getTopLayer().translateXProperty().get()) / graphDao.getTopLayer().getScale().getX() - shape.getOffsetX(), 
+                    (target.getY() - graphDao.getTopLayer().translateYProperty().get()) / graphDao.getTopLayer().getScale().getY() - shape.getOffsetY()
+            );
         }
         
         graphDao.add(shape);
@@ -171,19 +176,4 @@ public class DataService
         ((GraphNode)node.getRelatedObject()).getShapes().remove(node);
         return graphDao.remove(node);
     }
-    
-    
-    /**
-     * Ideas for functionality.
-     * 
-     * unused shapes: remove all shapes not linked to node in petri net
-     * node table overview: center view to on graph
-     * 
-     * copy node(s)
-     * clone node(s)
-     * delete node(s)
-     * connect nodes
-     * 
-     * right clicking node: options for...
-     */
 }

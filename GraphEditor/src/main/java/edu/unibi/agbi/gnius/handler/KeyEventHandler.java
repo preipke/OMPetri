@@ -25,6 +25,7 @@ public class KeyEventHandler
 {
     @Autowired private SelectionService selectionService;
     @Autowired private EditorTabController editorTabController;
+    @Autowired private MouseEventHandler mouseEventHandler;
     
     private boolean isCopying;
     
@@ -32,14 +33,23 @@ public class KeyEventHandler
         
         scene.setOnKeyPressed((KeyEvent event) -> {
             
+            if (event.getCode().equals(KeyCode.ESCAPE)) {
+                
+                mouseEventHandler.setCreatingNodes(false);
+                
+                selectionService.clear();
+            }
+            
             /**
              * Delete selected nodes.
              */
-            if (event.getCode().equals(KeyCode.DELETE)) {
+            else if (event.getCode().equals(KeyCode.DELETE)) {
+                
                 Platform.runLater(() -> {
                     editorTabController.RemoveSelected();
                 });
             }
+            
             /**
              * Copy, clone or paste selected nodes.
              */
