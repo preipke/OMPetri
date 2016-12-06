@@ -88,10 +88,6 @@ public class GravisRectangle extends Rectangle implements IGravisNode
      */
     @Override
     public void setTranslate(double centerX , double centerY) {
-        
-        centerX = centerX - getOffsetX();
-        centerY = centerY - getOffsetY();
-        
         setTranslateX(centerX);
         setTranslateY(centerY);
     }
