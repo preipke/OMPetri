@@ -13,6 +13,5 @@ import edu.unibi.agbi.petrinet.model.entity.Transition;
  */
 public class TransitionStochastic extends Transition {
     public TransitionStochastic() {
-        super(Type.STOCHASTIC);
     }
 }

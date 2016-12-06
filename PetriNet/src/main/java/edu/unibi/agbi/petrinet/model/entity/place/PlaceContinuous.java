@@ -14,6 +14,5 @@ import edu.unibi.agbi.petrinet.model.entity.Place;
 public class PlaceContinuous extends Place
 {
     public PlaceContinuous() {
-        super(Place.Type.CONTINUOUS);
     }
 }

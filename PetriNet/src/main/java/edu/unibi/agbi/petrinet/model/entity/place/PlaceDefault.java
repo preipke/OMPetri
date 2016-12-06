@@ -14,6 +14,5 @@ import edu.unibi.agbi.petrinet.model.entity.Place;
 public class PlaceDefault extends Place
 {
     public PlaceDefault() {
-        super(Type.DEFAULT);
     }
 }

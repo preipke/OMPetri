@@ -25,13 +25,13 @@ public abstract class PNNode {
     
     private final List<Object> shapes;
     
-    protected Type nodeType;
+    protected Type pnNodeType;
     
     public enum Type {
         ARC, PLACE, TRANSITION;
     }
-    public Type getNodeType() {
-        return nodeType;
+    public Type getPnNodeType() {
+        return pnNodeType;
     }
     
     public PNNode() {

@@ -14,6 +14,5 @@ import edu.unibi.agbi.petrinet.model.entity.Arc;
 public class ArcInhibitory extends Arc
 {
     public ArcInhibitory() {
-        super(Arc.Type.INHIBITORY);
     }
 }

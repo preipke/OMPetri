@@ -21,11 +21,10 @@ public abstract class Transition extends PNNode
     private List<Place> incomingPlaces;
     private List<Place> outgoingPlaces;
     
-    private final Type transitionType;
+    private Type transitionType;
     
-    public Transition(Transition.Type type) {
-        this.nodeType = PNNode.Type.TRANSITION;
-        this.transitionType = type;
+    public Transition() {
+        this.pnNodeType = PNNode.Type.TRANSITION;
     }
     
     public Type getTransitionType() {

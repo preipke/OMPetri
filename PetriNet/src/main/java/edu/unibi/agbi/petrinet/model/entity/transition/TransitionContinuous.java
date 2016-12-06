@@ -13,6 +13,5 @@ import edu.unibi.agbi.petrinet.model.entity.Transition;
  */
 public class TransitionContinuous extends Transition {
     public TransitionContinuous() {
-        super(Type.CONTINUOUS);
     }
 }

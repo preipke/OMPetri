@@ -14,6 +14,5 @@ import edu.unibi.agbi.petrinet.model.entity.Arc;
 public class ArcDefault extends Arc
 {
     public ArcDefault() {
-        super(Type.DEFAULT);
     }
 }

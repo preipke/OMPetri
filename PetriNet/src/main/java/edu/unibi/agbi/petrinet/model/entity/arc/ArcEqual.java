@@ -14,6 +14,5 @@ import edu.unibi.agbi.petrinet.model.entity.Arc;
 public class ArcEqual extends Arc
 {
     public ArcEqual() {
-        super(Arc.Type.EQUAL);
     }
 }

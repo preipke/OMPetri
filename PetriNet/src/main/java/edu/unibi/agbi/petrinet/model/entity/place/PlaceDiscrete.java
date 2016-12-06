@@ -15,6 +15,5 @@ import edu.unibi.agbi.petrinet.model.entity.Place;
 public class PlaceDiscrete extends Place
 {
     public PlaceDiscrete() {
-        super(Place.Type.DISCRETE);
     }
 }

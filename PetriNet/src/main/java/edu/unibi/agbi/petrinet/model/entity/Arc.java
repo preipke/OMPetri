@@ -16,11 +16,10 @@ public abstract class Arc extends PNNode
     
     private double weight;
     
-    private final Type arcType;
+    private Type arcType;
     
-    public Arc(Arc.Type type) {
-        this.nodeType = PNNode.Type.ARC;
-        this.arcType = type;
+    public Arc() {
+        this.pnNodeType = PNNode.Type.ARC;
     }
     
     public Type getArcType() {

@@ -22,11 +22,10 @@ public abstract class Place extends PNNode
     private List<Transition> incomingTransitions;
     private List<Transition> outgoingTransitions;
     
-    private final Type placeType;
+    private Type placeType;
     
-    public Place(Place.Type type) {
-        this.nodeType = PNNode.Type.PLACE;
-        this.placeType = type;
+    public Place() {
+        this.pnNodeType = PNNode.Type.PLACE;
     }
     
     public Type getPlaceType() {

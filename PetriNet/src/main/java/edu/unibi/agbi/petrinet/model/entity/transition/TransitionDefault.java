@@ -14,6 +14,5 @@ import edu.unibi.agbi.petrinet.model.entity.Transition;
 public class TransitionDefault extends Transition
 {
     public TransitionDefault() {
-        super(Type.DEFAULT);
     }
 }

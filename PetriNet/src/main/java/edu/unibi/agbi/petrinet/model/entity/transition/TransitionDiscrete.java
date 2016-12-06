@@ -13,6 +13,5 @@ import edu.unibi.agbi.petrinet.model.entity.Transition;
  */
 public class TransitionDiscrete extends Transition {
     public TransitionDiscrete() {
-        super(Type.DISCRETE);
     }
 }
