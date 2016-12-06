@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.util;
 
-import edu.unibi.agbi.gnius.dao.GraphDao;
-import edu.unibi.agbi.gnius.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.core.dao.GraphDao;
+import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import java.util.List;
@@ -39,7 +39,7 @@ public class Calculator
      * @param nodes
      * @return 
      */
-    public Point2D getCenter(IGravisNode[] nodes) {
+    public Point2D getCenter(IGravisNode... nodes) {
         double x = 0, y = 0;
         for (IGravisNode node : nodes) {
             x += node.getTranslateX();
@@ -47,23 +47,6 @@ public class Calculator
         }
         x = x / nodes.length;
         y = y / nodes.length;
-        return new Point2D(x , y);
-    }
-    
-    /**
-     * Computes center of weight.
-     * @param nodes
-     * @return 
-     */
-    public Point2D getCenter(List<IGravisNode> nodes) {
-        double x = 0, y = 0;
-        for (IGravisNode node : nodes) {
-            x += node.getTranslateX();
-            y += node.getTranslateY();
-        }
-        x = x / nodes.size();
-        y = y / nodes.size();
-        
         return new Point2D(x , y);
     }
     
