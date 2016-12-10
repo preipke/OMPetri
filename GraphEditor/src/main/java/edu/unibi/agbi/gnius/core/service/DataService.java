@@ -3,17 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.service;
+package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
 import edu.unibi.agbi.gnius.core.model.entity.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.GraphTransition;
-import edu.unibi.agbi.gnius.business.service.exception.EdgeCreationException;
-import edu.unibi.agbi.gnius.business.service.exception.NodeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
@@ -21,6 +20,7 @@ import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -37,7 +37,6 @@ public class DataService
 {
     @Autowired private Calculator calculator;
     @Autowired private SelectionService selectionService;
-    @Autowired private EditorToolsController editorToolsController;
     
     private final GraphDao graphDao;
     private final PetriNetDao petriNetDao;
@@ -64,7 +63,7 @@ public class DataService
      * @param position
      * @throws NodeCreationException 
      */
-    public IGravisNode create(GraphNode.Type type, MouseEvent target, Point2D position) throws NodeCreationException {
+    public IGravisNode create(PN_Element.Type type, MouseEvent target, Point2D position) throws NodeCreationException {
         
         GraphNode node;
         IGravisNode shape;
@@ -83,11 +82,11 @@ public class DataService
             default:
                 throw new NodeCreationException("No suitable node type selected!");
         }
-        node.addShape(shape);
+        node.getShapes().add(shape);
         
         //Point2D pos = calculator.getCorrectedMousePosition(target);
         
-        if (target != null) { // remove later - for testing purposes
+        if (target != null) { // TODO remove later - for testing purposes
             //shape.setTranslate(pos.getX(), pos.getY());
             shape.setTranslate(
                     (target.getX() - graphDao.getTopLayer().translateXProperty().get()) / graphDao.getTopLayer().getScale().getX() - shape.getOffsetX(), 
@@ -98,7 +97,7 @@ public class DataService
         graphDao.add(shape);
         petriNetDao.add(node);
         
-        return shape; // remove later - for testing purposes
+        return shape; // TODO remove later - for testing purposes
     }
     
     /**
@@ -117,7 +116,7 @@ public class DataService
         node = new GraphEdge();
         shape = new GravisEdge(source , target , node);
         shape.setActiveStyleClass("gravisEdge");
-        node.addShape(shape);
+        node.getShapes().add(shape);
         
         graphDao.add(shape);
         petriNetDao.add(node);
@@ -132,20 +131,20 @@ public class DataService
         GraphNode node = (GraphNode) target.getRelatedObject();
         IGravisNode copy;
         
-        switch(node.getType()) {
+        switch(node.getElementType()) {
             case PLACE:
                 node = new GraphPlace();
                 copy = new GravisCircle(node);
-                node.addShape(copy);
                 break;
             case TRANSITION:
                 node = new GraphTransition();
                 copy = new GravisRectangle(node);
-                node.addShape(copy);
                 break;
             default:
                 throw new NodeCreationException("No suitable edge type selected!");
         }
+        
+        node.getShapes().add(copy);
         
         return copy;
     }
@@ -155,18 +154,18 @@ public class DataService
         GraphNode node = (GraphNode) target.getRelatedObject();
         IGravisNode clone;
         
-        switch(node.getType()) {
+        switch(node.getElementType()) {
             case PLACE:
                 clone = new GravisCircle(node);
-                node.addShape(clone);
                 break;
             case TRANSITION:
                 clone = new GravisRectangle(node);
-                node.addShape(clone);
                 break;
             default:
                 throw new NodeCreationException("No suitable edge type selected!");
         }
+        
+        node.getShapes().add(clone);
         
         return clone;
     }

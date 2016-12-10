@@ -9,9 +9,9 @@ import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorPaneController;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.business.service.DataService;
-import edu.unibi.agbi.gnius.business.service.SelectionService;
-import edu.unibi.agbi.gnius.business.service.exception.NodeCreationException;
+import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
@@ -19,7 +19,7 @@ import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
-import edu.unibi.agbi.petrinet.model.entity.PNNode;
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
 
 import java.net.URL;
 

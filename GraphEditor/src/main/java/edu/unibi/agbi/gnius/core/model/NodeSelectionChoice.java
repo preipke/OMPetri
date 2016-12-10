@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model;
 
-import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
 
 /**
  *
@@ -13,15 +13,15 @@ import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
  */
 public class NodeSelectionChoice
 {
-    private final GraphNode.Type type;
+    private final PN_Element.Type type;
     private final String typeName;
 
-    public NodeSelectionChoice(GraphNode.Type type , String typeName) {
+    public NodeSelectionChoice(PN_Element.Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }
 
-    public GraphNode.Type getType() {
+    public PN_Element.Type getType() {
         return type;
     }
 

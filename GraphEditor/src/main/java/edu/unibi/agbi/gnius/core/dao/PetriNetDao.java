@@ -6,13 +6,13 @@
 package edu.unibi.agbi.gnius.core.dao;
 
 import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
-import edu.unibi.agbi.gnius.business.service.exception.NodeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 
 import edu.unibi.agbi.petrinet.model.PetriNet;
-import edu.unibi.agbi.petrinet.model.entity.Arc;
-import edu.unibi.agbi.petrinet.model.entity.PNNode;
-import edu.unibi.agbi.petrinet.model.entity.Place;
-import edu.unibi.agbi.petrinet.model.entity.Transition;
+import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.petrinet.model.entity.impl.Place;
+import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,12 +27,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PetriNetDao extends PetriNet
 {
-    private static final Map<String,PNNode> pnNodesInternalIds = new HashMap();
-    private static final Map<String,ArrayList<PNNode>> pnNodesUserIds = new HashMap();
+    private static final Map<String,PN_Element> pnNodesInternalIds = new HashMap();
+    private static final Map<String,ArrayList<PN_Element>> pnNodesUserIds = new HashMap();
     
     public void add(GraphNode node) throws NodeCreationException {
         
-        GraphNode.Type type = node.getType();
+        PN_Element.Type type = node.getElementType();
         
         switch(type) {
             case PLACE:
@@ -41,7 +41,7 @@ public class PetriNetDao extends PetriNet
             case TRANSITION:
                 add((Transition) node);
                 break;
-            case EDGE:
+            case ARC:
                 add((Arc) node);
                 break;
             default:

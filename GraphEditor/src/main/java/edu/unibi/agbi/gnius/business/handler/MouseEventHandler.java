@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.business.handler;
 
 import edu.unibi.agbi.gnius.business.controller.tab.EditorTabController;
-import edu.unibi.agbi.gnius.business.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;

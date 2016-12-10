@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity;
 
-import edu.unibi.agbi.petrinet.model.entity.Transition;
+import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
 
 /**
  *
@@ -13,19 +13,5 @@ import edu.unibi.agbi.petrinet.model.entity.Transition;
  */
 public class GraphTransition extends Transition implements GraphNode
 {
-    private final GraphNode.Type nodeType;
-    private Type transitionType;
     
-    public GraphTransition() {
-        nodeType = GraphNode.Type.TRANSITION;
-    }
-    
-    @Override
-    public GraphNode.Type getType() {
-        return nodeType;
-    }
-    public enum Type
-    {
-        CONTINUOUS, DEFAULT, DISCRETE, STOCHASTIC;
-    }
 }

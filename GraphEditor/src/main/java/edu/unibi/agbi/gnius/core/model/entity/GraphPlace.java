@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity;
 
-import edu.unibi.agbi.petrinet.model.entity.Place;
+import edu.unibi.agbi.petrinet.model.entity.impl.Place;
 
 /**
  *
@@ -13,21 +13,5 @@ import edu.unibi.agbi.petrinet.model.entity.Place;
  */
 public class GraphPlace extends Place implements GraphNode
 {
-    private final GraphNode.Type nodeType;
-    private Type placeType;
     
-    public GraphPlace() {
-        super();
-        nodeType = GraphNode.Type.PLACE;
-    }
-    
-    @Override
-    public GraphNode.Type getType() {
-        return nodeType;
-    }
-    
-    public enum Type
-    {
-        CONTINUOUS, DEFAULT, DISCRETE;
-    }
 }

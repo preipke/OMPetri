@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.service.DataService;
-import edu.unibi.agbi.gnius.business.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.SelectionService;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;

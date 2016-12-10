@@ -6,16 +6,16 @@
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
-import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
-import edu.unibi.agbi.gnius.business.service.exception.EdgeCreationException;
-import edu.unibi.agbi.gnius.business.service.exception.NodeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.LayoutSelectionChoice;
 import edu.unibi.agbi.gnius.core.model.NodeSelectionChoice;
-import edu.unibi.agbi.gnius.business.service.DataService;
+import edu.unibi.agbi.gnius.core.service.DataService;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -68,9 +68,9 @@ public class EditorToolsController implements Initializable
         choicesAlignNodes.getSelectionModel().selectFirst();
         
         ObservableList<NodeSelectionChoice> nodeChoices = FXCollections.observableArrayList();
-        nodeChoices.add(new NodeSelectionChoice(GraphNode.Type.PLACE, "Place"));
-        nodeChoices.add(new NodeSelectionChoice(GraphNode.Type.TRANSITION, "Transition"));
-        nodeChoices.add(new NodeSelectionChoice(GraphNode.Type.EDGE, "..."));
+        nodeChoices.add(new NodeSelectionChoice(PN_Element.Type.PLACE, "Place"));
+        nodeChoices.add(new NodeSelectionChoice(PN_Element.Type.TRANSITION, "Transition"));
+        nodeChoices.add(new NodeSelectionChoice(PN_Element.Type.ARC, "..."));
         
         choicesCreateNode.setItems(nodeChoices);
         choicesCreateNode.getSelectionModel().selectFirst();
@@ -102,32 +102,32 @@ public class EditorToolsController implements Initializable
         IGravisNode place, transition;
         try {
             for (int i = 0; i < elements; i++) {
-                place = dataService.create(GraphNode.Type.PLACE , null, null);
-                transition = dataService.create(GraphNode.Type.TRANSITION , null, null);
+                place = dataService.create(PN_Element.Type.PLACE , null, null);
+                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
                 dataService.create(place , transition);
                 
-                place = dataService.create(GraphNode.Type.PLACE , null, null);
+                place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.create(place , transition);
                 
-                transition = dataService.create(GraphNode.Type.TRANSITION , null, null);
+                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
                 dataService.create(place , transition);
                 
-                place = dataService.create(GraphNode.Type.PLACE , null, null);
+                place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.create(place , transition);
                 
-                place = dataService.create(GraphNode.Type.PLACE , null, null);
+                place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.create(place , transition);
                 
-                transition = dataService.create(GraphNode.Type.TRANSITION , null, null);
+                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
                 dataService.create(place , transition);
                 
-                transition = dataService.create(GraphNode.Type.TRANSITION , null, null);
+                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
                 dataService.create(place , transition);
                 
-                place = dataService.create(GraphNode.Type.PLACE , null, null);
+                place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.create(place , transition);
                 
-                place = dataService.create(GraphNode.Type.PLACE , null, null);
+                place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.create(place , transition);
             }
         } catch (NodeCreationException | EdgeCreationException ex) {

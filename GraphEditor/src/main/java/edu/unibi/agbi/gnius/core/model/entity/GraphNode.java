@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity;
 
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+
 import java.util.List;
 
 /**
@@ -13,11 +15,6 @@ import java.util.List;
  */
 public interface GraphNode
 {
-    public Type getType();
-    public void addShape(Object shape);
     public List<Object> getShapes();
-    
-    public enum Type {
-        EDGE, PLACE, TRANSITION;
-    }
+    public PN_Element.Type getElementType();
 }
