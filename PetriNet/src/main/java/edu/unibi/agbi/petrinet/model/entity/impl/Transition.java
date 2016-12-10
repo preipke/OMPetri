@@ -3,28 +3,31 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity;
+package edu.unibi.agbi.petrinet.model.entity.impl;
 
 import edu.unibi.agbi.petrinet.model.Function;
-import java.util.List;
+import edu.unibi.agbi.petrinet.model.entity.PN_Node;
+import edu.unibi.agbi.petrinet.model.entity.PN_Element;
 
 /**
  *
  * @author PR
  */
-public abstract class Transition extends PNNode
+public abstract class Transition extends PN_Node
 {
-    private boolean isEnabled;
-    
-    private Function function;
-    
-    private List<Place> incomingPlaces;
-    private List<Place> outgoingPlaces;
+    private final Function function;
     
     private Type transitionType;
     
     public Transition() {
-        this.pnNodeType = PNNode.Type.TRANSITION;
+        
+        type = PN_Element.Type.TRANSITION;
+        
+        function = new Function();
+    }
+
+    public Function getFunction() {
+        return function;
     }
     
     public Type getTransitionType() {

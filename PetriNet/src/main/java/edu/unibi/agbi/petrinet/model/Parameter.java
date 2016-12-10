@@ -11,7 +11,48 @@ package edu.unibi.agbi.petrinet.model;
  */
 public class Parameter
 {
+    private final Type type;
+    
     private String name;
-    private String description;
-    private double value;
+    private Double value;
+    private String note;
+    
+    public Parameter(String name, Double value, String note, Type type) {
+        this.name = name;
+        this.value = value;
+        this.note = note;
+        this.type = type;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public double getValue() {
+        return value;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public Type getType() {
+        return type;
+    }
+    
+    public enum Type {
+        INFO, COMPUTE, FUNCTION;
+    }
 }

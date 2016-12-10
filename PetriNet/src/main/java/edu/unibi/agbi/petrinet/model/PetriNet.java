@@ -5,9 +5,9 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
-import edu.unibi.agbi.petrinet.model.entity.Arc;
-import edu.unibi.agbi.petrinet.model.entity.Place;
-import edu.unibi.agbi.petrinet.model.entity.Transition;
+import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.model.entity.impl.Place;
+import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
 import java.util.ArrayList;
 import java.util.List;
 

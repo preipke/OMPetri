@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.arc;
+package edu.unibi.agbi.petrinet.model.entity.impl.transition;
 
-import edu.unibi.agbi.petrinet.model.entity.Arc;
+import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
 
 /**
  *
  * @author PR
  */
-public class ArcEqual extends Arc
+public class TransitionDefault extends Transition
 {
-    public ArcEqual() {
+    public TransitionDefault() {
     }
 }

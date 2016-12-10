@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.place;
+package edu.unibi.agbi.petrinet.model.entity.impl.arc;
 
-import edu.unibi.agbi.petrinet.model.entity.Place;
+import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
 
 /**
  *
  * @author PR
  */
-public class PlaceDefault extends Place
+public class ArcEqual extends Arc
 {
-    public PlaceDefault() {
+    public ArcEqual() {
     }
 }

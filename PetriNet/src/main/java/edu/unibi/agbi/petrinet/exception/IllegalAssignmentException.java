@@ -3,16 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.arc;
-
-import edu.unibi.agbi.petrinet.model.entity.Arc;
+package edu.unibi.agbi.petrinet.exception;
 
 /**
  *
  * @author PR
  */
-public class ArcDefault extends Arc
+public class IllegalAssignmentException extends Exception
 {
-    public ArcDefault() {
+    public IllegalAssignmentException(String msg) {
+        super(msg);
     }
 }
