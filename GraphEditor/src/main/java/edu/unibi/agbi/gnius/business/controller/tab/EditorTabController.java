@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.tab;
 
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorPaneController;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
-import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;

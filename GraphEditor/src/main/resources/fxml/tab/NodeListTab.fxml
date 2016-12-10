@@ -10,7 +10,7 @@
 
 <Tab fx:id="nodeListTab" text="Node List" xmlns:fx="http://javafx.com/fxml/1" 
      xmlns="http://javafx.com/javafx/8" 
-     fx:controller="edu.unibi.agbi.gnius.controller.tab.NodeListTabController">
+     fx:controller="edu.unibi.agbi.gnius.business.controller.tab.NodeListTabController">
     <content>
         <ListView/>
     </content>

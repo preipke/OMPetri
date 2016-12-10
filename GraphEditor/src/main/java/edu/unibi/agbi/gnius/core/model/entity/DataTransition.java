@@ -11,7 +11,7 @@ import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
  *
  * @author PR
  */
-public class GraphTransition extends Transition implements GraphNode
+public class DataTransition extends Transition implements IDataNode
 {
     
 }

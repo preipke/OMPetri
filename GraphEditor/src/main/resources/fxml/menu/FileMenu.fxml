@@ -10,7 +10,7 @@
 
         <Menu mnemonicParsing="false" text="File"  
 				xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-				fx:id="fileMenu" fx:controller="edu.unibi.agbi.gnius.controller.menu.FileMenuController">
+				fx:id="fileMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.FileMenuController">
           <items>
             <MenuItem mnemonicParsing="false" text="New" />
             <MenuItem mnemonicParsing="false" text="Open…" />

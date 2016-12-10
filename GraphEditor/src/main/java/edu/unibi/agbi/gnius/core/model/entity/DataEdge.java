@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Place;
+import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
 
 /**
  *
  * @author PR
  */
-public class GraphPlace extends Place implements GraphNode
+public class DataEdge extends Arc implements IDataNode
 {
-    
+
 }

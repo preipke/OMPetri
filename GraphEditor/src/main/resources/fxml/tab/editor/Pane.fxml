@@ -10,4 +10,4 @@
 
 <BorderPane fx:id="editorPane" HBox.hgrow="ALWAYS" 
             xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-            fx:controller="edu.unibi.agbi.gnius.controller.tab.editor.EditorPaneController" />
+            fx:controller="edu.unibi.agbi.gnius.business.controller.tab.editor.EditorPaneController" />

@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity;
 
+import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.entity.PN_Element;
 
 import java.util.List;
@@ -13,8 +14,9 @@ import java.util.List;
  *
  * @author PR
  */
-public interface GraphNode
+public interface IDataNode
 {
     public List<Object> getShapes();
     public PN_Element.Type getElementType();
+    public List<Parameter> getParameter();
 }

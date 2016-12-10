@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.SelectionDao;
-import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
@@ -38,7 +38,7 @@ public class SelectionService
     }
     
     public void addAll(IGravisNode node) {
-        GraphNode graphNode = (GraphNode) node.getRelatedObject();
+        IDataNode graphNode = (IDataNode) node.getRelatedObject();
         for (Object shape : graphNode.getShapes()) {
             selectionDao.add((IGravisNode)shape);
         }

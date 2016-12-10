@@ -10,7 +10,7 @@
 
         <Menu mnemonicParsing="false" text="Help"
 				xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-				fx:id="helpMenu" fx:controller="edu.unibi.agbi.gnius.controller.menu.HelpMenuController">
+				fx:id="helpMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.HelpMenuController">
           <items>
             <MenuItem mnemonicParsing="false" text="About MyHelloApp" />
           </items>

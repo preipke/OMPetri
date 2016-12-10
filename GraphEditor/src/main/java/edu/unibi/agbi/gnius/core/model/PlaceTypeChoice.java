@@ -5,31 +5,28 @@
  */
 package edu.unibi.agbi.gnius.core.model;
 
+import edu.unibi.agbi.gnius.core.model.entity.DataPlace;
+
 /**
  *
  * @author PR
  */
-public class LayoutSelectionChoice
+public class PlaceTypeChoice
 {
-    private final Type type;
+    private final DataPlace.Type type;
     private final String typeName;
 
-    public LayoutSelectionChoice(Type type , String typeName) {
+    public PlaceTypeChoice(DataPlace.Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }
 
-    public Type getType() {
+    public DataPlace.Type getType() {
         return type;
     }
 
     @Override
     public String toString() {
         return typeName;
-    }
-
-    public enum Type
-    {
-        RANDOM, DEFAULT;
     }
 }

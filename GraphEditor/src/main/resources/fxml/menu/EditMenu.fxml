@@ -10,7 +10,7 @@
 
         <Menu mnemonicParsing="false" text="Edit"
 				xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-				fx:id="editMenu" fx:controller="edu.unibi.agbi.gnius.controller.menu.EditMenuController">
+				fx:id="editMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.EditMenuController">
           <items>
             <MenuItem mnemonicParsing="false" text="Undo" />
             <MenuItem mnemonicParsing="false" text="Redo" />

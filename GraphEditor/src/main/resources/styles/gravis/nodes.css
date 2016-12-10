@@ -42,7 +42,7 @@
 }
 
 .gravisEdge:hover {
-    -fx-stroke: lightgoldenrodyellow;
+    -fx-stroke: darkred;
     -fx-stroke-width: 2;
 }
 

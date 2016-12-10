@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.business.handler;
 
 import edu.unibi.agbi.gnius.business.controller.tab.EditorTabController;
+import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.util.Calculator;
 
@@ -35,7 +36,10 @@ import org.springframework.stereotype.Component;
 public class MouseEventHandler
 {
     @Autowired private SelectionService selectionService;
+    
     @Autowired private EditorTabController editorTabController;
+    @Autowired private EditorDetailsController editorDetailsController;
+    
     @Autowired private KeyEventHandler keyEventHandler;
     @Autowired private Calculator calculator;
     
@@ -132,6 +136,7 @@ public class MouseEventHandler
                             if (!event.isControlDown()) {
                                 selectionService.clear();
                                 selectionService.addAll(node);
+                                editorDetailsController.getDetails(node);
                             }
                         } else {
                             // Maybe dragging - wait!
@@ -143,6 +148,7 @@ public class MouseEventHandler
                         
                         if (!event.isControlDown()) {
                             selectionService.clear();
+                            editorDetailsController.getDetails(edge);
                         }
                         selectionService.add(edge);
                     }
@@ -151,6 +157,9 @@ public class MouseEventHandler
                     /**
                      * Clicking the pane.
                      */
+                    
+                    editorDetailsController.clear();
+                    
                     if (isCreatingNodes.get()) {
                         
                         editorTabController.CreateNode(event); // Create node at event location.
@@ -269,7 +278,7 @@ public class MouseEventHandler
                     if (node instanceof IGravisNode) {
                         if (node.getBoundsInParent().intersects(selectionRectangle.getBoundsInParent())) {
                             Platform.runLater(() -> {
-                                selectionService.addAll((IGravisNode)node);
+                                selectionService.add((IGravisNode)node);
                             });
                         }
                     }
@@ -292,14 +301,21 @@ public class MouseEventHandler
                             if (!selectionService.remove(node)) {
                                 selectionService.add(node);
                             }
+                            editorDetailsController.clear();
+                        } else {
+                            editorDetailsController.getDetails(node);
+                            selectionService.clear();
+                            selectionService.addAll(node);
                         }
                         
                     } else if (event.getTarget() instanceof IGravisEdge) {
                         
                         IGravisEdge edge = (IGravisEdge)event.getTarget();
                         
-                        if (!event.isControlDown()) {
-                            selectionService.clear();
+                        if (event.isControlDown()) {
+                            editorDetailsController.clear();
+                        } else {
+                            editorDetailsController.getDetails(edge);
                         }
                         selectionService.add(edge);
                     }

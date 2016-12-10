@@ -5,23 +5,23 @@
  */
 package edu.unibi.agbi.gnius.core.model;
 
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.gnius.core.model.entity.DataEdge;
 
 /**
  *
  * @author PR
  */
-public class NodeSelectionChoice
+public class EdgeTypeChoice
 {
-    private final PN_Element.Type type;
+    private final DataEdge.Type type;
     private final String typeName;
 
-    public NodeSelectionChoice(PN_Element.Type type , String typeName) {
+    public EdgeTypeChoice(DataEdge.Type type , String typeName) {
         this.type = type;
         this.typeName = typeName;
     }
 
-    public PN_Element.Type getType() {
+    public DataEdge.Type getType() {
         return type;
     }
 

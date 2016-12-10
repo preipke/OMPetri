@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.dao;
 
-import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 
 import edu.unibi.agbi.petrinet.model.PetriNet;
@@ -30,7 +30,7 @@ public class PetriNetDao extends PetriNet
     private static final Map<String,PN_Element> pnNodesInternalIds = new HashMap();
     private static final Map<String,ArrayList<PN_Element>> pnNodesUserIds = new HashMap();
     
-    public void add(GraphNode node) throws NodeCreationException {
+    public void add(IDataNode node) throws NodeCreationException {
         
         PN_Element.Type type = node.getElementType();
         

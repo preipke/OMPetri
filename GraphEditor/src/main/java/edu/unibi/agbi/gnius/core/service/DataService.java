@@ -7,10 +7,10 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
-import edu.unibi.agbi.gnius.core.model.entity.GraphEdge;
-import edu.unibi.agbi.gnius.core.model.entity.GraphNode;
-import edu.unibi.agbi.gnius.core.model.entity.GraphPlace;
-import edu.unibi.agbi.gnius.core.model.entity.GraphTransition;
+import edu.unibi.agbi.gnius.core.model.entity.DataEdge;
+import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.DataTransition;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
@@ -65,17 +65,17 @@ public class DataService
      */
     public IGravisNode create(PN_Element.Type type, MouseEvent target, Point2D position) throws NodeCreationException {
         
-        GraphNode node;
+        IDataNode node;
         IGravisNode shape;
         
         switch(type) {
             case PLACE:
-                node = new GraphPlace();
+                node = new DataPlace();
                 shape = new GravisCircle(node);
                 shape.setActiveStyleClass("gravisCircle");
                 break;
             case TRANSITION:
-                node = new GraphTransition();
+                node = new DataTransition();
                 shape = new GravisRectangle(node);
                 shape.setActiveStyleClass("gravisRectangle");
                 break;
@@ -110,10 +110,10 @@ public class DataService
      */
     public void create(IGravisNode source, IGravisNode target) throws EdgeCreationException , NodeCreationException {
         
-        GraphNode node;
+        IDataNode node;
         IGravisEdge shape;
 
-        node = new GraphEdge();
+        node = new DataEdge();
         shape = new GravisEdge(source , target , node);
         shape.setActiveStyleClass("gravisEdge");
         node.getShapes().add(shape);
@@ -128,16 +128,16 @@ public class DataService
     
     public IGravisNode copy(IGravisNode target) throws NodeCreationException {
         
-        GraphNode node = (GraphNode) target.getRelatedObject();
+        IDataNode node = (IDataNode) target.getRelatedObject();
         IGravisNode copy;
         
         switch(node.getElementType()) {
             case PLACE:
-                node = new GraphPlace();
+                node = new DataPlace();
                 copy = new GravisCircle(node);
                 break;
             case TRANSITION:
-                node = new GraphTransition();
+                node = new DataTransition();
                 copy = new GravisRectangle(node);
                 break;
             default:
@@ -151,7 +151,7 @@ public class DataService
     
     public IGravisNode clone(IGravisNode target) throws NodeCreationException {
         
-        GraphNode node = (GraphNode) target.getRelatedObject();
+        IDataNode node = (IDataNode) target.getRelatedObject();
         IGravisNode clone;
         
         switch(node.getElementType()) {
@@ -205,7 +205,7 @@ public class DataService
     }
     
     public boolean remove(IGravisNode node) {
-        ((GraphNode)node.getRelatedObject()).getShapes().remove(node);
+        ((IDataNode)node.getRelatedObject()).getShapes().remove(node);
         return graphDao.remove(node);
     }
     

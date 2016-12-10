@@ -1,7 +1,5 @@
 package edu.unibi.agbi.gnius;
 
-import edu.unibi.agbi.gnius.business.handler.KeyEventHandler;
-import edu.unibi.agbi.gnius.core.service.DataService;
 import javafx.application.Application;
 import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
@@ -9,7 +7,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javax.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,7 +16,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * Boot and configuration class.
  * @author PR
  */
-@SpringBootApplication // worth three annotations: @Configuration @ComponentScan @EnableAutoConfig
+@SpringBootApplication // matches @Configuration @ComponentScan @EnableAutoConfig
 public class Main extends Application {
     
     private ConfigurableApplicationContext springContext;

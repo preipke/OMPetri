@@ -8,12 +8,37 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" prefWidth="200.0" spacing="5.0"
-                              xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-                              fx:id="editorDetails" fx:controller="edu.unibi.agbi.gnius.controller.tab.editor.EditorDetailsController">
+<VBox fx:id="editorDetails" alignment="CENTER" prefWidth="200.0" spacing="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController">
     <children>
-        <Label text="Label" />
-        <VBox prefHeight="200.0" prefWidth="100.0" VBox.vgrow="ALWAYS" />
-        <Label text="Label" />
+      <Separator prefWidth="200.0" />
+        <Label text="Details">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font></Label>
+      <Separator prefWidth="200.0" />
+      <HBox spacing="15.0">
+         <children>
+            <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Type" />
+               </children>
+            </VBox>
+            <TextField fx:id="detailsNodeType" editable="false" />
+         </children>
+      </HBox>
+      <HBox spacing="15.0">
+         <children>
+            <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Subtype" />
+               </children>
+            </VBox>
+            <ChoiceBox fx:id="detailsNodeSubtype" />
+         </children>
+      </HBox>
+      <VBox fx:id="detailsInfoBox" />
+      <Separator prefWidth="200.0" />
+        <VBox fx:id="detailsComputeBox" VBox.vgrow="ALWAYS" />
+      <Separator prefWidth="200.0" />
     </children>
 </VBox>

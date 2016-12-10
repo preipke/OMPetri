@@ -9,7 +9,7 @@
 
 <Tab fx:id="presentationTab" text="Presentation" xmlns:fx="http://javafx.com/fxml/1" 
      xmlns="http://javafx.com/javafx/8" 
-     fx:controller="edu.unibi.agbi.gnius.controller.tab.EditorTabController">
+     fx:controller="edu.unibi.agbi.gnius.business.controller.tab.EditorTabController">
     <content>
         <HBox spacing="5.0">
             <children>
