@@ -14,10 +14,10 @@ public class Parameter
     private final Type type;
     
     private String name;
-    private Double value;
+    private String value;
     private String note;
     
-    public Parameter(String name, Double value, String note, Type type) {
+    public Parameter(String name, String value, String note, Type type) {
         this.name = name;
         this.value = value;
         this.note = note;
@@ -40,11 +40,11 @@ public class Parameter
         this.note = note;
     }
 
-    public double getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(Double value) {
+    public void setValue(String value) {
         this.value = value;
     }
 

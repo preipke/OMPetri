@@ -9,8 +9,6 @@ package edu.unibi.agbi.petrinet.model.entity.impl;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.entity.PN_Node;
 import edu.unibi.agbi.petrinet.model.entity.PN_Element;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
