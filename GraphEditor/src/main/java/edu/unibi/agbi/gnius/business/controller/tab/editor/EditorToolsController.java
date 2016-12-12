@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
-import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
 
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
@@ -48,7 +48,7 @@ public class EditorToolsController implements Initializable
     
     @Autowired private MouseEventHandler mouseEventHandler;
     
-    int elements = 1000;
+    int elements = 10;
     
     public void CreateNode(MouseEvent target) {
         try {

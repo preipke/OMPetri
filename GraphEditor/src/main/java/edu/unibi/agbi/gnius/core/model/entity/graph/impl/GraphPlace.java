@@ -9,7 +9,8 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisRectangle;
 import javafx.beans.property.BooleanProperty;
@@ -20,7 +21,7 @@ import javafx.css.PseudoClass;
  *
  * @author PR
  */
-public class GraphPlace extends GravisRectangle implements IGraphNode
+public class GraphPlace extends GravisCircle implements IGraphNode
 {
     private DataPlace dataElement;
     

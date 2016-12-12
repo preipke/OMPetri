@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisRectangle;
 import javafx.beans.property.BooleanProperty;

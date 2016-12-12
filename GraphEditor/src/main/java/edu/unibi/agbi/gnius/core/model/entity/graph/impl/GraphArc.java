@@ -10,7 +10,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisEdge;
 import javafx.beans.property.BooleanProperty;

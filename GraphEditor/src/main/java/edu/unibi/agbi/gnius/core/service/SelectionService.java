@@ -59,7 +59,9 @@ public class SelectionService
     }
     
     public void copy() {
+        nodesCopy = new IGraphNode[selectionDao.getSelectedNodes().size()];
         nodesCopy = selectionDao.getSelectedNodes().toArray(nodesCopy);
+        edgeCopy = new IGraphArc[selectionDao.getSelectedArcs().size()];
         edgeCopy = selectionDao.getSelectedArcs().toArray(edgeCopy);
     }
     

@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
 
 /**
