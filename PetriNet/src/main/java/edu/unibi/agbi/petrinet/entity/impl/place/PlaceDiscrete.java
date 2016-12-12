@@ -1,6 +1,6 @@
-package edu.unibi.agbi.petrinet.model.entity.impl.place;
+package edu.unibi.agbi.petrinet.entity.impl.place;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

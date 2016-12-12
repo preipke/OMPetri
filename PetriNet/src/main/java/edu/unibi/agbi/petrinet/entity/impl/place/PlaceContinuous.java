@@ -3,16 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.impl.place;
+package edu.unibi.agbi.petrinet.entity.impl.place;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 
 /**
  *
- * @author PR
+ * @author pr
  */
-public class PlaceDefault extends Place
+public class PlaceContinuous extends Place
 {
-    public PlaceDefault() {
+    public PlaceContinuous() {
     }
 }

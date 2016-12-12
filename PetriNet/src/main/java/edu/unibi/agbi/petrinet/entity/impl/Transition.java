@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.impl;
+package edu.unibi.agbi.petrinet.entity.impl;
 
 import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.entity.PN_Node;
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Node;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
 
 /**
  *

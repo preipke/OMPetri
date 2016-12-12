@@ -3,11 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.impl;
+package edu.unibi.agbi.petrinet.entity.impl;
 
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Node;
+import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Weight;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -17,17 +23,37 @@ public abstract class Arc extends PN_Element
 {
     private Type arcType;
     
-    private PN_Element target;
-    private PN_Element source;
+    private PN_Node target;
+    private PN_Node source;
+    
+    private final Map<Colour,Weight> weights;
     
     public Arc() {
         
         type = PN_Element.Type.ARC;
         
         getParameter().add(new Parameter("Weight", null, null, Parameter.Type.COMPUTE));
+        
+        weights = new HashMap();
+    }
+    
+    public void setWeight(Weight weight) {
+        weights.put(weight.getColour(), weight);
+    }
+    
+    public Weight getWeight(Colour colour) {
+        return weights.get(colour);
+    }
+    
+    public Collection<Weight> getWeights() {
+        return weights.values();
+    }
+    
+    public Map<Colour,Weight> getWeightMap() {
+        return weights;
     }
 
-    public void setTarget(PN_Element target) throws IllegalAssignmentException {
+    public void setTarget(PN_Node target) throws IllegalAssignmentException {
         if (source != null) {
             if (source instanceof Place && target instanceof Place) {
                 throw new IllegalAssignmentException("Cannot assign target and source to be places!");
@@ -36,9 +62,10 @@ public abstract class Arc extends PN_Element
             }
         }
         this.target = target;
+        id = source.getId() + "_" + target.getId();
     }
 
-    public void setSource(PN_Element source) throws IllegalAssignmentException {
+    public void setSource(PN_Node source) throws IllegalAssignmentException {
         if (target != null) {
             if (source instanceof Place && target instanceof Place) {
                 throw new IllegalAssignmentException("Cannot assign target and source to be places!");
@@ -47,13 +74,14 @@ public abstract class Arc extends PN_Element
             }
         }
         this.source = source;
+        id = source.getId() + "_" + target.getId();
     }
 
-    public PN_Element getTarget() {
+    public PN_Node getTarget() {
         return target;
     }
 
-    public PN_Element getSource() {
+    public PN_Node getSource() {
         return source;
     }
     

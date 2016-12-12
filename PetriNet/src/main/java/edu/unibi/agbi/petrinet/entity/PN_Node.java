@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity;
+package edu.unibi.agbi.petrinet.entity;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +16,9 @@ import java.util.List;
  */
 public abstract class PN_Node extends PN_Element
 {
+    private static final String IDENT = "pn";
+    private static int COUNT = 0;
+    
     private boolean isEnabled = true;
     
     private final List<Arc> arcsIn;
@@ -23,6 +26,11 @@ public abstract class PN_Node extends PN_Element
     
     public PN_Node() {
         super();
+        
+        synchronized (IDENT) {
+            COUNT++;
+            id = IDENT + COUNT;
+        }
         
         getParameter().add(new Parameter("Name", null, null, Parameter.Type.INFO));
         getParameter().add(new Parameter("Label", null, null, Parameter.Type.INFO));

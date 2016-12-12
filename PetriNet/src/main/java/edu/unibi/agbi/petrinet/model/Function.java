@@ -14,8 +14,17 @@ import java.util.List;
 public class Function {
     
     private String function;
+    private String unit;
+    
     private List<Parameter> parameter;
     
+    public String getUnit() {
+        return unit;
+    }
     
+    @Override
+    public String toString() {
+        return function;
+    }
     
 }

@@ -3,15 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.impl.arc;
-
-import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
+package edu.unibi.agbi.petrinet.util;
 
 /**
  *
  * @author PR
  */
-public class ArcReset extends Arc
+public class SBML_Exporter
 {
     
 }

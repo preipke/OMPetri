@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.impl.transition;
+package edu.unibi.agbi.petrinet.entity.impl.transition;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 
 /**
  *
  * @author pr
  */
-public class TransitionStochastic extends Transition {
-    public TransitionStochastic() {
+public class TransitionDiscrete extends Transition {
+    public TransitionDiscrete() {
     }
 }

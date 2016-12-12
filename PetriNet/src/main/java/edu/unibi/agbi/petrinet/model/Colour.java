@@ -3,16 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model.entity.impl.transition;
-
-import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
+package edu.unibi.agbi.petrinet.model;
 
 /**
  *
  * @author PR
  */
-public class TransitionDefault extends Transition
+public class Colour
 {
-    public TransitionDefault() {
+    private String name;
+    private String description;
+
+    public String getId() {
+        return name;
     }
 }
