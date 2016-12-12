@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gravisfx.presentation.layout;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import java.util.Random;
 

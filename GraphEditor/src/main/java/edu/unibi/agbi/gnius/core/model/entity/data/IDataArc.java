@@ -5,15 +5,14 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import java.util.List;
 
 /**
  *
  * @author PR
  */
-public interface IDataNode extends IDataElement
+public interface IDataArc extends IDataElement
 {
-    public List<IGraphNode> getShapes();
+    public List<IGraphArc> getShapes();
 }

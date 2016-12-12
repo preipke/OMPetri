@@ -5,12 +5,16 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity;
 
+import javafx.scene.shape.Shape;
+
 /**
  *
  * @author PR
  */
-public interface IGravisEdge extends IGravisElement
+public interface IGravisElement
 {
-    public IGravisNode getSource();
-    public IGravisNode getTarget();
+    public Shape getShape();
+    
+    public double getTranslateX();
+    public double getTranslateY();
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.node;
+package edu.unibi.agbi.gravisfx.graph.entity;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @author PR
  */
-public interface IGravisNode extends IGravisSelectable
+public interface IGravisNode extends IGravisElement
 {
     public void setTranslate(double positionX, double positionY);
     
@@ -29,7 +29,4 @@ public interface IGravisNode extends IGravisSelectable
     public List<IGravisNode> getParents();
     public List<IGravisNode> getChildren();
     public List<IGravisEdge> getEdges();
-    
-    public IGravisNode getCopy();
-    public IGravisNode getClone();
 }

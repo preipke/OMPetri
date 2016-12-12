@@ -9,9 +9,10 @@ import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 
@@ -52,7 +53,7 @@ public class EditorToolsController implements Initializable
     public void CreateNode(MouseEvent target) {
         try {
             dataService.create(((NodeTypeChoice) choicesCreateNode.getSelectionModel().getSelectedItem()).getType() , target , Point2D.ZERO);
-        } catch (NodeCreationException ex) {
+        } catch (NodeCreationException | RelationChangeDeniedException ex) {
 
         }
     }
@@ -77,7 +78,7 @@ public class EditorToolsController implements Initializable
     
     @FXML
     private void buttonLoadExampleNodes() {
-        IGravisNode place, transition;
+        IGraphNode place, transition;
         try {
             for (int i = 0; i < elements; i++) {
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
@@ -108,7 +109,7 @@ public class EditorToolsController implements Initializable
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.create(place , transition);
             }
-        } catch (NodeCreationException | EdgeCreationException ex) {
+        } catch (NodeCreationException | EdgeCreationException | RelationChangeDeniedException ex) {
             System.out.println(ex.toString());
         }
     }

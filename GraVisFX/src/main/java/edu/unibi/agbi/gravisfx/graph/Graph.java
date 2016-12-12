@@ -6,13 +6,12 @@
 package edu.unibi.agbi.gravisfx.graph;
 
 import edu.unibi.agbi.gravisfx.graph.model.DataModel;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
-import java.util.List;
 
 /**
  * The Graph. Serves as a service to access the underlying data models.

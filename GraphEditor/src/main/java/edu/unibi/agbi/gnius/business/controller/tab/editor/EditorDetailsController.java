@@ -5,13 +5,12 @@
  */
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.DataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.data.DataPlace;
-import edu.unibi.agbi.gnius.core.model.entity.data.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
-
-import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -69,13 +68,13 @@ public class EditorDetailsController implements Initializable
     
     /**
      * Shows the details for the given entity.
-     * @param selectable 
+     * @param element 
      */
-    public void getDetails(IGravisSelectable selectable) {
+    public void getDetails(IGraphElement element) {
         
         clear();
         
-        IDataNode node = (IDataNode) selectable.getRelatedObject();
+        IDataElement node = element.getRelatedDataElement();
         
         PN_Element.Type elementType = node.getElementType();
 

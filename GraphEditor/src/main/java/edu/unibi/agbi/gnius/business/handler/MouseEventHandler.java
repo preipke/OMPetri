@@ -7,12 +7,12 @@ package edu.unibi.agbi.gnius.business.handler;
 
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.util.Calculator;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 
 import javafx.application.Platform;
@@ -123,14 +123,14 @@ public class MouseEventHandler
                 
                 isPrimaryButtonDown = true;
 
-                if (event.getTarget() instanceof IGravisSelectable) {
+                if (event.getTarget() instanceof IGraphElement) {
                     
                     /**
                      * Clicking node objects.
                      */
-                    if (event.getTarget() instanceof IGravisNode) {
+                    if (event.getTarget() instanceof IGraphNode) {
                         
-                        IGravisNode node = (IGravisNode)event.getTarget();
+                        IGraphNode node = (IGraphNode)event.getTarget();
                         
                         if (!selectionService.contains(node)) {
                             if (!event.isControlDown()) {
@@ -142,9 +142,9 @@ public class MouseEventHandler
                             // Maybe dragging - wait!
                         }
                         
-                    } else if (event.getTarget() instanceof IGravisEdge) {
+                    } else {
                         
-                        IGravisEdge edge = (IGravisEdge)event.getTarget();
+                        GraphArc edge = (GraphArc)event.getTarget();
                         
                         if (!event.isControlDown()) {
                             selectionService.clear();
@@ -234,18 +234,18 @@ public class MouseEventHandler
                     /**
                      * Drag selected node(s).
                      */
-                    if (event.getTarget() instanceof IGravisNode) {
+                    if (event.getTarget() instanceof IGraphNode) {
                         
                         Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious);
                         Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
                         
-                        for (IGravisNode node : selectionService.getNodes()) {
+                        for (IGraphNode node : selectionService.getNodes()) {
                             node.setTranslate(
                                     node.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
                                     node.getTranslateY() + pos_t1.getY() - pos_t0.getY()
                             );
                         }
-                    } else if (event.getTarget() instanceof IGravisEdge) {
+                    } else if (event.getTarget() instanceof GraphArc) {
                         // TODO
                         // allow dragging edges to connect places
                     }
@@ -275,10 +275,10 @@ public class MouseEventHandler
                  * Selecting node objects using the rectangle.
                  */
                 for (Node node : graphPane.getTopLayer().getNodeLayer().getChildren()) {
-                    if (node instanceof IGravisNode) {
+                    if (node instanceof IGraphNode) {
                         if (node.getBoundsInParent().intersects(selectionRectangle.getBoundsInParent())) {
                             Platform.runLater(() -> {
-                                selectionService.add((IGravisNode)node);
+                                selectionService.add((IGraphNode)node);
                             });
                         }
                     }
@@ -293,9 +293,9 @@ public class MouseEventHandler
                  */
                 if (isPrimaryButtonDown && !isDraggingNodes) {
                     
-                    if (event.getTarget() instanceof IGravisNode) {
+                    if (event.getTarget() instanceof IGraphNode) {
                         
-                        IGravisNode node = (IGravisNode)event.getTarget();
+                        IGraphNode node = (IGraphNode)event.getTarget();
                         
                         if (event.isControlDown()) {
                             if (!selectionService.remove(node)) {
@@ -308,9 +308,9 @@ public class MouseEventHandler
                             selectionService.addAll(node);
                         }
                         
-                    } else if (event.getTarget() instanceof IGravisEdge) {
+                    } else if (event.getTarget() instanceof GraphArc) {
                         
-                        IGravisEdge edge = (IGravisEdge)event.getTarget();
+                        GraphArc edge = (GraphArc)event.getTarget();
                         
                         if (event.isControlDown()) {
                             editorDetailsController.hide();

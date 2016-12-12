@@ -3,9 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.model.entity.data;
+package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -13,5 +17,15 @@ import edu.unibi.agbi.petrinet.entity.impl.Place;
  */
 public class DataPlace extends Place implements IDataNode
 {
+    private final List<IGraphNode> shapes;
     
+    public DataPlace() {
+        super();
+        shapes = new ArrayList();
+    }
+
+    @Override
+    public List<IGraphNode> getShapes() {
+        return shapes;
+    }
 }

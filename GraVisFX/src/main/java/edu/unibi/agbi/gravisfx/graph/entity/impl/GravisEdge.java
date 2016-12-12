@@ -3,16 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.node.entity;
+package edu.unibi.agbi.gravisfx.graph.entity.impl;
 
-import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.BooleanPropertyBase;
-import javafx.css.PseudoClass;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
@@ -24,26 +19,6 @@ public class GravisEdge extends Line implements IGravisEdge
 {
     private final IGravisNode source;
     private final IGravisNode target;
-    
-    private String activeStyleClass;
-    
-    private static final String PSEUDO_CLASS_IDENT = "selected";
-    private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass(PSEUDO_CLASS_IDENT);
-    
-    private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
-        @Override 
-        protected void invalidated() {
-            pseudoClassStateChanged(SELECTED_PSEUDO_CLASS , get());
-        }
-        @Override
-        public Object getBean() {
-            return GravisEdge.this;
-        }
-        @Override
-        public String getName() {
-            return PSEUDO_CLASS_IDENT;
-        }
-    };
     
     public GravisEdge(IGravisNode source, IGravisNode target) {
         
@@ -59,26 +34,6 @@ public class GravisEdge extends Line implements IGravisEdge
         endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
     }
     
-    public GravisEdge(IGravisNode source, IGravisNode target, Object relatedObject) {
-        this(source , target);
-        this.relatedObject = relatedObject;
-    }
-    
-    private Object relatedObject;
-    
-    @Override
-    public Object getRelatedObject() {
-        return relatedObject;
-    }
-
-    @Override
-    public void setRelatedObject(Object relatedObject) throws RelationChangeDeniedException {
-        if (this.relatedObject != null) {
-            throw new RelationChangeDeniedException("Relation object has already been assigned!");
-        }
-        this.relatedObject = relatedObject;
-    }
-    
     @Override
     public IGravisNode getSource() {
         return source;
@@ -92,29 +47,5 @@ public class GravisEdge extends Line implements IGravisEdge
     @Override
     public Shape getShape() {
         return this;
-    }
-
-    @Override
-    public void setHighlight(boolean value) {
-        isSelected.set(value);
-    }
-    
-    @Override
-    public void putOnTop() {
-        EdgeLayer edgeLayer = (EdgeLayer) getParent();
-        edgeLayer.getChildren().remove(this);
-        edgeLayer.getChildren().add(this);
-    }
-
-    @Override
-    public void setActiveStyleClass(String name) {
-        getShape().getStyleClass().remove(activeStyleClass);
-        activeStyleClass = name;
-        getShape().getStyleClass().add(name);
-    }
-
-    @Override
-    public String getActiveStyleClass() {
-        return activeStyleClass;
     }
 }

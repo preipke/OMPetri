@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;

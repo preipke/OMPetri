@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gravisfx.graph.model;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 import java.util.ArrayList;
 import java.util.List;
 

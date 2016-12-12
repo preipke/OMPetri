@@ -7,20 +7,22 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
-import edu.unibi.agbi.gnius.core.model.entity.data.DataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.data.DataPlace;
-import edu.unibi.agbi.gnius.core.model.entity.data.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.exception.ColourException;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
+import edu.unibi.agbi.gravisfx.exception.RelationChangeDeniedException;
 
-import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
-import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.model.Colour;
 import java.util.Collection;
@@ -54,7 +56,7 @@ public class DataService
      * Adds a IGravisNode to the graph.
      * @param node 
      */
-    public void add(IGravisNode node) {
+    public void add(IGraphNode node) {
         graphDao.add(node);
     }
     
@@ -66,20 +68,20 @@ public class DataService
      * @param position
      * @throws NodeCreationException 
      */
-    public IGravisNode create(PN_Element.Type type, MouseEvent target, Point2D position) throws NodeCreationException {
+    public IGraphNode create(PN_Element.Type type , MouseEvent target , Point2D position) throws NodeCreationException , RelationChangeDeniedException {
         
         IDataNode node;
-        IGravisNode shape;
+        IGraphNode shape;
         
         switch(type) {
             case PLACE:
                 node = new DataPlace();
-                shape = new GravisCircle(node);
+                shape = new GraphPlace(node);
                 shape.setActiveStyleClass("gravisCircle");
                 break;
             case TRANSITION:
                 node = new DataTransition();
-                shape = new GravisRectangle(node);
+                shape = new GraphTransition(node);
                 shape.setActiveStyleClass("gravisRectangle");
                 break;
             default:
@@ -111,13 +113,13 @@ public class DataService
      * @throws EdgeCreationException 
      * @throws NodeCreationException 
      */
-    public void create(IGravisNode source, IGravisNode target) throws EdgeCreationException , NodeCreationException {
+    public void create(IGraphNode source , IGraphNode target) throws EdgeCreationException , NodeCreationException , RelationChangeDeniedException {
         
-        IDataNode node;
-        IGravisEdge shape;
+        DataArc node;
+        IGraphArc shape;
 
         node = new DataArc();
-        shape = new GravisEdge(source , target , node);
+        shape = new GraphArc(source , target , node);
         shape.setActiveStyleClass("gravisEdge");
         node.getShapes().add(shape);
         
@@ -125,23 +127,23 @@ public class DataService
         petriNetDao.add(node);
     }
     
-    public void connect(IGravisNode source, IGravisNode target) {
+    public void connect(IGraphNode source, IGraphNode target) {
         
     }
     
-    public IGravisNode copy(IGravisNode target) throws NodeCreationException {
+    public IGraphNode copy(IGraphNode target) throws NodeCreationException , RelationChangeDeniedException {
         
-        IDataNode node = (IDataNode) target.getRelatedObject();
-        IGravisNode copy;
+        IDataNode node = target.getRelatedDataNode();
+        IGraphNode copy;
         
         switch(node.getElementType()) {
             case PLACE:
                 node = new DataPlace();
-                copy = new GravisCircle(node);
+                copy = new GraphPlace(node);
                 break;
             case TRANSITION:
                 node = new DataTransition();
-                copy = new GravisRectangle(node);
+                copy = new GraphTransition(node);
                 break;
             default:
                 throw new NodeCreationException("No suitable edge type selected!");
@@ -152,17 +154,17 @@ public class DataService
         return copy;
     }
     
-    public IGravisNode clone(IGravisNode target) throws NodeCreationException {
+    public IGraphNode clone(IGraphNode target) throws NodeCreationException , RelationChangeDeniedException {
         
-        IDataNode node = (IDataNode) target.getRelatedObject();
-        IGravisNode clone;
+        IDataNode node = target.getRelatedDataNode();
+        IGraphNode clone;
         
         switch(node.getElementType()) {
             case PLACE:
-                clone = new GravisCircle(node);
+                clone = new GraphPlace(node);
                 break;
             case TRANSITION:
-                clone = new GravisRectangle(node);
+                clone = new GraphTransition(node);
                 break;
             default:
                 throw new NodeCreationException("No suitable edge type selected!");
@@ -175,8 +177,8 @@ public class DataService
     
     public void paste(boolean clone) {
         
-        IGravisNode[] nodes = selectionService.getNodesCopy();
-        IGravisNode node;
+        IGraphNode[] nodes = selectionService.getNodesCopy();
+        IGraphNode node;
         
         Point2D center = calculator.getCenter(nodes);
         Point2D position = calculator.getCorrectedMousePositionLatest();
@@ -198,25 +200,25 @@ public class DataService
                         nodes[i].getTranslateY() - center.getY() + position.getY()
                 );
             }
-        } catch (NodeCreationException ex) {
+        } catch (NodeCreationException | RelationChangeDeniedException ex) {
 
         }
     }
     
-    public boolean remove(IGravisEdge edge) {
+    public boolean remove(IGraphArc edge) {
         return graphDao.remove(edge);
     }
     
-    public boolean remove(IGravisNode node) {
-        ((IDataNode)node.getRelatedObject()).getShapes().remove(node);
+    public boolean remove(IGraphNode node) {
+        node.getRelatedDataNode().getShapes().remove(node);
         return graphDao.remove(node);
     }
     
     public void removeSelected() {
-        for (IGravisEdge edge : selectionService.getEdges()) {
+        for (IGraphArc edge : selectionService.getEdges()) {
             remove(edge);
         }
-        for (IGravisNode node : selectionService.getNodes()) {
+        for (IGraphNode node : selectionService.getNodes()) {
             remove(node);
         }
         selectionService.clear();
