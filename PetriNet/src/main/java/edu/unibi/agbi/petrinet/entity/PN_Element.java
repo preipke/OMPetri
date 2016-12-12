@@ -19,23 +19,13 @@ public abstract class PN_Element {
     protected String id;
     
     private final List<Parameter> parameter;
-    private final List<Object> shapes;
     
     public PN_Element() {
-        
-        shapes = new ArrayList();
         parameter = new ArrayList();
     }
     
     public List<Parameter> getParameter() {
         return parameter;
-    }
-
-    /**
-     * @return the shapes
-     */
-    public List<Object> getShapes() {
-        return shapes;
     }
     
     public String getId() {
