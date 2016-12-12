@@ -5,35 +5,35 @@
  */
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
-import edu.unibi.agbi.gnius.core.model.EdgeTypeChoice;
-import edu.unibi.agbi.gnius.core.model.PlaceTypeChoice;
-import edu.unibi.agbi.gnius.core.model.TransitionTypeChoice;
-import edu.unibi.agbi.gnius.core.model.entity.DataEdge;
-import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.DataPlace;
-import edu.unibi.agbi.gnius.core.model.entity.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataTransition;
+import edu.unibi.agbi.gnius.core.service.DataService;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisSelectable;
 
-import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Function;
+import edu.unibi.agbi.petrinet.model.Token;
+import edu.unibi.agbi.petrinet.model.Weight;
 
-import java.io.IOException;
 import java.net.URL;
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
 
@@ -44,10 +44,28 @@ import org.springframework.stereotype.Component;
 @Component
 public class EditorDetailsController implements Initializable
 {
-    @FXML private TextField detailsNodeType;
-    @FXML private ChoiceBox detailsNodeSubtype;
-    @FXML private VBox detailsInfoBox;
-    @FXML private VBox detailsComputeBox;
+    @Autowired private DataService dataService;
+    
+    @FXML private VBox detailsBox;
+    @FXML private VBox propertiesBox;
+    
+    @FXML private GridPane arcPropertyGrid;
+    @FXML private GridPane colorSelectionGrid;
+    @FXML private GridPane placePropertyGrid;
+    @FXML private GridPane transitionPropertyGrid;
+    @FXML private GridPane typePropertyGrid;
+    
+    @FXML private ChoiceBox subtypeChoices;
+    @FXML private ChoiceBox colorChoices;
+    
+    @FXML private TextField propertyFunction;
+    @FXML private TextField propertyType;
+    @FXML private TextField propertyToken;
+    @FXML private TextField propertyTokenMin;
+    @FXML private TextField propertyTokenMax;
+    @FXML private TextField propertyWeight;
+    
+    @FXML private Button colorButton;
     
     /**
      * Shows the details for the given entity.
@@ -55,129 +73,213 @@ public class EditorDetailsController implements Initializable
      */
     public void getDetails(IGravisSelectable selectable) {
         
+        clear();
+        
         IDataNode node = (IDataNode) selectable.getRelatedObject();
         
         PN_Element.Type elementType = node.getElementType();
+
+        ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
+        ObservableList<ColourChoice> choicesColour = FXCollections.observableArrayList();
         
-        ObservableList<Object> choices = FXCollections.observableArrayList();
+        Collection<Colour> colors = dataService.getColours();
+        
         int selectionIndex = 0;
         
         switch (elementType) {
+            
             case PLACE:
+                
                 DataPlace place = (DataPlace) node;
+                
                 DataPlace.Type placeType;
                 for (int i = 0; i < DataPlace.Type.values().length; i++) {
                     placeType = DataPlace.Type.values()[i];
                     if (placeType == place.getPlaceType()) {
                         selectionIndex = i;
                     }
-                    choices.add(new PlaceTypeChoice(placeType , placeType.toString()));
+                    choicesSubtype.add(new PlaceTypeChoice(placeType));
                 }
+                
+                if (colors.size() > 0) {
+                    Map<Colour , Token> tokens = place.getTokenMap();
+                    for (Colour color : colors) {
+                        if (tokens.get(color) != null) {
+                            choicesColour.add(new ColourChoice(color));
+                        }
+                    }
+                    Token token = tokens.get(choicesColour.get(0).getColour());
+                    propertyToken.setText(Double.toString(token.getValueStart()));
+                    propertyTokenMin.setText(Double.toString(token.getValueMin()));
+                    propertyTokenMax.setText(Double.toString(token.getValueMax()));
+                }
+                
+                propertiesBox.getChildren().add(placePropertyGrid);
                 break;
                 
             case TRANSITION:
+                
                 DataTransition transition = (DataTransition) node;
+                
                 DataTransition.Type transitionType;
                 for (int i = 0; i < DataTransition.Type.values().length; i++) {
                     transitionType = DataTransition.Type.values()[i];
                     if (transitionType == transition.getTransitionType()) {
                         selectionIndex = i;
                     }
-                    choices.add(new TransitionTypeChoice(transitionType , transitionType.toString()));
+                    choicesSubtype.add(new TransitionTypeChoice(transitionType));
                 }
+                
+                Function function = transition.getFunction();
+                propertyFunction.setText(function.toString());
+                
+                propertiesBox.getChildren().add(transitionPropertyGrid);
                 break;
                 
             case ARC:
-                DataEdge edge = (DataEdge) node;
-                DataEdge.Type edgeType;
-                for (int i = 0; i < DataEdge.Type.values().length; i++) {
-                    edgeType = DataEdge.Type.values()[i];
-                    if (edgeType == edge.getArcType()) {
+                
+                DataArc arc = (DataArc) node;
+                
+                DataArc.Type arcType;
+                for (int i = 0; i < DataArc.Type.values().length; i++) {
+                    arcType = DataArc.Type.values()[i];
+                    if (arcType == arc.getArcType()) {
                         selectionIndex = i;
                     }
-                    choices.add(new EdgeTypeChoice(edgeType , edgeType.toString()));
+                    choicesSubtype.add(new EdgeTypeChoice(arcType));
                 }
-                break;
                 
-            default:
+                if (colors.size() > 0) {
+                    Map<Colour , Weight> weights = arc.getWeightMap();
+                    for (Colour color : colors) {
+                        if (weights.get(color) != null) {
+                            choicesColour.add(new ColourChoice(color));
+                        }
+                    }
+                    Weight weight = weights.get(choicesColour.get(0).getColour());
+                    propertyWeight.setText(Double.toString(weight.getValue()));
+                }
+                
+                propertiesBox.getChildren().add(arcPropertyGrid);
                 break;
         }
         
-        detailsNodeType.setText(elementType.toString());
+        propertyType.setText(elementType.toString());
+
+        subtypeChoices.setItems(choicesSubtype);
+        subtypeChoices.getSelectionModel().select(selectionIndex);
         
-        detailsNodeSubtype.setItems(choices);
-        detailsNodeSubtype.getSelectionModel().select(selectionIndex);
+        colorChoices.setItems(choicesColour);
+        colorChoices.getSelectionModel().select(0);
         
-        detailsInfoBox.getChildren().clear();
-        detailsComputeBox.getChildren().clear();
-        
-        List<Parameter> parameter = node.getParameter();
-
-        FXMLLoader fxmlLoader;
-        HBox parameterBox;
-        ObservableList<Node> nodes;
-        Label label;
-        TextField textField;
-        
-        try {
-            for (Parameter param : parameter) {
-                
-                fxmlLoader = new FXMLLoader(getClass().getResource("/fxml/tab/editor/details/Parameter.fxml"));
-                parameterBox = fxmlLoader.load();
-                nodes = parameterBox.getChildren();
-
-                for (int j = 0; j < nodes.size(); j++) {
-                    System.out.println(j + ": " + nodes.get(j).toString());
-                }
-                
-                label = (Label)((VBox)nodes.get(0)).getChildren().get(0);
-                label.setText(param.getName());
-                
-                textField = (TextField)nodes.get(1);
-                textField.setText("" + param.getNote());
-
-                switch (param.getType()) {
-
-                    case INFO:
-                        detailsInfoBox.getChildren().add(parameterBox);
-                        break;
-
-                    case COMPUTE:
-                        detailsComputeBox.getChildren().add(parameterBox);
-                        break;
-                }
-            }
-        } catch (IOException ex) {
-            System.out.println("Exception in EditorDetailsController - setDetails():");
-            System.out.println(ex.toString());
-        }
+        detailsBox.setVisible(true);
     }
     
     /**
-     * Updates entries within the according entity.
+     * Update properties. Stores the values from the textfields within the
+     * according entity.
      */
-    public void setDetails() {
+    public void update() {
         
     }
     
     /**
-     * Resets texfield entries, discarding changes.
+     * Reset texfields. Discards changes and displays the current values.
      */
     public void reset() {
         
     }
     
     /**
-     * Clears displayed elements. Use for deselecting.
+     * Clear details. Hides the node specific grids.
      */
     public void clear() {
-        detailsNodeType.setText("");
-        detailsNodeSubtype.getItems().clear();
-        detailsInfoBox.getChildren().clear();
-        detailsComputeBox.getChildren().clear();
+        propertiesBox.getChildren().remove(arcPropertyGrid);
+        propertiesBox.getChildren().remove(placePropertyGrid);
+        propertiesBox.getChildren().remove(transitionPropertyGrid);
+    }
+    
+    /**
+     * Hide details. Completely hides the details box.
+     */
+    public void hide() {
+        detailsBox.setVisible(false);
     }
 
     @Override
     public void initialize(URL location , ResourceBundle resources) {
+        detailsBox.setVisible(false);
+    }
+
+    private class ColourChoice
+    {
+        private final Colour colour;
+
+        public ColourChoice(Colour colour) {
+            this.colour = colour;
+        }
+
+        public Colour getColour() {
+            return colour;
+        }
+
+        @Override
+        public String toString() {
+            return colour.getId();
+        }
+    }
+
+    private class EdgeTypeChoice
+    {
+        private final DataArc.Type type;
+
+        public EdgeTypeChoice(DataArc.Type type) {
+            this.type = type;
+        }
+
+        public DataArc.Type getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return type.toString();
+        }
+    }
+
+    private class PlaceTypeChoice
+    {
+        private final DataPlace.Type type;
+
+        public PlaceTypeChoice(DataPlace.Type type) {
+            this.type = type;
+        }
+
+        public DataPlace.Type getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return type.toString();
+        }
+    }
+
+    public class TransitionTypeChoice
+    {
+        private final DataTransition.Type type;
+
+        public TransitionTypeChoice(DataTransition.Type type) {
+            this.type = type;
+        }
+
+        public DataTransition.Type getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return type.toString();
+        }
     }
 }

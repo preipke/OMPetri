@@ -9,13 +9,11 @@ import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.core.model.LayoutTypeChoice;
-import edu.unibi.agbi.gnius.core.model.NodeTypeChoice;
 import edu.unibi.agbi.gnius.core.service.DataService;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -24,8 +22,10 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
@@ -47,40 +47,19 @@ public class EditorToolsController implements Initializable
     
     @Autowired private MouseEventHandler mouseEventHandler;
     
-    int elements = 10;
+    int elements = 1000;
     
-    public LayoutTypeChoice getLayoutChoice() {
-        return (LayoutTypeChoice) choicesAlignNodes.getSelectionModel().getSelectedItem();
-    }
-    
-    public NodeTypeChoice getNodeChoice() {
-        return (NodeTypeChoice) choicesCreateNode.getSelectionModel().getSelectedItem();
-    }
+    public void CreateNode(MouseEvent target) {
+        try {
+            dataService.create(((NodeTypeChoice) choicesCreateNode.getSelectionModel().getSelectedItem()).getType() , target , Point2D.ZERO);
+        } catch (NodeCreationException ex) {
 
-    @Override
-    public void initialize(URL location , ResourceBundle resources) {
-        
-        ObservableList<LayoutTypeChoice> alignChoices = FXCollections.observableArrayList();
-        alignChoices.add(new LayoutTypeChoice(LayoutTypeChoice.Type.RANDOM, "Random"));
-        alignChoices.add(new LayoutTypeChoice(LayoutTypeChoice.Type.DEFAULT, "..."));
-        
-        choicesAlignNodes.setItems(alignChoices);
-        choicesAlignNodes.getSelectionModel().selectFirst();
-        
-        ObservableList<NodeTypeChoice> nodeChoices = FXCollections.observableArrayList();
-        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.PLACE, "Place"));
-        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.TRANSITION, "Transition"));
-        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.ARC, "..."));
-        
-        choicesCreateNode.setItems(nodeChoices);
-        choicesCreateNode.getSelectionModel().selectFirst();
+        }
     }
     
     @FXML
     private void buttonAlignNodes() {
-        
-        LayoutTypeChoice.Type type = ((LayoutTypeChoice) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
-        
+        LayoutType type = ((LayoutTypeChoice) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
         switch(type) {
             case RANDOM:
                 RandomLayout.applyOn(graphDao);
@@ -98,7 +77,6 @@ public class EditorToolsController implements Initializable
     
     @FXML
     private void buttonLoadExampleNodes() {
-        
         IGravisNode place, transition;
         try {
             for (int i = 0; i < elements; i++) {
@@ -133,5 +111,69 @@ public class EditorToolsController implements Initializable
         } catch (NodeCreationException | EdgeCreationException ex) {
             System.out.println(ex.toString());
         }
+    }
+
+    @Override
+    public void initialize(URL location , ResourceBundle resources) {
+        
+        ObservableList<LayoutTypeChoice> alignChoices = FXCollections.observableArrayList();
+        alignChoices.add(new LayoutTypeChoice(LayoutType.RANDOM, "Random"));
+        alignChoices.add(new LayoutTypeChoice(LayoutType.DEFAULT, "..."));
+        
+        choicesAlignNodes.setItems(alignChoices);
+        choicesAlignNodes.getSelectionModel().selectFirst();
+        
+        ObservableList<NodeTypeChoice> nodeChoices = FXCollections.observableArrayList();
+        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.PLACE, "Place"));
+        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.TRANSITION, "Transition"));
+        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.ARC, "..."));
+        
+        choicesCreateNode.setItems(nodeChoices);
+        choicesCreateNode.getSelectionModel().selectFirst();
+    }
+
+    private class NodeTypeChoice
+    {
+        private final PN_Element.Type type;
+        private final String name;
+
+        public NodeTypeChoice(PN_Element.Type type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        public PN_Element.Type getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    private class LayoutTypeChoice
+    {
+        private final LayoutType type;
+        private final String name;
+
+        public LayoutTypeChoice(LayoutType type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        public LayoutType getType() {
+            return type;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
+    public enum LayoutType
+    {
+        RANDOM, DEFAULT;
     }
 }

@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.model.entity;
-
-import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
+package edu.unibi.agbi.gnius.core.service.exception;
 
 /**
  *
  * @author PR
  */
-public class DataTransition extends Transition implements IDataNode
+public class ColourException extends Exception
 {
-    
+    public ColourException(String msg) {
+        super(msg);
+    }
 }

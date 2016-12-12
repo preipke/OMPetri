@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.SelectionDao;
-import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 
 import edu.unibi.agbi.gravisfx.graph.node.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;

@@ -7,10 +7,11 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
-import edu.unibi.agbi.gnius.core.model.entity.DataEdge;
-import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.DataPlace;
-import edu.unibi.agbi.gnius.core.model.entity.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataTransition;
+import edu.unibi.agbi.gnius.core.service.exception.ColourException;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
@@ -20,7 +21,9 @@ import edu.unibi.agbi.gravisfx.graph.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisEdge;
 import edu.unibi.agbi.gravisfx.graph.node.entity.GravisRectangle;
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.model.Colour;
+import java.util.Collection;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -113,7 +116,7 @@ public class DataService
         IDataNode node;
         IGravisEdge shape;
 
-        node = new DataEdge();
+        node = new DataArc();
         shape = new GravisEdge(source , target , node);
         shape.setActiveStyleClass("gravisEdge");
         node.getShapes().add(shape);
@@ -217,5 +220,15 @@ public class DataService
             remove(node);
         }
         selectionService.clear();
+    }
+    
+    public void add(Colour color) throws ColourException {
+        if (!petriNetDao.add(color)) {
+            throw new ColourException("The specified colour already exists!");
+        }
+    }
+    
+    public Collection<Colour> getColours() {
+        return petriNetDao.getColours();
     }
 }

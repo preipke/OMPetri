@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.model.entity;
+package edu.unibi.agbi.gnius.core.model.entity.data;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 
 /**
  *
  * @author PR
  */
-public class DataEdge extends Arc implements IDataNode
+public class DataArc extends Arc implements IDataNode
 {
 
 }

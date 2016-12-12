@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.model.entity;
+package edu.unibi.agbi.gnius.core.model.entity.data;
 
-import edu.unibi.agbi.petrinet.model.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 
 /**
  *
  * @author PR
  */
-public class DataPlace extends Place implements IDataNode
+public class DataTransition extends Transition implements IDataNode
 {
     
 }

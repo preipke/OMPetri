@@ -5,14 +5,14 @@
  */
 package edu.unibi.agbi.gnius.core.dao;
 
-import edu.unibi.agbi.gnius.core.model.entity.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 
 import edu.unibi.agbi.petrinet.model.PetriNet;
-import edu.unibi.agbi.petrinet.model.entity.impl.Arc;
-import edu.unibi.agbi.petrinet.model.entity.PN_Element;
-import edu.unibi.agbi.petrinet.model.entity.impl.Place;
-import edu.unibi.agbi.petrinet.model.entity.impl.Transition;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.tab.EditorTabController;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
+import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.util.Calculator;
 
@@ -37,7 +37,7 @@ public class MouseEventHandler
 {
     @Autowired private SelectionService selectionService;
     
-    @Autowired private EditorTabController editorTabController;
+    @Autowired private EditorToolsController editorToolsController;
     @Autowired private EditorDetailsController editorDetailsController;
     
     @Autowired private KeyEventHandler keyEventHandler;
@@ -158,11 +158,11 @@ public class MouseEventHandler
                      * Clicking the pane.
                      */
                     
-                    editorDetailsController.clear();
+                    editorDetailsController.hide();
                     
                     if (isCreatingNodes.get()) {
                         
-                        editorTabController.CreateNode(event); // Create node at event location.
+                        editorToolsController.CreateNode(event); // Create node at event location.
                         
                     } else {
 
@@ -301,7 +301,7 @@ public class MouseEventHandler
                             if (!selectionService.remove(node)) {
                                 selectionService.add(node);
                             }
-                            editorDetailsController.clear();
+                            editorDetailsController.hide();
                         } else {
                             editorDetailsController.getDetails(node);
                             selectionService.clear();
@@ -313,7 +313,7 @@ public class MouseEventHandler
                         IGravisEdge edge = (IGravisEdge)event.getTarget();
                         
                         if (event.isControlDown()) {
-                            editorDetailsController.clear();
+                            editorDetailsController.hide();
                         } else {
                             editorDetailsController.getDetails(edge);
                         }
