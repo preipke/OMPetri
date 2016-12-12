@@ -35,6 +35,6 @@ public abstract class Transition extends PN_Node
     }
     
     public enum Type {
-        CONTINUOUS, DEFAULT, DISCRETE, STOCHASTIC;
+        DEFAULT, CONTINUOUS, DISCRETE, STOCHASTIC;
     }
 }

@@ -49,6 +49,6 @@ public abstract class Place extends PN_Node
     }
     
     public enum Type {
-        CONTINUOUS, DEFAULT, DISCRETE;
+        DEFAULT, CONTINUOUS, DISCRETE;
     }
 }

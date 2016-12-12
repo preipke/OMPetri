@@ -90,6 +90,6 @@ public abstract class Arc extends PN_Element
     }
     
     public enum Type {
-        EQUAL, INHIBITORY, READ, RESET, DEFAULT;
+        DEFAULT, EQUAL, INHIBITORY, READ, RESET;
     }
 }
