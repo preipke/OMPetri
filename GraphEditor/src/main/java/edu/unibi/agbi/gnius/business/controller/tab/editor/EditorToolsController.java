@@ -73,7 +73,7 @@ public class EditorToolsController implements Initializable
     
     @FXML
     public void buttonCreateNodeEnable() {
-        mouseEventHandler.setCreatingNodes(true);
+        mouseEventHandler.setCreationMode();
     }
     
     @FXML

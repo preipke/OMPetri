@@ -21,12 +21,12 @@ public class SelectionDao
 {
     private List<IGraphNode> selectedNodes;
     private List<IGraphArc> selectedEdges;
-    private List<IGraphElement> selectedSelectables;
+    private List<IGraphElement> highlightedElements;
     
     public SelectionDao() {
         selectedNodes = new ArrayList();
         selectedEdges = new ArrayList();
-        selectedSelectables = new ArrayList();
+        highlightedElements = new ArrayList();
     }
     
     public synchronized void add(IGraphNode node) {
@@ -38,7 +38,7 @@ public class SelectionDao
     }
     
     public synchronized void add(IGraphElement node) {
-        selectedSelectables.add(node);
+        highlightedElements.add(node);
     }
     
     public synchronized boolean contains(IGraphNode node) {
@@ -49,8 +49,8 @@ public class SelectionDao
         return selectedEdges.contains(edge);
     }
     
-    public synchronized boolean contains(IGraphElement edge) {
-        return selectedSelectables.contains(edge);
+    public synchronized boolean contains(IGraphElement element) {
+        return highlightedElements.contains(element);
     }
     
     public synchronized List<IGraphArc> getSelectedArcs() {
@@ -61,8 +61,8 @@ public class SelectionDao
         return selectedNodes;
     }
     
-    public synchronized List<IGraphElement> getSelectedSelectables() {
-        return selectedSelectables;
+    public synchronized List<IGraphElement> getHightlightedElements() {
+        return highlightedElements;
     }
     
     public synchronized IGraphNode[] getSelectedNodesArray() {
@@ -81,12 +81,12 @@ public class SelectionDao
         return edges;
     }
     
-    public synchronized IGraphElement[] getSelectedSelectablesArray() {
-        IGraphElement[] selectables = new IGraphElement[selectedSelectables.size()];
-        for (int i = 0; i < selectables.length; i++) {
-            selectables[i] = selectedSelectables.get(i);
+    public synchronized IGraphElement[] getHighlightedElementsArray() {
+        IGraphElement[] elements = new IGraphElement[highlightedElements.size()];
+        for (int i = 0; i < elements.length; i++) {
+            elements[i] = highlightedElements.get(i);
         }
-        return selectables;
+        return elements;
     }
     
     public synchronized boolean remove(IGraphArc arc) {
@@ -97,13 +97,13 @@ public class SelectionDao
         return selectedNodes.remove(node);
     }
     
-    public synchronized boolean remove(IGraphElement selectable) {
-        return selectedSelectables.remove(selectable);
+    public synchronized boolean removeHighlight(IGraphElement element) {
+        return highlightedElements.remove(element);
     }
     
     public synchronized void clear() {
         selectedNodes = new ArrayList();
         selectedEdges = new ArrayList();
-        selectedSelectables = new ArrayList();
+        highlightedElements = new ArrayList();
     }
 }

@@ -193,7 +193,7 @@ public class DataService
                 node.setActiveStyleClass(nodes[i].getActiveStyleClass());
 
                 add(node);
-                selectionService.addAll(node);
+                selectionService.selectAll(node);
                 
                 node.setTranslate(
                         nodes[i].getTranslateX() - center.getX() + position.getX() ,
@@ -215,10 +215,10 @@ public class DataService
     }
     
     public void removeSelected() {
-        for (IGraphArc edge : selectionService.getEdges()) {
+        for (IGraphArc edge : selectionService.getSelectedArcs()) {
             remove(edge);
         }
-        for (IGraphNode node : selectionService.getNodes()) {
+        for (IGraphNode node : selectionService.getSelectedNodes()) {
             remove(node);
         }
         selectionService.clear();

@@ -15,6 +15,12 @@
     -fx-stroke-width: 2;
 }
 
+.gravisRectangle:highlighted {
+    -fx-stroke: red;
+    -fx-stroke-width: 2;
+    -fx-stroke-dash-array: 3 6;
+}
+
 
 
 .gravisCircle {
@@ -34,6 +40,12 @@
     -fx-stroke-width: 2;
 }
 
+.gravisCircle:highlighted {
+    -fx-stroke: darkgreen;
+    -fx-stroke-width: 2;
+    -fx-stroke-dash-array: 3 6;
+}
+
 
 
 .gravisEdge {
@@ -49,4 +61,10 @@
 .gravisEdge:selected {
     -fx-stroke: darkred;
     -fx-stroke-width: 2;
+}
+
+.gravisEdge:highlighted {
+    -fx-stroke: darkred;
+    -fx-stroke-width: 2;
+    -fx-stroke-dash-array: 3 6;
 }

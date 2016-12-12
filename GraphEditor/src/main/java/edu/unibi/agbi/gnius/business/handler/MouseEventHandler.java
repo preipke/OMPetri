@@ -43,39 +43,43 @@ public class MouseEventHandler
     @Autowired private KeyEventHandler keyEventHandler;
     @Autowired private Calculator calculator;
     
-    private Rectangle selectionRectangle;
-    
-    private boolean keyEventsRegistered = false;
+    private boolean isKeyEventsRegistered = false;
     
     private boolean isPrimaryButtonDown = false;
-    private boolean isDraggingNodes = false;
-    private boolean isSelectionRectangleActive = false;
     
-    private final BooleanProperty isCreatingNodes = new SimpleBooleanProperty(false); // TODO bind this to according GUI button later
-    
-    public void setCreatingNodes(boolean value) {
-        isCreatingNodes.set(value);
-    }
-    
-    public void setRectangleActive(boolean value) {
-        isCreatingNodes.set(!value);
-        isSelectionRectangleActive = value;
-    }
+    // TODO bind GUI buttons to these later
+    private final BooleanProperty isCreatingNodes = new SimpleBooleanProperty(false);
+    private final BooleanProperty isDraggingNodes = new SimpleBooleanProperty(false);
+    private final BooleanProperty isSelectionFrameActive = new SimpleBooleanProperty(false); 
     
     private MouseEvent mouseEventMovedLatest;
     private MouseEvent mouseEventMovedPrevious;
     private MouseEvent mouseEventPressed;
     
-    public MouseEvent getMouseMovedEventLatest() {
-        return mouseEventMovedLatest;
+    private Rectangle selectionFrame;
+    
+    public void setCreationMode() {
+        isCreatingNodes.set(true);
+        isDraggingNodes.set(false);
+        isSelectionFrameActive.set(false);
     }
     
-    public MouseEvent geMouseMovedEventPrevious() {
-        return mouseEventMovedPrevious;
+    public void setDraggingMode() {
+        isCreatingNodes.set(false);
+        isDraggingNodes.set(true);
+        isSelectionFrameActive.set(false);
     }
     
-    public MouseEvent getMousePressedEvent() {
-        return mouseEventPressed;
+    public void setSelectionMode() {
+        isCreatingNodes.set(false);
+        isDraggingNodes.set(false);
+        isSelectionFrameActive.set(true);
+    }
+    
+    public void setFreeMode() {
+        isCreatingNodes.set(false);
+        isDraggingNodes.set(false);
+        isSelectionFrameActive.set(false);
     }
     
     /**
@@ -87,11 +91,11 @@ public class MouseEventHandler
         /**
          * Preparing selection rectangle.
          */
-        selectionRectangle = new Rectangle(0 , 0 , 0 , 0);
-        selectionRectangle.setStroke(Color.BLUE);
-        selectionRectangle.setStrokeWidth(1);
-        selectionRectangle.setStrokeLineCap(StrokeLineCap.ROUND);
-        selectionRectangle.setFill(Color.LIGHTBLUE.deriveColor(0 , 1.2 , 1 , 0.6));
+        selectionFrame = new Rectangle(0 , 0 , 0 , 0);
+        selectionFrame.setStroke(Color.BLUE);
+        selectionFrame.setStrokeWidth(1);
+        selectionFrame.setStrokeLineCap(StrokeLineCap.ROUND);
+        selectionFrame.setFill(Color.LIGHTBLUE.deriveColor(0 , 1.2 , 1 , 0.6));
         
         /**
          * Register key events. Must be done after showing stage (Scene is null
@@ -101,9 +105,9 @@ public class MouseEventHandler
             
             mouseEventMovedLatest = event;
             
-            if (!keyEventsRegistered) {
+            if (!isKeyEventsRegistered) {
                 keyEventHandler.registerTo(graphPane.getScene());
-                keyEventsRegistered = true;
+                isKeyEventsRegistered = true;
             }
         });
 
@@ -126,20 +130,24 @@ public class MouseEventHandler
                 if (event.getTarget() instanceof IGraphElement) {
                     
                     /**
-                     * Clicking node objects.
+                     * Clicking graph elements.
                      */
+                    
+                    isCreatingNodes.set(false);
+                    
                     if (event.getTarget() instanceof IGraphNode) {
                         
                         IGraphNode node = (IGraphNode)event.getTarget();
                         
-                        if (!selectionService.contains(node)) {
+                        if (!selectionService.isSelected(node)) {
                             if (!event.isControlDown()) {
                                 selectionService.clear();
-                                selectionService.addAll(node);
+                                selectionService.select(node);
+                                selectionService.hightlightRelated(node);
                                 editorDetailsController.getDetails(node);
                             }
                         } else {
-                            // Maybe dragging - wait!
+                            // Dragging
                         }
                         
                     } else {
@@ -150,8 +158,9 @@ public class MouseEventHandler
                             selectionService.clear();
                             editorDetailsController.getDetails(edge);
                         }
-                        selectionService.add(edge);
+                        selectionService.select(edge);
                     }
+                    
                 } else {
                     
                     /**
@@ -179,13 +188,13 @@ public class MouseEventHandler
 
                             // TODO
                             // apply translation
-                            selectionRectangle.setX(pos.getX());
-                            selectionRectangle.setY(pos.getY());
-                            selectionRectangle.setWidth(0);
-                            selectionRectangle.setHeight(0);
+                            selectionFrame.setX(pos.getX());
+                            selectionFrame.setY(pos.getY());
+                            selectionFrame.setWidth(0);
+                            selectionFrame.setHeight(0);
                             
-                            setRectangleActive(true);
-                            graphPane.getTopLayer().getChildren().add(selectionRectangle);
+                            graphPane.getTopLayer().getChildren().add(selectionFrame);
+                            setSelectionMode();
                         }
                     }
                 }
@@ -203,9 +212,9 @@ public class MouseEventHandler
             if (event.isPrimaryButtonDown()) {
                 
                 /**
-                 * Resizing the selection rectangle.
+                 * Selection Mode. Resizing the selection rectangle.
                  */
-                if (isSelectionRectangleActive) {
+                if (isSelectionFrameActive.get()) {
                     
                     Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventPressed);
                     Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
@@ -214,32 +223,30 @@ public class MouseEventHandler
                     double offsetY = pos_t1.getY() - pos_t0.getY();
 
                     if (offsetX > 0) {
-                        selectionRectangle.setWidth(offsetX);
+                        selectionFrame.setWidth(offsetX);
                     } else {
-                        selectionRectangle.setX(pos_t1.getX());
-                        selectionRectangle.setWidth(pos_t0.getX() - selectionRectangle.getX());
+                        selectionFrame.setX(pos_t1.getX());
+                        selectionFrame.setWidth(pos_t0.getX() - selectionFrame.getX());
                     }
 
                     if (offsetY > 0) {
-                        selectionRectangle.setHeight(offsetY);
+                        selectionFrame.setHeight(offsetY);
                     } else {
-                        selectionRectangle.setY(pos_t1.getY());
-                        selectionRectangle.setHeight(pos_t0.getY() - selectionRectangle.getY());
+                        selectionFrame.setY(pos_t1.getY());
+                        selectionFrame.setHeight(pos_t0.getY() - selectionFrame.getY());
                     }
                     
                 } else {
 
-                    isDraggingNodes = true;
-
                     /**
-                     * Drag selected node(s).
+                     * Dragging Mode. Drag selected node(s).
                      */
                     if (event.getTarget() instanceof IGraphNode) {
                         
                         Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious);
                         Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
                         
-                        for (IGraphNode node : selectionService.getNodes()) {
+                        for (IGraphNode node : selectionService.getSelectedNodes()) {
                             node.setTranslate(
                                     node.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
                                     node.getTranslateY() + pos_t1.getY() - pos_t0.getY()
@@ -249,6 +256,8 @@ public class MouseEventHandler
                         // TODO
                         // allow dragging edges to connect places
                     }
+
+                    setDraggingMode();
                 }
             } 
             /**
@@ -264,34 +273,31 @@ public class MouseEventHandler
             event.consume();
         });
 
-        /**
-         * Used to determine relative position for dragging.
-         */
+        
         graphPane.setOnMouseReleased(( MouseEvent event ) -> {
-
-            if (isSelectionRectangleActive) {
-                
-                /**
-                 * Selecting node objects using the rectangle.
-                 */
+            
+            /**
+             * Selection Frame Mode. Selecting node objects using the rectangle.
+             */
+            if (isSelectionFrameActive.get()) {
                 for (Node node : graphPane.getTopLayer().getNodeLayer().getChildren()) {
                     if (node instanceof IGraphNode) {
-                        if (node.getBoundsInParent().intersects(selectionRectangle.getBoundsInParent())) {
+                        if (node.getBoundsInParent().intersects(selectionFrame.getBoundsInParent())) {
                             Platform.runLater(() -> {
-                                selectionService.add((IGraphNode)node);
+                                selectionService.select((IGraphNode)node);
                             });
                         }
                     }
                 }
-                graphPane.getTopLayer().getChildren().remove(selectionRectangle);
-                isSelectionRectangleActive = false;
+                graphPane.getTopLayer().getChildren().remove(selectionFrame);
+                isSelectionFrameActive.set(false);
                 
             } else {
                 
                 /**
                  * Selecting node objects by clicking.
                  */
-                if (isPrimaryButtonDown && !isDraggingNodes) {
+                if (isPrimaryButtonDown && !isDraggingNodes.get()) {
                     
                     if (event.getTarget() instanceof IGraphNode) {
                         
@@ -299,13 +305,14 @@ public class MouseEventHandler
                         
                         if (event.isControlDown()) {
                             if (!selectionService.remove(node)) {
-                                selectionService.add(node);
+                                selectionService.select(node);
                             }
                             editorDetailsController.hide();
                         } else {
-                            editorDetailsController.getDetails(node);
                             selectionService.clear();
-                            selectionService.addAll(node);
+                            selectionService.select(node);
+                            selectionService.hightlightRelated(node);
+                            editorDetailsController.getDetails(node);
                         }
                         
                     } else if (event.getTarget() instanceof GraphArc) {
@@ -317,7 +324,7 @@ public class MouseEventHandler
                         } else {
                             editorDetailsController.getDetails(edge);
                         }
-                        selectionService.add(edge);
+                        selectionService.select(edge);
                     }
                 }
             }
@@ -332,9 +339,21 @@ public class MouseEventHandler
             mouseEventPressed = null;
 
             isPrimaryButtonDown = false;
-            isDraggingNodes = false;
+            isDraggingNodes.set(false);
             
             event.consume();
         });
+    }
+    
+    public MouseEvent getMouseMovedEventLatest() {
+        return mouseEventMovedLatest;
+    }
+    
+    public MouseEvent geMouseMovedEventPrevious() {
+        return mouseEventMovedPrevious;
+    }
+    
+    public MouseEvent getMousePressedEvent() {
+        return mouseEventPressed;
     }
 }

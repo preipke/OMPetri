@@ -16,9 +16,11 @@ public interface IGraphElement extends IGravisElement
 {
     public IDataElement getRelatedDataElement();
     
+    public void setHighlighted(boolean value);
+    
     public void setActiveStyleClass(String name);
     public String getActiveStyleClass();
     
-    public void setHighlight(boolean value);
+    public void setSelected(boolean value);
     public void putOnTop();
 }
