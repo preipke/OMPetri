@@ -11,10 +11,27 @@ package edu.unibi.agbi.petrinet.model;
  */
 public class Colour
 {
-    private String name;
+    private String id;
     private String description;
 
     public String getId() {
-        return name;
+        return id;
+    }
+    
+    @Override
+    public boolean equals(Object object) {
+        if (object != null) {
+            if (object instanceof Colour) {
+                if (this.id.matches(((Colour)object).getId())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }
