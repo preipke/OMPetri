@@ -6,7 +6,6 @@
 package edu.unibi.agbi.petrinet.entity;
 
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
-import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,10 +30,6 @@ public abstract class PN_Node extends PN_Element
             COUNT++;
             id = IDENT + COUNT;
         }
-        
-        getParameter().add(new Parameter("Name", null, null, Parameter.Type.INFO));
-        getParameter().add(new Parameter("Label", null, null, Parameter.Type.INFO));
-        getParameter().add(new Parameter("Description", null, null, Parameter.Type.INFO));
         
         arcsIn = new ArrayList();
         arcsOut = new ArrayList();

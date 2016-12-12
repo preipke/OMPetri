@@ -6,7 +6,6 @@
 package edu.unibi.agbi.petrinet.entity.impl;
 
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
-import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -31,8 +30,6 @@ public abstract class Arc extends PN_Element
     public Arc() {
         
         type = PN_Element.Type.ARC;
-        
-        getParameter().add(new Parameter("Weight", null, null, Parameter.Type.COMPUTE));
         
         weights = new HashMap();
     }
