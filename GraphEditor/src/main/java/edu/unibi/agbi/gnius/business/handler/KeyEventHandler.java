@@ -35,7 +35,7 @@ public class KeyEventHandler
             
             if (event.getCode().equals(KeyCode.ESCAPE)) {
                 
-                mouseEventHandler.setFreeMode();
+                mouseEventHandler.UnlockEditorMode();
                 
                 selectionService.clear();
             }

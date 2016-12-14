@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
+import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
@@ -48,7 +49,7 @@ public class EditorToolsController implements Initializable
     
     @Autowired private MouseEventHandler mouseEventHandler;
     
-    int elements = 10;
+    int elements = 100;
     
     public void CreateNode(MouseEvent target) {
         try {
@@ -73,7 +74,11 @@ public class EditorToolsController implements Initializable
     
     @FXML
     public void buttonCreateNodeEnable() {
-        mouseEventHandler.setCreationMode();
+        try {
+            mouseEventHandler.setNodeCreationMode();
+        } catch (EditorModeLockException ex) {
+
+        }
     }
     
     @FXML
@@ -83,31 +88,33 @@ public class EditorToolsController implements Initializable
             for (int i = 0; i < elements; i++) {
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
                 transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
+                dataService.connect(transition , place);
                 
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.create(place , transition);
+                dataService.connect(transition , place);
+                dataService.connect(place , transition);
                 
                 transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
                 
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
                 
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
                 
                 transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
                 
                 transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
                 
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
                 
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.create(place , transition);
+                dataService.connect(place , transition);
             }
         } catch (NodeCreationException | EdgeCreationException | RelationChangeDeniedException ex) {
             System.out.println(ex.toString());

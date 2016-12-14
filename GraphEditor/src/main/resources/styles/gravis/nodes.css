@@ -49,21 +49,46 @@
 
 
 .gravisEdge {
+    -fx-fill: red;
     -fx-stroke: red;
+    -fx-stroke-type: centered;
     -fx-stroke-width: 2;
 }
 
 .gravisEdge:hover {
-    -fx-stroke: darkred;
-    -fx-stroke-width: 2;
+    -fx-stroke: orange;
+    -fx-stroke-width: 3;
 }
 
 .gravisEdge:selected {
     -fx-stroke: darkred;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 3;
 }
 
 .gravisEdge:highlighted {
+    -fx-stroke: darkred;
+    -fx-stroke-width: 2;
+    -fx-stroke-dash-array: 3 6;
+}
+
+
+
+.gravisCurve {
+    -fx-stroke: red;
+    -fx-stroke-width: 2;
+}
+
+.gravisCurve:hover {
+    -fx-stroke: orange;
+    -fx-stroke-width: 2;
+}
+
+.gravisCurve:selected {
+    -fx-stroke: darkred;
+    -fx-stroke-width: 3;
+}
+
+.gravisCurve:highlighted {
     -fx-stroke: darkred;
     -fx-stroke-width: 2;
     -fx-stroke-dash-array: 3 6;

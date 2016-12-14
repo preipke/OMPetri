@@ -15,6 +15,8 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCurve;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.exception.ColourException;
@@ -113,22 +115,22 @@ public class DataService
      * @throws EdgeCreationException 
      * @throws NodeCreationException 
      */
-    public void create(IGraphNode source , IGraphNode target) throws EdgeCreationException , NodeCreationException , RelationChangeDeniedException {
+    public void connect(IGraphNode source , IGraphNode target) throws EdgeCreationException , NodeCreationException , RelationChangeDeniedException {
         
         DataArc node;
         IGraphArc shape;
 
         node = new DataArc();
-        shape = new GraphArc(source , target , node);
+//        shape = new GraphArc(source , target , node);
+//        shape.setActiveStyleClass("gravisCurve");
+        shape = new GraphEdge(source , target , node);
         shape.setActiveStyleClass("gravisEdge");
+//        shape = new GraphCurve(source , target , node);
+//        shape.setActiveStyleClass("gravisCurve");
         node.getShapes().add(shape);
         
         graphDao.add(shape);
         petriNetDao.add(node);
-    }
-    
-    public void connect(IGraphNode source, IGraphNode target) {
-        
     }
     
     public IGraphNode copy(IGraphNode target) throws NodeCreationException , RelationChangeDeniedException {

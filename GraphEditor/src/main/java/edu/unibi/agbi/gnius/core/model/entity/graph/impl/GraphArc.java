@@ -11,8 +11,8 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisArc;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
-import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisEdge;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.css.PseudoClass;
@@ -21,7 +21,7 @@ import javafx.css.PseudoClass;
  *
  * @author PR
  */
-public class GraphEdge extends GravisEdge implements IGraphArc
+public class GraphArc extends GravisArc implements IGraphArc
 {
     private DataArc dataArc;
     
@@ -40,7 +40,7 @@ public class GraphEdge extends GravisEdge implements IGraphArc
         }
         @Override
         public Object getBean() {
-            return GraphEdge.this;
+            return GraphArc.this;
         }
         @Override
         public String getName() {
@@ -55,7 +55,7 @@ public class GraphEdge extends GravisEdge implements IGraphArc
         }
         @Override
         public Object getBean() {
-            return GraphEdge.this;
+            return GraphArc.this;
         }
         @Override
         public String getName() {
@@ -63,11 +63,11 @@ public class GraphEdge extends GravisEdge implements IGraphArc
         }
     };
     
-    public GraphEdge(IGraphNode source, IGraphNode target) {
+    public GraphArc(IGraphNode source, IGraphNode target) {
         super(source , target);
     }
-    
-    public GraphEdge(IGraphNode source, IGraphNode target, IDataArc dataArc) throws RelationChangeDeniedException {
+
+    public GraphArc(IGraphNode source , IGraphNode target , IDataArc dataArc) throws RelationChangeDeniedException {
         this(source , target);
         if (!(dataArc instanceof DataArc)) {
             throw new RelationChangeDeniedException("Must assign DataArc to GraphArc! Action denied.");

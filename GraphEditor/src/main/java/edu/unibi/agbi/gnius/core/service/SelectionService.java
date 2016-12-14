@@ -160,8 +160,10 @@ public class SelectionService
         if (selectionDao.removeHighlight(arc)) {
             arc.setHighlighted(false);
         }
-        selectionDao.add(arc);
-        arc.setSelected(true);
+        if (!selectionDao.contains(arc)) {
+            selectionDao.add(arc);
+            arc.setSelected(true);
+        }
         arc.putOnTop();
     }
     
@@ -173,8 +175,10 @@ public class SelectionService
         if (selectionDao.removeHighlight(node)) {
             node.setHighlighted(false);
         }
-        selectionDao.add(node);
-        node.setSelected(true);
+        if (!selectionDao.contains(node)) {
+            selectionDao.add(node);
+            node.setSelected(true);
+        }
         node.putOnTop();
     }
     
