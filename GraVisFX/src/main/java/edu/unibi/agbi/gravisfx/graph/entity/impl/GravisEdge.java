@@ -18,18 +18,18 @@ import javafx.scene.shape.Shape;
 public class GravisEdge extends Line implements IGravisEdge
 {
     private final IGravisNode source;
-    private final IGravisNode target;
+    private IGravisNode target;
     
-    public GravisEdge(IGravisNode source, IGravisNode target) {
-        
+    public GravisEdge(IGravisNode source) {
         super();
-        
         this.source = source;
-        this.target = target;
-        
         startXProperty().bind(source.getShape().translateXProperty().add(source.getOffsetX()));
         startYProperty().bind(source.getShape().translateYProperty().add(source.getOffsetY()));
-
+    }
+    
+    public GravisEdge(IGravisNode source, IGravisNode target) {
+        this(source);
+        this.target = target;
         endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
         endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
     }
