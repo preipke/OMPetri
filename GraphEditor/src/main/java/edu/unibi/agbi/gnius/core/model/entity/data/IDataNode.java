@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.petrinet.entity.IPN_Node;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author PR
  */
-public interface IDataNode extends IDataElement
+public interface IDataNode extends IDataElement , IPN_Node
 {
     public List<IGraphNode> getShapes();
 }

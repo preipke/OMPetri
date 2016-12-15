@@ -11,7 +11,11 @@ import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
@@ -39,6 +43,7 @@ import org.springframework.stereotype.Component;
 public class MouseEventHandler
 {
     @Autowired private SelectionService selectionService;
+    @Autowired private DataService dataService;
     
     @Autowired private EditorToolsController editorToolsController;
     @Autowired private EditorDetailsController editorDetailsController;
@@ -47,21 +52,22 @@ public class MouseEventHandler
     @Autowired private Calculator calculator;
     
     private boolean isInitialized = false;
-    
     private boolean isPrimaryButtonDown = false;
-    private boolean isModeLocked = false;
     
     // TODO bind GUI buttons to these later
-    private final BooleanProperty isArcCreationModeActive = new SimpleBooleanProperty(false);
-    private final BooleanProperty isDraggingModeActive = new SimpleBooleanProperty(false);
-    private final BooleanProperty isNodeCreationModeActive = new SimpleBooleanProperty(false);
-    private final BooleanProperty isSelectionFrameActive = new SimpleBooleanProperty(false); 
+    private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
+    private final BooleanProperty isInDraggingMode = new SimpleBooleanProperty(false);
+    private final BooleanProperty isInNodeCreationMode = new SimpleBooleanProperty(false);
+    private final BooleanProperty isInSelectionFrameMode = new SimpleBooleanProperty(false); 
+    private final BooleanProperty isInFreeMode = new SimpleBooleanProperty(true); 
     
     private MouseEvent mouseEventMovedLatest;
     private MouseEvent mouseEventMovedPrevious;
     private MouseEvent mouseEventPressed;
     
     private Rectangle selectionFrame;
+    
+    private IGraphArc arcInCreation;
     
     /**
      * Registers several mouse and scroll event handlers.
@@ -118,7 +124,7 @@ public class MouseEventHandler
                      * Clicking graph elements.
                      */
                     
-                    MouseEventHandler.this.UnlockEditorMode(isNodeCreationModeActive);
+                    disableMode(isInNodeCreationMode);
                     
                     if (event.getTarget() instanceof IGraphNode) {
                         
@@ -126,7 +132,7 @@ public class MouseEventHandler
                         
                         if (!selectionService.isSelected(node)) {
                             
-                            // Clicked not yet selected node
+                            // Clicking not yet selected node
                             
                             if (!event.isControlDown()) {
                                 selectionService.clear();
@@ -136,15 +142,24 @@ public class MouseEventHandler
                             }
                         } 
                         
-                        if (!isDraggingModeActive.get()) {
+                        if (!isInDraggingMode.get()) {
+
+                            /**
+                             * Arc Creation Mode. Creating new arc after a 
+                             * certain time if event is not consumed.
+                             */
                             
                             PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1d));
                             pauseTransition.setOnFinished(e -> {
                                 if (!event.isConsumed()) {
                                     selectionService.select(node);
                                     try {
-                                        LockEditorMode(isArcCreationModeActive);
-                                        UnlockEditorMode(isArcCreationModeActive);
+                                        setEditorMode(isInArcCreationMode);
+                                        try {
+                                            arcInCreation = dataService.connect(node , null);
+                                        } catch (EdgeCreationException | AssignmentDeniedException ex) {
+
+                                        }
                                     } catch (EditorModeLockException ex) {
 
                                     }
@@ -173,9 +188,9 @@ public class MouseEventHandler
                     
                     editorDetailsController.hide();
                     
-                    if (isNodeCreationModeActive.get()) {
+                    if (isInNodeCreationMode.get()) {
                         
-                        editorToolsController.CreateNode(event); // Create node at event location.
+                        editorToolsController.CreateNode(event); // Creating node at event location.
                         
                     } else {
 
@@ -183,26 +198,25 @@ public class MouseEventHandler
                             selectionService.clear(); // Clearing current selection.
                         }
                         
-                        /**
-                         * Selection rectangle.
-                         */
                         if (event.isShiftDown()) {
+
+                            /**
+                             * Selection Frame Mode. Creating the rectangle.
+                             */
+                            
+                            try {
+                                setEditorMode(isInSelectionFrameMode);
+                            } catch (EditorModeLockException ex) {
+
+                            }
                             
                             Point2D pos = calculator.getCorrectedMousePosition(mouseEventPressed);
-
-                            // TODO
-                            // apply translation
                             selectionFrame.setX(pos.getX());
                             selectionFrame.setY(pos.getY());
                             selectionFrame.setWidth(0);
                             selectionFrame.setHeight(0);
                             
                             graphPane.getTopLayer().getChildren().add(selectionFrame);
-                            try {
-                                LockEditorMode(isSelectionFrameActive);
-                            } catch (EditorModeLockException ex) {
-
-                            }
                         }
                     }
                 }
@@ -214,15 +228,15 @@ public class MouseEventHandler
         graphPane.setOnMouseDragged(( event ) -> {
             
             mouseEventPressed.consume(); // for PauseTransition
-            
             mouseEventMovedLatest = event;
             
             if (event.isPrimaryButtonDown()) {
                 
-                /**
-                 * Selection Mode. Resizing the selection rectangle.
-                 */
-                if (isSelectionFrameActive.get()) {
+                if (isInSelectionFrameMode.get()) {
+                    
+                    /**
+                     * Selection Frame Mode. Resizes the selection rectangle.
+                     */
                     
                     Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventPressed);
                     Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
@@ -244,39 +258,53 @@ public class MouseEventHandler
                         selectionFrame.setHeight(pos_t0.getY() - selectionFrame.getY());
                     }
                     
+                } else if (isInArcCreationMode.get()) {
+                    
+                    /**
+                     * Arc Creation Mode. Binds arc end (target) to mouse pointer.
+                     */
+                    
+                    Point2D correctedMousePos = calculator.getCorrectedMousePosition(event);
+                    
+                    arcInCreation.endXProperty().set(correctedMousePos.getX());
+                    arcInCreation.endYProperty().set(correctedMousePos.getY());
+                    
                 } else {
 
                     /**
-                     * Dragging Mode. Drag selected node(s).
+                     * Dragging Mode. Drags selected node(s).
                      */
+                    
                     try {
-                        LockEditorMode(isDraggingModeActive);
-
-                        if (event.getTarget() instanceof IGraphNode) {
-
-                            Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious);
-                            Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
-
-                            for (IGraphNode node : selectionService.getSelectedNodes()) {
-                                node.setTranslate(
-                                        node.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
-                                        node.getTranslateY() + pos_t1.getY() - pos_t0.getY()
-                                );
-                            }
-                            
-                        } else if (event.getTarget() instanceof IGraphArc) {
-                            // TODO
-                            // allow dragging edges to connect places
-                        }
+                        setEditorMode(isInDraggingMode);
                     } catch (EditorModeLockException ex) {
 
                     }
+
+                    if (event.getTarget() instanceof IGraphNode) {
+
+                        Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious);
+                        Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
+
+                        for (IGraphNode node : selectionService.getSelectedNodes()) {
+                            node.setTranslate(
+                                    node.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
+                                    node.getTranslateY() + pos_t1.getY() - pos_t0.getY()
+                            );
+                        }
+
+                    } else if (event.getTarget() instanceof IGraphArc) {
+                        // TODO
+                        // allow dragging edges to connect places?
+                    }
                 }
             } 
-            /**
-             * Drag the toplayer / pane.
-             */
             else if (event.isSecondaryButtonDown()) {
+                
+                /**
+                 * Dragging the entire graph.
+                 */
+
                 graphPane.getTopLayer().setTranslateX((mouseEventMovedLatest.getX() - mouseEventMovedPrevious.getX() + graphPane.getTopLayer().translateXProperty().get()));
                 graphPane.getTopLayer().setTranslateY((mouseEventMovedLatest.getY() - mouseEventMovedPrevious.getY() + graphPane.getTopLayer().translateYProperty().get()));
             }
@@ -288,10 +316,12 @@ public class MouseEventHandler
 
         graphPane.setOnMouseReleased(( event ) -> {
             
-            /**
-             * Selection Frame Mode. Selecting node objects using the rectangle.
-             */
-            if (isSelectionFrameActive.get()) {
+            if (isInSelectionFrameMode.get()) {
+
+                /**
+                 * Selection Frame Mode. Selecting nodes using the rectangle.
+                 */
+                
                 for (Node node : graphPane.getTopLayer().getNodeLayer().getChildren()) {
                     if (node instanceof IGraphNode) {
                         if (node.getBoundsInParent().intersects(selectionFrame.getBoundsInParent())) {
@@ -302,14 +332,35 @@ public class MouseEventHandler
                     }
                 }
                 graphPane.getTopLayer().getChildren().remove(selectionFrame);
-                MouseEventHandler.this.UnlockEditorMode(isSelectionFrameActive);
+                disableMode(isInSelectionFrameMode);
+                
+            } else if (isInArcCreationMode.get()) {
+
+                /**
+                 * Arc Creation Mode. Binding or deleting arc.
+                 */
+                
+                IGraphNode target;
+                
+                if (event.getPickResult().getIntersectedNode() instanceof IGraphNode) {
+                    target = (IGraphNode) event.getPickResult().getIntersectedNode();
+                } else {
+                    target = null;
+                }
+                try {
+                    dataService.connect(arcInCreation , target);
+                } catch (Exception ex) {
+
+                }
+                disableMode(isInArcCreationMode);
                 
             } else {
                 
-                /**
-                 * Selecting node objects by clicking.
-                 */
-                if (isPrimaryButtonDown && !isDraggingModeActive.get()) {
+                if (isPrimaryButtonDown && !isInDraggingMode.get()) {
+
+                    /**
+                     * Selecting nodes by clicking.
+                     */
                     
                     if (event.getTarget() instanceof IGraphNode) {
                         
@@ -350,7 +401,7 @@ public class MouseEventHandler
             System.out.println("Clicked!");
             mouseEventPressed.consume();
             isPrimaryButtonDown = false;
-            UnlockEditorMode(isDraggingModeActive);
+            disableMode(isInDraggingMode);
             
             event.consume();
         });
@@ -379,13 +430,13 @@ public class MouseEventHandler
      * @param mode
      * @throws EditorModeLockException 
      */
-    private synchronized void LockEditorMode(BooleanProperty mode) throws EditorModeLockException {
+    private synchronized void setEditorMode(BooleanProperty mode) throws EditorModeLockException {
         if (!mode.get()) {
-            if (isModeLocked) {
-                throw new EditorModeLockException("Changing mode is locked!");
+            if (!isInFreeMode.get()) {
+                throw new EditorModeLockException("Changing mode is blocked!");
             }
-            isModeLocked = true;
-            mode.set(isModeLocked);
+            isInFreeMode.set(false);
+            mode.set(true);
         }
     }
     
@@ -393,24 +444,22 @@ public class MouseEventHandler
      * Unlock editor mode.
      * @param mode 
      */
-    private synchronized void UnlockEditorMode(BooleanProperty mode) {
+    private synchronized void disableMode(BooleanProperty mode) {
         if (mode.get()) {
             mode.set(false);
-            isModeLocked = false;
+            isInFreeMode.set(true);
         }
     }
     
     /**
      * 
      */
-    public void UnlockEditorMode() {
-        isArcCreationModeActive.set(false);
-        isDraggingModeActive.set(false);
-        isNodeCreationModeActive.set(false);
-        isSelectionFrameActive.set(false);
-        synchronized (this) {
-            isModeLocked = false;
-        }
+    public synchronized void UnlockEditorMode() {
+        isInArcCreationMode.set(false);
+        isInDraggingMode.set(false);
+        isInNodeCreationMode.set(false);
+        isInSelectionFrameMode.set(false);
+        isInFreeMode.set(true);
     }
     
     /**
@@ -418,6 +467,6 @@ public class MouseEventHandler
      * @throws EditorModeLockException 
      */
     public void setNodeCreationMode() throws EditorModeLockException {
-        LockEditorMode(isNodeCreationModeActive);
+        setEditorMode(isInNodeCreationMode);
     }
 }

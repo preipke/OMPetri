@@ -8,8 +8,8 @@ package edu.unibi.agbi.gnius.core.service;
 import edu.unibi.agbi.gnius.core.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -23,7 +23,7 @@ import edu.unibi.agbi.gnius.core.service.exception.ColourException;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -55,22 +55,58 @@ public class DataService
     }
     
     /**
-     * Adds a IGravisNode to the graph.
-     * @param node 
+     * Create a new arc.
+     * @param source
+     * @param target
+     * @return 
+     * @throws EdgeCreationException 
+     * @throws AssignmentDeniedException 
      */
-    public void add(IGraphNode node) {
-        graphDao.add(node);
+    public IGraphArc connect(IGraphNode source , IGraphNode target) throws EdgeCreationException , AssignmentDeniedException {
+        
+        DataArc node;
+        IGraphArc shape;
+
+        node = new DataArc();
+        shape = new GraphEdge(source , target , node);
+        shape.setActiveStyleClass("gravisArc");
+//        shape = new GraphCurve(source , target , node);
+//        shape.setActiveStyleClass("gravisArc");
+        node.getShapes().add(shape);
+
+        graphDao.add(shape);
+        if (target != null) {
+            petriNetDao.add(node);
+        }
+        
+        return shape;
     }
     
     /**
-     * Creates a IGravisNode of the given NodeType at the MouseEvent target location.
-     * 
+     * Connect arc to node.
+     * @param arc
+     * @param target 
+     * @throws AssignmentDeniedException 
+     */
+    public void connect(IGraphArc arc , IGraphNode target) throws AssignmentDeniedException {
+        
+        if (target != null && target != arc.getSource()) {
+            arc.setTarget(target);
+            petriNetDao.add(target.getRelatedDataNode());
+        } else {
+            graphDao.remove(arc);
+        }
+        
+    }
+    
+    /**
+     * Creates a new node.
      * @param type
      * @param target
      * @param position
      * @throws NodeCreationException 
      */
-    public IGraphNode create(PN_Element.Type type , MouseEvent target , Point2D position) throws NodeCreationException , RelationChangeDeniedException {
+    public IGraphNode create(PN_Element.Type type , MouseEvent target , Point2D position) throws NodeCreationException , AssignmentDeniedException {
         
         IDataNode node;
         IGraphNode shape;
@@ -108,32 +144,13 @@ public class DataService
     }
     
     /**
-     * Creates an edge of type EdgyType connecting source and target IGravisNode.
-     * 
-     * @param source
+     * Copy the target node.
      * @param target
-     * @throws EdgeCreationException 
-     * @throws NodeCreationException 
+     * @return
+     * @throws NodeCreationException
+     * @throws AssignmentDeniedException 
      */
-    public void connect(IGraphNode source , IGraphNode target) throws EdgeCreationException , NodeCreationException , RelationChangeDeniedException {
-        
-        DataArc node;
-        IGraphArc shape;
-
-        node = new DataArc();
-//        shape = new GraphArc(source , target , node);
-//        shape.setActiveStyleClass("gravisCurve");
-        shape = new GraphEdge(source , target , node);
-        shape.setActiveStyleClass("gravisEdge");
-//        shape = new GraphCurve(source , target , node);
-//        shape.setActiveStyleClass("gravisCurve");
-        node.getShapes().add(shape);
-        
-        graphDao.add(shape);
-        petriNetDao.add(node);
-    }
-    
-    public IGraphNode copy(IGraphNode target) throws NodeCreationException , RelationChangeDeniedException {
+    public IGraphNode copy(IGraphNode target) throws NodeCreationException , AssignmentDeniedException {
         
         IDataNode node = target.getRelatedDataNode();
         IGraphNode copy;
@@ -156,7 +173,14 @@ public class DataService
         return copy;
     }
     
-    public IGraphNode clone(IGraphNode target) throws NodeCreationException , RelationChangeDeniedException {
+    /**
+     * Clone the target node.
+     * @param target
+     * @return
+     * @throws NodeCreationException
+     * @throws AssignmentDeniedException 
+     */
+    public IGraphNode clone(IGraphNode target) throws NodeCreationException , AssignmentDeniedException {
         
         IDataNode node = target.getRelatedDataNode();
         IGraphNode clone;
@@ -202,12 +226,31 @@ public class DataService
                         nodes[i].getTranslateY() - center.getY() + position.getY()
                 );
             }
-        } catch (NodeCreationException | RelationChangeDeniedException ex) {
+        } catch (NodeCreationException | AssignmentDeniedException ex) {
 
         }
     }
     
+    public void add(IDataNode node) {
+        petriNetDao.add(node);
+    }
+    
+    public void add(IGraphNode node) {
+        graphDao.add(node);
+    }
+    
+    public void add(Colour color) throws ColourException {
+        if (!petriNetDao.add(color)) {
+            throw new ColourException("The specified colour already exists!");
+        }
+    }
+    
+    public Collection<Colour> getColours() {
+        return petriNetDao.getColours();
+    }
+    
     public boolean remove(IGraphArc edge) {
+        edge.getRelatedDataArc().getShapes().remove(edge);
         return graphDao.remove(edge);
     }
     
@@ -224,15 +267,5 @@ public class DataService
             remove(node);
         }
         selectionService.clear();
-    }
-    
-    public void add(Colour color) throws ColourException {
-        if (!petriNetDao.add(color)) {
-            throw new ColourException("The specified colour already exists!");
-        }
-    }
-    
-    public Collection<Colour> getColours() {
-        return petriNetDao.getColours();
     }
 }
