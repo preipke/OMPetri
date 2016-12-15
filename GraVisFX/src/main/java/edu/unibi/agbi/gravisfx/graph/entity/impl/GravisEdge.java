@@ -20,18 +20,36 @@ public class GravisEdge extends Line implements IGravisEdge
     private final IGravisNode source;
     private IGravisNode target;
     
-    public GravisEdge(IGravisNode source) {
+    /**
+     * 
+     * @param source must not be null, final
+     * @param target can be null and set later
+     */
+    public GravisEdge(IGravisNode source, IGravisNode target) {
         super();
         this.source = source;
+        this.target = target;
+//        System.out.println("Width = " + getBoundsInParent().getWidth());
+//        System.out.println("Height = " + getBoundsInParent().getHeight());
         startXProperty().bind(source.getShape().translateXProperty().add(source.getOffsetX()));
         startYProperty().bind(source.getShape().translateYProperty().add(source.getOffsetY()));
+//        System.out.println("Offset X = " + source.getOffsetX());
+//        System.out.println("Offset Y = " + source.getOffsetY());
+        if (target != null) {
+            endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
+            endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+        } else {
+            endXProperty().set(startXProperty().get());
+            endYProperty().set(startYProperty().get());
+        }
     }
     
-    public GravisEdge(IGravisNode source, IGravisNode target) {
-        this(source);
+    public void setTarget(IGravisNode target) {
         this.target = target;
-        endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
-        endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+        if (target != null) {
+            endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
+            endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+        }
     }
     
     @Override
