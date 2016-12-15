@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.SelectionDao;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -44,9 +45,9 @@ public class SelectionService
     }
     
     /**
-     * Clear selected and hightlighted elements.
+     * Clear selected and highlighted elements.
      */
-    public void clear() {
+    public void unselectAll() {
         for (IGraphArc arc : selectionDao.getSelectedArcs()) {
             arc.setSelected(false);
         }
@@ -114,12 +115,16 @@ public class SelectionService
     }
     
     /**
-     * Test wether node is already selected or not.
-     * @param node
-     * @return 
+     * Highlight related objects. Only if those are not already selected.
+     * @param arc 
      */
-    public boolean isSelected(IGraphNode node) {
-        return selectionDao.contains(node);
+    public void hightlightRelated(IGraphArc arc) {
+        IDataArc graphNode = arc.getRelatedDataArc();
+        for (IGraphArc relatedArc : graphNode.getShapes()) {
+            if (!selectionDao.contains(relatedArc)) {
+                highlight(relatedArc);
+            }
+        }
     }
     
     /**
@@ -127,7 +132,7 @@ public class SelectionService
      * @param arc
      * @return 
      */
-    public boolean remove(IGraphArc arc) {
+    public boolean unselect(IGraphArc arc) {
         arc.setSelected(false);
         return selectionDao.remove(arc);
     }
@@ -137,7 +142,7 @@ public class SelectionService
      * @param node
      * @return 
      */
-    public boolean remove(IGraphNode node) {
+    public boolean unselect(IGraphNode node) {
         node.setSelected(false);
         return selectionDao.remove(node);
     }
@@ -147,7 +152,7 @@ public class SelectionService
      * @param element
      * @return 
      */
-    public boolean remove(IGraphElement element) {
+    public boolean unhighlight(IGraphElement element) {
         element.setHighlighted(false);
         return selectionDao.removeHighlight(element);
     }

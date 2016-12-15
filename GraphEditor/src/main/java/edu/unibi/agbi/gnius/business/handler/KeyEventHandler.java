@@ -37,7 +37,7 @@ public class KeyEventHandler
                 
                 mouseEventHandler.UnlockEditorMode();
                 
-                selectionService.clear();
+                selectionService.unselectAll();
             }
             
             /**
@@ -67,7 +67,7 @@ public class KeyEventHandler
                     
                 } else if (event.getCode().equals(KeyCode.V)) {
 
-                    selectionService.clear();
+                    selectionService.unselectAll();
                     dataService.paste(isCloning);
                 }
             }

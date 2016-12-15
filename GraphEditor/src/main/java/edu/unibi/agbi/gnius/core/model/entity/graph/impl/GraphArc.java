@@ -119,6 +119,16 @@ public class GraphArc extends GravisArc implements IGraphArc
     }
     
     @Override
+    public boolean isSelected() {
+        return isSelected.get();
+    }
+    
+    @Override
+    public boolean isHighlighted() {
+        return isHighlighted.get();
+    }
+    
+    @Override
     public void putOnTop() {
         EdgeLayer edgeLayer = (EdgeLayer) getParent();
         edgeLayer.getChildren().remove(this);

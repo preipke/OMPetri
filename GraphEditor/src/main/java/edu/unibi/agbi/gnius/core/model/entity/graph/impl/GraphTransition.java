@@ -117,6 +117,16 @@ public class GraphTransition extends GravisRectangle implements IGraphNode
     }
     
     @Override
+    public boolean isSelected() {
+        return isSelected.get();
+    }
+    
+    @Override
+    public boolean isHighlighted() {
+        return isHighlighted.get();
+    }
+    
+    @Override
     public void putOnTop() {
         NodeLayer nodeLayer = (NodeLayer) getParent();
         nodeLayer.getChildren().remove(this);
