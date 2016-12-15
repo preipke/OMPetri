@@ -12,7 +12,7 @@ import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
-import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
@@ -54,7 +54,7 @@ public class EditorToolsController implements Initializable
     public void CreateNode(MouseEvent target) {
         try {
             dataService.create(((NodeTypeChoice) choicesCreateNode.getSelectionModel().getSelectedItem()).getType() , target , Point2D.ZERO);
-        } catch (NodeCreationException | RelationChangeDeniedException ex) {
+        } catch (NodeCreationException | AssignmentDeniedException ex) {
 
         }
     }
@@ -116,7 +116,7 @@ public class EditorToolsController implements Initializable
                 place = dataService.create(PN_Element.Type.PLACE , null, null);
                 dataService.connect(place , transition);
             }
-        } catch (NodeCreationException | EdgeCreationException | RelationChangeDeniedException ex) {
+        } catch (NodeCreationException | EdgeCreationException | AssignmentDeniedException ex) {
             System.out.println(ex.toString());
         }
     }

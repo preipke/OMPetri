@@ -10,11 +10,12 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisArc;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
+import javafx.beans.property.DoubleProperty;
 import javafx.css.PseudoClass;
 
 /**
@@ -67,20 +68,20 @@ public class GraphArc extends GravisArc implements IGraphArc
         super(source , target);
     }
 
-    public GraphArc(IGraphNode source , IGraphNode target , IDataArc dataArc) throws RelationChangeDeniedException {
+    public GraphArc(IGraphNode source , IGraphNode target , IDataArc dataArc) throws AssignmentDeniedException {
         this(source , target);
         if (!(dataArc instanceof DataArc)) {
-            throw new RelationChangeDeniedException("Must assign DataArc to GraphArc! Action denied.");
+            throw new AssignmentDeniedException("Must assign DataArc to GraphArc! Action denied.");
         }
         this.dataArc = (DataArc) dataArc;
     }
 
     @Override
-    public void setRelatedElement(IDataArc dataArc) throws RelationChangeDeniedException {
+    public void setRelatedElement(IDataArc dataArc) throws AssignmentDeniedException {
         if (this.dataArc != null) {
-            throw new RelationChangeDeniedException("Related data object has already been assigned! Action denied.");
+            throw new AssignmentDeniedException("Related data object has already been assigned! Action denied.");
         } else if (!(dataArc instanceof DataArc)) {
-            throw new RelationChangeDeniedException("Must assign DataArc to GraphArc! Action denied.");
+            throw new AssignmentDeniedException("Must assign DataArc to GraphArc! Action denied.");
         }
         this.dataArc = (DataArc) dataArc;
     }
@@ -122,5 +123,20 @@ public class GraphArc extends GravisArc implements IGraphArc
         EdgeLayer edgeLayer = (EdgeLayer) getParent();
         edgeLayer.getChildren().remove(this);
         edgeLayer.getChildren().add(this);
+    }
+
+    @Override
+    public void setTarget(IGraphNode target) throws AssignmentDeniedException {
+        throw new AssignmentDeniedException("Cannot assign new target to curved arc! Change denied.");
+    }
+
+    @Override
+    public DoubleProperty endXProperty() {
+        throw new UnsupportedOperationException("Arcs have no endpoint.");
+    }
+
+    @Override
+    public DoubleProperty endYProperty() {
+        throw new UnsupportedOperationException("Arcs have no endpoint.");
     }
 }

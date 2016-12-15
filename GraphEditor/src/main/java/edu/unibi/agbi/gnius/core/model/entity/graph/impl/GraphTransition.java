@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisRectangle;
 import javafx.beans.property.BooleanProperty;
@@ -66,20 +66,20 @@ public class GraphTransition extends GravisRectangle implements IGraphNode
         super();
     }
     
-    public GraphTransition(IDataNode dataNode) throws RelationChangeDeniedException {
+    public GraphTransition(IDataNode dataNode) throws AssignmentDeniedException {
         this();
         if (!(dataNode instanceof DataTransition)) {
-            throw new RelationChangeDeniedException("Must assign DataTransition to GraphTransition! Action denied.");
+            throw new AssignmentDeniedException("Must assign transition! Action denied.");
         }
         this.dataTransition = (DataTransition) dataNode;
     }
 
     @Override
-    public void setRelatedElement(IDataNode dataNode) throws RelationChangeDeniedException {
+    public void setRelatedElement(IDataNode dataNode) throws AssignmentDeniedException {
         if (this.dataTransition != null) {
-            throw new RelationChangeDeniedException("Related data object has already been assigned!");
+            throw new AssignmentDeniedException("Related transition has already been assigned! Change denied.");
         } else if (!(dataNode instanceof DataTransition)) {
-            throw new RelationChangeDeniedException("Must assign DataTransition to GraphTransition! Action denied.");
+            throw new AssignmentDeniedException("Must assign a transition! Action denied.");
         }
         this.dataTransition = (DataTransition) dataNode;
     }

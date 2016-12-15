@@ -9,21 +9,21 @@ package edu.unibi.agbi.gnius.core.service.exception;
  *
  * @author PR
  */
-public class RelationChangeDeniedException extends Exception
+public class AssignmentDeniedException extends Exception
 {
-    public RelationChangeDeniedException() {
+    public AssignmentDeniedException() {
         super();
     }
 
-    public RelationChangeDeniedException(String msg) {
+    public AssignmentDeniedException(String msg) {
         super(msg);
     }
 
-    public RelationChangeDeniedException(Throwable thr) {
+    public AssignmentDeniedException(Throwable thr) {
         super(thr);
     }
     
-    public RelationChangeDeniedException(String msg, Throwable thr) {
+    public AssignmentDeniedException(String msg, Throwable thr) {
         super(msg , thr);
     }
 }

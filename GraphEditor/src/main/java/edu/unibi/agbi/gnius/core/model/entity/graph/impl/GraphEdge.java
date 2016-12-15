@@ -10,7 +10,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisEdge;
 import javafx.beans.property.BooleanProperty;
@@ -67,20 +67,20 @@ public class GraphEdge extends GravisEdge implements IGraphArc
         super(source , target);
     }
     
-    public GraphEdge(IGraphNode source, IGraphNode target, IDataArc dataArc) throws RelationChangeDeniedException {
+    public GraphEdge(IGraphNode source, IGraphNode target, IDataArc dataArc) throws AssignmentDeniedException {
         this(source , target);
         if (!(dataArc instanceof DataArc)) {
-            throw new RelationChangeDeniedException("Must assign DataArc to GraphArc! Action denied.");
+            throw new AssignmentDeniedException("Must assign an arc! Action denied.");
         }
         this.dataArc = (DataArc) dataArc;
     }
 
     @Override
-    public void setRelatedElement(IDataArc dataArc) throws RelationChangeDeniedException {
+    public void setRelatedElement(IDataArc dataArc) throws AssignmentDeniedException {
         if (this.dataArc != null) {
-            throw new RelationChangeDeniedException("Related data object has already been assigned! Action denied.");
+            throw new AssignmentDeniedException("Related arc has already been assigned! Action denied.");
         } else if (!(dataArc instanceof DataArc)) {
-            throw new RelationChangeDeniedException("Must assign DataArc to GraphArc! Action denied.");
+            throw new AssignmentDeniedException("Must assign an arc! Action denied.");
         }
         this.dataArc = (DataArc) dataArc;
     }
@@ -122,5 +122,14 @@ public class GraphEdge extends GravisEdge implements IGraphArc
         EdgeLayer edgeLayer = (EdgeLayer) getParent();
         edgeLayer.getChildren().remove(this);
         edgeLayer.getChildren().add(this);
+    }
+
+    @Override
+    public void setTarget(IGraphNode target) throws AssignmentDeniedException {
+        if (getTarget() == null) {
+            super.setTarget(target);
+        } else {
+            throw new AssignmentDeniedException("Cannot assign new target to an arc! Change denied.");
+        }
     }
 }

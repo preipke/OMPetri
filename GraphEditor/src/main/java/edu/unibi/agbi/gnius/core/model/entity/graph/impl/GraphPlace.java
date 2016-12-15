@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.RelationChangeDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gravisfx.graph.entity.impl.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import javafx.beans.property.BooleanProperty;
@@ -66,20 +66,20 @@ public class GraphPlace extends GravisCircle implements IGraphNode
         super();
     }
     
-    public GraphPlace(IDataNode dataNode) throws RelationChangeDeniedException {
+    public GraphPlace(IDataNode dataNode) throws AssignmentDeniedException {
         this();
         if (!(dataNode instanceof DataPlace)) {
-            throw new RelationChangeDeniedException("Must assign DataPlace to GraphPlace! Action denied.");
+            throw new AssignmentDeniedException("Must assign a place! Action denied.");
         }
         this.dataElement = (DataPlace) dataNode;
     }
 
     @Override
-    public void setRelatedElement(IDataNode dataNode) throws RelationChangeDeniedException {
+    public void setRelatedElement(IDataNode dataNode) throws AssignmentDeniedException {
         if (this.dataElement != null) {
-            throw new RelationChangeDeniedException("Related data object has already been assigned! Action denied.");
+            throw new AssignmentDeniedException("Related place has already been assigned! Change denied.");
         } else if (!(dataNode instanceof DataPlace)) {
-            throw new RelationChangeDeniedException("Must assign DataPlace to GraphPlace! Action denied.");
+            throw new AssignmentDeniedException("Must assign a place! Action denied.");
         }
         this.dataElement = (DataPlace) dataNode;
     }
