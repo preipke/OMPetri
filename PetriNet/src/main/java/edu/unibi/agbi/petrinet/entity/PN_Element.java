@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author pr
  */
-public abstract class PN_Element {
+public abstract class PN_Element implements IPN_Element {
     
     protected Type type;
     protected String id;
@@ -28,6 +28,7 @@ public abstract class PN_Element {
         return parameter;
     }
     
+    @Override
     public String getId() {
         return id;
     }

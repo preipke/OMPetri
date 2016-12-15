@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.util;
 
+import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
@@ -36,8 +37,8 @@ public class OM_Exporter
         
         Collection<Arc> arcs = petriNet.getArcs();
         Collection<Colour> colors = petriNet.getColours();
-        Collection<Place> places = petriNet.getPlaces();
-        Collection<Transition> transitions = petriNet.getTransitions();
+        Collection<IPN_Node> places = petriNet.getPlaces();
+        Collection<IPN_Node> transitions = petriNet.getTransitions();
         
         boolean isCpn = colors.size() != 1;
         String pnLibPlace, pnLibTransition;
@@ -79,9 +80,13 @@ public class OM_Exporter
             Token token;
             Weight weight;
             PN_Node node;
+            Place place;
+            Transition transition;
             int count;
             
-            for (Place place : places) {
+            for (IPN_Node nPlace : places) {
+                
+                place = (Place) nPlace;
 
                 tokenMap = place.getTokenMap();
                 
@@ -155,7 +160,9 @@ public class OM_Exporter
              * Transitions.
              */
             
-            for (Transition transition : transitions) {
+            for (IPN_Node nTransition : transitions) {
+                
+                transition = (Transition) nTransition;
                 
                 function = transition.getFunction();
                 

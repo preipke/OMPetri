@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
-import edu.unibi.agbi.petrinet.entity.PN_Node;
+import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
@@ -27,9 +27,9 @@ public class PetriNet
     private final Map<String,Arc> arcs;
     private final Map<String,Colour> colours;
     // TODO remove some of the following, depending on if place id can be the same as transition id or not
-    private final Map<String,Place> places;
-    private final Map<String,Transition> transitions;
-    private final Map<String,PN_Node> placesAndTransitions;
+    private final Map<String,IPN_Node> places;
+    private final Map<String,IPN_Node> transitions;
+    private final Map<String,IPN_Node> placesAndTransitions;
     
     public PetriNet() {
         arcs = new HashMap();
@@ -52,6 +52,19 @@ public class PetriNet
             return false;
         } 
         colours.put(colour.getId(), colour);
+        return true;
+    }
+    
+    public boolean add(IPN_Node node) {
+        if (placesAndTransitions.containsKey(node.getId())) {
+            return false;
+        } 
+        placesAndTransitions.put(node.getId(), node);
+        if (node instanceof Place) {
+            places.put(node.getId(), node);
+        } else {
+            transitions.put(node.getId(), node);
+        }
         return true;
     }
     
@@ -81,11 +94,15 @@ public class PetriNet
         return colours.values();
     }
     
-    public Collection<Place> getPlaces() {
+    public Collection<IPN_Node> getPlaces() {
         return places.values();
     }
     
-    public Collection<Transition> getTransitions() {
+    public Collection<IPN_Node> getPlacesAndTransitions() {
+        return placesAndTransitions.values();
+    }
+    
+    public Collection<IPN_Node> getTransitions() {
         return transitions.values();
     }
 

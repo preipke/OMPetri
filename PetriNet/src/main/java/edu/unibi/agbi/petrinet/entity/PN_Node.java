@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author PR
  */
-public abstract class PN_Node extends PN_Element
+public abstract class PN_Node extends PN_Element implements IPN_Node
 {
     private static final String IDENT = "pn";
     private static int COUNT = 0;
