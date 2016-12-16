@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.SelectionDao;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -60,38 +61,6 @@ public class SelectionService
     }
     
     /**
-     * Get selected arcs.
-     * @return 
-     */
-    public List<IGraphArc> getSelectedArcs() {
-        return selectionDao.getSelectedArcs();
-    }
-    
-    /**
-     * Get selected nodes.
-     * @return 
-     */
-    public List<IGraphNode> getSelectedNodes() {
-        return selectionDao.getSelectedNodes();
-    }
-    
-    /**
-     * Get copied arcs.
-     * @return 
-     */
-    public IGraphArc[] getEdgesCopy() {
-        return arcCopy;
-    }
-    
-    /**
-     * Get copied nodes.
-     * @return 
-     */
-    public IGraphNode[] getNodesCopy() {
-        return nodesCopy;
-    }
-    
-    /**
      * Highlight the given element.
      * @param element 
      */
@@ -105,41 +74,25 @@ public class SelectionService
      * @param node 
      */
     public void hightlightRelated(IGraphNode node) {
-        IDataNode graphNode = node.getRelatedDataNode();
-        for (IGraphNode relatedNode : graphNode.getShapes()) {
-            if (!selectionDao.contains(relatedNode)) {
-                highlight(relatedNode);
+        IDataNode dataNode = node.getRelatedDataNode();
+        for (IGraphNode shape : dataNode.getShapes()) {
+            if (!selectionDao.contains(shape)) {
+                highlight(shape);
             }
         }
     }
     
     /**
-     * Test wether node is already selected or not.
-     * @param node
-     * @return 
+     * Highlight related objects. Only if those are not already selected.
+     * @param arc 
      */
-    public boolean isSelected(IGraphNode node) {
-        return selectionDao.contains(node);
-    }
-    
-    /**
-     * Remove arc selection.
-     * @param arc
-     * @return 
-     */
-    public boolean remove(IGraphArc arc) {
-        arc.setSelected(false);
-        return selectionDao.remove(arc);
-    }
-    
-    /**
-     * Remove node selection.
-     * @param node
-     * @return 
-     */
-    public boolean remove(IGraphNode node) {
-        node.setSelected(false);
-        return selectionDao.remove(node);
+    public void hightlightRelated(IGraphArc arc) {
+        IDataArc dataArc = arc.getRelatedDataArc();
+        for (IGraphArc shape : dataArc.getShapes()) {
+            if (!selectionDao.contains(shape)) {
+                highlight(shape);
+            }
+        }
     }
     
     /**
@@ -147,7 +100,7 @@ public class SelectionService
      * @param element
      * @return 
      */
-    public boolean remove(IGraphElement element) {
+    public boolean unhighlight(IGraphElement element) {
         element.setHighlighted(false);
         return selectionDao.removeHighlight(element);
     }
@@ -191,5 +144,57 @@ public class SelectionService
         for (IGraphNode relatedNode : dataNode.getShapes()) {
             select(relatedNode);
         }
+    }
+    
+    /**
+     * Remove arc selection.
+     * @param arc
+     * @return 
+     */
+    public boolean unselect(IGraphArc arc) {
+        arc.setSelected(false);
+        return selectionDao.remove(arc);
+    }
+    
+    /**
+     * Remove node selection.
+     * @param node
+     * @return 
+     */
+    public boolean unselect(IGraphNode node) {
+        node.setSelected(false);
+        return selectionDao.remove(node);
+    }
+    
+    /**
+     * Get selected arcs.
+     * @return 
+     */
+    public List<IGraphArc> getSelectedArcs() {
+        return selectionDao.getSelectedArcs();
+    }
+    
+    /**
+     * Get selected nodes.
+     * @return 
+     */
+    public List<IGraphNode> getSelectedNodes() {
+        return selectionDao.getSelectedNodes();
+    }
+    
+    /**
+     * Get copied arcs.
+     * @return 
+     */
+    public IGraphArc[] getEdgesCopy() {
+        return arcCopy;
+    }
+    
+    /**
+     * Get copied nodes.
+     * @return 
+     */
+    public IGraphNode[] getNodesCopy() {
+        return nodesCopy;
     }
 }
