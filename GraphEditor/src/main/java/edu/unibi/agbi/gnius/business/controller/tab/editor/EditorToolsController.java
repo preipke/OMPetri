@@ -59,6 +59,14 @@ public class EditorToolsController implements Initializable
         }
     }
     
+    public void addToLog(String msg) {
+        textLogArea.appendText(msg + "\n");
+    }
+    
+    public void addToLog(Throwable thr) {
+        textLogArea.appendText(thr.toString() + "\n");
+    }
+    
     @FXML
     private void buttonAlignNodes() {
         LayoutType type = ((LayoutTypeChoice) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
@@ -77,7 +85,8 @@ public class EditorToolsController implements Initializable
         try {
             mouseEventHandler.setNodeCreationMode();
         } catch (EditorModeLockException ex) {
-
+            addToLog(getClass() + ":");
+            addToLog(ex);
         }
     }
     
@@ -117,7 +126,8 @@ public class EditorToolsController implements Initializable
                 dataService.connect(place , transition);
             }
         } catch (NodeCreationException | EdgeCreationException | AssignmentDeniedException ex) {
-            System.out.println(ex.toString());
+            addToLog(getClass() + ":");
+            addToLog(ex);
         }
     }
 
