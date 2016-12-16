@@ -6,13 +6,14 @@
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import java.util.List;
 
 /**
  *
  * @author PR
  */
-public interface IDataArc extends IDataElement
+public interface IDataArc extends IDataElement, IPN_Arc
 {
     public List<IGraphArc> getShapes();
 }

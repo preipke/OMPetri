@@ -139,4 +139,24 @@ public class GraphArc extends GravisArc implements IGraphArc
     public DoubleProperty endYProperty() {
         throw new UnsupportedOperationException("Arcs have no endpoint.");
     }
+
+    @Override
+    public IGraphNode getSource() {
+        return (IGraphNode) super.getSource();
+    }
+
+    @Override
+    public IGraphNode getTarget() {
+        return (IGraphNode) super.getTarget();
+    }
+
+    @Override
+    public boolean isHighlighted() {
+        return isHighlighted.get();
+    }
+
+    @Override
+    public boolean isSelected() {
+        return isSelected.get();
+    }
 }

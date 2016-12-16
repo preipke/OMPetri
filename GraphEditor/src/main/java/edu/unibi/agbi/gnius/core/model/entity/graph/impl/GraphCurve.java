@@ -128,4 +128,24 @@ public class GraphCurve extends GravisCurve implements IGraphArc
     public void setTarget(IGraphNode target) throws AssignmentDeniedException {
         throw new AssignmentDeniedException("Cannot assign new target to curved arc! Change denied.");
     }
+
+    @Override
+    public IGraphNode getSource() {
+        return (IGraphNode) super.getSource();
+    }
+
+    @Override
+    public IGraphNode getTarget() {
+        return (IGraphNode) super.getTarget();
+    }
+
+    @Override
+    public boolean isHighlighted() {
+        return isHighlighted.get();
+    }
+
+    @Override
+    public boolean isSelected() {
+        return isSelected.get();
+    }
 }

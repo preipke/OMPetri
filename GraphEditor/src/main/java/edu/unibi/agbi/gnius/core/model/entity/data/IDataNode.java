@@ -7,7 +7,6 @@ package edu.unibi.agbi.gnius.core.model.entity.data;
 
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
-
 import java.util.List;
 
 /**

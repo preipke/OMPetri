@@ -122,4 +122,14 @@ public class GraphPlace extends GravisCircle implements IGraphNode
         nodeLayer.getChildren().remove(this);
         nodeLayer.getChildren().add(this);
     }
+
+    @Override
+    public boolean isHighlighted() {
+        return isHighlighted.get();
+    }
+
+    @Override
+    public boolean isSelected() {
+        return isSelected.get();
+    }
 }

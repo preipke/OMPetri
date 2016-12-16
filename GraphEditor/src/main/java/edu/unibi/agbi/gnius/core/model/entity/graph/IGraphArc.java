@@ -14,11 +14,13 @@ import javafx.beans.property.DoubleProperty;
  *
  * @author PR
  */
-public interface IGraphArc extends IGraphElement,IGravisEdge
+public interface IGraphArc extends IGraphElement , IGravisEdge
 {
     public IDataArc getRelatedDataArc();
     public void setRelatedElement(IDataArc dataNode) throws AssignmentDeniedException;
     public void setTarget(IGraphNode target) throws AssignmentDeniedException;
     public DoubleProperty endXProperty();
     public DoubleProperty endYProperty();
+    @Override public IGraphNode getSource();
+    @Override public IGraphNode getTarget();
 }
