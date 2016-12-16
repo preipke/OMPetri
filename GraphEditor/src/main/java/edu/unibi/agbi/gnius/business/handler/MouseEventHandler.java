@@ -140,7 +140,7 @@ public class MouseEventHandler
                             if (!event.isControlDown()) {
                                 selectionService.unselectAll();
                                 selectionService.select(node);
-                                selectionService.hightlightRelated(node);
+                                selectionService.highlightRelated(node);
                                 editorDetailsController.getDetails(node);
                             }
                         } 
@@ -168,20 +168,7 @@ public class MouseEventHandler
                             });
                             pauseTransition.playFromStart();
                         }
-                    } 
-//                    if (event.getTarget() instanceof IGraphArc) {
-//                        
-//                        IGraphArc arc = (IGraphArc)event.getTarget();
-//
-//                        if (!arc.isSelected()) {
-//                            if (!event.isControlDown()) {
-//                                selectionService.unselectAll();
-//                                selectionService.select(arc);
-//                                selectionService.hightlightRelated(arc);
-//                                editorDetailsController.getDetails(arc);
-//                            }
-//                        }
-//                    } 
+                    }
                     
                 } else {
                     
@@ -296,10 +283,10 @@ public class MouseEventHandler
                         Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious);
                         Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
 
-                        for (IGraphNode node : selectionService.getSelectedNodes()) {
-                            node.setTranslate(
-                                    node.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
-                                    node.getTranslateY() + pos_t1.getY() - pos_t0.getY()
+                        for (IGraphElement element : selectionService.getSelectedElements()) {
+                            element.setTranslate(
+                                    element.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
+                                    element.getTranslateY() + pos_t1.getY() - pos_t0.getY()
                             );
                         }
                     } 
@@ -364,12 +351,12 @@ public class MouseEventHandler
                 if (isPrimaryButtonDown && !isInDraggingMode.get()) {
 
                     /**
-                     * Selecting nodes by clicking.
+                     * Selecting elements by clicking.
                      */
                     
-                    if (event.getTarget() instanceof IGraphNode) {
+                    if (event.getTarget() instanceof IGraphElement) {
                         
-                        IGraphNode node = (IGraphNode)event.getTarget();
+                        IGraphElement node = (IGraphElement)event.getTarget();
                         
                         if (event.isControlDown()) {
                             if (node.isSelected()) {
@@ -377,36 +364,16 @@ public class MouseEventHandler
                                 selectionService.unhighlightRelated(node);
                             } else {
                                 selectionService.select(node);
-                                selectionService.hightlightRelated(node);
+                                selectionService.highlightRelated(node);
                             }
                             editorDetailsController.hide();
                         } else {
                             selectionService.unselectAll();
                             selectionService.select(node);
-                            selectionService.hightlightRelated(node);
+                            selectionService.highlightRelated(node);
                             editorDetailsController.getDetails(node);
                         }
-                        
-                    } else if (event.getTarget() instanceof IGraphArc) {
-                        
-                        IGraphArc arc = (IGraphArc)event.getTarget();
-                        
-                        if (event.isControlDown()) {
-                            if (arc.isSelected()) {
-                                selectionService.unselect(arc);
-//                                selectionService.unhighlightRelated(arc);
-                            } else {
-                                selectionService.select(arc);
-                                selectionService.hightlightRelated(arc);
-                            }
-                            editorDetailsController.hide();
-                        } else {
-                            selectionService.unselectAll();
-                            selectionService.select(arc);
-                            selectionService.hightlightRelated(arc);
-                            editorDetailsController.getDetails(arc);
-                        }
-                    }
+                    } 
                 }
             }
 

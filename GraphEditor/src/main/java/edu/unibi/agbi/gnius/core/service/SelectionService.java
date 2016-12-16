@@ -39,21 +39,18 @@ public class SelectionService
      * Copy and store selected nodes and arcs.
      */
     public void copy() {
-        arcCopy = new IGraphArc[selectionDao.getSelectedArcs().size()];
-        arcCopy = selectionDao.getSelectedArcs().toArray(arcCopy);
-        nodesCopy = new IGraphNode[selectionDao.getSelectedNodes().size()];
-        nodesCopy = selectionDao.getSelectedNodes().toArray(nodesCopy);
+//        arcCopy = new IGraphArc[selectionDao.getSelectedArcs().size()];
+//        arcCopy = selectionDao.getSelectedArcs().toArray(arcCopy);
+//        nodesCopy = new IGraphNode[selectionDao.getSelectedNodes().size()];
+//        nodesCopy = selectionDao.getSelectedNodes().toArray(nodesCopy);
     }
     
     /**
      * Clear selected and highlighted elements.
      */
     public void unselectAll() {
-        for (IGraphArc arc : selectionDao.getSelectedArcs()) {
-            arc.setSelected(false);
-        }
-        for (IGraphNode node : selectionDao.getSelectedNodes()) {
-            node.setSelected(false);
+        for (IGraphElement selected : selectionDao.getSelectedElements()) {
+            selected.setSelected(false);
         }
         for (IGraphElement hightlighted : selectionDao.getHightlightedElements()) {
             hightlighted.setHighlighted(false);
@@ -67,32 +64,16 @@ public class SelectionService
      */
     public void highlight(IGraphElement element) {
         element.setHighlighted(true);
-        selectionDao.add(element);
+        selectionDao.addHighlight(element);
     }
     
     /**
      * Highlight related objects. Only if those are not already selected.
-     * @param node 
+     * @param element 
      */
-    public void hightlightRelated(IGraphNode node) {
-        IDataNode dataNode = node.getRelatedDataNode();
-        for (IGraphNode shape : dataNode.getShapes()) {
-            if (!shape.isSelected()) {
-                if (!shape.isHighlighted()) {
-                    highlight(shape);
-                }
-            }
-        }
-    }
-    
-    /**
-     * Highlight related objects. Only if those are not already selected.
-     * @param arc 
-<<<<<<< HEAD
-     */
-    public void hightlightRelated(IGraphArc arc) {
-        IDataArc dataArc = arc.getRelatedDataArc();
-        for (IGraphArc shape : dataArc.getShapes()) {
+    public void highlightRelated(IGraphElement element) {
+        IDataElement dataElement = element.getRelatedDataElement();
+        for (IGraphElement shape : dataElement.getShapes()) {
             if (!shape.isSelected()) {
                 if (!shape.isHighlighted()) {
                     highlight(shape);
@@ -111,99 +92,72 @@ public class SelectionService
         return selectionDao.removeHighlight(element);
     }
     
-    public void unhighlightRelated(IGraphNode node) {
+    /**
+     * Removes element highlight from all related. Only if no other related
+     * element is selected anymore.
+     * @param element 
+     */
+    public void unhighlightRelated(IGraphElement element) {
         
-        IDataNode dataNode = node.getRelatedDataNode();
+        IDataElement dataElement = element.getRelatedDataElement();
         
         boolean isStillSelected = false;
-        for (IGraphNode relatedShape : dataNode.getShapes()) {
+        for (IGraphElement relatedShape : dataElement.getShapes()) {
             if (relatedShape.isSelected()) {
                 isStillSelected = true;
                 break;
             }
         }
         if (!isStillSelected) {
-            for (IGraphNode relatedShape : dataNode.getShapes()) {
+            for (IGraphElement relatedShape : dataElement.getShapes()) {
                 unhighlight(relatedShape);
             }
         }
     }
     
     /**
-     * Select arc.
-     * @param arc 
+     * Select element.
+     * @param element 
      */
-    public void select(IGraphArc arc) {
-        if (selectionDao.removeHighlight(arc)) {
-            arc.setHighlighted(false);
+    public void select(IGraphElement element) {
+        if (element.isHighlighted()) {
+            selectionDao.removeHighlight(element);
+            element.setHighlighted(false);
         }
-        if (!selectionDao.contains(arc)) {
-            selectionDao.add(arc);
-            arc.setSelected(true);
+        if (!element.isSelected()) {
+            selectionDao.addSelection(element);
+            element.setSelected(true);
         }
-        arc.putOnTop();
+        element.putOnTop();
     }
     
     /**
-     * Select node.
-     * @param node 
+     * Select element and all related.
+     * @param element 
      */
-    public void select(IGraphNode node) {
-        if (selectionDao.removeHighlight(node)) {
-            node.setHighlighted(false);
-        }
-        if (!selectionDao.contains(node)) {
-            selectionDao.add(node);
-            node.setSelected(true);
-        }
-        node.putOnTop();
-    }
-    
-    /**
-     * Select node and all related.
-     * @param node 
-     */
-    public void selectAll(IGraphNode node) {
-        IDataNode dataNode = node.getRelatedDataNode();
-        for (IGraphNode relatedNode : dataNode.getShapes()) {
-            select(relatedNode);
+    public void selectAll(IGraphElement element) {
+        IDataElement dataElement = element.getRelatedDataElement();
+        for (IGraphElement relatedElement : dataElement.getShapes()) {
+            select(relatedElement);
         }
     }
     
     /**
-     * Remove arc selection.
+     * Remove selection.
      * @param arc
      * @return 
      */
-    public boolean unselect(IGraphArc arc) {
+    public boolean unselect(IGraphElement arc) {
         arc.setSelected(false);
-        return selectionDao.remove(arc);
+        return selectionDao.removeSelection(arc);
     }
     
     /**
-     * Remove node selection.
-     * @param node
+     * Get selected elements.
      * @return 
      */
-    public boolean unselect(IGraphNode node) {
-        node.setSelected(false);
-        return selectionDao.remove(node);
-    }
-    
-    /**
-     * Get selected arcs.
-     * @return 
-     */
-    public List<IGraphArc> getSelectedArcs() {
-        return selectionDao.getSelectedArcs();
-    }
-    
-    /**
-     * Get selected nodes.
-     * @return 
-     */
-    public List<IGraphNode> getSelectedNodes() {
-        return selectionDao.getSelectedNodes();
+    public List<IGraphElement> getSelectedElements() {
+        return selectionDao.getSelectedElements();
     }
     
     /**

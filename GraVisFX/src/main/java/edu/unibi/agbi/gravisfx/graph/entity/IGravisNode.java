@@ -13,8 +13,6 @@ import java.util.List;
  */
 public interface IGravisNode extends IGravisElement
 {
-    public void setTranslate(double positionX, double positionY);
-    
     public double getOffsetX();
     public double getOffsetY();
     

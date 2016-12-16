@@ -66,4 +66,8 @@ public class GravisEdge extends Line implements IGravisEdge
     public Shape getShape() {
         return this;
     }
+
+    @Override
+    public void setTranslate(double positionX , double positionY) {
+    }
 }

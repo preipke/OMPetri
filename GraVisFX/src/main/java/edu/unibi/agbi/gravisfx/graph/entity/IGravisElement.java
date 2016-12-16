@@ -15,6 +15,8 @@ public interface IGravisElement
 {
     public Shape getShape();
     
+    public void setTranslate(double positionX, double positionY);
+    
     public double getTranslateX();
     public double getTranslateY();
 }

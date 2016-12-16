@@ -13,6 +13,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCurve;
@@ -101,7 +102,9 @@ public class DataService
         if (source.getChildren().contains(target)) {
             throw new EdgeCreationException("Nodes are already connected!");
         } 
-        for (IGraphNode relatedSourceShape : dataSourceNode.getShapes()) {
+        for (IGraphElement relatedSourceElement : dataSourceNode.getShapes()) {
+            
+            IGraphNode relatedSourceShape = (IGraphNode) relatedSourceElement;
             
             for (int i = 0; i < relatedSourceShape.getChildren().size(); i++) {
                 
@@ -360,11 +363,12 @@ public class DataService
     }
     
     public void removeSelected() {
-        for (IGraphArc edge : selectionService.getSelectedArcs()) {
-            remove(edge);
-        }
-        for (IGraphNode node : selectionService.getSelectedNodes()) {
-            remove(node);
+        for (IGraphElement element : selectionService.getSelectedElements()) {
+            if (element instanceof IGraphArc) {
+                remove((IGraphArc)element);
+            } else {
+                remove((IGraphNode)element);
+            }
         }
         selectionService.unselectAll();
     }

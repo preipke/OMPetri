@@ -47,6 +47,8 @@ public class EditorDetailsController implements Initializable
     @Autowired private DataService dataService;
     @Autowired private SelectionService selectionService;
     
+    @Autowired private EditorToolsController editorToolsController;
+    
     @FXML private VBox detailsBox;
     @FXML private VBox propertiesBox;
     
@@ -201,6 +203,7 @@ public class EditorDetailsController implements Initializable
         switch (elementType) {
                 
             case ARC:
+                
                 DataArc arc = (DataArc) activeNode;
                 
                 Weight weight = new Weight(null);
@@ -210,23 +213,37 @@ public class EditorDetailsController implements Initializable
                 break;
             
             case PLACE:
+                
                 DataPlace place = (DataPlace) activeNode;
                 
                 Token token = new Token(null);
                 if (!propertyToken.getText().isEmpty()) {
-                    token.setValueStart(Double.parseDouble(propertyToken.getText()));
+                    try {
+                        token.setValueStart(Double.parseDouble(propertyToken.getText()));
+                    } catch (NumberFormatException ex) {
+                        editorToolsController.addToLog("Value for 'Token' ist not a number!");
+                    }
                 }
                 if (!propertyTokenMin.getText().isEmpty()) {
-                    token.setValueMin(Double.parseDouble(propertyTokenMin.getText()));
+                    try {
+                        token.setValueMin(Double.parseDouble(propertyTokenMin.getText()));
+                    } catch (NumberFormatException ex) {
+                        editorToolsController.addToLog("Value for 'Token (min.)' ist not a number!");
+                    }
                 }
                 if (!propertyTokenMax.getText().isEmpty()) {
-                    token.setValueMax(Double.parseDouble(propertyTokenMax.getText()));
+                    try {
+                        token.setValueMax(Double.parseDouble(propertyTokenMax.getText()));
+                    } catch (NumberFormatException ex) {
+                        editorToolsController.addToLog("Value for 'Token (max.)' ist not a number!");
+                    }
                 }
                 
                 place.setToken(token);
                 break;
                 
             case TRANSITION:
+                
                 DataTransition transition = (DataTransition) activeNode;
                 
                 Function function = new Function();

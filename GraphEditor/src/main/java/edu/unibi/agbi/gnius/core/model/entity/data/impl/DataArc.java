@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public class DataArc extends Arc implements IDataArc
 {
-    private final List<IGraphArc> shapes;
+    private final List<IGraphElement> shapes;
     
     public DataArc() {
         super();
@@ -25,7 +26,7 @@ public class DataArc extends Arc implements IDataArc
     }
 
     @Override
-    public List<IGraphArc> getShapes() {
+    public List<IGraphElement> getShapes() {
         return shapes;
     }
 }
