@@ -90,7 +90,7 @@ public class MouseEventHandler
          * Register key events. Must be done after showing stage (Scene is null
          * before).
          */
-        graphPane.setOnMouseMoved((MouseEvent event) -> {
+        graphPane.setOnMouseMoved(( event ) -> {
             
             mouseEventMovedLatest = event;
             
@@ -138,16 +138,17 @@ public class MouseEventHandler
                         if (!node.isSelected()) {
                             
                             // Clicking not yet selected node
+                            // Node has to be set to selected to allow immediate dragging
                             
                             if (!event.isControlDown()) {
-                                selectionService.clear();
+                                selectionService.unselectAll();
                                 selectionService.select(node);
                                 selectionService.hightlightRelated(node);
                                 editorDetailsController.getDetails(node);
                             }
                         } 
                         
-                        if (!isInDraggingMode.get()) {
+                        if (isInFreeMode.get()) {
 
                             /**
                              * Arc Creation Mode. Creating new arc after a 
@@ -158,6 +159,7 @@ public class MouseEventHandler
                             pauseTransition.setOnFinished(e -> {
                                 if (!event.isConsumed()) {
                                     selectionService.unselect(node);
+                                    editorDetailsController.hide();
                                     try {
                                         setEditorMode(isInArcCreationMode);
                                         arcTemp = dataService.createTemporaryArc(node);
@@ -170,22 +172,20 @@ public class MouseEventHandler
                             });
                             pauseTransition.playFromStart();
                         }
-                        
-                    } else {
-                        
-                        IGraphArc arc = (IGraphArc)event.getTarget();
-
-                        if (!arc.isSelected()) {
-
-                            if (!event.isControlDown()) {
-                                selectionService.clear();
-                                selectionService.select(arc);
-                                selectionService.hightlightRelated(arc);
-                                editorDetailsController.getDetails(arc);
-                            }
-
-                        }
-                    }
+                    } 
+//                    if (event.getTarget() instanceof IGraphArc) {
+//                        
+//                        IGraphArc arc = (IGraphArc)event.getTarget();
+//
+//                        if (!arc.isSelected()) {
+//                            if (!event.isControlDown()) {
+//                                selectionService.unselectAll();
+//                                selectionService.select(arc);
+//                                selectionService.hightlightRelated(arc);
+//                                editorDetailsController.getDetails(arc);
+//                            }
+//                        }
+//                    } 
                     
                 } else {
                     
@@ -196,7 +196,7 @@ public class MouseEventHandler
                     editorDetailsController.hide();
 
                     if (!event.isControlDown()) {
-                        selectionService.clear(); // Clearing current selection.
+                        selectionService.unselectAll(); // Clearing current selection.
                     }
 
                     if (event.isShiftDown()) {
@@ -381,13 +381,16 @@ public class MouseEventHandler
                         IGraphNode node = (IGraphNode)event.getTarget();
                         
                         if (event.isControlDown()) {
-                            if (!selectionService.unselect(node)) {
+                            if (node.isSelected()) {
+                                selectionService.unselect(node);
+                                selectionService.unhighlightRelated(node);
+                            } else {
                                 selectionService.select(node);
                                 selectionService.hightlightRelated(node);
                             }
                             editorDetailsController.hide();
                         } else {
-                            selectionService.clear();
+                            selectionService.unselectAll();
                             selectionService.select(node);
                             selectionService.hightlightRelated(node);
                             editorDetailsController.getDetails(node);
@@ -398,18 +401,20 @@ public class MouseEventHandler
                         IGraphArc arc = (IGraphArc)event.getTarget();
                         
                         if (event.isControlDown()) {
-                            if (!selectionService.unselect(arc)) {
+                            if (arc.isSelected()) {
+                                selectionService.unselect(arc);
+//                                selectionService.unhighlightRelated(arc);
+                            } else {
                                 selectionService.select(arc);
                                 selectionService.hightlightRelated(arc);
                             }
                             editorDetailsController.hide();
                         } else {
-                            selectionService.clear();
+                            selectionService.unselectAll();
                             selectionService.select(arc);
                             selectionService.hightlightRelated(arc);
                             editorDetailsController.getDetails(arc);
                         }
-                        selectionService.select(arc);
                     }
                 }
             }
@@ -427,7 +432,7 @@ public class MouseEventHandler
             
             event.consume();
         });
-    }
+    };
     
     public MouseEvent getMouseMovedEventLatest() {
         return mouseEventMovedLatest;

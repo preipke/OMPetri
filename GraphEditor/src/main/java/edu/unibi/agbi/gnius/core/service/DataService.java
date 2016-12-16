@@ -366,7 +366,7 @@ public class DataService
         for (IGraphNode node : selectionService.getSelectedNodes()) {
             remove(node);
         }
-        selectionService.clear();
+        selectionService.unselectAll();
     }
     
     public void add(Colour color) throws ColourException {

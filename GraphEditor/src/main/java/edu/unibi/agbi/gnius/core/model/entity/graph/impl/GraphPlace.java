@@ -117,19 +117,19 @@ public class GraphPlace extends GravisCircle implements IGraphNode
     }
     
     @Override
-    public void putOnTop() {
-        NodeLayer nodeLayer = (NodeLayer) getParent();
-        nodeLayer.getChildren().remove(this);
-        nodeLayer.getChildren().add(this);
+    public boolean isSelected() {
+        return isSelected.get();
     }
-
+    
     @Override
     public boolean isHighlighted() {
         return isHighlighted.get();
     }
-
+    
     @Override
-    public boolean isSelected() {
-        return isSelected.get();
+    public void putOnTop() {
+        NodeLayer nodeLayer = (NodeLayer) getParent();
+        nodeLayer.getChildren().remove(this);
+        nodeLayer.getChildren().add(this);
     }
 }

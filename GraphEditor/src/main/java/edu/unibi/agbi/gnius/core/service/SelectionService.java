@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.SelectionDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -45,9 +46,9 @@ public class SelectionService
     }
     
     /**
-     * Clear selected and hightlighted elements.
+     * Clear selected and highlighted elements.
      */
-    public void clear() {
+    public void unselectAll() {
         for (IGraphArc arc : selectionDao.getSelectedArcs()) {
             arc.setSelected(false);
         }
@@ -87,6 +88,7 @@ public class SelectionService
     /**
      * Highlight related objects. Only if those are not already selected.
      * @param arc 
+<<<<<<< HEAD
      */
     public void hightlightRelated(IGraphArc arc) {
         IDataArc dataArc = arc.getRelatedDataArc();
@@ -107,6 +109,24 @@ public class SelectionService
     public boolean unhighlight(IGraphElement element) {
         element.setHighlighted(false);
         return selectionDao.removeHighlight(element);
+    }
+    
+    public void unhighlightRelated(IGraphNode node) {
+        
+        IDataNode dataNode = node.getRelatedDataNode();
+        
+        boolean isStillSelected = false;
+        for (IGraphNode relatedShape : dataNode.getShapes()) {
+            if (relatedShape.isSelected()) {
+                isStillSelected = true;
+                break;
+            }
+        }
+        if (!isStillSelected) {
+            for (IGraphNode relatedShape : dataNode.getShapes()) {
+                unhighlight(relatedShape);
+            }
+        }
     }
     
     /**
