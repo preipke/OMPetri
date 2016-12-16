@@ -5,13 +5,14 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.model.DataModel;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Graph. Serves as a service to access the underlying data models.
@@ -19,27 +20,25 @@ import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
  */
 public class Graph
 {
-    private final DataModel dataModel;
-    
     private final TopLayer topLayer;
     
     private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
     private final EdgeLayer edgeLayer;
     
+    private final List<IGravisNode> nodes;
+    private final List<IGravisEdge> edges;
+    
     public Graph() {
-        
-        dataModel = new DataModel();
         
         topLayer = new TopLayer();
         
         labelLayer = topLayer.getLabelLayer();
         nodeLayer = topLayer.getNodeLayer();
         edgeLayer = topLayer.getEdgeLayer();
-    }
-    
-    public DataModel getDataModel() {
-        return dataModel;
+        
+        nodes = new ArrayList();
+        edges = new ArrayList();
     }
     
     public TopLayer getTopLayer() {
@@ -47,43 +46,70 @@ public class Graph
     }
     
     public void add(IGravisNode node) {
-        if (dataModel.add(node)) {
+        if (!nodes.contains(node)) {
+            nodes.add(node);
             nodeLayer.getChildren().add(node.getShape());
         }
     }
     
     public void add(IGravisEdge edge) {
-        if (dataModel.add(edge)){
+        if (!edges.contains(edge)) {
+            edges.add(edge);
             edgeLayer.getChildren().add(edge.getShape());
         }
     }
     
-    public boolean containsNode(IGravisNode node) {
-        return dataModel.contains(node);
+    public boolean contains(IGravisNode node) {
+        return nodes.contains(node);
     }
     
-    public boolean containsEdge(IGravisEdge edge) {
-        return dataModel.contains(edge);
+    public boolean contains(IGravisEdge edge) {
+        return edges.contains(edge);
+    }
+    
+    public IGravisNode remove(IGravisNode node) {
+        
+        for (IGravisEdge edge : node.getEdges()) {
+            remove(edge);
+        }
+        nodeLayer.getChildren().remove(node.getShape());
+        nodes.remove(node);
+        
+//        for (IGravisEdge edge : node.getEdges()) {
+//            if (edge.getSource() == node) {
+//                edge.getTarget().removeParent(node);
+//                edge.getTarget().removeEdge(edge);
+//            } else {
+//                edge.getSource().removeChild(node);
+//                edge.getSource().removeEdge(edge);
+//            }
+//        }
+//        node.getEdges().clear();
+        
+        return node;
+    }
+    
+    public IGravisEdge remove(IGravisEdge edge) {
+        
+        edgeLayer.getChildren().remove(edge.getShape());
+        edges.remove(edge);
+        
+        return edge;
     }
     
     public IGravisNode[] getNodes() {
-        return dataModel.getNodes();
+        IGravisNode[] nodesArray = new IGravisNode[this.nodes.size()];
+        for (int i = 0; i < nodesArray.length; i++) {
+            nodesArray[i] = this.nodes.get(i);
+        }
+        return nodesArray;
     }
     
     public IGravisEdge[] getEdges() {
-        return dataModel.getEdges();
-    }
-    
-    public boolean remove(IGravisNode node) {
-        for (IGravisEdge edge : node.getEdges()) {
-            edgeLayer.getChildren().remove(edge.getShape());
+        IGravisEdge[] edgesArray = new IGravisEdge[this.edges.size()];
+        for (int i = 0; i < edgesArray.length; i++) {
+            edgesArray[i] = this.edges.get(i);
         }
-        nodeLayer.getChildren().remove(node.getShape());
-        return dataModel.remove(node);
-    }
-    
-    public boolean remove(IGravisEdge edge) {
-        edgeLayer.getChildren().remove(edge.getShape());
-        return dataModel.remove(edge);
+        return edgesArray;
     }
 }
