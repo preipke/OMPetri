@@ -72,19 +72,9 @@ public class Graph
         for (IGravisEdge edge : node.getEdges()) {
             remove(edge);
         }
+        
         nodeLayer.getChildren().remove(node.getShape());
         nodes.remove(node);
-        
-//        for (IGravisEdge edge : node.getEdges()) {
-//            if (edge.getSource() == node) {
-//                edge.getTarget().removeParent(node);
-//                edge.getTarget().removeEdge(edge);
-//            } else {
-//                edge.getSource().removeChild(node);
-//                edge.getSource().removeEdge(edge);
-//            }
-//        }
-//        node.getEdges().clear();
         
         return node;
     }
