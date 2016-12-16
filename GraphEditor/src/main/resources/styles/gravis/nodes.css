@@ -49,6 +49,7 @@
 
 
 .gravisArc {
+    -fx-fill: null;
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
