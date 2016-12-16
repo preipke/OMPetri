@@ -65,8 +65,8 @@ public class SelectionService
      * @param element 
      */
     public void highlight(IGraphElement element) {
-        selectionDao.add(element);
         element.setHighlighted(true);
+        selectionDao.add(element);
     }
     
     /**
@@ -76,8 +76,10 @@ public class SelectionService
     public void hightlightRelated(IGraphNode node) {
         IDataNode dataNode = node.getRelatedDataNode();
         for (IGraphNode shape : dataNode.getShapes()) {
-            if (!selectionDao.contains(shape)) {
-                highlight(shape);
+            if (!shape.isSelected()) {
+                if (!shape.isHighlighted()) {
+                    highlight(shape);
+                }
             }
         }
     }
@@ -89,8 +91,10 @@ public class SelectionService
     public void hightlightRelated(IGraphArc arc) {
         IDataArc dataArc = arc.getRelatedDataArc();
         for (IGraphArc shape : dataArc.getShapes()) {
-            if (!selectionDao.contains(shape)) {
-                highlight(shape);
+            if (!shape.isSelected()) {
+                if (!shape.isHighlighted()) {
+                    highlight(shape);
+                }
             }
         }
     }

@@ -22,6 +22,7 @@ import javafx.css.PseudoClass;
  *
  * @author PR
  */
+@Deprecated
 public class GraphArc extends GravisArc implements IGraphArc
 {
     private DataArc dataArc;

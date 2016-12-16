@@ -1,24 +1,24 @@
 .gravisRectangle {
     -fx-fill: orange;
     -fx-stroke: darkorange;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 1px;
     -fx-stroke-type: outside;
 }
 
 .gravisRectangle:hover {
     -fx-stroke: yellow;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 2px;
 }
 
 .gravisRectangle:selected {
     -fx-stroke: red;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 2px;
 }
 
 .gravisRectangle:highlighted {
     -fx-stroke: red;
-    -fx-stroke-width: 2;
-    -fx-stroke-dash-array: 3 6;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 1px 8px;
 }
 
 
@@ -26,45 +26,46 @@
 .gravisCircle {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
-    -fx-stroke-width: 1;
+    -fx-stroke-width: 1px;
     -fx-stroke-type: outside;
 }
 
 .gravisCircle:hover {
     -fx-stroke: lightgreen;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 2px;
 }
 
 .gravisCircle:selected {
     -fx-stroke: darkgreen;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 2px;
 }
 
 .gravisCircle:highlighted {
     -fx-stroke: darkgreen;
-    -fx-stroke-width: 2;
-    -fx-stroke-dash-array: 3 6;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 1px 8px;
 }
 
 
 
 .gravisArc {
     -fx-stroke: red;
-    -fx-stroke-width: 2;
+    -fx-stroke-width: 3px;
 }
 
 .gravisArc:hover {
     -fx-stroke: orange;
-    -fx-stroke-width: 3;
+    -fx-stroke-width: 4px;
 }
 
 .gravisArc:selected {
     -fx-stroke: darkred;
-    -fx-stroke-width: 3;
+    -fx-stroke-width: 4px;
+    -fx-stroke-dash-array: 1px 4px;
 }
 
 .gravisArc:highlighted {
     -fx-stroke: darkred;
-    -fx-stroke-width: 2;
-    -fx-stroke-dash-array: 3 6;
+    -fx-stroke-width: 4px;
+    -fx-stroke-dash-array: 1px 4px;
 }

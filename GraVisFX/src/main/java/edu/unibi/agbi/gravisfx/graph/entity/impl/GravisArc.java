@@ -17,6 +17,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
+@Deprecated
 public class GravisArc extends Arc implements IGravisEdge
 {
     private final IGravisNode source;

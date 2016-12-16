@@ -15,7 +15,6 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
-import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
@@ -53,6 +52,9 @@ public class MouseEventHandler
     
     private boolean isInitialized = false;
     private boolean isPrimaryButtonDown = false;
+    private boolean isSecondaryButtonDown = false;
+    
+    private final double secondsBeforeCreatingArc = .65d;
     
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
@@ -67,7 +69,7 @@ public class MouseEventHandler
     
     private Rectangle selectionFrame;
     
-    private IGraphArc arcInCreation;
+    private IGraphArc arcTemp;
     
     /**
      * Registers several mouse and scroll event handlers.
@@ -106,6 +108,9 @@ public class MouseEventHandler
             
             System.out.println("Pressed!");
             
+            isPrimaryButtonDown = false;
+            isSecondaryButtonDown = false;
+            
             mouseEventMovedLatest = event;
             mouseEventMovedPrevious = event; // used for several actions, i.e. dragging
             mouseEventPressed.consume();
@@ -130,7 +135,7 @@ public class MouseEventHandler
                         
                         final IGraphNode node = (IGraphNode)event.getTarget();
                         
-                        if (!selectionService.isSelected(node)) {
+                        if (!node.isSelected()) {
                             
                             // Clicking not yet selected node
                             
@@ -149,19 +154,16 @@ public class MouseEventHandler
                              * certain time if event is not consumed.
                              */
                             
-                            PauseTransition pauseTransition = new PauseTransition(Duration.seconds(1d));
+                            PauseTransition pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
                             pauseTransition.setOnFinished(e -> {
                                 if (!event.isConsumed()) {
-                                    selectionService.select(node);
+                                    selectionService.unselect(node);
                                     try {
                                         setEditorMode(isInArcCreationMode);
-                                        try {
-                                            arcInCreation = dataService.connect(node , null);
-                                        } catch (EdgeCreationException | AssignmentDeniedException ex) {
-
-                                        }
-                                    } catch (EditorModeLockException ex) {
-
+                                        arcTemp = dataService.createTemporaryArc(node);
+                                    } catch (EditorModeLockException | AssignmentDeniedException ex) {
+                                        editorToolsController.addToLog(getClass() + ":");
+                                        editorToolsController.addToLog(ex);
                                     }
                                     System.out.println("Creating ARC!");
                                 }
@@ -172,12 +174,17 @@ public class MouseEventHandler
                     } else {
                         
                         IGraphArc arc = (IGraphArc)event.getTarget();
-                        
-                        if (!event.isControlDown()) {
-                            selectionService.clear();
-                            editorDetailsController.getDetails(arc);
+
+                        if (!arc.isSelected()) {
+
+                            if (!event.isControlDown()) {
+                                selectionService.clear();
+                                selectionService.select(arc);
+                                selectionService.hightlightRelated(arc);
+                                editorDetailsController.getDetails(arc);
+                            }
+
                         }
-                        selectionService.select(arc);
                     }
                     
                 } else {
@@ -187,41 +194,46 @@ public class MouseEventHandler
                      */
                     
                     editorDetailsController.hide();
-                    
-                    if (isInNodeCreationMode.get()) {
-                        
-                        editorToolsController.CreateNode(event); // Creating node at event location.
-                        
-                    } else {
 
-                        if (!event.isControlDown()) {
-                            selectionService.clear(); // Clearing current selection.
-                        }
-                        
-                        if (event.isShiftDown()) {
-
-                            /**
-                             * Selection Frame Mode. Creating the rectangle.
-                             */
-                            
-                            try {
-                                setEditorMode(isInSelectionFrameMode);
-                            } catch (EditorModeLockException ex) {
-
-                            }
-                            
-                            Point2D pos = calculator.getCorrectedMousePosition(mouseEventPressed);
-                            selectionFrame.setX(pos.getX());
-                            selectionFrame.setY(pos.getY());
-                            selectionFrame.setWidth(0);
-                            selectionFrame.setHeight(0);
-                            
-                            graphPane.getTopLayer().getChildren().add(selectionFrame);
-                        }
+                    if (!event.isControlDown()) {
+                        selectionService.clear(); // Clearing current selection.
                     }
+
+                    if (event.isShiftDown()) {
+
+                        disableMode(isInNodeCreationMode);
+
+                        /**
+                         * Selection Frame Mode. Creating the rectangle.
+                         */
+                        try {
+                            setEditorMode(isInSelectionFrameMode);
+                        } catch (EditorModeLockException ex) {
+                            editorToolsController.addToLog(getClass() + ":");
+                            editorToolsController.addToLog(ex);
+                        }
+
+                        Point2D pos = calculator.getCorrectedMousePosition(mouseEventPressed);
+                        selectionFrame.setX(pos.getX());
+                        selectionFrame.setY(pos.getY());
+                        selectionFrame.setWidth(0);
+                        selectionFrame.setHeight(0);
+
+                        graphPane.getTopLayer().getChildren().add(selectionFrame);
+                        
+                    } else if (isInNodeCreationMode.get()) {
+
+                        editorToolsController.CreateNode(event); // Creating node at event location.
+
+                    }
+                    
                 }
             } else if (event.isSecondaryButtonDown()) {
+                
+                isSecondaryButtonDown = true;
+                
                 // TODO
+                // Context menu
             }
         });
 
@@ -266,8 +278,8 @@ public class MouseEventHandler
                     
                     Point2D correctedMousePos = calculator.getCorrectedMousePosition(event);
                     
-                    arcInCreation.endXProperty().set(correctedMousePos.getX());
-                    arcInCreation.endYProperty().set(correctedMousePos.getY());
+                    arcTemp.endXProperty().set(correctedMousePos.getX());
+                    arcTemp.endYProperty().set(correctedMousePos.getY());
                     
                 } else {
 
@@ -278,7 +290,8 @@ public class MouseEventHandler
                     try {
                         setEditorMode(isInDraggingMode);
                     } catch (EditorModeLockException ex) {
-
+                        editorToolsController.addToLog(getClass() + ":");
+                        editorToolsController.addToLog(ex);
                     }
 
                     if (event.getTarget() instanceof IGraphNode) {
@@ -340,18 +353,19 @@ public class MouseEventHandler
                  * Arc Creation Mode. Binding or deleting arc.
                  */
                 
-                IGraphNode target;
-                
                 if (event.getPickResult().getIntersectedNode() instanceof IGraphNode) {
-                    target = (IGraphNode) event.getPickResult().getIntersectedNode();
-                } else {
-                    target = null;
-                }
-                try {
-                    dataService.connect(arcInCreation , target);
-                } catch (Exception ex) {
-
-                }
+                    
+                    IGraphNode target = (IGraphNode)event.getPickResult().getIntersectedNode();
+                    
+                    try {
+                        dataService.connect(arcTemp.getSource() , target);
+                    } catch (EdgeCreationException | AssignmentDeniedException ex) {
+                        editorToolsController.addToLog(getClass() + ":");
+                        editorToolsController.addToLog(ex);
+                    }
+                } 
+                dataService.remove(arcTemp);
+                
                 disableMode(isInArcCreationMode);
                 
             } else {
@@ -367,8 +381,9 @@ public class MouseEventHandler
                         IGraphNode node = (IGraphNode)event.getTarget();
                         
                         if (event.isControlDown()) {
-                            if (!selectionService.remove(node)) {
+                            if (!selectionService.unselect(node)) {
                                 selectionService.select(node);
+                                selectionService.hightlightRelated(node);
                             }
                             editorDetailsController.hide();
                         } else {
@@ -380,14 +395,21 @@ public class MouseEventHandler
                         
                     } else if (event.getTarget() instanceof IGraphArc) {
                         
-                        IGraphArc edge = (IGraphArc)event.getTarget();
+                        IGraphArc arc = (IGraphArc)event.getTarget();
                         
                         if (event.isControlDown()) {
+                            if (!selectionService.unselect(arc)) {
+                                selectionService.select(arc);
+                                selectionService.hightlightRelated(arc);
+                            }
                             editorDetailsController.hide();
                         } else {
-                            editorDetailsController.getDetails(edge);
+                            selectionService.clear();
+                            selectionService.select(arc);
+                            selectionService.hightlightRelated(arc);
+                            editorDetailsController.getDetails(arc);
                         }
-                        selectionService.select(edge);
+                        selectionService.select(arc);
                     }
                 }
             }
@@ -417,12 +439,6 @@ public class MouseEventHandler
     
     public MouseEvent getMousePressedEvent() {
         return mouseEventPressed;
-    }
-    
-    private void DragArc(MouseEvent event) {
-        
-        event.getTarget();
-        
     }
     
     /**

@@ -49,7 +49,7 @@ public class EditorToolsController implements Initializable
     
     @Autowired private MouseEventHandler mouseEventHandler;
     
-    int elements = 100;
+    int elements = 10;
     
     public void CreateNode(MouseEvent target) {
         try {
@@ -136,7 +136,6 @@ public class EditorToolsController implements Initializable
         
         ObservableList<LayoutTypeChoice> alignChoices = FXCollections.observableArrayList();
         alignChoices.add(new LayoutTypeChoice(LayoutType.RANDOM, "Random"));
-        alignChoices.add(new LayoutTypeChoice(LayoutType.DEFAULT, "..."));
         
         choicesAlignNodes.setItems(alignChoices);
         choicesAlignNodes.getSelectionModel().selectFirst();
@@ -144,7 +143,6 @@ public class EditorToolsController implements Initializable
         ObservableList<NodeTypeChoice> nodeChoices = FXCollections.observableArrayList();
         nodeChoices.add(new NodeTypeChoice(PN_Element.Type.PLACE, "Place"));
         nodeChoices.add(new NodeTypeChoice(PN_Element.Type.TRANSITION, "Transition"));
-        nodeChoices.add(new NodeTypeChoice(PN_Element.Type.ARC, "..."));
         
         choicesCreateNode.setItems(nodeChoices);
         choicesCreateNode.getSelectionModel().selectFirst();
