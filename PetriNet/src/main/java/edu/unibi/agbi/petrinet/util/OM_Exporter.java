@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.util;
 
+import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
@@ -35,7 +36,7 @@ public class OM_Exporter
     
     public void export(PetriNet petriNet, File file) {
         
-        Collection<Arc> arcs = petriNet.getArcs();
+        Collection<IPN_Arc> arcs = petriNet.getArcs();
         Collection<Colour> colors = petriNet.getColours();
         Collection<IPN_Node> places = petriNet.getPlaces();
         Collection<IPN_Node> transitions = petriNet.getTransitions();
@@ -320,7 +321,9 @@ public class OM_Exporter
             writer.append("equation");
             writer.println();
             
-            for (Arc arc : arcs) {
+            for (IPN_Arc nArc : arcs) {
+                
+                Arc arc = (Arc) nArc;
                 
                 writer.append("  ");
                 writer.append("connect(");

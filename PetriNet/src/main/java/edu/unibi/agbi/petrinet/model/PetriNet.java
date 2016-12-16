@@ -5,10 +5,9 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
+import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
-import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
-import edu.unibi.agbi.petrinet.entity.impl.Transition;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,7 +23,7 @@ public class PetriNet
     private String name;
     private String description;
     
-    private final Map<String,Arc> arcs;
+    private final Map<String,IPN_Arc> arcs;
     private final Map<String,Colour> colours;
     // TODO remove some of the following, depending on if place id can be the same as transition id or not
     private final Map<String,IPN_Node> places;
@@ -39,19 +38,19 @@ public class PetriNet
         placesAndTransitions = new HashMap();
     }
     
-    public boolean add(Arc arc) {
-        if (arcs.containsKey(arc.getId())) {
-            return false;
-        } 
-        arcs.put(arc.getId(), arc);
-        return true;
-    }
-    
     public boolean add(Colour colour) {
         if (colours.containsKey(colour.getId())) {
             return false;
         } 
         colours.put(colour.getId(), colour);
+        return true;
+    }
+    
+    public boolean add(IPN_Arc arc) {
+        if (arcs.containsKey(arc.getId())) {
+            return false;
+        } 
+        arcs.put(arc.getId(), arc);
         return true;
     }
     
@@ -68,25 +67,7 @@ public class PetriNet
         return true;
     }
     
-    public boolean add(Place place) {
-        if (placesAndTransitions.containsKey(place.getId())) {
-            return false;
-        } 
-        placesAndTransitions.put(place.getId(), place);
-        places.put(place.getId() , place);
-        return true;
-    }
-    
-    public boolean add(Transition transition) {
-        if (placesAndTransitions.containsKey(transition.getId())) {
-            return false;
-        } 
-        placesAndTransitions.put(transition.getId(), transition);
-        transitions.put(transition.getId(), transition);
-        return true;
-    }
-    
-    public Collection<Arc> getArcs() {
+    public Collection<IPN_Arc> getArcs() {
         return arcs.values();
     }
     
