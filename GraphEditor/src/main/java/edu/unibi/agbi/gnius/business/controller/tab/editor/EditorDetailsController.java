@@ -11,6 +11,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.SelectionService;
 
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -44,6 +45,7 @@ import org.springframework.stereotype.Component;
 public class EditorDetailsController implements Initializable
 {
     @Autowired private DataService dataService;
+    @Autowired private SelectionService selectionService;
     
     @FXML private VBox detailsBox;
     @FXML private VBox propertiesBox;
@@ -58,13 +60,15 @@ public class EditorDetailsController implements Initializable
     @FXML private ChoiceBox colorChoices;
     
     @FXML private TextField propertyFunction;
-    @FXML private TextField propertyType;
     @FXML private TextField propertyToken;
     @FXML private TextField propertyTokenMin;
     @FXML private TextField propertyTokenMax;
+    @FXML private TextField propertyType;
     @FXML private TextField propertyWeight;
     
     @FXML private Button colorButton;
+    
+    private IDataElement activeNode;
     
     /**
      * Shows the details for the given entity.
@@ -72,59 +76,95 @@ public class EditorDetailsController implements Initializable
      */
     public void getDetails(IGraphElement element) {
         
+        if (activeNode != null) {
+            update();
+        }
         clear();
         
-        IDataElement node = element.getRelatedDataElement();
+        activeNode = element.getRelatedDataElement();
         
-        PN_Element.Type elementType = node.getElementType();
+        PN_Element.Type elementType = activeNode.getElementType();
 
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
         ObservableList<ColourChoice> choicesColour = FXCollections.observableArrayList();
         
         Collection<Colour> colors = dataService.getColours();
         
-        int selectionIndex = 0;
+        int typeIndex = 0;
         
         switch (elementType) {
+                
+            case ARC:
+                
+                DataArc arc = (DataArc) activeNode;
+                
+                DataArc.Type arcType;
+                for (int i = 0; i < DataArc.Type.values().length; i++) {
+                    arcType = DataArc.Type.values()[i];
+                    if (arcType == arc.getArcType()) {
+                        typeIndex = i;
+                    }
+                    choicesSubtype.add(new EdgeTypeChoice(arcType));
+                }
+                
+                Map<Colour , Weight> weights = arc.getWeightMap();
+                Weight weight;
+                if (colors.size() > 0) {
+                    for (Colour color : colors) {
+                        if (weights.get(color) != null) {
+                            choicesColour.add(new ColourChoice(color));
+                        }
+                    }
+                    weight = weights.get(choicesColour.get(0).getColour());
+                } else {
+                    weight = weights.get(null);
+                }
+                propertyWeight.setText(weight.getValue());
+                
+                propertiesBox.getChildren().add(arcPropertyGrid);
+                break;
             
             case PLACE:
                 
-                DataPlace place = (DataPlace) node;
+                DataPlace place = (DataPlace) activeNode;
                 
                 DataPlace.Type placeType;
                 for (int i = 0; i < DataPlace.Type.values().length; i++) {
                     placeType = DataPlace.Type.values()[i];
                     if (placeType == place.getPlaceType()) {
-                        selectionIndex = i;
+                        typeIndex = i;
                     }
                     choicesSubtype.add(new PlaceTypeChoice(placeType));
                 }
                 
+                Map<Colour , Token> tokens = place.getTokenMap();
+                Token token;
                 if (colors.size() > 0) {
-                    Map<Colour , Token> tokens = place.getTokenMap();
                     for (Colour color : colors) {
                         if (tokens.get(color) != null) {
                             choicesColour.add(new ColourChoice(color));
                         }
                     }
-                    Token token = tokens.get(choicesColour.get(0).getColour());
-                    propertyToken.setText(Double.toString(token.getValueStart()));
-                    propertyTokenMin.setText(Double.toString(token.getValueMin()));
-                    propertyTokenMax.setText(Double.toString(token.getValueMax()));
+                    token = tokens.get(choicesColour.get(0).getColour());
+                } else {
+                    token = tokens.get(null);
                 }
+                propertyToken.setText(Double.toString(token.getValueStart()));
+                propertyTokenMin.setText(Double.toString(token.getValueMin()));
+                propertyTokenMax.setText(Double.toString(token.getValueMax()));
                 
                 propertiesBox.getChildren().add(placePropertyGrid);
                 break;
                 
             case TRANSITION:
                 
-                DataTransition transition = (DataTransition) node;
+                DataTransition transition = (DataTransition) activeNode;
                 
                 DataTransition.Type transitionType;
                 for (int i = 0; i < DataTransition.Type.values().length; i++) {
                     transitionType = DataTransition.Type.values()[i];
                     if (transitionType == transition.getTransitionType()) {
-                        selectionIndex = i;
+                        typeIndex = i;
                     }
                     choicesSubtype.add(new TransitionTypeChoice(transitionType));
                 }
@@ -134,39 +174,12 @@ public class EditorDetailsController implements Initializable
                 
                 propertiesBox.getChildren().add(transitionPropertyGrid);
                 break;
-                
-            case ARC:
-                
-                DataArc arc = (DataArc) node;
-                
-                DataArc.Type arcType;
-                for (int i = 0; i < DataArc.Type.values().length; i++) {
-                    arcType = DataArc.Type.values()[i];
-                    if (arcType == arc.getArcType()) {
-                        selectionIndex = i;
-                    }
-                    choicesSubtype.add(new EdgeTypeChoice(arcType));
-                }
-                
-                if (colors.size() > 0) {
-                    Map<Colour , Weight> weights = arc.getWeightMap();
-                    for (Colour color : colors) {
-                        if (weights.get(color) != null) {
-                            choicesColour.add(new ColourChoice(color));
-                        }
-                    }
-                    Weight weight = weights.get(choicesColour.get(0).getColour());
-                    propertyWeight.setText(Double.toString(weight.getValue()));
-                }
-                
-                propertiesBox.getChildren().add(arcPropertyGrid);
-                break;
         }
         
         propertyType.setText(elementType.toString());
 
         subtypeChoices.setItems(choicesSubtype);
-        subtypeChoices.getSelectionModel().select(selectionIndex);
+        subtypeChoices.getSelectionModel().select(typeIndex);
         
         colorChoices.setItems(choicesColour);
         colorChoices.getSelectionModel().select(0);
@@ -180,10 +193,52 @@ public class EditorDetailsController implements Initializable
      */
     public void update() {
         
+        // TODO
+        // store values according to the selected colour
+        
+        PN_Element.Type elementType = activeNode.getElementType();
+        
+        switch (elementType) {
+                
+            case ARC:
+                DataArc arc = (DataArc) activeNode;
+                
+                Weight weight = new Weight(null);
+                weight.setValue(propertyWeight.getText());
+                
+                arc.setWeight(weight);
+                break;
+            
+            case PLACE:
+                DataPlace place = (DataPlace) activeNode;
+                
+                Token token = new Token(null);
+                if (!propertyToken.getText().isEmpty()) {
+                    token.setValueStart(Double.parseDouble(propertyToken.getText()));
+                }
+                if (!propertyTokenMin.getText().isEmpty()) {
+                    token.setValueMin(Double.parseDouble(propertyTokenMin.getText()));
+                }
+                if (!propertyTokenMax.getText().isEmpty()) {
+                    token.setValueMax(Double.parseDouble(propertyTokenMax.getText()));
+                }
+                
+                place.setToken(token);
+                break;
+                
+            case TRANSITION:
+                DataTransition transition = (DataTransition) activeNode;
+                
+                Function function = new Function();
+                function.setFunction(propertyFunction.getText());
+                
+                transition.setFunction(function);
+                break;
+        }
     }
     
     /**
-     * Reset texfields. Discards changes and displays the current values.
+     * Reset texfields. Discards changes and shows the current values.
      */
     public void reset() {
         
@@ -193,15 +248,27 @@ public class EditorDetailsController implements Initializable
      * Clear details. Hides the node specific grids.
      */
     public void clear() {
+        
+//        selectionService.unselect(activeNode);
+        activeNode = null;
+        
         propertiesBox.getChildren().remove(arcPropertyGrid);
+        propertyWeight.setText("");
+        
         propertiesBox.getChildren().remove(placePropertyGrid);
+        propertyToken.setText("");
+        propertyTokenMin.setText("");
+        propertyTokenMax.setText("");
+        
         propertiesBox.getChildren().remove(transitionPropertyGrid);
+        propertyFunction.setText("");
     }
     
     /**
      * Hide details. Completely hides the details box.
      */
     public void hide() {
+        clear();
         detailsBox.setVisible(false);
     }
 

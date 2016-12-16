@@ -106,14 +106,11 @@ public class MouseEventHandler
          */
         graphPane.setOnMousePressed(( event ) -> {
             
-            System.out.println("Pressed!");
-            
             isPrimaryButtonDown = false;
             isSecondaryButtonDown = false;
             
-            mouseEventMovedLatest = event;
-            mouseEventMovedPrevious = event; // used for several actions, i.e. dragging
-            mouseEventPressed.consume();
+            mouseEventMovedPrevious = event; // used for dragging to avoid initial null pointer
+            mouseEventPressed.consume(); // avoids multiple pause transitions
             mouseEventPressed = event;
             
             /**
@@ -158,7 +155,6 @@ public class MouseEventHandler
                             PauseTransition pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
                             pauseTransition.setOnFinished(e -> {
                                 if (!event.isConsumed()) {
-                                    selectionService.unselect(node);
                                     editorDetailsController.hide();
                                     try {
                                         setEditorMode(isInArcCreationMode);
@@ -206,6 +202,7 @@ public class MouseEventHandler
                         /**
                          * Selection Frame Mode. Creating the rectangle.
                          */
+                        
                         try {
                             setEditorMode(isInSelectionFrameMode);
                         } catch (EditorModeLockException ex) {
@@ -305,11 +302,7 @@ public class MouseEventHandler
                                     node.getTranslateY() + pos_t1.getY() - pos_t0.getY()
                             );
                         }
-
-                    } else if (event.getTarget() instanceof IGraphArc) {
-                        // TODO
-                        // allow dragging edges to connect places?
-                    }
+                    } 
                 }
             } 
             else if (event.isSecondaryButtonDown()) {
@@ -323,8 +316,6 @@ public class MouseEventHandler
             }
             
             mouseEventMovedPrevious = event;
-
-            event.consume();
         });
 
         graphPane.setOnMouseReleased(( event ) -> {
