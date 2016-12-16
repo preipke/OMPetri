@@ -15,5 +15,4 @@ import java.util.List;
  */
 public interface IDataNode extends IDataElement , IPN_Node
 {
-    public List<IGraphNode> getShapes();
 }

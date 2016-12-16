@@ -15,5 +15,4 @@ import java.util.List;
  */
 public interface IDataArc extends IDataElement, IPN_Arc
 {
-    public List<IGraphArc> getShapes();
 }

@@ -139,4 +139,8 @@ public class GravisCurve extends QuadCurve implements IGravisEdge
     public Shape getShape() {
         return this;
     }
+
+    @Override
+    public void setTranslate(double positionX , double positionY) {
+    }
 }
