@@ -15,7 +15,7 @@ import edu.unibi.agbi.petrinet.entity.PN_Element;
  */
 public abstract class Transition extends PN_Node
 {
-    private final Function function;
+    private Function function;
     
     private Type transitionType;
     
@@ -24,6 +24,10 @@ public abstract class Transition extends PN_Node
         type = PN_Element.Type.TRANSITION;
         
         function = new Function();
+    }
+
+    public void setFunction(Function function) {
+        this.function = function;
     }
 
     public Function getFunction() {

@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,15 +17,30 @@ public class Function {
     private String function;
     private String unit;
     
-    private List<Parameter> parameter;
+    private final List<Parameter> parameter;
+    
+    public Function() {
+        parameter = new ArrayList();
+    }
+    
+    public void setFunction(String function) {
+        this.function = function;
+    }
+    
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
     
     public String getUnit() {
         return unit;
+    }
+    
+    public List<Parameter> getParameter() {
+        return parameter;
     }
     
     @Override
     public String toString() {
         return function;
     }
-    
 }

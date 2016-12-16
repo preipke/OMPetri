@@ -11,7 +11,7 @@ package edu.unibi.agbi.petrinet.model;
  */
 public class Token
 {
-    private Colour colour;
+    private final Colour colour;
     
     private double valueMin = 0d;
     private double valueMax = Double.MAX_VALUE;
@@ -23,10 +23,6 @@ public class Token
 
     public Colour getColour() {
         return colour;
-    }
-
-    public void setColour(Colour colour) {
-        this.colour = colour;
     }
 
     public double getValueMin() {

@@ -11,8 +11,8 @@ package edu.unibi.agbi.petrinet.model;
  */
 public class Weight
 {
-    private Colour colour;
-    private double weight = 1d;
+    private final Colour colour;
+    private String weight;
     
     public Weight(Colour colour) {
         this.colour = colour;
@@ -22,15 +22,11 @@ public class Weight
         return colour;
     }
 
-    public void setColour(Colour colour) {
-        this.colour = colour;
-    }
-
-    public double getValue() {
+    public String getValue() {
         return weight;
     }
 
-    public void setWeight(double weight) {
+    public void setValue(String weight) {
         this.weight = weight;
     }
 }

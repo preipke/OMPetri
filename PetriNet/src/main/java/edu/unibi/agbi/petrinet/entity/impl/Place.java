@@ -32,7 +32,7 @@ public abstract class Place extends PN_Node
         token.put(null , new Token(null));
     }
     
-    public void addToken(Token token) {
+    public void setToken(Token token) {
         this.token.put(token.getColour() , token);
     }
     
