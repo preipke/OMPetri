@@ -8,9 +8,11 @@ package edu.unibi.agbi.petrinet.model;
 import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
+import java.util.ArrayList;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,26 +25,26 @@ public class PetriNet
     private String name;
     private String description;
     
+    private final List<Colour> colors; // TODO replace by list
+    
     private final Map<String,IPN_Arc> arcs;
-    private final Map<String,Colour> colours;
-    // TODO remove some of the following, depending on if place id can be the same as transition id or not
     private final Map<String,IPN_Node> places;
     private final Map<String,IPN_Node> transitions;
-    private final Map<String,IPN_Node> placesAndTransitions;
+    private final Map<String,IPN_Node> placesAndTransitions; // TODO remove if places and transitions can have the same names
     
     public PetriNet() {
+        colors = new ArrayList();
         arcs = new HashMap();
-        colours = new HashMap();
         places = new HashMap();
         transitions = new HashMap();
         placesAndTransitions = new HashMap();
     }
     
-    public boolean add(Colour colour) {
-        if (colours.containsKey(colour.getId())) {
+    public boolean add(Colour color) {
+        if (colors.contains(color)) {
             return false;
         } 
-        colours.put(colour.getId(), colour);
+        colors.add(color);
         return true;
     }
     
@@ -71,8 +73,8 @@ public class PetriNet
         return arcs.values();
     }
     
-    public Collection<Colour> getColours() {
-        return colours.values();
+    public List<Colour> getColours() {
+        return colors;
     }
     
     public Collection<IPN_Node> getPlaces() {
