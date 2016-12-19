@@ -207,7 +207,9 @@ public class EditorDetailsController implements Initializable
                 DataArc arc = (DataArc) activeNode;
                 
                 Weight weight = new Weight(null);
-                weight.setValue(propertyWeight.getText());
+                if (!propertyWeight.getText().isEmpty()) {
+                    weight.setValue(propertyWeight.getText());
+                }
                 
                 arc.setWeight(weight);
                 break;
@@ -247,7 +249,9 @@ public class EditorDetailsController implements Initializable
                 DataTransition transition = (DataTransition) activeNode;
                 
                 Function function = new Function();
-                function.setFunction(propertyFunction.getText());
+                if (!propertyWeight.getText().isEmpty()) {
+                    function.setFunction(propertyFunction.getText());
+                }
                 
                 transition.setFunction(function);
                 break;

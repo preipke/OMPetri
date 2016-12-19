@@ -32,6 +32,7 @@ public abstract class Arc extends PN_Element
         type = PN_Element.Type.ARC;
         
         weights = new HashMap();
+        weights.put(null, new Weight(null));
     }
     
     public void setWeight(Weight weight) {
