@@ -5,8 +5,10 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
+import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -25,7 +27,9 @@ public class KeyEventHandler
 {
     @Autowired private SelectionService selectionService;
     @Autowired private DataService dataService;
+    
     @Autowired private MouseEventHandler mouseEventHandler;
+    @Autowired private EditorToolsController editorToolsController;
     
     private boolean isCloning;
     
@@ -46,7 +50,11 @@ public class KeyEventHandler
             else if (event.getCode().equals(KeyCode.DELETE)) {
                 
                 Platform.runLater(() -> {
-                    dataService.removeSelected();
+                    try {
+                        dataService.removeSelected();
+                    } catch (AssignmentDeniedException ex) {
+                        editorToolsController.addToLog(ex.getMessage());
+                    }
                 });
             }
             

@@ -19,6 +19,7 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Component;
@@ -52,5 +53,9 @@ public class EditorPaneController implements Initializable
         // register handler
         mouseEventHandler.registerTo(graphScene.getGraphPane());
         scrollEventHandler.registerTo(graphScene.getGraphPane());
+    }
+    
+    public Stage getStage() {
+        return (Stage) editorPane.getScene().getWindow();
     }
 }

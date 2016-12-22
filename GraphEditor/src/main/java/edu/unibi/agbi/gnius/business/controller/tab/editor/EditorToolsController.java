@@ -26,6 +26,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,20 +41,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class EditorToolsController implements Initializable
 {
-    @FXML private ChoiceBox choicesAlignNodes;
-    @FXML private ChoiceBox choicesCreateNode;
-    
-    @FXML private TextArea textLogArea;
-    
     @Autowired private DataService dataService;
-    @Autowired private GraphDao graphDao;
     
     @Autowired private MouseEventHandler mouseEventHandler;
     
-    int elements = 10;
+//    @FXML private ChoiceBox choicesAlignNodes;
+    @FXML private ChoiceBox choicesCreateNode;
+    
+    @FXML private SplitMenuButton buttonMenuCreate;
+    
+    @FXML private TextArea textLogArea;
     
     public void CreateNode(MouseEvent target) {
         try {
+            
             dataService.create(((NodeTypeChoice) choicesCreateNode.getSelectionModel().getSelectedItem()).getType() , target , Point2D.ZERO);
         } catch (NodeCreationException | AssignmentDeniedException ex) {
 
@@ -67,16 +69,25 @@ public class EditorToolsController implements Initializable
         textLogArea.appendText(thr.toString() + "\n");
     }
     
+//    @FXML
+//    private void buttonAlignNodes() {
+//        LayoutType type = ((LayoutTypeChoice) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
+//        switch(type) {
+//            case RANDOM:
+//                RandomLayout.applyOn(graphDao);
+//                break;
+//            default:
+//                textLogArea.appendText("Align Nodes: no method selected!"); 
+//                return;
+//        }
+//    }
+    
     @FXML
-    private void buttonAlignNodes() {
-        LayoutType type = ((LayoutTypeChoice) choicesAlignNodes.getSelectionModel().getSelectedItem()).getType();
-        switch(type) {
-            case RANDOM:
-                RandomLayout.applyOn(graphDao);
-                break;
-            default:
-                textLogArea.appendText("Align Nodes: no method selected!"); 
-                return;
+    public void EnableCreatingNodes() {
+        try {
+            mouseEventHandler.setNodeCreationMode();
+        } catch (EditorModeLockException ex) {
+            addToLog(ex.getMessage());
         }
     }
     
@@ -85,60 +96,22 @@ public class EditorToolsController implements Initializable
         try {
             mouseEventHandler.setNodeCreationMode();
         } catch (EditorModeLockException ex) {
-            addToLog(getClass() + ":");
-            addToLog(ex);
-        }
-    }
-    
-    @FXML
-    private void buttonLoadExampleNodes() {
-        IGraphNode place, transition;
-        try {
-            for (int i = 0; i < elements; i++) {
-                place = dataService.create(PN_Element.Type.PLACE , null, null);
-                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.connect(place , transition);
-                dataService.connect(transition , place);
-                
-                place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.connect(transition , place);
-                dataService.connect(place , transition);
-                
-                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.connect(place , transition);
-                
-                place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.connect(place , transition);
-                
-                place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.connect(place , transition);
-                
-                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.connect(place , transition);
-                
-                transition = dataService.create(PN_Element.Type.TRANSITION , null, null);
-                dataService.connect(place , transition);
-                
-                place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.connect(place , transition);
-                
-                place = dataService.create(PN_Element.Type.PLACE , null, null);
-                dataService.connect(place , transition);
-            }
-        } catch (NodeCreationException | EdgeCreationException | AssignmentDeniedException ex) {
-            addToLog(getClass() + ":");
-            addToLog(ex);
+            addToLog(ex.getMessage());
         }
     }
 
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        ObservableList<LayoutTypeChoice> alignChoices = FXCollections.observableArrayList();
-        alignChoices.add(new LayoutTypeChoice(LayoutType.RANDOM, "Random"));
+//        ObservableList<LayoutTypeChoice> alignChoices = FXCollections.observableArrayList();
+//        alignChoices.add(new LayoutTypeChoice(LayoutType.RANDOM, "Random"));
+//        
+//        choicesAlignNodes.setItems(alignChoices);
+//        choicesAlignNodes.getSelectionModel().selectFirst();
         
-        choicesAlignNodes.setItems(alignChoices);
-        choicesAlignNodes.getSelectionModel().selectFirst();
+        buttonMenuCreate.getItems().clear();
+        buttonMenuCreate.getItems().add(new MenuItem("Place"));
+        buttonMenuCreate.getItems().add(new MenuItem("Transition"));
         
         ObservableList<NodeTypeChoice> nodeChoices = FXCollections.observableArrayList();
         nodeChoices.add(new NodeTypeChoice(PN_Element.Type.PLACE, "Place"));
@@ -168,25 +141,25 @@ public class EditorToolsController implements Initializable
         }
     }
 
-    private class LayoutTypeChoice
-    {
-        private final LayoutType type;
-        private final String name;
-
-        public LayoutTypeChoice(LayoutType type, String name) {
-            this.type = type;
-            this.name = name;
-        }
-
-        public LayoutType getType() {
-            return type;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
+//    private class LayoutTypeChoice
+//    {
+//        private final LayoutType type;
+//        private final String name;
+//
+//        public LayoutTypeChoice(LayoutType type, String name) {
+//            this.type = type;
+//            this.name = name;
+//        }
+//
+//        public LayoutType getType() {
+//            return type;
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return name;
+//        }
+//    }
 
     public enum LayoutType
     {

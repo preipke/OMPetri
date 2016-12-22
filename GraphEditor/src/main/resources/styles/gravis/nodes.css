@@ -1,22 +1,22 @@
 .gravisRectangle {
-    -fx-fill: orange;
-    -fx-stroke: darkorange;
+    -fx-fill: lightblue;
+    -fx-stroke: blue;
     -fx-stroke-width: 1px;
     -fx-stroke-type: outside;
 }
 
 .gravisRectangle:hover {
-    -fx-stroke: yellow;
+    -fx-stroke: blue;
     -fx-stroke-width: 2px;
 }
 
 .gravisRectangle:selected {
-    -fx-stroke: red;
+    -fx-stroke: darkblue;
     -fx-stroke-width: 2px;
 }
 
 .gravisRectangle:highlighted {
-    -fx-stroke: red;
+    -fx-stroke: darkblue;
     -fx-stroke-width: 2px;
     -fx-stroke-dash-array: 1px 8px;
 }
@@ -31,7 +31,7 @@
 }
 
 .gravisCircle:hover {
-    -fx-stroke: lightgreen;
+    -fx-stroke: forestgreen;
     -fx-stroke-width: 2px;
 }
 
@@ -50,23 +50,22 @@
 
 .gravisArc {
     -fx-fill: null;
-    -fx-stroke: red;
-    -fx-stroke-width: 3px;
+    -fx-stroke: orange;
+    -fx-stroke-width: 2px;
 }
 
 .gravisArc:hover {
     -fx-stroke: orange;
-    -fx-stroke-width: 4px;
+    -fx-stroke-width: 3px;
 }
 
 .gravisArc:selected {
-    -fx-stroke: darkred;
-    -fx-stroke-width: 4px;
-    -fx-stroke-dash-array: 1px 4px;
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
 }
 
 .gravisArc:highlighted {
-    -fx-stroke: darkred;
-    -fx-stroke-width: 4px;
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
     -fx-stroke-dash-array: 1px 4px;
 }

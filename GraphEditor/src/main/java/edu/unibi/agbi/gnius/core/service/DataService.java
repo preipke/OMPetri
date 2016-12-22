@@ -26,9 +26,12 @@ import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gnius.util.Calculator;
 
 import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.PetriNet;
 
 import java.util.Collection;
+import java.util.List;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -61,7 +64,7 @@ public class DataService
      * @param shape
      * @throws AssignmentDeniedException 
      */
-    private void convert(IGraphArc shape) throws AssignmentDeniedException {
+    private IGraphArc convert(IGraphArc shape) throws AssignmentDeniedException {
         
         IDataArc data = shape.getRelatedDataArc();
         IGraphArc shapeConverted;
@@ -73,8 +76,7 @@ public class DataService
         }
         shapeConverted.setActiveStyleClass("gravisArc");
         
-        remove(shape);
-        add(shapeConverted);
+        return shapeConverted;
     }
     
     /**
@@ -86,7 +88,12 @@ public class DataService
      */
     public void connect(IGraphNode source , IGraphNode target) throws EdgeCreationException , AssignmentDeniedException {
         
-        IDataArc dataSourceToTarget = new DataArc();
+        IDataArc dataSourceToTarget = null;
+        try {
+            dataSourceToTarget = new DataArc(source.getRelatedDataNode() , target.getRelatedDataNode());
+        } catch (IllegalAssignmentException ex) {
+            throw new AssignmentDeniedException(ex);
+        }
         IDataNode dataSourceNode = source.getRelatedDataNode();
         IDataNode dataTargetNode = target.getRelatedDataNode();
         IGraphArc shapeSourceToTarget;
@@ -112,6 +119,8 @@ public class DataService
                 
                 if (dataTargetNode == relatedSourceShapeChild.getRelatedDataNode()) {
                     throw new EdgeCreationException("A related node already connects those nodes!");
+                    // TODO
+                    // dialog to ask if connection should be removed and recreated at the current location
                 }
             }
         }
@@ -141,8 +150,9 @@ public class DataService
                     break;
                 }
             }
-            
-            convert(shapeTargetToSource);
+            remove(shapeTargetToSource);
+            shapeTargetToSource = convert(shapeTargetToSource);
+            add(shapeTargetToSource);
             
             shapeSourceToTarget = new GraphCurve(source , target , dataSourceToTarget);
         }
@@ -177,7 +187,7 @@ public class DataService
      * @param position
      * @throws NodeCreationException 
      */
-    public IGraphNode create(PN_Element.Type type , MouseEvent target , Point2D position) throws NodeCreationException , AssignmentDeniedException {
+    public void create(PN_Element.Type type , MouseEvent target , Point2D position) throws NodeCreationException , AssignmentDeniedException {
         
         IDataNode node;
         IGraphNode shape;
@@ -198,20 +208,11 @@ public class DataService
         }
         node.getShapes().add(shape);
         
-        //Point2D pos = calculator.getCorrectedMousePosition(target);
-        
-        if (target != null) { // TODO remove later - for testing purposes
-            //shape.setTranslate(pos.getX(), pos.getY());
-            shape.setTranslate(
-                    (target.getX() - graphDao.getTopLayer().translateXProperty().get()) / graphDao.getTopLayer().getScale().getX() - shape.getOffsetX(), 
-                    (target.getY() - graphDao.getTopLayer().translateYProperty().get()) / graphDao.getTopLayer().getScale().getY() - shape.getOffsetY()
-            );
-        }
+        Point2D pos = calculator.getCorrectedMousePosition(target);
+        shape.setTranslate(pos.getX(), pos.getY());
         
         graphDao.add(shape);
         petriNetDao.add(node);
-        
-        return shape; // TODO remove later - for testing purposes
     }
     
     /**
@@ -274,27 +275,27 @@ public class DataService
     
     public void paste(boolean clone) {
         
-        IGraphNode[] nodes = selectionService.getNodesCopy();
+        List<IGraphNode> nodes = selectionService.getNodesCopy();
         IGraphNode node;
         
         Point2D center = calculator.getCenter(nodes);
         Point2D position = calculator.getCorrectedMousePositionLatest();
         
         try {
-            for (int i = 0; i < nodes.length; i++) {
+            for (int i = 0; i < nodes.size(); i++) {
                 if (clone) {
-                    node = clone(nodes[i]);
+                    node = clone(nodes.get(i));
                 } else {
-                    node = copy(nodes[i]);
+                    node = copy(nodes.get(i));
                 }
-                node.setActiveStyleClass(nodes[i].getActiveStyleClass());
+                node.setActiveStyleClass(nodes.get(i).getActiveStyleClass());
 
                 graphDao.add(node);
                 selectionService.selectAll(node);
                 
                 node.setTranslate(
-                        nodes[i].getTranslateX() - center.getX() + position.getX() ,
-                        nodes[i].getTranslateY() - center.getY() + position.getY()
+                        nodes.get(i).getTranslateX() - center.getX() + position.getX() ,
+                        nodes.get(i).getTranslateY() - center.getY() + position.getY()
                 );
             }
         } catch (NodeCreationException | AssignmentDeniedException ex) {
@@ -319,11 +320,12 @@ public class DataService
     
     /**
      * Removes arc. Disconnects graph nodes and removes shape from the 
-     * associated data object.
+     * associated data object. Converts curved arcs to straight edges.
      * @param arc 
      * @return  
+     * @throws AssignmentDeniedException  
      */
-    public IGraphArc remove(IGraphArc arc) {
+    public IGraphArc remove(IGraphArc arc) throws AssignmentDeniedException {
         
         graphDao.remove(arc);
         
@@ -335,11 +337,24 @@ public class DataService
             arc.getRelatedDataArc().getShapes().remove(arc);
 
             source.getChildren().remove(target);
-            target.getParents().remove(source);
-
             source.removeEdge(arc);
+            
+            // reconvert double linked arc
+            IGraphArc reverseArc;
+            if (target.getChildren().contains(arc.getSource())) {
+                for (int i = 0; i < target.getEdges().size(); i++) {
+                    if (target.getEdges().get(i).getTarget().equals(source)) {
+                        reverseArc = (IGraphArc)target.getEdges().get(i);
+                        remove(reverseArc);
+                        reverseArc = convert(reverseArc);
+                        add(reverseArc);
+                        break;
+                    }
+                }
+            }
+            
+            target.getParents().remove(source);
             target.removeEdge(arc);
-
         }
         
         return arc;
@@ -362,7 +377,7 @@ public class DataService
         node.getEdges().clear();
     }
     
-    public void removeSelected() {
+    public void removeSelected() throws AssignmentDeniedException {
         for (IGraphElement element : selectionService.getSelectedElements()) {
             if (element instanceof IGraphArc) {
                 remove((IGraphArc)element);
@@ -381,5 +396,9 @@ public class DataService
     
     public Collection<Colour> getColours() {
         return petriNetDao.getColours();
+    }
+    
+    public PetriNet getPetriNet() {
+        return petriNetDao;
     }
 }

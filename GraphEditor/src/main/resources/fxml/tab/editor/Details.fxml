@@ -31,7 +31,7 @@
          <children>
             <Label text="Type" />
             <TextField fx:id="propertyType" editable="false" GridPane.columnIndex="1" />
-            <ChoiceBox fx:id="subtypeChoices" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
+            <ChoiceBox fx:id="propertySubtypeChoices" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
             <Label text="Subtype" GridPane.rowIndex="1" />
          </children>
          <VBox.margin>
@@ -39,14 +39,45 @@
          </VBox.margin>
       </GridPane>
       <Separator prefWidth="200.0" />
-      <VBox fx:id="propertiesBox">
+      <VBox fx:id="nodePropertiesBox">
          <children>
+            <VBox fx:id="idPropertyBox">
+               <children>
+                  <GridPane hgap="5.0">
+                     <children>
+                        <TextField fx:id="propertyName" GridPane.columnIndex="1" />
+                        <TextField fx:id="propertyLabel" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <TextArea fx:id="propertyDescription" prefHeight="60.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets top="3.0" />
+                           </GridPane.margin>
+                        </TextArea>
+                        <Label text="Name" />
+                        <Label text="Label" GridPane.rowIndex="1" />
+                        <Label text="Description" GridPane.rowIndex="2" />
+                     </children>
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <VBox.margin>
+                        <Insets bottom="10.0" top="5.0" />
+                     </VBox.margin>
+                  </GridPane>
+                  <Separator prefWidth="200.0" />
+               </children>
+            </VBox>
             <GridPane fx:id="colorSelectionGrid" hgap="5.0">
                <children>
                   <Label text="Color" />
                   <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
                      <children>
-                        <ChoiceBox fx:id="colorChoices" prefWidth="100.0" HBox.hgrow="ALWAYS" />
+                        <ChoiceBox fx:id="propertyColorChoices" prefWidth="100.0" HBox.hgrow="ALWAYS" />
                         <Button fx:id="colorButton" mnemonicParsing="false" prefWidth="25.0" />
                      </children>
                   </HBox>
@@ -66,12 +97,18 @@
                <children>
                   <Label text="Weight" />
                   <TextField fx:id="propertyWeight" GridPane.columnIndex="1" />
+                  <Label text="Source" GridPane.rowIndex="1" />
+                  <Label text="Target" GridPane.rowIndex="2" />
+                  <TextField fx:id="propertySource" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="propertyTarget" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                </children>
                <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
                   <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
                </columnConstraints>
                <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
             </GridPane>
@@ -108,6 +145,9 @@
                </rowConstraints>
             </GridPane>
          </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
       </VBox>
         <VBox fx:id="detailsComputeBox" VBox.vgrow="ALWAYS" />
       <Separator prefWidth="200.0" />

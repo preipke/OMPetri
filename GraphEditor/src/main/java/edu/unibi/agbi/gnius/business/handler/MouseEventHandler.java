@@ -9,8 +9,8 @@ import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsControll
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
@@ -54,7 +54,7 @@ public class MouseEventHandler
     private boolean isPrimaryButtonDown = false;
     private boolean isSecondaryButtonDown = false;
     
-    private final double secondsBeforeCreatingArc = .65d;
+    private final double secondsBeforeCreatingArc = .35d; // TODO assign custom value in preferences
     
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
@@ -158,10 +158,11 @@ public class MouseEventHandler
                                     editorDetailsController.hide();
                                     try {
                                         setEditorMode(isInArcCreationMode);
+                                        selectionService.unselectAll();
+                                        selectionService.highlight(node);
                                         arcTemp = dataService.createTemporaryArc(node);
                                     } catch (EditorModeLockException | AssignmentDeniedException ex) {
-                                        editorToolsController.addToLog(getClass() + ":");
-                                        editorToolsController.addToLog(ex);
+                                        editorToolsController.addToLog(ex.getMessage());
                                     }
                                     System.out.println("Creating ARC!");
                                 }
@@ -193,8 +194,7 @@ public class MouseEventHandler
                         try {
                             setEditorMode(isInSelectionFrameMode);
                         } catch (EditorModeLockException ex) {
-                            editorToolsController.addToLog(getClass() + ":");
-                            editorToolsController.addToLog(ex);
+                            editorToolsController.addToLog(ex.getMessage());
                         }
 
                         Point2D pos = calculator.getCorrectedMousePosition(mouseEventPressed);
@@ -265,7 +265,7 @@ public class MouseEventHandler
                     arcTemp.endXProperty().set(correctedMousePos.getX());
                     arcTemp.endYProperty().set(correctedMousePos.getY());
                     
-                } else {
+                } else if (!isInNodeCreationMode.get()){
 
                     /**
                      * Dragging Mode. Drags selected node(s).
@@ -274,8 +274,7 @@ public class MouseEventHandler
                     try {
                         setEditorMode(isInDraggingMode);
                     } catch (EditorModeLockException ex) {
-                        editorToolsController.addToLog(getClass() + ":");
-                        editorToolsController.addToLog(ex);
+                        editorToolsController.addToLog(ex.getMessage());
                     }
 
                     if (event.getTarget() instanceof IGraphNode) {
@@ -338,11 +337,15 @@ public class MouseEventHandler
                     try {
                         dataService.connect(arcTemp.getSource() , target);
                     } catch (EdgeCreationException | AssignmentDeniedException ex) {
-                        editorToolsController.addToLog(getClass() + ":");
-                        editorToolsController.addToLog(ex);
+                        editorToolsController.addToLog(ex.getMessage());
                     }
                 } 
-                dataService.remove(arcTemp);
+                selectionService.unhighlight(arcTemp.getSource());
+                try {
+                    dataService.remove(arcTemp);
+                } catch (AssignmentDeniedException ex) {
+                    editorToolsController.addToLog(ex.getMessage());
+                }
                 
                 disableMode(isInArcCreationMode);
                 
@@ -412,7 +415,15 @@ public class MouseEventHandler
     private synchronized void setEditorMode(BooleanProperty mode) throws EditorModeLockException {
         if (!mode.get()) {
             if (!isInFreeMode.get()) {
-                throw new EditorModeLockException("Changing mode is blocked!");
+                if (isInArcCreationMode.get()) {
+                    throw new EditorModeLockException("Changing mode is blocked! In ArcCreation Mode.");
+                } else if (isInDraggingMode.get()) {
+                    throw new EditorModeLockException("Changing mode is blocked! In Draggin Mode.");
+                } else if (isInNodeCreationMode.get()) {
+                    throw new EditorModeLockException("Changing mode is blocked! In NodeCreation Mode.");
+                } else if (isInSelectionFrameMode.get()) {
+                    throw new EditorModeLockException("Changing mode is blocked! In SelectionFrame Mode.");
+                }
             }
             isInFreeMode.set(false);
             mode.set(true);

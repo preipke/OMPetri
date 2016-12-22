@@ -5,9 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.petrinet.entity.IPN_Arc;
-import java.util.List;
 
 /**
  *

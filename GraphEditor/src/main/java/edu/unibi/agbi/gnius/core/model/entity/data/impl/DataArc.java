@@ -6,9 +6,10 @@
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.petrinet.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.abstr.Arc;
+import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +21,8 @@ public class DataArc extends Arc implements IDataArc
 {
     private final List<IGraphElement> shapes;
     
-    public DataArc() {
-        super();
+    public DataArc(IDataNode source, IDataNode target) throws IllegalAssignmentException {
+        super(source, target);
         shapes = new ArrayList();
     }
 

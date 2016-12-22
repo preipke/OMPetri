@@ -12,6 +12,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
+import java.util.ArrayList;
 
 import java.util.List;
 
@@ -27,8 +28,7 @@ public class SelectionService
 {
     private final SelectionDao selectionDao;
     
-    private IGraphNode[] nodesCopy;
-    private IGraphArc[] arcCopy;
+    private List<IGraphNode> nodesCopy;
     
     @Autowired
     public SelectionService(SelectionDao selectionDao) {
@@ -39,10 +39,17 @@ public class SelectionService
      * Copy and store selected nodes and arcs.
      */
     public void copy() {
-//        arcCopy = new IGraphArc[selectionDao.getSelectedArcs().size()];
-//        arcCopy = selectionDao.getSelectedArcs().toArray(arcCopy);
-//        nodesCopy = new IGraphNode[selectionDao.getSelectedNodes().size()];
-//        nodesCopy = selectionDao.getSelectedNodes().toArray(nodesCopy);
+        
+        nodesCopy = new ArrayList();
+        
+        for (IGraphElement element : getSelectedElements()) {
+            try {
+                nodesCopy.add((IGraphNode)element);
+            } catch (Exception ex) {
+                System.out.println("Element not a node!");
+                System.out.println(ex.toString());
+            }
+        }
     }
     
     /**
@@ -161,18 +168,10 @@ public class SelectionService
     }
     
     /**
-     * Get copied arcs.
-     * @return 
-     */
-    public IGraphArc[] getEdgesCopy() {
-        return arcCopy;
-    }
-    
-    /**
      * Get copied nodes.
      * @return 
      */
-    public IGraphNode[] getNodesCopy() {
+    public List<IGraphNode> getNodesCopy() {
         return nodesCopy;
     }
 }

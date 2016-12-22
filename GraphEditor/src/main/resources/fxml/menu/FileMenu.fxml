@@ -8,21 +8,19 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-        <Menu mnemonicParsing="false" text="File"  
-				xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-				fx:id="fileMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.FileMenuController">
-          <items>
-            <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
-            <Menu mnemonicParsing="false" text="Open Recent" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
-          </items>
-        </Menu>
+<Menu fx:id="fileMenu" mnemonicParsing="false" text="File" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.FileMenuController">
+    <items>
+        <MenuItem mnemonicParsing="false" text="New" />
+        <MenuItem mnemonicParsing="false" text="Open…" />
+        <Menu mnemonicParsing="false" text="Open Recent" />
+        <SeparatorMenuItem mnemonicParsing="false" />
+        <MenuItem mnemonicParsing="false" text="Close" />
+        <MenuItem mnemonicParsing="false" text="Save" />
+        <MenuItem mnemonicParsing="false" onAction="#SaveFileAs" text="Save As…" />
+        <MenuItem mnemonicParsing="false" text="Revert" />
+        <SeparatorMenuItem mnemonicParsing="false" />
+        <MenuItem mnemonicParsing="false" text="Preferences…" />
+        <SeparatorMenuItem mnemonicParsing="false" />
+        <MenuItem mnemonicParsing="false" text="Quit" />
+    </items>
+</Menu>
