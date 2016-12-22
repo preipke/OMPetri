@@ -5,10 +5,15 @@
  */
 package edu.unibi.agbi.petrinet.entity;
 
+import edu.unibi.agbi.petrinet.entity.abstr.Arc;
+import java.util.List;
+
 /**
  *
  * @author PR
  */
 public interface IPN_Node extends IPN_Element
 {
+    public List<Arc> getArcsOut();
+    public List<Arc> getArcsIn();
 }

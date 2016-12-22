@@ -12,7 +12,7 @@ package edu.unibi.agbi.petrinet.model;
 public class Weight
 {
     private final Colour colour;
-    private String weight;
+    private String weight = "1";
     
     public Weight(Colour colour) {
         this.colour = colour;

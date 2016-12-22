@@ -14,8 +14,8 @@ import java.util.List;
  */
 public class Function {
     
-    private String function;
-    private String unit;
+    private String function = "1";
+    private String unit = "";
     
     private final List<Parameter> parameter;
     

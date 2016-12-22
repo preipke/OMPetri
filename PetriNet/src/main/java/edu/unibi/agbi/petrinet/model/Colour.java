@@ -12,7 +12,7 @@ package edu.unibi.agbi.petrinet.model;
 public class Colour
 {
     private String id;
-    private String description;
+    private String description = "";
 
     public String getId() {
         return id;

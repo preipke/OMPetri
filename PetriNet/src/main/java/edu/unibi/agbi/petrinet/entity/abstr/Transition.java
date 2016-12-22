@@ -3,11 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.impl;
+package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Node;
 
 /**
  *
@@ -15,11 +17,16 @@ import edu.unibi.agbi.petrinet.entity.PN_Element;
  */
 public abstract class Transition extends PN_Node
 {
+    private static final String IDENT = "T";
+    private static int COUNT = 0;
+    
     private Function function;
     
     private Type transitionType;
     
     public Transition() {
+
+        super(IDENT + ++COUNT);
         
         type = PN_Element.Type.TRANSITION;
         
@@ -34,11 +41,15 @@ public abstract class Transition extends PN_Node
         return function;
     }
     
+    public void setTransitionType(Type transitionType) {
+        this.transitionType = transitionType;
+    }
+    
     public Type getTransitionType() {
         return transitionType;
     }
     
     public enum Type {
-        DEFAULT, CONTINUOUS, DISCRETE, STOCHASTIC;
+        CONTINUOUS, DISCRETE, STOCHASTIC;
     }
 }

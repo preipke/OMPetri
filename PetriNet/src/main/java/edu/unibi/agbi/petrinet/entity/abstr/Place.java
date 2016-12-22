@@ -3,10 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.impl;
+package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Token;
 import java.util.Collection;
@@ -20,11 +22,16 @@ import java.util.Map;
  */
 public abstract class Place extends PN_Node
 {
+    private static final String IDENT = "P";
+    private static int COUNT = 0;
+    
     private Type placeType;
     
     private final Map<Colour,Token> token;
     
     public Place() {
+
+        super(IDENT + ++COUNT);
         
         type = PN_Element.Type.PLACE;
         
@@ -44,11 +51,15 @@ public abstract class Place extends PN_Node
         return token;
     }
     
+    public void setPlaceType(Type placeType) {
+        this.placeType = placeType;
+    }
+    
     public Type getPlaceType() {
         return placeType;
     }
     
     public enum Type {
-        DEFAULT, CONTINUOUS, DISCRETE;
+        CONTINUOUS, DISCRETE;
     }
 }

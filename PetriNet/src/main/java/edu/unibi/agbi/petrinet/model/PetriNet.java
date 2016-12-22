@@ -7,7 +7,7 @@ package edu.unibi.agbi.petrinet.model;
 
 import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
-import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.abstr.Place;
 import java.util.ArrayList;
 
 import java.util.Collection;

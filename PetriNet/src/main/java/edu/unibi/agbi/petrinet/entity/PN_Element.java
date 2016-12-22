@@ -28,13 +28,13 @@ public abstract class PN_Element implements IPN_Element {
         return parameter;
     }
     
+    public Type getElementType() {
+        return type;
+    }
+    
     @Override
     public String getId() {
         return id;
-    }
-    
-    public Type getElementType() {
-        return type;
     }
     
     public enum Type {

@@ -7,10 +7,9 @@ package edu.unibi.agbi.petrinet.util;
 
 import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
-import edu.unibi.agbi.petrinet.entity.PN_Node;
-import edu.unibi.agbi.petrinet.entity.impl.Arc;
-import edu.unibi.agbi.petrinet.entity.impl.Place;
-import edu.unibi.agbi.petrinet.entity.impl.Transition;
+import edu.unibi.agbi.petrinet.entity.abstr.Arc;
+import edu.unibi.agbi.petrinet.entity.abstr.Place;
+import edu.unibi.agbi.petrinet.entity.abstr.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.PetriNet;
@@ -62,8 +61,7 @@ public class OM_Exporter
              * Settings.
              */
             
-            writer.append("  ");
-            writer.append(" inner PNlib.Settings");
+            writer.append("  inner PNlib.Settings");
             writer.append(" settings(showTokenFlow = true)");
             //writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
@@ -80,7 +78,7 @@ public class OM_Exporter
             Map<Colour,Weight> weightMap;
             Token token;
             Weight weight;
-            PN_Node node;
+            IPN_Node node;
             Place place;
             Transition transition;
             int count;
@@ -167,7 +165,7 @@ public class OM_Exporter
                 
                 function = transition.getFunction();
                 
-                writer.append("");
+                writer.append("  ");
                 writer.append(pnLibTransition);
                 writer.append(" '" + transition.getId() + "'");
                 writer.append("(nIn=" + transition.getArcsIn().size());
@@ -372,13 +370,14 @@ public class OM_Exporter
                 writer.println();
             }
             writer.append("  annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
+            writer.println();
             
             writer.append("end '" + petriNet.getName() + "'");
             writer.append(";");
             writer.println();
 
         } catch (IOException ex) {
-
+            System.out.println(ex.toString());
         }
     }
 }
