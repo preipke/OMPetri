@@ -16,7 +16,11 @@ import java.util.List;
 public abstract class PN_Element implements IPN_Element {
     
     protected Type type;
+    
     protected String id;
+    protected int exportIndex;
+    
+    protected boolean isEnabled = true;
     
     private final List<Parameter> parameter;
     
@@ -24,10 +28,30 @@ public abstract class PN_Element implements IPN_Element {
         parameter = new ArrayList();
     }
     
+    @Override
+    public void setExportIndex(int index) {
+        exportIndex = index;
+    }
+    
+    @Override
+    public int getExportIndex() {
+        return exportIndex;
+    }
+    
     public List<Parameter> getParameter() {
         return parameter;
     }
+
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
     
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+    
+    @Override
     public Type getElementType() {
         return type;
     }

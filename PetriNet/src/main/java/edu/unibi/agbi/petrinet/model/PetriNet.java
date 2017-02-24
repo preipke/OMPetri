@@ -21,11 +21,13 @@ import java.util.Map;
  */
 public class PetriNet
 {
+    public final static Colour DEFAULT_COLOUR = new Colour("DEFAULT", "Default colour");
+    
     private String author;
     private String name;
     private String description;
     
-    private final List<Colour> colors; // TODO replace by list
+    private final List<Colour> colors;
     
     private final Map<String,IPN_Arc> arcs;
     private final Map<String,IPN_Node> places;
@@ -34,6 +36,8 @@ public class PetriNet
     
     public PetriNet() {
         colors = new ArrayList();
+        colors.add(DEFAULT_COLOUR);
+        
         arcs = new HashMap();
         places = new HashMap();
         transitions = new HashMap();

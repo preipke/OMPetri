@@ -15,10 +15,10 @@ import java.util.List;
  */
 public abstract class PN_Node extends PN_Element implements IPN_Node
 {
-    private boolean enabled = true;
+    private boolean isConstant = true;
     
-    private final List<Arc> arcsIn;
-    private final List<Arc> arcsOut;
+    private final List<IPN_Arc> arcsIn;
+    private final List<IPN_Arc> arcsOut;
     
     public PN_Node(String internalId) {
         
@@ -28,21 +28,22 @@ public abstract class PN_Node extends PN_Element implements IPN_Node
         arcsOut = new ArrayList();
     }
 
+    public void setConstant(boolean isConstant) {
+        this.isConstant = isConstant;
+    }
+    
     @Override
-    public List<Arc> getArcsIn() {
+    public boolean isConstant() {
+        return isConstant;
+    }
+
+    @Override
+    public List<IPN_Arc> getArcsIn() {
         return arcsIn;
     }
 
     @Override
-    public List<Arc> getArcsOut() {
+    public List<IPN_Arc> getArcsOut() {
         return arcsOut;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setIsEnabled(boolean isEnabled) {
-        this.enabled = isEnabled;
     }
 }

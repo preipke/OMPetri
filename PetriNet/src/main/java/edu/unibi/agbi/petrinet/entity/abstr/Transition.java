@@ -6,8 +6,6 @@
 package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.entity.PN_Node;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 

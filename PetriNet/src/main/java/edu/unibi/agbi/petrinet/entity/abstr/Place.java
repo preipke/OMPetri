@@ -5,14 +5,13 @@
  */
 package edu.unibi.agbi.petrinet.entity.abstr;
 
-import edu.unibi.agbi.petrinet.entity.PN_Node;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Token;
-import java.util.Collection;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,11 +35,15 @@ public abstract class Place extends PN_Node
         type = PN_Element.Type.PLACE;
         
         token = new HashMap();
-        token.put(null , new Token(null));
+        token.put(PetriNet.DEFAULT_COLOUR , new Token(PetriNet.DEFAULT_COLOUR));
     }
     
     public void setToken(Token token) {
         this.token.put(token.getColour() , token);
+    }
+    
+    public Token getToken(Colour colour) {
+        return token.get(colour);
     }
     
     public Collection<Token> getToken() {

@@ -14,6 +14,7 @@ import java.util.List;
  */
 public interface IPN_Node extends IPN_Element
 {
-    public List<Arc> getArcsOut();
-    public List<Arc> getArcsIn();
+    public List<IPN_Arc> getArcsOut();
+    public List<IPN_Arc> getArcsIn();
+    public boolean isConstant();
 }

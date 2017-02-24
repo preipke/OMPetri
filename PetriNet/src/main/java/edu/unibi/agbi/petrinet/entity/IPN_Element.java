@@ -12,4 +12,8 @@ package edu.unibi.agbi.petrinet.entity;
 public interface IPN_Element
 {
     public String getId();
+    public void setExportIndex(int index);
+    public int getExportIndex();
+    public PN_Element.Type getElementType();
+    public boolean isEnabled();
 }

@@ -5,14 +5,14 @@
  */
 package edu.unibi.agbi.petrinet.entity.abstr;
 
+import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
-import edu.unibi.agbi.petrinet.entity.IPN_Node;
+import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Weight;
-import java.util.Collection;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,12 +20,12 @@ import java.util.Map;
  *
  * @author PR
  */
-public abstract class Arc extends PN_Element
+public abstract class Arc extends PN_Element implements IPN_Arc
 {
     private Type arcType;
     
-    private IPN_Node target;
-    private IPN_Node source;
+    protected IPN_Node target;
+    protected IPN_Node source;
     
     private final Map<Colour,Weight> weights;
     
@@ -39,23 +39,7 @@ public abstract class Arc extends PN_Element
         id = source.getId() + "_" + target.getId();
         
         weights = new HashMap();
-        weights.put(null, new Weight(null));
-    }
-    
-    public void setWeight(Weight weight) {
-        weights.put(weight.getColour(), weight);
-    }
-    
-    public Weight getWeight(Colour colour) {
-        return weights.get(colour);
-    }
-    
-    public Collection<Weight> getWeights() {
-        return weights.values();
-    }
-    
-    public Map<Colour,Weight> getWeightMap() {
-        return weights;
+        weights.put(PetriNet.DEFAULT_COLOUR, new Weight(PetriNet.DEFAULT_COLOUR));
     }
 
     public void setTarget(IPN_Node target) throws IllegalAssignmentException {
@@ -82,12 +66,28 @@ public abstract class Arc extends PN_Element
         this.source = source;
     }
 
+    @Override
     public IPN_Node getTarget() {
         return target;
     }
 
+    @Override
     public IPN_Node getSource() {
         return source;
+    }
+    
+    public void setWeight(Weight weight) {
+        weights.put(weight.getColour(), weight);
+    }
+    
+    @Override
+    public Weight getWeight(Colour colour) {
+        return weights.get(colour);
+    }
+    
+    @Override
+    public Map<Colour,Weight> getWeightMap() {
+        return weights;
     }
     
     public void setArcType(Type arcType) {
