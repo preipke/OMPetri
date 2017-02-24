@@ -5,9 +5,10 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.impl;
 
-import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +24,12 @@ public class GravisCircle extends Circle implements IGravisNode
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
-    private final List<IGravisEdge> edges = new ArrayList();
+    private final List<IGravisConnection> edges = new ArrayList();
     
     
     public GravisCircle() {
         super();
-        setRadius(PropertiesController.CIRCLE_RADIUS);
+        setRadius(GravisProperties.CIRCLE_RADIUS);
     }
     
     /**
@@ -64,7 +65,7 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public void addEdge(IGravisEdge edge) {
+    public void addEdge(IGravisConnection edge) {
         edges.add(edge);
     }
     
@@ -79,13 +80,15 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public List<IGravisEdge> getEdges() {
+    public List<IGravisConnection> getEdges() {
         return edges;
     }
     
     @Override
-    public Shape getShape() {
-        return this;
+    public List<Shape> getShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
     }
     
     @Override
@@ -99,7 +102,14 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public boolean removeEdge(IGravisEdge edge) {
+    public boolean removeConnection(IGravisConnection edge) {
         return edges.remove(edge);
+    }
+    
+    @Override
+    public void putOnTop() {
+        NodeLayer nodeLayer = (NodeLayer) getParent();
+        nodeLayer.getChildren().remove(this);
+        nodeLayer.getChildren().add(this);
     }
 }

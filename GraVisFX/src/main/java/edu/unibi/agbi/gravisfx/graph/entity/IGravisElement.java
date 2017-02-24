@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity;
 
+import java.util.List;
+import javafx.beans.property.DoubleProperty;
 import javafx.scene.shape.Shape;
 
 /**
@@ -13,10 +15,15 @@ import javafx.scene.shape.Shape;
  */
 public interface IGravisElement
 {
-    public Shape getShape();
+    public List<Shape> getShapes();
     
     public void setTranslate(double positionX, double positionY);
     
     public double getTranslateX();
     public double getTranslateY();
+    
+    public DoubleProperty translateXProperty();
+    public DoubleProperty translateYProperty();
+    
+    public void putOnTop();
 }

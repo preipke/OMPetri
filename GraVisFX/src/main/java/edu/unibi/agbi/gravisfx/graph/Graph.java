@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
@@ -27,7 +27,7 @@ public class Graph
     private final EdgeLayer edgeLayer;
     
     private final List<IGravisNode> nodes;
-    private final List<IGravisEdge> edges;
+    private final List<IGravisConnection> edges;
     
     public Graph() {
         
@@ -48,14 +48,14 @@ public class Graph
     public void add(IGravisNode node) {
         if (!nodes.contains(node)) {
             nodes.add(node);
-            nodeLayer.getChildren().add(node.getShape());
+            nodeLayer.getChildren().addAll(node.getShapes());
         }
     }
     
-    public void add(IGravisEdge edge) {
+    public void add(IGravisConnection edge) {
         if (!edges.contains(edge)) {
             edges.add(edge);
-            edgeLayer.getChildren().add(edge.getShape());
+            edgeLayer.getChildren().addAll(edge.getShapes());
         }
     }
     
@@ -63,25 +63,25 @@ public class Graph
         return nodes.contains(node);
     }
     
-    public boolean contains(IGravisEdge edge) {
+    public boolean contains(IGravisConnection edge) {
         return edges.contains(edge);
     }
     
     public IGravisNode remove(IGravisNode node) {
         
-        for (IGravisEdge edge : node.getEdges()) {
+        for (IGravisConnection edge : node.getEdges()) {
             remove(edge);
         }
         
-        nodeLayer.getChildren().remove(node.getShape());
+        nodeLayer.getChildren().removeAll(node.getShapes());
         nodes.remove(node);
         
         return node;
     }
     
-    public IGravisEdge remove(IGravisEdge edge) {
+    public IGravisConnection remove(IGravisConnection edge) {
         
-        edgeLayer.getChildren().remove(edge.getShape());
+        edgeLayer.getChildren().removeAll(edge.getShapes());
         edges.remove(edge);
         
         return edge;
@@ -95,8 +95,8 @@ public class Graph
         return nodesArray;
     }
     
-    public IGravisEdge[] getEdges() {
-        IGravisEdge[] edgesArray = new IGravisEdge[this.edges.size()];
+    public IGravisConnection[] getEdges() {
+        IGravisConnection[] edgesArray = new IGravisConnection[this.edges.size()];
         for (int i = 0; i < edgesArray.length; i++) {
             edgesArray[i] = this.edges.get(i);
         }

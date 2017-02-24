@@ -5,9 +5,12 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.impl;
 
-import edu.unibi.agbi.gravisfx.PropertiesController;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.GravisProperties;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
@@ -18,12 +21,10 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisCurve extends QuadCurve implements IGravisEdge
+public class GravisCurve extends QuadCurve implements IGravisConnection
 {
     private final IGravisNode source;
     private final IGravisNode target;
-    
-    private static final double ARC_GAP = PropertiesController.ARC_GAP;
     
     public GravisCurve(IGravisNode source, IGravisNode target) {
         
@@ -32,17 +33,17 @@ public class GravisCurve extends QuadCurve implements IGravisEdge
         this.source = source;
         this.target = target;
         
-        startXProperty().bind(source.getShape().translateXProperty().add(source.getOffsetX()));
-        startYProperty().bind(source.getShape().translateYProperty().add(source.getOffsetY()));
+        startXProperty().bind(source.translateXProperty().add(source.getOffsetX()));
+        startYProperty().bind(source.translateYProperty().add(source.getOffsetY()));
         
-        endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
-        endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+        endXProperty().bind(target.translateXProperty().add(target.getOffsetX()));
+        endYProperty().bind(target.translateYProperty().add(target.getOffsetY()));
         
-        final DoubleProperty sourceXProperty = source.getShape().translateXProperty();
-        final DoubleProperty sourceYProperty = source.getShape().translateYProperty();
+        final DoubleProperty sourceXProperty = source.translateXProperty();
+        final DoubleProperty sourceYProperty = source.translateYProperty();
         
-        final DoubleProperty targetXProperty = target.getShape().translateXProperty();
-        final DoubleProperty targetYProperty = target.getShape().translateYProperty();
+        final DoubleProperty targetXProperty = target.translateXProperty();
+        final DoubleProperty targetYProperty = target.translateYProperty();
         
         /**
          * Control point X coordinate.
@@ -87,7 +88,7 @@ public class GravisCurve extends QuadCurve implements IGravisEdge
                 double m2 = x / y;
                 
                 double b2 = y3 - m2 * x3;
-                double r = ARC_GAP / 2;
+                double r = GravisProperties.ARC_GAP / 2;
                 
 //                System.out.println("####");
 //                System.out.println("P1 ( " + x1 + " | " + y1 + " )");
@@ -170,11 +171,20 @@ public class GravisCurve extends QuadCurve implements IGravisEdge
     }
     
     @Override
-    public Shape getShape() {
-        return this;
+    public List<Shape> getShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
     }
 
     @Override
     public void setTranslate(double positionX , double positionY) {
+    }
+    
+    @Override
+    public void putOnTop() {
+        EdgeLayer edgeLayer = (EdgeLayer) getParent();
+        edgeLayer.getChildren().remove(this);
+        edgeLayer.getChildren().add(this);
     }
 }

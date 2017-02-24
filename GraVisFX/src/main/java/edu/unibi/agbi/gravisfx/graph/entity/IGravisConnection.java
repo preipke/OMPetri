@@ -9,7 +9,7 @@ package edu.unibi.agbi.gravisfx.graph.entity;
  *
  * @author PR
  */
-public interface IGravisEdge extends IGravisElement
+public interface IGravisConnection extends IGravisElement
 {
     public IGravisNode getSource();
     public IGravisNode getTarget();

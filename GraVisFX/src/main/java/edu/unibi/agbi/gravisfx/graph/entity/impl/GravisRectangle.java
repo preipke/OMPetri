@@ -5,9 +5,10 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.impl;
 
-import edu.unibi.agbi.gravisfx.PropertiesController;
+import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,30 +24,14 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
-    private final List<IGravisEdge> edges = new ArrayList();
+    private final List<IGravisConnection> edges = new ArrayList();
     
     public GravisRectangle() {
         super();
-        setWidth(PropertiesController.RECTANGLE_WIDTH);
-        setHeight(PropertiesController.RECTANGLE_HEIGHT);
-        setArcWidth(PropertiesController.RECTANGLE_ARC_WIDTH);
-        setArcHeight(PropertiesController.RECTANGLE_ARC_HEIGHT);
-    }
-    
-    @Override
-    public Shape getShape() {
-        return this;
-    }
-    
-    /**
-     * Position the center of the node at the given coordinates.
-     * @param centerX
-     * @param centerY 
-     */
-    @Override
-    public void setTranslate(double centerX , double centerY) {
-        setTranslateX(centerX);
-        setTranslateY(centerY);
+        setWidth(GravisProperties.RECTANGLE_WIDTH);
+        setHeight(GravisProperties.RECTANGLE_HEIGHT);
+        setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH);
+        setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
     }
 
     @Override
@@ -60,6 +45,31 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     @Override
+    public List<Shape> getShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
+    }
+    
+    /**
+     * Position the center of the node at the given coordinates.
+     * @param centerX
+     * @param centerY 
+     */
+    @Override
+    public void setTranslate(double centerX , double centerY) {
+        setTranslateX(centerX);
+        setTranslateY(centerY);
+    }
+    
+    @Override
+    public void putOnTop() {
+        NodeLayer nodeLayer = (NodeLayer) getParent();
+        nodeLayer.getChildren().remove(this);
+        nodeLayer.getChildren().add(this);
+    }
+    
+    @Override
     public void addParentNode(IGravisNode parent) {
         parents.add(parent);
     }
@@ -70,7 +80,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     @Override
-    public void addEdge(IGravisEdge edge) {
+    public void addEdge(IGravisConnection edge) {
         edges.add(edge);
     }
     
@@ -85,7 +95,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     @Override
-    public List<IGravisEdge> getEdges() {
+    public List<IGravisConnection> getEdges() {
         return edges;
     }
     
@@ -100,7 +110,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
     
     @Override
-    public boolean removeEdge(IGravisEdge edge) {
+    public boolean removeConnection(IGravisConnection edge) {
         return edges.remove(edge);
     }
 }

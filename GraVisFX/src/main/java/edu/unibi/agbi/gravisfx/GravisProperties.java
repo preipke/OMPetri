@@ -9,11 +9,16 @@ package edu.unibi.agbi.gravisfx;
  *
  * @author PR
  */
-public class PropertiesController
+public class GravisProperties
 {
     public static final double BASE_SIZE = 8;
     
     public static final double ARC_GAP = BASE_SIZE * 5d;
+    
+    public static final double ARROW_DISTANCE = BASE_SIZE * 4d;
+    public static final double ARROW_BASE = BASE_SIZE * 0.125d;
+    public static final double ARROW_HEIGHT = ARROW_BASE * 4d;
+    public static final double ARROW_WIDTH = ARROW_BASE * 4d;
     
     public static final double CIRCLE_RADIUS = BASE_SIZE * 2.5d;
     

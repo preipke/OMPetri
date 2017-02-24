@@ -5,8 +5,11 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity.impl;
 
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
@@ -15,7 +18,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisEdge extends Line implements IGravisEdge
+public class GravisEdge extends Line implements IGravisConnection
 {
     private final IGravisNode source;
     private IGravisNode target;
@@ -31,13 +34,13 @@ public class GravisEdge extends Line implements IGravisEdge
         this.target = target;
 //        System.out.println("Width = " + getBoundsInParent().getWidth());
 //        System.out.println("Height = " + getBoundsInParent().getHeight());
-        startXProperty().bind(source.getShape().translateXProperty().add(source.getOffsetX()));
-        startYProperty().bind(source.getShape().translateYProperty().add(source.getOffsetY()));
+        startXProperty().bind(source.translateXProperty().add(source.getOffsetX()));
+        startYProperty().bind(source.translateYProperty().add(source.getOffsetY()));
 //        System.out.println("Offset X = " + source.getOffsetX());
 //        System.out.println("Offset Y = " + source.getOffsetY());
         if (target != null) {
-            endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
-            endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+            endXProperty().bind(target.translateXProperty().add(target.getOffsetX()));
+            endYProperty().bind(target.translateYProperty().add(target.getOffsetY()));
         } else {
             endXProperty().set(startXProperty().get());
             endYProperty().set(startYProperty().get());
@@ -47,8 +50,8 @@ public class GravisEdge extends Line implements IGravisEdge
     public void setTarget(IGravisNode target) {
         this.target = target;
         if (target != null) {
-            endXProperty().bind(target.getShape().translateXProperty().add(target.getOffsetX()));
-            endYProperty().bind(target.getShape().translateYProperty().add(target.getOffsetY()));
+            endXProperty().bind(target.translateXProperty().add(target.getOffsetX()));
+            endYProperty().bind(target.translateYProperty().add(target.getOffsetY()));
         }
     }
     
@@ -63,11 +66,20 @@ public class GravisEdge extends Line implements IGravisEdge
     }
     
     @Override
-    public Shape getShape() {
-        return this;
+    public List<Shape> getShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
     }
 
     @Override
     public void setTranslate(double positionX , double positionY) {
+    }
+    
+    @Override
+    public void putOnTop() {
+        EdgeLayer edgeLayer = (EdgeLayer) getParent();
+        edgeLayer.getChildren().remove(this);
+        edgeLayer.getChildren().add(this);
     }
 }

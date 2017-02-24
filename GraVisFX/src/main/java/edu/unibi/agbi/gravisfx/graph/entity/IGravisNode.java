@@ -18,13 +18,13 @@ public interface IGravisNode extends IGravisElement
     
     public void addParentNode(IGravisNode parent);
     public void addChildNode(IGravisNode child);
-    public void addEdge(IGravisEdge edge);
+    public void addEdge(IGravisConnection edge);
     
     public boolean removeParent(IGravisNode node);
     public boolean removeChild(IGravisNode node);
-    public boolean removeEdge(IGravisEdge node);
+    public boolean removeConnection(IGravisConnection node);
     
     public List<IGravisNode> getParents();
     public List<IGravisNode> getChildren();
-    public List<IGravisEdge> getEdges();
+    public List<IGravisConnection> getEdges();
 }
