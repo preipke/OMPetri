@@ -48,14 +48,14 @@ public class Graph
     public void add(IGravisNode node) {
         if (!nodes.contains(node)) {
             nodes.add(node);
-            nodeLayer.getChildren().addAll(node.getShapes());
+            nodeLayer.getChildren().addAll(node.getAllShapes());
         }
     }
     
     public void add(IGravisConnection edge) {
         if (!edges.contains(edge)) {
             edges.add(edge);
-            edgeLayer.getChildren().addAll(edge.getShapes());
+            edgeLayer.getChildren().addAll(edge.getAllShapes());
         }
     }
     
@@ -73,7 +73,7 @@ public class Graph
             remove(edge);
         }
         
-        nodeLayer.getChildren().removeAll(node.getShapes());
+        nodeLayer.getChildren().removeAll(node.getAllShapes());
         nodes.remove(node);
         
         return node;
@@ -81,7 +81,7 @@ public class Graph
     
     public IGravisConnection remove(IGravisConnection edge) {
         
-        edgeLayer.getChildren().removeAll(edge.getShapes());
+        edgeLayer.getChildren().removeAll(edge.getAllShapes());
         edges.remove(edge);
         
         return edge;

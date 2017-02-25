@@ -41,7 +41,8 @@ public class RandomLayout
             double x = rnd.nextDouble() * layoutX / scale;
             double y = rnd.nextDouble() * layoutY / scale;
 
-            node.setTranslate(x, y);
+            node.translateXProperty().set(x);
+            node.translateYProperty().set(y);
         }
     }
 }

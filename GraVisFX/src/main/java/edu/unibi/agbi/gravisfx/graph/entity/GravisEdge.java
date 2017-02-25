@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.impl;
+package edu.unibi.agbi.gravisfx.graph.entity;
 
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +19,10 @@ import javafx.scene.shape.Shape;
  */
 public class GravisEdge extends Line implements IGravisConnection
 {
+    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    
     private final IGravisNode source;
-    private IGravisNode target;
+    private final IGravisNode target;
     
     /**
      * 
@@ -29,15 +30,17 @@ public class GravisEdge extends Line implements IGravisConnection
      * @param target can be null and set later
      */
     public GravisEdge(IGravisNode source, IGravisNode target) {
+        
         super();
+        
+        elementHandles.add(new GravisElementHandle(this));
+        
         this.source = source;
         this.target = target;
-//        System.out.println("Width = " + getBoundsInParent().getWidth());
-//        System.out.println("Height = " + getBoundsInParent().getHeight());
+        
         startXProperty().bind(source.translateXProperty().add(source.getOffsetX()));
         startYProperty().bind(source.translateYProperty().add(source.getOffsetY()));
-//        System.out.println("Offset X = " + source.getOffsetX());
-//        System.out.println("Offset Y = " + source.getOffsetY());
+        
         if (target != null) {
             endXProperty().bind(target.translateXProperty().add(target.getOffsetX()));
             endYProperty().bind(target.translateYProperty().add(target.getOffsetY()));
@@ -47,12 +50,26 @@ public class GravisEdge extends Line implements IGravisConnection
         }
     }
     
-    public void setTarget(IGravisNode target) {
-        this.target = target;
-        if (target != null) {
-            endXProperty().bind(target.translateXProperty().add(target.getOffsetX()));
-            endYProperty().bind(target.translateYProperty().add(target.getOffsetY()));
-        }
+    @Override
+    public Object getBean() {
+        return GravisEdge.this;
+    }
+
+    @Override
+    public List<GravisElementHandle> getElementHandles() {
+        return elementHandles;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public List<Shape> getAllShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
     }
     
     @Override
@@ -63,23 +80,5 @@ public class GravisEdge extends Line implements IGravisConnection
     @Override
     public IGravisNode getTarget() {
         return target;
-    }
-    
-    @Override
-    public List<Shape> getShapes() {
-        List<Shape> shapes = new ArrayList();
-        shapes.add(this);
-        return shapes;
-    }
-
-    @Override
-    public void setTranslate(double positionX , double positionY) {
-    }
-    
-    @Override
-    public void putOnTop() {
-        EdgeLayer edgeLayer = (EdgeLayer) getParent();
-        edgeLayer.getChildren().remove(this);
-        edgeLayer.getChildren().add(this);
     }
 }

@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity;
+package edu.unibi.agbi.gravisfx.graph.entity.abst;
 
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.css.PseudoClass;
-import javafx.scene.shape.Shape;
+import javafx.scene.Group;
 
 /**
  *
@@ -16,6 +17,7 @@ import javafx.scene.shape.Shape;
  */
 public class GravisElementHandle
 {
+    private IGravisElement element;
     
     private String activeStyleClass;
     
@@ -25,14 +27,18 @@ public class GravisElementHandle
     private static final PseudoClass PSEUDO_CLASS_SELECTED = PseudoClass.getPseudoClass(PSEUDO_CLASS_SELECTED_IDENT);
     private static final PseudoClass PSEUDO_CLASS_HIGHLIGHT = PseudoClass.getPseudoClass(PSEUDO_CLASS_HIGHLIGHT_IDENT);
     
+    public GravisElementHandle(IGravisElement element) {
+        this.element = element;
+    }
+    
     private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
         @Override 
         protected void invalidated() {
-            pseudoClassStateChanged(PSEUDO_CLASS_SELECTED , get());
+            element.pseudoClassStateChanged(PSEUDO_CLASS_SELECTED , get());
         }
         @Override
         public Object getBean() {
-            return GraphCurve.this;
+            return element.getBean();
         }
         @Override
         public String getName() {
@@ -43,11 +49,11 @@ public class GravisElementHandle
     private final BooleanProperty isHighlighted = new BooleanPropertyBase(false) {
         @Override 
         protected void invalidated() {
-            pseudoClassStateChanged(PSEUDO_CLASS_HIGHLIGHT , get());
+            element.pseudoClassStateChanged(PSEUDO_CLASS_HIGHLIGHT , get());
         }
         @Override
         public Object getBean() {
-            return GraphCurve.this;
+            return element.getBean();
         }
         @Override
         public String getName() {
@@ -55,37 +61,39 @@ public class GravisElementHandle
         }
     };
 
-    @Override
     public String getActiveStyleClass() {
         return activeStyleClass;
     }
 
-    @Override
     public void setActiveStyleClass(String name) {
-        for (Shape shape : getShapes()) {
-            shape.getStyleClass().remove(activeStyleClass);
-            shape.getStyleClass().add(name);
-        }
+        
+        element.getStyleClass().remove(activeStyleClass);
+        element.getStyleClass().add(name);
+
         activeStyleClass = name;
     }
 
-    @Override
     public void setSelected(boolean value) {
         isSelected.set(value);
     }
     
-    @Override
     public void setHighlighted(boolean value) {
         isHighlighted.set(value);
     }
     
-    @Override
     public boolean isSelected() {
         return isSelected.get();
     }
     
-    @Override
     public boolean isHighlighted() {
         return isHighlighted.get();
+    }
+    
+    public void putOnTop() {
+        
+        Group layer = (Group) element.getParent();
+
+        layer.getChildren().remove(element.getShape());
+        layer.getChildren().add(element.getShape());
     }
 }

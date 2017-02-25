@@ -3,11 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.impl;
+package edu.unibi.agbi.gravisfx.graph.entity;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
 import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +22,16 @@ import javafx.scene.shape.Shape;
  */
 public class GravisCurve extends QuadCurve implements IGravisConnection
 {
+    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    
     private final IGravisNode source;
     private final IGravisNode target;
     
     public GravisCurve(IGravisNode source, IGravisNode target) {
         
         super();
+        
+        elementHandles.add(new GravisElementHandle(this));
         
         this.source = source;
         this.target = target;
@@ -159,6 +162,27 @@ public class GravisCurve extends QuadCurve implements IGravisConnection
         controlYProperty().bind(bindingControlY);
     }
     
+    @Override
+    public Object getBean() {
+        return GravisCurve.this;
+    }
+
+    @Override
+    public List<GravisElementHandle> getElementHandles() {
+        return elementHandles;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public List<Shape> getAllShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
+    }
     
     @Override
     public IGravisNode getSource() {
@@ -168,23 +192,5 @@ public class GravisCurve extends QuadCurve implements IGravisConnection
     @Override
     public IGravisNode getTarget() {
         return target;
-    }
-    
-    @Override
-    public List<Shape> getShapes() {
-        List<Shape> shapes = new ArrayList();
-        shapes.add(this);
-        return shapes;
-    }
-
-    @Override
-    public void setTranslate(double positionX , double positionY) {
-    }
-    
-    @Override
-    public void putOnTop() {
-        EdgeLayer edgeLayer = (EdgeLayer) getParent();
-        edgeLayer.getChildren().remove(this);
-        edgeLayer.getChildren().add(this);
     }
 }

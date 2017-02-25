@@ -3,12 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.impl;
+package edu.unibi.agbi.gravisfx.graph.entity;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
+import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,26 +20,29 @@ import javafx.scene.shape.Shape;
  */
 public class GravisCircle extends Circle implements IGravisNode
 {
+    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<IGravisConnection> edges = new ArrayList();
     
-    
     public GravisCircle() {
+        
         super();
+        
+        elementHandles.add(new GravisElementHandle(this));
+        
         setRadius(GravisProperties.CIRCLE_RADIUS);
     }
     
-    /**
-     * Position the center of the node at the given coordinates.
-     * @param centerX
-     * @param centerY 
-     */
     @Override
-    public void setTranslate(double centerX , double centerY) {
-        
-        setTranslateX(centerX);
-        setTranslateY(centerY);
+    public Object getBean() {
+        return GravisCircle.this;
+    }
+
+    @Override
+    public List<GravisElementHandle> getElementHandles() {
+        return elementHandles;
     }
 
     @Override
@@ -52,6 +53,18 @@ public class GravisCircle extends Circle implements IGravisNode
     @Override
     public double getOffsetY() {
         return 0; // position is fixed to shape center
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public List<Shape> getAllShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        return shapes;
     }
     
     @Override
@@ -85,13 +98,6 @@ public class GravisCircle extends Circle implements IGravisNode
     }
     
     @Override
-    public List<Shape> getShapes() {
-        List<Shape> shapes = new ArrayList();
-        shapes.add(this);
-        return shapes;
-    }
-    
-    @Override
     public boolean removeChild(IGravisNode node) {
         return children.remove(node);
     }
@@ -104,12 +110,5 @@ public class GravisCircle extends Circle implements IGravisNode
     @Override
     public boolean removeConnection(IGravisConnection edge) {
         return edges.remove(edge);
-    }
-    
-    @Override
-    public void putOnTop() {
-        NodeLayer nodeLayer = (NodeLayer) getParent();
-        nodeLayer.getChildren().remove(this);
-        nodeLayer.getChildren().add(this);
     }
 }

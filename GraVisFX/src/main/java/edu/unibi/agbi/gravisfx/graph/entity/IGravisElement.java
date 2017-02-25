@@ -5,8 +5,12 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity;
 
+import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
 import java.util.List;
 import javafx.beans.property.DoubleProperty;
+import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
+import javafx.scene.Parent;
 import javafx.scene.shape.Shape;
 
 /**
@@ -15,15 +19,13 @@ import javafx.scene.shape.Shape;
  */
 public interface IGravisElement
 {
-    public List<Shape> getShapes();
-    
-    public void setTranslate(double positionX, double positionY);
-    
-    public double getTranslateX();
-    public double getTranslateY();
-    
+    public Object getBean();
+    public List<GravisElementHandle> getElementHandles();
+    public Parent getParent();
+    public Shape getShape();
+    public List<Shape> getAllShapes();
+    public void pseudoClassStateChanged(PseudoClass pseudoClass, boolean active);
+    public ObservableList<String> getStyleClass();
     public DoubleProperty translateXProperty();
     public DoubleProperty translateYProperty();
-    
-    public void putOnTop();
 }

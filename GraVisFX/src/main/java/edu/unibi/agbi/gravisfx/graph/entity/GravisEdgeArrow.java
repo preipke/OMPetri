@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.impl;
+package edu.unibi.agbi.gravisfx.graph.entity;
 
+import edu.unibi.agbi.gravisfx.graph.entity.sub.GravisArrow;
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,8 @@ import javafx.scene.shape.Shape;
  */
 public class GravisEdgeArrow extends Path implements IGravisConnection
 {
+    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    
     private final GravisArrow arrow;
 
     private final IGravisNode source;
@@ -34,7 +35,10 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
 
         super();
         
-        arrow = new GravisArrow();
+        arrow = new GravisArrow(this);
+        
+        elementHandles.add(new GravisElementHandle(this));
+        elementHandles.add(arrow.getElementHandles().get(0));
 
         this.source = source;
         this.target = target;
@@ -227,6 +231,29 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
         arrow.translateYProperty().bind(bindingLineEndY.subtract(GravisProperties.ARROW_HEIGHT / 2));
         arrow.rotateProperty().bind(arrowAngle);
     }
+    
+    @Override
+    public Object getBean() {
+        return GravisEdgeArrow.this;
+    }
+
+    @Override
+    public List<GravisElementHandle> getElementHandles() {
+        return elementHandles;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public List<Shape> getAllShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        shapes.add(arrow);
+        return shapes;
+    }
 
     @Override
     public IGravisNode getSource() {
@@ -236,26 +263,5 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
     @Override
     public IGravisNode getTarget() {
         return target;
-    }
-    
-    @Override
-    public List<Shape> getShapes() {
-        List<Shape> shapes = new ArrayList();
-        shapes.add(this);
-        shapes.add(arrow);
-        return shapes;
-    }
-    
-    @Override
-    public void putOnTop() {
-        EdgeLayer edgeLayer = (EdgeLayer) getParent();
-        edgeLayer.getChildren().remove(this);
-        edgeLayer.getChildren().remove(arrow);
-        edgeLayer.getChildren().add(this);
-        edgeLayer.getChildren().add(arrow);
-    }
-
-    @Override
-    public void setTranslate(double positionX , double positionY) {
     }
 }

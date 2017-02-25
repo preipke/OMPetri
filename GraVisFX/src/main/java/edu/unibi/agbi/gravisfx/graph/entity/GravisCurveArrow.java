@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.impl;
+package edu.unibi.agbi.gravisfx.graph.entity;
 
+import edu.unibi.agbi.gravisfx.graph.entity.sub.GravisArrow;
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +24,8 @@ import javafx.scene.shape.Shape;
  */
 public class GravisCurveArrow extends Path implements IGravisConnection
 {
+    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    
     private final GravisArrow arrow;
     
     private final IGravisNode source;
@@ -34,7 +35,10 @@ public class GravisCurveArrow extends Path implements IGravisConnection
         
         super();
         
-        this.arrow = new GravisArrow();
+        arrow = new GravisArrow(this);
+        
+        elementHandles.add(new GravisElementHandle(this));
+        elementHandles.add(arrow.getElementHandles().get(0));
         
         this.source = source;
         this.target = target;
@@ -288,8 +292,8 @@ public class GravisCurveArrow extends Path implements IGravisConnection
             @Override
             protected double computeValue() {
                 
-                double x1 = bindingCurveControlX.get() + source.getOffsetX();
-                double y1 = bindingCurveControlY.get() + source.getOffsetY();
+                double x1 = bindingCurveControlX.get();
+                double y1 = bindingCurveControlY.get();
                 
                 double x2 = target.translateXProperty().get() + target.getOffsetX();
                 double y2 = target.translateYProperty().get() + target.getOffsetY();
@@ -321,11 +325,18 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                  * Unten links: -90 bis 0   +180
                  */
                 
+                double alpha;
+                
                 if (x2 < x1) {
-                    return Math.toDegrees(Math.atan(y / x)) + 180;
+                    alpha =  Math.toDegrees(Math.atan(y / x)) + 180;
                 } else {
-                    return Math.toDegrees(Math.atan(y / x));
+                    alpha =  Math.toDegrees(Math.atan(y / x));
                 }
+                
+                System.out.println("#####");
+                System.out.println("Alpha = " + alpha);
+                
+                return alpha;
             }
         };
         arrow.rotateProperty().bind(arrowAngle);
@@ -334,6 +345,28 @@ public class GravisCurveArrow extends Path implements IGravisConnection
         getElements().add(qct);
     }
     
+    @Override
+    public Object getBean() {
+        return GravisCurveArrow.this;
+    }
+
+    @Override
+    public List<GravisElementHandle> getElementHandles() {
+        return elementHandles;
+    }
+    
+    @Override
+    public Shape getShape() {
+        return this;
+    }
+    
+    @Override
+    public List<Shape> getAllShapes() {
+        List<Shape> shapes = new ArrayList();
+        shapes.add(this);
+        shapes.add(arrow);
+        return shapes;
+    }
     
     @Override
     public IGravisNode getSource() {
@@ -343,26 +376,5 @@ public class GravisCurveArrow extends Path implements IGravisConnection
     @Override
     public IGravisNode getTarget() {
         return target;
-    }
-    
-    @Override
-    public List<Shape> getShapes() {
-        List<Shape> shapes = new ArrayList();
-        shapes.add(this);
-        shapes.add(arrow);
-        return shapes;
-    }
-    
-    @Override
-    public void putOnTop() {
-        EdgeLayer edgeLayer = (EdgeLayer) getParent();
-        edgeLayer.getChildren().remove(this);
-        edgeLayer.getChildren().remove(arrow);
-        edgeLayer.getChildren().add(this);
-        edgeLayer.getChildren().add(arrow);
-    }
-
-    @Override
-    public void setTranslate(double positionX , double positionY) {
     }
 }
