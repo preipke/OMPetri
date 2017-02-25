@@ -11,21 +11,21 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
-import edu.unibi.agbi.gravisfx.graph.entity.GravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.GravisEdgeArrow;
 
 /**
  *
  * @author PR
  */
-public class GraphEdge extends GravisEdge implements IGraphArc
+public class GraphEdgeArrow extends GravisEdgeArrow implements IGraphArc
 {
     private DataArc dataArc;
     
-    public GraphEdge(IGraphNode source, IGraphNode target) {
+    public GraphEdgeArrow(IGraphNode source, IGraphNode target) {
         super(source , target);
     }
     
-    public GraphEdge(IGraphNode source, IGraphNode target, IDataArc dataArc) throws AssignmentDeniedException {
+    public GraphEdgeArrow(IGraphNode source, IGraphNode target, IDataArc dataArc) throws AssignmentDeniedException {
         this(source , target);
         if (!(dataArc instanceof DataArc)) {
             throw new AssignmentDeniedException("Must assign an arc! Action denied.");

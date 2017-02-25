@@ -8,14 +8,16 @@ package edu.unibi.agbi.gnius.business.handler;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.util.Calculator;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.graph.entity.sub.IGravisSubElement;
 
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 
@@ -69,7 +71,7 @@ public class MouseEventHandler
     
     private Rectangle selectionFrame;
     
-    private IGraphArc arcTemp;
+    private GraphEdge arcTemp;
     
     /**
      * Registers several mouse and scroll event handlers.
@@ -128,11 +130,25 @@ public class MouseEventHandler
                     
                     disableMode(isInNodeCreationMode);
                     
-                    if (event.getTarget() instanceof IGraphNode) {
+                    IGravisElement ele;
+                    final IGraphNode node;
+                    
+                    if (event.getTarget() instanceof IGravisSubElement) {
+                        ele = ((IGravisSubElement)event.getTarget()).getParentElement();
+                        if (ele instanceof IGraphNode) {
+                            node = (IGraphNode) ele;
+                        } else {
+                            node = null;
+                        }
+                    } else if (event.getTarget() instanceof IGraphNode) {
+                        node = (IGraphNode)event.getTarget();
+                    } else {
+                        node = null;
+                    }
+                    
+                    if (node != null) {
                         
-                        final IGraphNode node = (IGraphNode)event.getTarget();
-                        
-                        if (!node.isSelected()) {
+                        if (!node.getElementHandles().get(0).isSelected()) {
                             
                             // Clicking not yet selected node
                             // Node has to be set to selected to allow immediate dragging
@@ -141,7 +157,6 @@ public class MouseEventHandler
                                 selectionService.unselectAll();
                                 selectionService.select(node);
                                 selectionService.highlightRelated(node);
-                                editorDetailsController.getDetails(node);
                             }
                         } 
                         
@@ -273,6 +288,7 @@ public class MouseEventHandler
                     
                     try {
                         setEditorMode(isInDraggingMode);
+                        editorDetailsController.hide();
                     } catch (EditorModeLockException ex) {
                         editorToolsController.addToLog(ex.getMessage());
                     }
@@ -283,10 +299,8 @@ public class MouseEventHandler
                         Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
 
                         for (IGraphElement element : selectionService.getSelectedElements()) {
-                            element.setTranslate(
-                                    element.getTranslateX() + pos_t1.getX() - pos_t0.getX() ,
-                                    element.getTranslateY() + pos_t1.getY() - pos_t0.getY()
-                            );
+                            element.translateXProperty().set(element.translateXProperty().get() + pos_t1.getX() - pos_t0.getX());
+                            element.translateYProperty().set(element.translateYProperty().get() + pos_t1.getY() - pos_t0.getY());
                         }
                     } 
                 }
@@ -342,7 +356,7 @@ public class MouseEventHandler
                 } 
                 selectionService.unhighlight(arcTemp.getSource());
                 try {
-                    dataService.remove(arcTemp);
+                    dataService.removeGraphArc(arcTemp);
                 } catch (AssignmentDeniedException ex) {
                     editorToolsController.addToLog(ex.getMessage());
                 }
@@ -357,12 +371,18 @@ public class MouseEventHandler
                      * Selecting elements by clicking.
                      */
                     
-                    if (event.getTarget() instanceof IGraphElement) {
+                    if (event.getTarget() instanceof IGravisElement) {
                         
-                        IGraphElement node = (IGraphElement)event.getTarget();
+                        IGraphElement node;
+                        
+                        if (event.getTarget() instanceof IGravisSubElement) {
+                            node = (IGraphElement)((IGravisSubElement)event.getTarget()).getParentElement();
+                        } else {
+                            node = (IGraphElement)event.getTarget();
+                        }
                         
                         if (event.isControlDown()) {
-                            if (node.isSelected()) {
+                            if (node.getElementHandles().get(0).isSelected()) {
                                 selectionService.unselect(node);
                                 selectionService.unhighlightRelated(node);
                             } else {

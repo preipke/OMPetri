@@ -22,7 +22,8 @@ public class DataTransition extends Transition implements IDataNode
     private String name;
     private String description;
     
-    public DataTransition() {
+    public DataTransition(Transition.Type type) {
+        setTransitionType(type);
         name = super.id;
         description = "";
         shapes = new ArrayList();

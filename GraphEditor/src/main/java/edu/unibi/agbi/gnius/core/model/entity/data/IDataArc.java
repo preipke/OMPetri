@@ -13,4 +13,6 @@ import edu.unibi.agbi.petrinet.entity.IPN_Arc;
  */
 public interface IDataArc extends IDataElement, IPN_Arc
 {
+    @Override public IDataNode getSource();
+    @Override public IDataNode getTarget();
 }

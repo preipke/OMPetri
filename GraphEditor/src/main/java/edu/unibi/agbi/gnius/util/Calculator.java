@@ -44,8 +44,8 @@ public class Calculator
     public Point2D getCenter(List<IGraphNode> nodes) {
         double x = 0, y = 0;
         for (IGravisNode node : nodes) {
-            x += node.getTranslateX();
-            y += node.getTranslateY();
+            x += node.translateXProperty().get();
+            y += node.translateYProperty().get();
         }
         x = x / nodes.size();
         y = y / nodes.size();

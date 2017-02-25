@@ -1,13 +1,25 @@
 
 import edu.unibi.agbi.gnius.Main;
+import edu.unibi.agbi.gnius.core.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
-import javafx.scene.Group;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Pane;
+
+import javafx.application.Platform;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
+
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
 import org.testfx.api.FxAssert;
 import org.testfx.api.FxRobotException;
 import static org.testfx.api.FxAssert.verifyThat;
@@ -25,13 +37,11 @@ import org.testfx.matcher.base.NodeMatchers;
  */
 public class ButtonActionTest extends TestFXBase
 {
-    final String buttonLoad = "#buttonLoad";
-    final String buttonConnect = "#buttonConnect";
-    final String buttonCreate = "#buttonCreate";
-    final String choicesCreate = "#choicesCreate";
+    final String CREATE_NODE_BUTTON = "#buttonCreate";
+    final String CREATE_NODE_CHOICEBOX = "#choicesCreateNode";
     
-    final String buttonAlign = "#buttonAlign";
-    final String choicesAlign = "#choicesAlign";
+    final String EDITOR_PANE_ID = "#editorPane";
+    protected Graph graphDao;
     
     /**
      * Expects the given ID not to exist.
@@ -41,36 +51,65 @@ public class ButtonActionTest extends TestFXBase
         clickOn("#sector9");
     }
     
-    //@Test
-    public void ensureButtonAddsExampleNodes() {
+    @Test
+    public void testCreatingNodes() {
         
-        GraphScene graphScene = find("#graphScene");
+        BorderPane editorPane = find(EDITOR_PANE_ID);
+        GraphScene graphScene = (GraphScene) editorPane.getCenter();
+        graphDao = graphScene.getGraph();
         
-        GraphPane graphPane = graphScene.getGraphPane();
-        Graph graph = graphScene.getGraph();
+        ChoiceBox nodeChoices = find(CREATE_NODE_CHOICEBOX);
+        nodeChoices.getSelectionModel().select(0);
         
-        Group nodeLayer =  graphPane.getTopLayer().getNodeLayer();
-        Group edgeLayer = graphPane.getTopLayer().getEdgeLayer();
-        Group selectionLayer = graphPane.getTopLayer().getLabelLayer();
+        clickOn(CREATE_NODE_BUTTON);
         
-        Assert.assertEquals(1 , graphPane.getChildren().size());
-        Assert.assertEquals(0, graph.getNodes().length);
-        Assert.assertEquals(0, nodeLayer.getChildren().size());
-        Assert.assertEquals(graph.getNodes().length, nodeLayer.getChildren().size());
+        moveTo(400 , 200);
+        clickOn(MouseButton.PRIMARY);
         
-        clickOn(buttonLoad);
+        moveTo(400 , 400);
+        clickOn(MouseButton.PRIMARY);
         
-        Assert.assertTrue(graph.getNodes().length != 0);
-        Assert.assertTrue(nodeLayer.getChildren().size() != 0);
-        Assert.assertEquals(graph.getNodes().length, nodeLayer.getChildren().size());
+        moveTo(600 , 300);
+        clickOn(MouseButton.PRIMARY);
+        
+        press(KeyCode.ESCAPE);
+        release(KeyCode.ESCAPE);
+        
+        Platform.runLater(() -> {
+            nodeChoices.getSelectionModel().select(1);
+        });
+        
+        while (!nodeChoices.getSelectionModel().isSelected(1)) {
+            try {
+                synchronized(this) {
+                    wait(10);
+                }
+                System.out.println("Waiting...");
+            } catch (InterruptedException ex) {
+                System.out.println(ex);
+            }
+        }
+        
+        clickOn(CREATE_NODE_BUTTON);
+        
+        moveTo(500 , 300);
+        clickOn(MouseButton.PRIMARY);
+        release(MouseButton.PRIMARY);
+        
+        press(KeyCode.ESCAPE);
+        release(KeyCode.ESCAPE);
+        
+        Assert.assertEquals(4 , graphDao.getNodes().length);
+//        Assert.assertEquals(3 , petriNetDao.getPlaces().size());
+//        Assert.assertEquals(1 , petriNetDao.getTransitions().size());
+//        Assert.assertEquals(4 , petriNetDao.getPlacesAndTransitions().size());
     }
     
-    
-    public void ensureButtonConnectsNodes() {
-        Assert.assertEquals(this , this);
-        clickOn(buttonConnect);
-        Assert.assertEquals(this , this);
-    }
+//    @Test
+//    public void ensureButtonConnectsNodes() {
+//        
+//        
+//    }
     
     /*
     @Test

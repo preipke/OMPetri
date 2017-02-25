@@ -11,24 +11,24 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
-import edu.unibi.agbi.gravisfx.graph.entity.GravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.GravisCurveArrow;
 
 /**
  *
  * @author PR
  */
-public class GraphEdge extends GravisEdge implements IGraphArc
+public class GraphCurveArrow extends GravisCurveArrow implements IGraphArc
 {
     private DataArc dataArc;
     
-    public GraphEdge(IGraphNode source, IGraphNode target) {
+    public GraphCurveArrow(IGraphNode source, IGraphNode target) {
         super(source , target);
     }
-    
-    public GraphEdge(IGraphNode source, IGraphNode target, IDataArc dataArc) throws AssignmentDeniedException {
+
+    public GraphCurveArrow(IGraphNode source , IGraphNode target , IDataArc dataArc) throws AssignmentDeniedException {
         this(source , target);
         if (!(dataArc instanceof DataArc)) {
-            throw new AssignmentDeniedException("Must assign an arc! Action denied.");
+            throw new AssignmentDeniedException("Must assign DataArc to GraphArc! Action denied.");
         }
         this.dataArc = (DataArc) dataArc;
     }
@@ -36,9 +36,9 @@ public class GraphEdge extends GravisEdge implements IGraphArc
     @Override
     public void setRelatedElement(IDataArc dataArc) throws AssignmentDeniedException {
         if (this.dataArc != null) {
-            throw new AssignmentDeniedException("Related arc has already been assigned! Action denied.");
+            throw new AssignmentDeniedException("Related data object has already been assigned! Action denied.");
         } else if (!(dataArc instanceof DataArc)) {
-            throw new AssignmentDeniedException("Must assign an arc! Action denied.");
+            throw new AssignmentDeniedException("Must assign DataArc to GraphArc! Action denied.");
         }
         this.dataArc = (DataArc) dataArc;
     }

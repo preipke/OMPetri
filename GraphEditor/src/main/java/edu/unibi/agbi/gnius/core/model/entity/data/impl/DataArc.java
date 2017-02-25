@@ -21,13 +21,24 @@ public class DataArc extends Arc implements IDataArc
 {
     private final List<IGraphElement> shapes;
     
-    public DataArc(IDataNode source, IDataNode target) throws IllegalAssignmentException {
+    public DataArc(IDataNode source, IDataNode target, Arc.Type type) throws IllegalAssignmentException {
         super(source, target);
+        setArcType(type);
         shapes = new ArrayList();
     }
 
     @Override
     public List<IGraphElement> getShapes() {
         return shapes;
+    }
+
+    @Override
+    public IDataNode getSource() {
+        return (IDataNode) this.source;
+    }
+
+    @Override
+    public IDataNode getTarget() {
+        return (IDataNode) this.target;
     }
 }

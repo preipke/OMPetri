@@ -7,20 +7,16 @@ package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisEdge;
-import javafx.beans.property.DoubleProperty;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
 
 /**
  *
  * @author PR
  */
-public interface IGraphArc extends IGraphElement , IGravisEdge
+public interface IGraphArc extends IGraphElement , IGravisConnection
 {
     public IDataArc getRelatedDataArc();
     public void setRelatedElement(IDataArc dataNode) throws AssignmentDeniedException;
-    public void setTarget(IGraphNode target) throws AssignmentDeniedException;
-    public DoubleProperty endXProperty();
-    public DoubleProperty endYProperty();
     @Override public IGraphNode getSource();
     @Override public IGraphNode getTarget();
 }

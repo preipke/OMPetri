@@ -6,14 +6,11 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.dao.SelectionDao;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,10 +54,14 @@ public class SelectionService
      */
     public void unselectAll() {
         for (IGraphElement selected : selectionDao.getSelectedElements()) {
-            selected.setSelected(false);
+            selected.getElementHandles().forEach(ele -> {
+                ele.setSelected(false);
+            });
         }
         for (IGraphElement hightlighted : selectionDao.getHightlightedElements()) {
-            hightlighted.setHighlighted(false);
+            hightlighted.getElementHandles().forEach(ele -> {
+                ele.setHighlighted(false);
+            });
         }
         selectionDao.clear();
     }
@@ -70,7 +71,9 @@ public class SelectionService
      * @param element 
      */
     public void highlight(IGraphElement element) {
-        element.setHighlighted(true);
+        element.getElementHandles().forEach(ele -> {
+            ele.setHighlighted(true);
+        });
         selectionDao.addHighlight(element);
     }
     
@@ -81,8 +84,8 @@ public class SelectionService
     public void highlightRelated(IGraphElement element) {
         IDataElement dataElement = element.getRelatedDataElement();
         for (IGraphElement shape : dataElement.getShapes()) {
-            if (!shape.isSelected()) {
-                if (!shape.isHighlighted()) {
+            if (!shape.getElementHandles().get(0).isSelected()) {
+                if (!shape.getElementHandles().get(0).isHighlighted()) {
                     highlight(shape);
                 }
             }
@@ -95,7 +98,9 @@ public class SelectionService
      * @return 
      */
     public boolean unhighlight(IGraphElement element) {
-        element.setHighlighted(false);
+        element.getElementHandles().forEach(ele -> {
+            ele.setHighlighted(false);
+        });
         return selectionDao.removeHighlight(element);
     }
     
@@ -110,7 +115,7 @@ public class SelectionService
         
         boolean isStillSelected = false;
         for (IGraphElement relatedShape : dataElement.getShapes()) {
-            if (relatedShape.isSelected()) {
+            if (relatedShape.getElementHandles().get(0).isSelected()) {
                 isStillSelected = true;
                 break;
             }
@@ -127,15 +132,21 @@ public class SelectionService
      * @param element 
      */
     public void select(IGraphElement element) {
-        if (element.isHighlighted()) {
+        if (element.getElementHandles().get(0).isHighlighted()) {
             selectionDao.removeHighlight(element);
-            element.setHighlighted(false);
+            element.getElementHandles().forEach(ele -> {
+                ele.setHighlighted(false);
+            });
         }
-        if (!element.isSelected()) {
+        if (!element.getElementHandles().get(0).isSelected()) {
             selectionDao.addSelection(element);
-            element.setSelected(true);
+            element.getElementHandles().forEach(ele -> {
+                ele.setSelected(true);
+            });
         }
-        element.putOnTop();
+        element.getElementHandles().forEach(ele -> {
+            ele.putOnTop();
+        });
     }
     
     /**
@@ -155,7 +166,9 @@ public class SelectionService
      * @return 
      */
     public boolean unselect(IGraphElement arc) {
-        arc.setSelected(false);
+        arc.getElementHandles().forEach(ele -> {
+            ele.setSelected(false);
+        });
         return selectionDao.removeSelection(arc);
     }
     

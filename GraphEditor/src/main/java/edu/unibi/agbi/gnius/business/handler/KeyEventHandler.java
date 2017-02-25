@@ -51,7 +51,7 @@ public class KeyEventHandler
                 
                 Platform.runLater(() -> {
                     try {
-                        dataService.removeSelected();
+                        dataService.removeSelectedShapes();
                     } catch (AssignmentDeniedException ex) {
                         editorToolsController.addToLog(ex.getMessage());
                     }

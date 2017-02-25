@@ -8,19 +8,19 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-        <Menu mnemonicParsing="false" text="Edit"
-				xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
-				fx:id="editMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.EditMenuController">
-          <items>
-            <MenuItem mnemonicParsing="false" text="Undo" />
-            <MenuItem mnemonicParsing="false" text="Redo" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Cut" />
-            <MenuItem mnemonicParsing="false" text="Copy" />
-            <MenuItem mnemonicParsing="false" text="Paste" />
-            <MenuItem mnemonicParsing="false" text="Delete" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Select All" />
-            <MenuItem mnemonicParsing="false" text="Unselect All" />
-          </items>
-        </Menu>
+<Menu mnemonicParsing="false" text="Edit"
+              xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8" 
+              fx:id="editMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.EditMenuController">
+    <items>
+        <MenuItem mnemonicParsing="false" text="Undo" />
+        <MenuItem mnemonicParsing="false" text="Redo" />
+        <SeparatorMenuItem mnemonicParsing="false" />
+        <MenuItem mnemonicParsing="false" text="Cut" />
+        <MenuItem mnemonicParsing="false" text="Copy" />
+        <MenuItem mnemonicParsing="false" text="Paste" />
+        <MenuItem mnemonicParsing="false" text="Delete" />
+        <SeparatorMenuItem mnemonicParsing="false" />
+        <MenuItem mnemonicParsing="false" text="Select All" />
+        <MenuItem mnemonicParsing="false" text="Unselect All" />
+    </items>
+</Menu>

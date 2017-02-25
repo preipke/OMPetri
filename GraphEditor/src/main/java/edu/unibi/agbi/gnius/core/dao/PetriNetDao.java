@@ -16,4 +16,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class PetriNetDao extends PetriNet
 {
+    public PetriNetDao() {
+        super();
+        this.setName("Untitled");
+        this.setAuthor(System.getProperty("user.name"));
+        this.setDescription("New petri net.");
+    }
 }

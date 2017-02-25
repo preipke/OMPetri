@@ -22,7 +22,8 @@ public class DataPlace extends Place implements IDataNode
     private String name;
     private String description;
     
-    public DataPlace() {
+    public DataPlace(Place.Type type) {
+        setPlaceType(type);
         name = super.id;
         description = "";
         shapes = new ArrayList();

@@ -125,11 +125,11 @@ public class EditorDetailsController implements Initializable
                         choicesColour.add(new ColourChoice(color));
                     }
                 }
-                if (weight != null) {
+//                if (weight != null) {
                     weight = weights.get(choicesColour.get(0).getColour());
-                } else {
-                    weight = weights.get(null);
-                }
+//                } else {
+//                    weight = weights.get(null);
+//                }
                 propertyWeight.setText(weight.getValue());
                 propertySource.setText(((IDataNode)arc.getSource()).getName());
                 propertyTarget.setText(((IDataNode)arc.getTarget()).getName());
@@ -161,11 +161,11 @@ public class EditorDetailsController implements Initializable
                         choicesColour.add(new ColourChoice(color));
                     }
                 }
-                if (token != null) {
+//                if (token != null) {
                     token = tokens.get(choicesColour.get(0).getColour());
-                } else {
-                    token = tokens.get(null);
-                }
+//                } else {
+//                    token = tokens.get(null);
+//                }
                 propertyToken.setText(Double.toString(token.getValueStart()));
                 propertyTokenMin.setText(Double.toString(token.getValueMin()));
                 propertyTokenMax.setText(Double.toString(token.getValueMax()));
@@ -210,7 +210,7 @@ public class EditorDetailsController implements Initializable
     }
     
     /**
-     * Update properties. Stores the values from the textfields within the
+     * Updates properties. Stores the values from the textfields within the
      * according entity.
      */
     public void update() {
@@ -220,16 +220,25 @@ public class EditorDetailsController implements Initializable
         
         PN_Element.Type elementType = activeDataNode.getElementType();
         
+        ColourChoice colourChoice;
+        Colour colour;
+        
         switch (elementType) {
                 
             case ARC:
                 
+                colourChoice = (ColourChoice)propertyColorChoices.getSelectionModel().getSelectedItem();
+                colour = colourChoice.getColour();
+                
                 DataArc arc = (DataArc) activeDataNode;
                 
                 ArcTypeChoice arcTypeChoice = (ArcTypeChoice) propertySubtypeChoices.getSelectionModel().getSelectedItem();
-                arc.setArcType(arcTypeChoice.getType());
+                DataArc.Type arcType = arcTypeChoice.getType();
                 
-                Weight weight = new Weight(null);
+                arc.setArcType(arcType);
+                dataService.setArcTypeDefault(arcType);
+                
+                Weight weight = new Weight(colour);
                 if (!propertyWeight.getText().isEmpty()) {
                     weight.setValue(propertyWeight.getText());
                 }
@@ -239,12 +248,18 @@ public class EditorDetailsController implements Initializable
             
             case PLACE:
                 
+                colourChoice = (ColourChoice)propertyColorChoices.getSelectionModel().getSelectedItem();
+                colour = colourChoice.getColour();
+                
                 DataPlace place = (DataPlace) activeDataNode;
                 
                 PlaceTypeChoice placeTypeChoice = (PlaceTypeChoice) propertySubtypeChoices.getSelectionModel().getSelectedItem();
-                place.setPlaceType(placeTypeChoice.getType());
+                DataPlace.Type placeType = placeTypeChoice.getType();
                 
-                Token token = new Token(null);
+                place.setPlaceType(placeType);
+                dataService.setPlaceTypeDefault(placeType);
+                
+                Token token = new Token(colour);
                 if (!propertyToken.getText().isEmpty()) {
                     try {
                         token.setValueStart(Double.parseDouble(propertyToken.getText()));
@@ -282,7 +297,10 @@ public class EditorDetailsController implements Initializable
                 DataTransition transition = (DataTransition) activeDataNode;
                 
                 TransitionTypeChoice transitionTypeChoice = (TransitionTypeChoice) propertySubtypeChoices.getSelectionModel().getSelectedItem();
-                transition.setTransitionType(transitionTypeChoice.getType());
+                DataTransition.Type transitionType = transitionTypeChoice.getType();
+                
+                transition.setTransitionType(transitionType);
+                dataService.setTransitionTypeDefault(transitionType);
                 
                 Function function = new Function();
                 if (!propertyFunction.getText().isEmpty()) {
@@ -320,11 +338,6 @@ public class EditorDetailsController implements Initializable
      */
     public void hide() {
         clear();
-        detailsBox.setVisible(false);
-    }
-
-    @Override
-    public void initialize(URL location , ResourceBundle resources) {
         detailsBox.setVisible(false);
     }
 
@@ -398,5 +411,10 @@ public class EditorDetailsController implements Initializable
         public String toString() {
             return type.toString();
         }
+    }
+
+    @Override
+    public void initialize(URL location , ResourceBundle resources) {
+        detailsBox.setVisible(false);
     }
 }

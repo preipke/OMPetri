@@ -26,6 +26,7 @@
             <properties>
                 <exec.args>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath edu.unibi.agbi.gnius.Main</exec.args>
                 <jpda.listen>true</jpda.listen>
+                <headless>true</headless>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -44,14 +45,16 @@
             </properties>
         </action>
         <action>
-            <actionName>build</actionName>
+            <actionName>test.single</actionName>
             <packagings>
                 <packaging>*</packaging>
             </packagings>
             <goals>
-                <goal>install</goal>
+                <goal>test-compile</goal>
+                <goal>surefire:test</goal>
             </goals>
             <properties>
+                <test>${packageClassName}</test>
                 <headless>true</headless>
             </properties>
         </action>
@@ -68,7 +71,45 @@
             </properties>
         </action>
         <action>
-            <actionName>test.single</actionName>
+            <actionName>build</actionName>
+            <packagings>
+                <packaging>*</packaging>
+            </packagings>
+            <goals>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <headless>true</headless>
+            </properties>
+        </action>
+        <action>
+            <actionName>rebuild</actionName>
+            <packagings>
+                <packaging>*</packaging>
+            </packagings>
+            <goals>
+                <goal>clean</goal>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <headless>true</headless>
+            </properties>
+        </action>
+        <action>
+            <actionName>build-with-dependencies</actionName>
+            <reactor>also-make</reactor>
+            <packagings>
+                <packaging>*</packaging>
+            </packagings>
+            <goals>
+                <goal>install</goal>
+            </goals>
+            <properties>
+                <headless>true</headless>
+            </properties>
+        </action>
+        <action>
+            <actionName>debug.test.single</actionName>
             <packagings>
                 <packaging>*</packaging>
             </packagings>
@@ -78,6 +119,9 @@
             </goals>
             <properties>
                 <test>${packageClassName}</test>
+                <forkMode>once</forkMode>
+                <maven.surefire.debug>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</maven.surefire.debug>
+                <jpda.listen>true</jpda.listen>
                 <headless>true</headless>
             </properties>
         </action>

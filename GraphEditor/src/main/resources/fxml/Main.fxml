@@ -9,42 +9,44 @@
 <?import javafx.scene.text.*?>
 
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-  <children>
-    <MenuBar id="menuBar" VBox.vgrow="NEVER">
-		<menus>
-			<fx:include fx:id="fileMenu" source="menu/FileMenu.fxml" />
-			<fx:include fx:id="editMenu" source="menu/EditMenu.fxml" />
-			<fx:include fx:id="helpMenu" source="menu/HelpMenu.fxml" />
-		</menus>
-	</MenuBar>
-      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
-        <tabs>
-          <fx:include fx:id="presentationTab" source="tab/PresentationTab.fxml" />
-          <fx:include fx:id="nodeListTab" source="tab/NodeListTab.fxml" />
-        </tabs>
-      </TabPane>
-    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
-      <children>
-        <Label maxWidth="-1.0" text="Left status" HBox.hgrow="ALWAYS">
-          <font>
-            <Font size="11.0" fx:id="x3" />
-          </font>
-          <textFill>
-            <Color blue="0.625" green="0.625" red="0.625" fx:id="x4" />
-          </textFill>
-               <HBox.margin>
-                  <Insets />
-               </HBox.margin>
-        </Label>
-        <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
-        <Label font="$x3" maxWidth="-1.0" text="Right status" textFill="$x4" HBox.hgrow="NEVER" />
-      </children>
-         <VBox.margin>
-            <Insets />
-         </VBox.margin>
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-    </HBox>
-  </children>
+    <children>
+        <MenuBar id="menuBar" VBox.vgrow="NEVER">
+            <menus>
+                <fx:include fx:id="fileMenu" source="menu/FileMenu.fxml" />
+                <fx:include fx:id="editMenu" source="menu/EditMenu.fxml" />
+                <fx:include fx:id="simulationMenu" source="menu/SimulationMenu.fxml" />
+                <fx:include fx:id="helpMenu" source="menu/HelpMenu.fxml" />
+            </menus>
+        </MenuBar>
+        <fx:include fx:id="simControlsContainer" source="simulation/SimulationControls.fxml" />
+        <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+            <tabs>
+                <fx:include fx:id="presentationTab" source="tab/PresentationTab.fxml" />
+                <fx:include fx:id="nodeListTab" source="tab/NodeListTab.fxml" />
+            </tabs>
+        </TabPane>
+        <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+            <children>
+                <Label maxWidth="-1.0" text="Left status" HBox.hgrow="ALWAYS">
+                    <font>
+                        <Font size="11.0" fx:id="x3" />
+                    </font>
+                    <textFill>
+                        <Color blue="0.625" green="0.625" red="0.625" fx:id="x4" />
+                    </textFill>
+                    <HBox.margin>
+                        <Insets />
+                    </HBox.margin>
+                </Label>
+                <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
+                <Label font="$x3" maxWidth="-1.0" text="Right status" textFill="$x4" HBox.hgrow="NEVER" />
+            </children>
+            <VBox.margin>
+                <Insets />
+            </VBox.margin>
+            <padding>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+            </padding>
+        </HBox>
+    </children>
 </VBox>
