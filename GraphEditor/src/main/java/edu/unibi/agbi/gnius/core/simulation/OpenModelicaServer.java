@@ -75,11 +75,13 @@ public class OpenModelicaServer
             
             try {
                 isTerminated = false;
+                isRunning = true;
                 serverSocket = new java.net.ServerSocket(SERVER_PORT);
                 synchronized (this) {
                     this.notify();
                 }
                 while (true) {
+                    System.out.println("Waiting for client...");
                     client = serverSocket.accept();
                     System.out.println("Client connected!");
                     clientInput = new DataInputStream(client.getInputStream());
@@ -133,6 +135,8 @@ public class OpenModelicaServer
      */
     private void ReadData(DataInputStream inputStream) throws IOException {
         
+        System.out.println("In ReadData...");
+        
         ArrayList<Object> values;
         String[] sValues;
         String names;
@@ -142,8 +146,14 @@ public class OpenModelicaServer
         int lengthMax = 2048;
         byte[] buffer = new byte[lengthMax];
         
+        inputStream.readFully(buffer, 0, 1);
+        id = (int) buffer[0];
+        System.out.println("Server: id: " + id);
+        
 //        inputStream.readFully(buffer , 0 , 1); // blockiert bis Nachricht empfangen
         inputStream.readFully(buffer , 0 , 4);
+        
+        System.out.println("#1...");
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -152,8 +162,15 @@ public class OpenModelicaServer
         if (lengthMax < length) {
             buffer = new byte[length];
         }
+        
+        
+        System.out.println("length: " + length);
+        
+        System.out.println(inputStream.available());
 
-        inputStream.readFully(buffer , 0 , length); // blocks until msg received
+        inputStream.readFully(buffer , 0 , length-1); // blocks until msg received
+        
+        System.out.println("#2...");
         
         byteBuffer = ByteBuffer.wrap(buffer , 0 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -187,11 +204,15 @@ public class OpenModelicaServer
         }
 
         try {
+            int count = 3;
             while (isRunning) {
                 
                 values = new ArrayList();
 
                 inputStream.readFully(buffer , 0 , 5);
+        
+                System.out.println("#" + count++);
+                
                 id = (int)buffer[0];
 
                 byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(buffer , 1 , buffer.length - 2));
@@ -243,7 +264,8 @@ public class OpenModelicaServer
                     System.out.println(e);
                 }
             }
-        } catch (SocketException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             // TODO
         } finally {
             StopThread();
@@ -261,7 +283,8 @@ public class OpenModelicaServer
         for (IPN_Arc arc : arcs) {
             
             // token flow
-            value = (Double)values.get(arc.getExportIndex());
+            System.out.println("ExportIndex: " + arc.getExportIndex());
+            value = (Integer)values.get(arc.getExportIndex());
             resultsService.addResult(arc.getId(), value);
 
             // gesamt

@@ -92,7 +92,7 @@ public class OpenModelicaExecuter
             fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
             OpenModelicaExport.exportMO(petriNetDao , fileMo);
             OpenModelicaExport.exportMOS(petriNetDao , fileMos , fileMo , dirWork);
-            fileMos = new File("C:/Users/PR/AppData/Local/Temp/GraVisFX/data/example/simulation.mos");
+//            fileMos = new File("C:/Users/PR/AppData/Local/Temp/GraVisFX/data/example/simulation.mos");
         } catch (IOException ex) {
             // TODO
             System.out.println("Data export failed!");
@@ -191,13 +191,7 @@ public class OpenModelicaExecuter
          */
         boolean noEmmit = true;
 
-        String override = "";
-
-        if (OS_Validator.isOsWindows()) {
-            override += "\"";
-        }
-        
-        override += "-override=outputFormat=ia,stopTime=" + stopTime + ",stepSize=" + stopTime / simIntervals + ",tolerance=0.0001";
+        String override = "-override=outputFormat=ia,stopTime=" + stopTime + ",stepSize=" + stopTime / simIntervals + ",tolerance=0.0001";
         
 //                    if (flags.isParameterChanged()) {
 //
@@ -246,15 +240,20 @@ public class OpenModelicaExecuter
 //                    }
             
         pb = new ProcessBuilder();
+//        noEmmit = false;
         if (noEmmit) {
-            pb.command(pathSimulation , "-s=" + simController.getIntegrator() , override , "-port=11111" , "-noEventEmit" , "-lv=LOG_STATS" , "-d=initialization");
+            pb.command(pathSimulation , "-s=" + simController.getIntegrator() , override , "-port=11111" , "-noEventEmit" , "-lv=LOG_STATS");
         } else {
-            pb.command(pathSimulation , "-s=" + simController.getIntegrator() , override , "-port=11111" , "-lv=LOG_STATS");
+            pb.command(pathSimulation , override , "-port=11111" );
         }
         pb.directory(dirWork);
         pb.redirectOutput();
 
         Map<String , String> env = pb.environment();
+        
+        pathCompiler = pathCompiler.substring(0 , pathCompiler.lastIndexOf(File.separator));
+        env.put("PATH" , env.get("PATH") + ";" + pathCompiler);
+        
         pathCompiler = pathCompiler.substring(0 , pathCompiler.lastIndexOf(File.separator));
         env.put("PATH" , env.get("PATH") + ";" + pathCompiler);
 
