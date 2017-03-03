@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.simulation;
 
-import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
-import edu.unibi.agbi.gnius.core.service.ResultsService;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.util.OS_Validator;
 import edu.unibi.agbi.petrinet.entity.IPN_Arc;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
@@ -33,8 +33,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class OpenModelicaServer
 {
-    @Autowired private ResultsService resultsService;
-    @Autowired private PetriNetDao petriNetDao;
+    @Autowired private SimulationService resultsService;
+    @Autowired private DataDao petriNetDao;
     
     private final int SIZE_OF_INT; // size of modelica int;
     private final int SERVER_PORT = 11111;

@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 
 import edu.unibi.agbi.petrinet.entity.PN_Element;
@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EditorDetailsController implements Initializable
 {
-    @Autowired private DataService dataService;
+    @Autowired private DataGraphService dataService;
     @Autowired private SelectionService selectionService;
     
     @Autowired private EditorToolsController editorToolsController;

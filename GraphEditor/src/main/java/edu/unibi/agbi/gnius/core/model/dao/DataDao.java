@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.dao;
+package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.petrinet.model.PetriNet;
 
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Repository;
  * @author PR
  */
 @Repository
-public class PetriNetDao extends PetriNet
+public class DataDao extends PetriNet
 {
-    public PetriNetDao() {
+    public DataDao() {
         super();
         this.setName("Untitled");
         this.setAuthor(System.getProperty("user.name"));

@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.simulation;
 
 import edu.unibi.agbi.gnius.business.controller.simulation.SimulationController;
-import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.util.OS_Validator;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
 import java.io.BufferedReader;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OpenModelicaExecuter
 {
-    @Autowired private PetriNetDao petriNetDao;
+    @Autowired private DataDao petriNetDao;
     @Autowired private OpenModelicaServer openModelicaServer;
     @Autowired private SimulationController simController;
 

@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.core.dao.GraphDao;
-import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
@@ -45,7 +45,7 @@ import org.springframework.stereotype.Service;
  * @author PR
  */
 @Service
-public class DataService
+public class DataGraphService
 {
     @Autowired private Calculator calculator;
     @Autowired private SelectionService selectionService;
@@ -55,10 +55,10 @@ public class DataService
     private DataTransition.Type defaultTransitionType = DataTransition.Type.DISCRETE;
     
     private final GraphDao graphDao;
-    private final PetriNetDao petriNetDao;
+    private final DataDao petriNetDao;
     
     @Autowired
-    public DataService(GraphDao graphDao, PetriNetDao petriNetDao) {
+    public DataGraphService(GraphDao graphDao, DataDao petriNetDao) {
         this.graphDao = graphDao;
         this.petriNetDao = petriNetDao;
     }
@@ -301,7 +301,7 @@ public class DataService
                 } else {
                     node = copy(nodes.get(i));
                 }
-                final String styleClass = node.getElementHandles().get(0).getActiveStyleClass();
+                final String styleClass = nodes.get(i).getElementHandles().get(0).getActiveStyleClass();
                 node.getElementHandles().forEach(ele -> {
                     ele.setActiveStyleClass(styleClass);
                 });

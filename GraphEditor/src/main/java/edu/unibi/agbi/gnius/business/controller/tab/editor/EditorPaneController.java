@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
-import edu.unibi.agbi.gnius.core.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.business.handler.KeyEventHandler;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;

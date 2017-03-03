@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.util;
 
-import edu.unibi.agbi.gnius.core.dao.GraphDao;
-import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import javafx.scene.layout.Pane;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class TestHelper extends Pane
 {
     @Autowired GraphDao graphDao;
-    @Autowired PetriNetDao petriNetDao;
+    @Autowired DataDao petriNetDao;
     
     
 }

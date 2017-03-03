@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.util;
 
-import edu.unibi.agbi.gnius.core.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 

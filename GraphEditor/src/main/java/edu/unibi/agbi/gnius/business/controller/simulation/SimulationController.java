@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.business.controller.simulation;
 
-import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
 import edu.unibi.agbi.gnius.core.simulation.OpenModelicaExecuter;
 import java.net.URL;
 import java.util.ResourceBundle;

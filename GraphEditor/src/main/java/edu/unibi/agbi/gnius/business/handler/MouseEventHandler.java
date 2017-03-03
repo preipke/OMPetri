@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
-import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
@@ -44,7 +44,7 @@ import org.springframework.stereotype.Component;
 public class MouseEventHandler
 {
     @Autowired private SelectionService selectionService;
-    @Autowired private DataService dataService;
+    @Autowired private DataGraphService dataService;
     
     @Autowired private EditorToolsController editorToolsController;
     @Autowired private EditorDetailsController editorDetailsController;

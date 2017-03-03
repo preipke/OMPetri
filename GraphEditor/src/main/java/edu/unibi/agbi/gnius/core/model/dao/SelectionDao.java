@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.dao;
+package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 

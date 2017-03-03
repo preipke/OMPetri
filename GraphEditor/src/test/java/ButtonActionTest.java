@@ -1,7 +1,7 @@
 
 import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gnius.core.dao.GraphDao;
-import edu.unibi.agbi.gnius.core.dao.PetriNetDao;
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 

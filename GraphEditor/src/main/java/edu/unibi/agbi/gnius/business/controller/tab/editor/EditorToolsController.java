@@ -6,12 +6,12 @@
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
 import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
-import edu.unibi.agbi.gnius.core.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 
 import edu.unibi.agbi.gravisfx.presentation.layout.RandomLayout;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EditorToolsController implements Initializable
 {
-    @Autowired private DataService dataService;
+    @Autowired private DataGraphService dataService;
     
     @Autowired private MouseEventHandler mouseEventHandler;
     
