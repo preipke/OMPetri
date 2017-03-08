@@ -108,6 +108,8 @@ public class MouseEventHandler
          */
         graphPane.setOnMousePressed(( event ) -> {
             
+            editorDetailsController.update();
+            
             isPrimaryButtonDown = false;
             isSecondaryButtonDown = false;
             

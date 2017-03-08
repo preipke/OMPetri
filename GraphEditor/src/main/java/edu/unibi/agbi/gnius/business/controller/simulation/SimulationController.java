@@ -5,7 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.controller.simulation;
 
-import edu.unibi.agbi.gnius.core.simulation.OpenModelicaExecuter;
+import edu.unibi.agbi.gnius.core.service.SimulationService;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SimulationController implements Initializable
 {
-    @Autowired private OpenModelicaExecuter openModelicaExecuter;
+    @Autowired private SimulationService simulationService;
     
     @FXML private Button simControlsStart;
     @FXML private Button simControlsStop;
@@ -42,15 +43,34 @@ public class SimulationController implements Initializable
     @FXML
     public void StartSimulation() {
         
+        try {
+            simulationService.setSimulationStopTime(getStopTime());
+        } catch (NumberFormatException ex) {
+            System.out.println("The value given for 'Stop Time' is not a number!");
+            return;
+        }
+        
+        try {
+            simulationService.setSimulationIntervals(getIntervals());
+        } catch (NumberFormatException ex) {
+            System.out.println("The value given for 'Intervals' is not a natural number!");
+        }
+        
+        simulationService.setSimulationIntegrator(getIntegrator());
+        
         simControlsStart.setDisable(true);
         simMenuControlsStart.setDisable(true);
         
-        boolean success = openModelicaExecuter.simulate();
-        
-        if (success) {
+        try {
+            simulationService.simulate();
+            
             simControlsStop.setDisable(false);
             simMenuControlsStop.setDisable(false);
-        } else {
+            
+        } catch (SimulationServiceException ex) {
+            
+            System.out.println(ex);
+            
             simControlsStart.setDisable(false);
             simMenuControlsStart.setDisable(false);
         }
@@ -62,7 +82,7 @@ public class SimulationController implements Initializable
         simControlsStop.setDisable(true);
         simMenuControlsStop.setDisable(true);
         
-        openModelicaExecuter.terminate();
+//        simulationService.terminate();
         
         simControlsStart.setDisable(false);
         simMenuControlsStart.setDisable(false);

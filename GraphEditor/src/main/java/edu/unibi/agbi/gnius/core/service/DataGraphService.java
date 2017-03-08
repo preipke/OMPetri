@@ -51,8 +51,8 @@ public class DataGraphService
     @Autowired private SelectionService selectionService;
     
     private DataArc.Type defaultArcType = DataArc.Type.READ;
-    private DataPlace.Type defaultPlaceType = DataPlace.Type.DISCRETE;
-    private DataTransition.Type defaultTransitionType = DataTransition.Type.DISCRETE;
+    private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
+    private DataTransition.Type defaultTransitionType = DataTransition.Type.CONTINUOUS;
     
     private final GraphDao graphDao;
     private final DataDao petriNetDao;

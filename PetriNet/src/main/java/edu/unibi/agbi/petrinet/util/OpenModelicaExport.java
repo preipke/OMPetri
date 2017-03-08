@@ -6,6 +6,7 @@
 package edu.unibi.agbi.petrinet.util;
 
 import edu.unibi.agbi.petrinet.entity.IPN_Arc;
+import edu.unibi.agbi.petrinet.entity.IPN_Element;
 import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.abstr.Place;
 import edu.unibi.agbi.petrinet.entity.abstr.Transition;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import java.util.Collection;
 
@@ -436,6 +438,7 @@ public class OpenModelicaExport
      * @param petriNet
      * @param fileMOS
      * @param fileMO
+     * @param workDirectory
      * @return
      * @throws IOException 
      */
@@ -443,45 +446,71 @@ public class OpenModelicaExport
         
         String filter = "variableFilter=\"";
         String tmp;
-        int index, exportIndex; // store index to recover data from server input
+        int index;
         
-        exportIndex = 0;
+        // Removes previous filter names
+        for (IPN_Element ele : petriNet.getArcs()) {
+            ele.setFilterNames(new ArrayList());
+        }
+        for (IPN_Element ele : petriNet.getPlaces()) {
+            ele.setFilterNames(new ArrayList());
+        }
+        for (IPN_Element ele : petriNet.getTransitions()) {
+            ele.setFilterNames(new ArrayList());
+        }
+        
         for (IPN_Node place : petriNet.getPlaces()) {
             
-            filter += "'" + place.getId() + "'\\\\.t|";
-            place.setExportIndex(exportIndex);
-            exportIndex++;
+            tmp = "'" + place.getId() + "'.t";
+            filter += tmp + "|";
+            place.addFilterName(tmp);
             
             index = 1;
             for (IPN_Arc arc : place.getArcsOut()) {
-                tmp = "'" + arc.getSource().getId() + "'\\\\.tokenFlow\\\\.outflow\\\\[" + index + "\\\\]";
+                
+                tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
                 filter += tmp + "|";
-                filter += "der\\\\(" + tmp + "\\\\)|";
-                arc.setExportIndex(exportIndex);
-                exportIndex++;
+                arc.addFilterName(tmp);
+
+                tmp = "der(" + tmp + ")";
+                filter += tmp + "|";
+                arc.addFilterName(tmp);
+                
                 index++;
             }
             
             index = 1;
             for (IPN_Arc arc : place.getArcsIn()) {
-                tmp = "'" + arc.getTarget().getId() + "'\\\\.tokenFlow\\\\.inflow\\\\[" + index + "\\\\]";
+                
+                tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
                 filter += tmp + "|";
-                filter += "der\\\\(" + tmp + "\\\\)|";
-                arc.setExportIndex(exportIndex);
-                exportIndex++;
+                arc.addFilterName(tmp);
+                
+                tmp = "der(" + tmp + ")";
+                filter += tmp + "|";
+                arc.addFilterName(tmp);
+                
                 index++;
             }
         }
 
         for (IPN_Node transition : petriNet.getTransitions()) {
             
-            filter += "'" + transition.getId() + "'\\\\.fire|";
-            filter += "'" + transition.getId() + "'\\\\.actualSpeed|";
-            transition.setExportIndex(exportIndex);
-            exportIndex++;
+            tmp = "'" + transition.getId() + "'.fire|";
+            filter += tmp + "|";
+            transition.addFilterName(tmp);
+            
+            tmp = "'" + transition.getId() + "'.actualSpeed|";
+            filter += tmp + "|";
+            transition.addFilterName(tmp);
         }
         
         filter = filter.substring(0 , filter.length() - 1);
+        filter = filter.replace(".", "\\\\."); // might cause problems when custom names are used
+        filter = filter.replace("[", "\\\\[");
+        filter = filter.replace("]", "\\\\]");
+        filter = filter.replace("(", "\\\\(");
+        filter = filter.replace(")", "\\\\)");
         filter += "\"";
         
         FileWriter fstream = new FileWriter(fileMOS);

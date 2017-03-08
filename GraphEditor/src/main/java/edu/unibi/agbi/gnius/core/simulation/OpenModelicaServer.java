@@ -5,24 +5,16 @@
  */
 package edu.unibi.agbi.gnius.core.simulation;
 
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.util.OS_Validator;
-import edu.unibi.agbi.petrinet.entity.IPN_Arc;
-import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,19 +25,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class OpenModelicaServer
 {
-    @Autowired private SimulationService resultsService;
-    @Autowired private DataDao petriNetDao;
+    @Autowired private SimulationService simulationService;
     
     private final int SIZE_OF_INT; // size of modelica int;
-    private final int SERVER_PORT = 11111;
     
     private boolean isTerminated = false;
-    private boolean isRunning = true;
+    private boolean isRunning = false;
     
     private ServerSocket serverSocket;
-    
-    private ArrayList<String> nodeNames;
-    private HashMap<String , Integer> nodeIndicesForNames;
+    private DataInputStream inputStream;
 
     public OpenModelicaServer() {
         if (OS_Validator.isOsWindows()) {
@@ -57,35 +45,45 @@ public class OpenModelicaServer
     
     /**
      * Starts the server thread. Waits for the thread to start before returning.
-     * @throws IOException 
+     * @param port
+     * @return 
      */
-    public void StartThread() throws IOException {
+    public Thread StartThread(int port) {
         
-        final Thread serverThread;
+        final Boolean serverSync = true;
+        Thread serverThread;
         
-        if (serverSocket != null) {
-            System.out.println("Server is still running! Please wait and try again later...");
-            return;
-        }
-        
+        /**
+         * Start server thread.
+         */
         serverThread = new Thread(() -> {
             
             Socket client;
-            DataInputStream clientInput;
+            String[] names;
+            Simulation simulation;
             
             try {
                 isTerminated = false;
                 isRunning = true;
-                serverSocket = new java.net.ServerSocket(SERVER_PORT);
-                synchronized (this) {
-                    this.notify();
+                serverSocket = new java.net.ServerSocket(port);
+                synchronized (serverSync) {
+                    serverSync.notify();
                 }
                 while (true) {
+                    if (serverSocket.isClosed()) {
+                        break;
+                    }
                     System.out.println("Waiting for client...");
                     client = serverSocket.accept();
                     System.out.println("Client connected!");
-                    clientInput = new DataInputStream(client.getInputStream());
-                    ReadData(clientInput);
+                    
+                    inputStream = new DataInputStream(client.getInputStream());
+                    
+                    names = InitData();
+                    simulation = simulationService.InitSimulation(names);
+                    ReadData(simulation);
+                    
+                    System.out.println("Client disconnect!");
                 }
             } catch (IOException ex) {
                 if (isTerminated) {
@@ -94,23 +92,25 @@ public class OpenModelicaServer
                     System.out.println("Exception while processing client request!");
                     System.out.println(ex.toString());
                 }
-            } finally {
-                serverSocket = null;
             }
         });
         serverThread.start();
         
-        
-        synchronized (this) {
+        /**
+         * Wait for server thread before returning.
+         */
+        synchronized (serverSync) {
             try {
                 System.out.println("Waiting for server to start...");
-                this.wait();
+                serverSync.wait();
                 System.out.println("Server started!");
             } catch (InterruptedException ex) {
                 System.out.println("Exception while waiting for server start!");
                 System.out.println(ex);
             }
         }
+        
+        return serverThread;
     }
     
     /**
@@ -128,54 +128,43 @@ public class OpenModelicaServer
         }
     }
     
+    private byte[] buffer;
+    private ByteBuffer byteBuffer;
+    
+    private int vars, doubles, ints, bools, expected, length;
+    private byte btmp;
+    
     /**
      * Reads data from the given input stream.
      * @param inputStream
      * @throws IOException 
      */
-    private void ReadData(DataInputStream inputStream) throws IOException {
+    private String[] InitData() throws IOException {
         
-        System.out.println("In ReadData...");
-        
-        ArrayList<Object> values;
-        String[] sValues;
-        String names;
-        int reals, ints, bools, expected, length, id;
-        byte btmp;
+        String[] names;
         
         int lengthMax = 2048;
-        byte[] buffer = new byte[lengthMax];
+        buffer = new byte[lengthMax];
         
         inputStream.readFully(buffer, 0, 1);
-        id = (int) buffer[0];
-        System.out.println("Server: id: " + id);
-        
-//        inputStream.readFully(buffer , 0 , 1); // blockiert bis Nachricht empfangen
+//        id = (int) buffer[0];
+//        System.out.println("Server ID: " + id);
         inputStream.readFully(buffer , 0 , 4);
-        
-        System.out.println("#1...");
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        byteBuffer = ByteBuffer.wrap(buffer);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         
         length = byteBuffer.getInt();
         if (lengthMax < length) {
             buffer = new byte[length];
         }
-        
-        
-        System.out.println("length: " + length);
-        
-        System.out.println(inputStream.available());
 
-        inputStream.readFully(buffer , 0 , length-1); // blocks until msg received
-        
-        System.out.println("#2...");
+        inputStream.readFully(buffer , 0 , length); // blocks until msg received
         
         byteBuffer = ByteBuffer.wrap(buffer , 0 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-        reals = byteBuffer.getInt();
+        doubles = byteBuffer.getInt();
         byteBuffer = ByteBuffer.wrap(buffer , 4 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ints = byteBuffer.getInt();
@@ -184,136 +173,110 @@ public class OpenModelicaServer
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         bools = byteBuffer.getInt();
 
-        expected = reals * 8 + ints * SIZE_OF_INT + bools;
+        expected = doubles * 8 + ints * SIZE_OF_INT + bools;
 
         byteBuffer = ByteBuffer.wrap(buffer , 12 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+//        int strings = byteBuffer.getInt();
+//        System.out.println("string: " + strings);
         
-        names = new String(buffer , 16 , buffer.length - 17);
-        nodeNames = new ArrayList(Arrays.asList(names.split("\u0000")));
+        names = new String(buffer , 16 , buffer.length - 17).split("\u0000");
+        vars = names.length;
         
         System.out.println(">> START: INCOMING NODE NAMES:");
-        for (String name : nodeNames) {
-            System.out.println(name);
+        for (String n : names) {
+            System.out.println(n);
         }
         System.out.println("<< END: INCOMING NODE NAMES:");
         
-        nodeIndicesForNames = new HashMap(); // to avoid calls of names.indexOf(identifier)
-        for (int i = 0; i < nodeNames.size(); i++) {
-            nodeIndicesForNames.put(nodeNames.get(i) , i);
-        }
+        return names;
+    }
+    
+    public void ReadData(Simulation simulation) {
 
+        Object[] data;
+        String[] messages;
+        int id, index;
+        
         try {
-            int count = 3;
+            int count = 0;
             while (isRunning) {
                 
-                values = new ArrayList();
+//                try {
+////                    Thread.sleep(20); // sleep thread to save resources
+//                    Thread.sleep(1); // sleep thread to save resources
+//                } catch (InterruptedException e) {
+//                    System.out.println("Thread interrupted while sleeping!");
+//                    System.out.println(e);
+//                }
 
+                System.out.println("#" + count++ + ": " + inputStream.available());
                 inputStream.readFully(buffer , 0 , 5);
-        
-                System.out.println("#" + count++);
-                
                 id = (int)buffer[0];
 
-                byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(buffer , 1 , buffer.length - 2));
+                byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(buffer , 1 , buffer.length - 2)); // length
                 byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
                 length = byteBuffer.getInt();
+                
+                System.out.println("#" + count++ + ": ID = " + id + " | " + length);
 
                 switch (id) {
                     case 4:
                         if (length > 0) {
+                            
                             inputStream.readFully(buffer , 0 , length);
-
-                            for (int r = 0; r < reals; r++) {
+                            
+                            // reihenfolge passt zu reihenfolge der variablen?
+                            data = new Object[vars];
+                            index = 0;
+                            for (int r = 0; r < doubles; r++) {
                                 byteBuffer = ByteBuffer.wrap(buffer , r * 8 , 8);
                                 byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                                values.add(byteBuffer.getDouble());
+                                data[index] = byteBuffer.getDouble();
+                                if (r == 0) {
+                                    System.out.println("time = " + data[index]);
+                                }
+                                index++;
                             }
                             for (int i = 0; i < ints; i++) {
-                                byteBuffer = ByteBuffer.wrap(buffer , reals * 8 + i * SIZE_OF_INT , SIZE_OF_INT);
+                                byteBuffer = ByteBuffer.wrap(buffer , doubles * 8 + i * SIZE_OF_INT , SIZE_OF_INT);
                                 byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-                                values.add(byteBuffer.getInt());
+                                data[index] = byteBuffer.getInt();
+                                index++;
                             }
                             for (int b = 0; b < bools; b++) {
-                                btmp = buffer[reals * 8 + ints * SIZE_OF_INT + b];
-                                values.add((double)btmp);
+                                btmp = buffer[doubles * 8 + ints * SIZE_OF_INT + b];
+                                data[index] = btmp;
+                                index++;
                             }
                             
                             byteBuffer = ByteBuffer.wrap(buffer , expected , length - expected);
                             byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
-                            sValues = (new String(buffer , expected , length - expected)).split("\u0000");
-                            for (int i = 0; i < sValues.length; i++) {
-                                values.add(sValues[i]);
+                            messages = (new String(buffer , expected , length - expected)).split("\u0000");
+                            for (int i = 0; i < messages.length; i++) {
+                                if (messages[i].length() > 0) {
+                                    System.out.println(messages[i]);
+                                }
                             }
-                            setData(values);
+                            
+                            simulation.addResult(data);
                         }
                         break;
 
                     case 6:
-                        // TODO
-                        System.out.println("Server shutting down...");
-                        StopThread();
+                        isTerminated = true;
+                        isRunning = false;
                         break;
-                }
-                
-                try {
-                    Thread.sleep(10); // sleep thread to save resources
-                } catch (InterruptedException e) {
-                    System.out.println("Thread interrupted while sleeping!");
-                    System.out.println(e);
                 }
             }
         } catch (Exception e) {
+            System.out.println("Exception while reading data!");
+//            System.out.println(e);
             e.printStackTrace();
-            // TODO
         } finally {
             StopThread();
         }
-    }
-
-    private void setData(ArrayList<Object> values) {
-        
-        Collection<IPN_Node> places = petriNetDao.getPlaces();
-        Collection<IPN_Node> transitions = petriNetDao.getTransitions();
-        Collection<IPN_Arc> arcs = petriNetDao.getArcs();
-        
-        double value;
-        
-        for (IPN_Arc arc : arcs) {
-            
-            // token flow
-            System.out.println("ExportIndex: " + arc.getExportIndex());
-            value = (Integer)values.get(arc.getExportIndex());
-            resultsService.addResult(arc.getId(), value);
-
-            // gesamt
-//            this.simResult.addValue(e , SimulationResultController.SIM_SUM_OF_TOKEN , value);
-        }
-        
-        for (IPN_Node place : places) {
-            
-            // token
-            value = (Double) values.get(place.getExportIndex());
-            resultsService.addResult(place.getId(), value);
-        }
-        
-        for (IPN_Node transition : transitions) {
-            
-            // speed
-            value = (Double) values.get(transition.getExportIndex()); // "'" + bna.getName() + "'.actualSpeed"
-            resultsService.addResult(transition.getId(), value);
-            
-            // condition
-            value = (Double) values.get(transition.getExportIndex()); // "'" + bna.getName() + "'.fire"
-            resultsService.addResult(transition.getId(), value);
-        }
-        
-        String time = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME);
-
-//        System.out.println(time + ": " + values.get(name2index.get("time")));
-//        value = (Double)values.get(name2index.get("time"));
-//        this.simResult.addTime(value);
     }
     
     public boolean isRunning() {

@@ -89,9 +89,6 @@ public class EditorDetailsController implements Initializable
      */
     public void getDetails(IGraphElement element) {
         
-        if (activeDataNode != null) {
-            update();
-        }
         clear();
         
         activeDataNode = element.getRelatedDataElement();
@@ -214,6 +211,10 @@ public class EditorDetailsController implements Initializable
      * according entity.
      */
     public void update() {
+        
+        if (activeDataNode == null) {
+            return;
+        }
         
         // TODO
         // store values according to the selected colour

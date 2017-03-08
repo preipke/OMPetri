@@ -10,7 +10,7 @@
 
 <VBox fx:id="editorTools" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0" spacing="20.0" HBox.hgrow="NEVER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController">
     <children>
-      <SplitMenuButton fx:id="buttonMenuCreate" mnemonicParsing="false" onAction="#EnableCreatingNodes" text="Create">
+      <SplitMenuButton fx:id="buttonMenuCreate" mnemonicParsing="false" onAction="#EnableCreatingNodes" text="Create"  >
         <items>
           <MenuItem mnemonicParsing="false" text="Action 1" />
           <MenuItem mnemonicParsing="false" text="Action 2" />

@@ -18,7 +18,7 @@ public abstract class PN_Element implements IPN_Element {
     protected Type type;
     
     protected String id;
-    protected int exportIndex;
+    protected List<String> filterNames;
     
     protected boolean isEnabled = true;
     
@@ -29,13 +29,18 @@ public abstract class PN_Element implements IPN_Element {
     }
     
     @Override
-    public void setExportIndex(int index) {
-        exportIndex = index;
+    public void setFilterNames(List<String> names) {
+        filterNames = names;
     }
     
     @Override
-    public int getExportIndex() {
-        return exportIndex;
+    public void addFilterName(String name) {
+        filterNames.add(name);
+    }
+    
+    @Override
+    public List<String> getFilterNames() {
+        return filterNames;
     }
     
     public List<Parameter> getParameter() {

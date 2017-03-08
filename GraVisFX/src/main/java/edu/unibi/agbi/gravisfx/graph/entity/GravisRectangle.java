@@ -50,12 +50,12 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 
     @Override
     public double getOffsetX() {
-        return getBoundsInParent().getWidth() / 2;
+        return getWidth() / 2;
     }
 
     @Override
     public double getOffsetY() {
-        return getBoundsInParent().getHeight() / 2;
+        return getHeight() / 2;
     }
     
     @Override

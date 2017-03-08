@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.petrinet.entity;
 
+import java.util.List;
+
 /**
  *
  * @author PR
@@ -12,8 +14,9 @@ package edu.unibi.agbi.petrinet.entity;
 public interface IPN_Element
 {
     public String getId();
-    public void setExportIndex(int index);
-    public int getExportIndex();
+    public void setFilterNames(List<String> names);
+    public void addFilterName(String name);
+    public List<String> getFilterNames();
     public PN_Element.Type getElementType();
     public boolean isEnabled();
 }
