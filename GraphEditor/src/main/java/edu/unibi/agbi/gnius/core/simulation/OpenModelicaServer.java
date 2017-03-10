@@ -15,6 +15,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -46,9 +47,10 @@ public class OpenModelicaServer
     /**
      * Starts the server thread. Waits for the thread to start before returning.
      * @param port
+     * @param filterVariableReferences
      * @return 
      */
-    public Thread StartThread(int port) {
+    public Thread StartThread(int port, final Map filterVariableReferences) {
         
         final Boolean serverSync = true;
         Thread serverThread;
@@ -80,7 +82,7 @@ public class OpenModelicaServer
                     inputStream = new DataInputStream(client.getInputStream());
                     
                     names = InitData();
-                    simulation = simulationService.InitSimulation(names);
+                    simulation = simulationService.InitSimulation(names , filterVariableReferences);
                     ReadData(simulation);
                     
                     System.out.println("Client disconnect!");
@@ -159,7 +161,7 @@ public class OpenModelicaServer
             buffer = new byte[length];
         }
 
-        inputStream.readFully(buffer , 0 , length); // blocks until msg received
+        inputStream.readFully(buffer , 0 , length);
         
         byteBuffer = ByteBuffer.wrap(buffer , 0 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
@@ -199,26 +201,18 @@ public class OpenModelicaServer
         int id, index;
         
         try {
-            int count = 0;
+//            int count = 0;
             while (isRunning) {
-                
-//                try {
-////                    Thread.sleep(20); // sleep thread to save resources
-//                    Thread.sleep(1); // sleep thread to save resources
-//                } catch (InterruptedException e) {
-//                    System.out.println("Thread interrupted while sleeping!");
-//                    System.out.println(e);
-//                }
 
-                System.out.println("#" + count++ + ": " + inputStream.available());
-                inputStream.readFully(buffer , 0 , 5);
+//                System.out.println("#" + count++ + ": " + inputStream.available());
+                inputStream.readFully(buffer , 0 , 5); // blocks until msg received
                 id = (int)buffer[0];
 
                 byteBuffer = ByteBuffer.wrap(Arrays.copyOfRange(buffer , 1 , buffer.length - 2)); // length
                 byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
                 length = byteBuffer.getInt();
                 
-                System.out.println("#" + count++ + ": ID = " + id + " | " + length);
+//                System.out.println("#" + count++ + ": ID = " + id + " | " + length);
 
                 switch (id) {
                     case 4:
@@ -226,16 +220,15 @@ public class OpenModelicaServer
                             
                             inputStream.readFully(buffer , 0 , length);
                             
-                            // reihenfolge passt zu reihenfolge der variablen?
                             data = new Object[vars];
                             index = 0;
                             for (int r = 0; r < doubles; r++) {
                                 byteBuffer = ByteBuffer.wrap(buffer , r * 8 , 8);
                                 byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
                                 data[index] = byteBuffer.getDouble();
-                                if (r == 0) {
-                                    System.out.println("time = " + data[index]);
-                                }
+//                                if (r == 0) {
+//                                    System.out.println("time = " + data[index]);
+//                                }
                                 index++;
                             }
                             for (int i = 0; i < ints; i++) {
@@ -265,6 +258,7 @@ public class OpenModelicaServer
                         break;
 
                     case 6:
+                        System.out.println("Simulation finished!");
                         isTerminated = true;
                         isRunning = false;
                         break;

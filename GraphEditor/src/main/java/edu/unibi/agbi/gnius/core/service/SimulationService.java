@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import static java.lang.Thread.sleep;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +45,7 @@ public class SimulationService
     private int simIntervals;
     
     private final String envOpenModelicaHome = "OPENMODELICAHOME";
-    private File localStorageDirectory = null;
+    private File workingDirectory = null;
     
     @Autowired 
     public SimulationService(SimulationDao simulationDao, DataDao dataDao) {
@@ -52,12 +53,8 @@ public class SimulationService
         this.dataDao = dataDao;
     }
     
-    public Simulation InitSimulation(String[] variables) {
-        
-        Simulation simulation = new Simulation(variables);
-        simulationDao.addSimulation(simulation);
-        
-        return simulation;
+    public List<Simulation> getSimulations() {
+        return simulationDao.getSimulations();
     }
     
     public void setSimulationIntegrator(String integrator) {
@@ -72,44 +69,47 @@ public class SimulationService
         simStopTime = stopTime;
     }
     
+    public Simulation InitSimulation(String[] variables, Map variableReferences) {
+        
+        Simulation simulation = new Simulation(variables, variableReferences);
+        simulationDao.addSimulation(simulation);
+        
+        return simulation;
+    }
+    
     public void simulate() throws SimulationServiceException {
         
         final Process buildProcess, simulationProcess;
         final BufferedReader simulationOutput;
         ProcessBuilder pb;
         
-        File dirStorage, dirWork , fileMo, fileMos;
+        File dirStorage, fileMo, fileMos;
         String pathCompiler, pathSimulation, nameSimulation;
+        Map filterVariableReferences;
         
-        dirStorage = getStorageDirectory();
-        if (dirStorage == null) {
-            throw new SimulationServiceException("Application's storage directory not accessible!");
-        }
+        System.out.println("Getting working directory...");
+        workingDirectory = getWorkingDirectory();
         
-        dirWork = getWorkingDirectory();
-        if (dirWork == null) {
-            throw new SimulationServiceException("Application's working directory not accessible!");
-        }
+        System.out.println("Getting storage directory...");
+        dirStorage = getStorageDirectory(workingDirectory);
         
+        System.out.println("Getting compiler path...");
         pathCompiler = getCompilerPath();
-        if (pathCompiler == null) {
-            throw new SimulationServiceException("OpenModelica compiler not found!");
-        }
         
         if (server.isRunning()) {
             throw new SimulationServiceException("Server is still running!");
         }
 
-        /**
-         * Exporting data for OpenModelica.
-         */
-        nameSimulation = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME).replace(":" , "").substring(0, 6) + "-" + dataDao.getName();
         try {
-            System.out.println("Exporting data...");
+            System.out.println("Exporting data for OpenModelica compiler...");
+
+            nameSimulation = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME).replace(":" , "").substring(0 , 6) + "-" + dataDao.getName();
+
             fileMo = new File(dirStorage + File.separator + nameSimulation + ".mo");
             fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
             OpenModelicaExport.exportMO(dataDao , fileMo);
-            OpenModelicaExport.exportMOS(dataDao , fileMos , fileMo , dirWork);
+            filterVariableReferences = OpenModelicaExport.exportMOS(dataDao , fileMos , fileMo , workingDirectory);
+            
         } catch (IOException ex) {
             throw new SimulationServiceException("Data export for OpenModelica failed! (" + ex + ")");
         }
@@ -118,7 +118,7 @@ public class SimulationService
          * Building simulation.
          */
         pb = new ProcessBuilder(pathCompiler , fileMos.getPath());
-        pb.directory(dirWork);
+        pb.directory(workingDirectory);
         try {
             System.out.println("Building simulation...");
             buildProcess = pb.start();
@@ -129,31 +129,31 @@ public class SimulationService
         /**
          * Terminates process after 20 minutes.
          */
-        Thread compilerWatcherThread = new Thread()
-        {
-            @Override
-            public void run() {
-                long totalTime = 1200000;
-                try {
-                    for (long t = 0; t < totalTime; t += 1000) {
-                        if (buildProcess.isAlive()) {
-                            sleep(1000);
-                        }
-                    }
-                    buildProcess.destroy();
-                    // stopped = true;
-                } catch (Exception e) {
-                }
-            }
-        };
-        compilerWatcherThread.start();
+//        Thread compilerWatcherThread = new Thread()
+//        {
+//            @Override
+//            public void run() {
+//                long totalTime = 1200000;
+//                try {
+//                    for (long t = 0; t < totalTime; t += 1000) {
+//                        if (buildProcess.isAlive()) {
+//                            sleep(1000);
+//                        }
+//                    }
+//                    buildProcess.destroy();
+//                    // stopped = true;
+//                } catch (Exception e) {
+//                }
+//            }
+//        };
+//        compilerWatcherThread.start();
         
         /**
          * Waits for build process and interrupt waiting thread.
          */
         try {
             buildProcess.waitFor();
-            compilerWatcherThread.interrupt();
+//            compilerWatcherThread.interrupt();
         } catch (InterruptedException ex) {
             throw new SimulationServiceException("Exception while waiting for compiler thread! (" + ex + ")");
         }
@@ -189,8 +189,7 @@ public class SimulationService
         /**
          * Start server.
          */
-        serverThread = server.StartThread(serverPort);
-        
+        serverThread = server.StartThread(serverPort, filterVariableReferences);
         
         /**
          * Ausführen der Simulation.
@@ -249,13 +248,10 @@ public class SimulationService
         } else {
             pb.command(pathSimulation , override , "-port=11111" );
         }
-        pb.directory(dirWork);
+        pb.directory(workingDirectory);
         pb.redirectOutput();
 
         Map<String , String> env = pb.environment();
-        
-        pathCompiler = pathCompiler.substring(0 , pathCompiler.lastIndexOf(File.separator));
-        env.put("PATH" , env.get("PATH") + ";" + pathCompiler);
         
         pathCompiler = pathCompiler.substring(0 , pathCompiler.lastIndexOf(File.separator));
         env.put("PATH" , env.get("PATH") + ";" + pathCompiler);
@@ -276,11 +272,9 @@ public class SimulationService
         /**
          * Simulation Output. (?)
          */
-//        try {
         Thread t3 = new Thread()
         {
             public void run() {
-                // System.out.println("running");
                 String line;
                 if (simulationOutput != null) {
                     while (server.isRunning()) {
@@ -308,7 +302,6 @@ public class SimulationService
                         e.printStackTrace();
                     }
                 }
-                // w.updatePCPView();
             }
         };
         t3.start();
@@ -353,29 +346,41 @@ public class SimulationService
     }
     
     /**
-     * Gets the directory for storing files related to the simulation.
+     * Gets the working directory. Used for storing and executing the compiled 
+     * sources.
      * @return 
      */
-    private File getStorageDirectory() {
-        
+    private File getWorkingDirectory() throws SimulationServiceException {
+
         File dir;
-        
+
         dir = new File(System.getProperty("java.io.tmpdir"));
         if (!dir.exists() || !dir.isDirectory()) {
-            return null;
+            throw new SimulationServiceException("Application's working directory not accessible!");
         }
-        
+
         dir = new File(dir + File.separator + "GraVisFX");
         if (!dir.exists() || !dir.isDirectory()) {
             dir.mkdir();
         }
-        
+
         dir = new File(dir + File.separator + "data");
         if (!dir.exists() || !dir.isDirectory()) {
             dir.mkdir();
         }
+
+        return dir;
+    }
+    
+    /**
+     * Gets the directory for storing files used for building the simulation.
+     * @return 
+     */
+    private File getStorageDirectory(File workingDirectory) throws SimulationServiceException {
         
-        dir = new File(dir + File.separator + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        File dir;
+        
+        dir = new File(workingDirectory + File.separator + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
         if (!dir.exists() || !dir.isDirectory()) {
             dir.mkdir();
         }
@@ -384,41 +389,10 @@ public class SimulationService
     }
     
     /**
-     * Gets the working directory. Used for storing compiled sources.
-     * @return 
-     */
-    private File getWorkingDirectory() {
-        
-        if (localStorageDirectory == null) {
-
-            File dir;
-
-            dir = new File(System.getProperty("java.io.tmpdir"));
-            if (!dir.exists() || !dir.isDirectory()) {
-                return null;
-            }
-
-            dir = new File(dir + File.separator + "GraVisFX");
-            if (!dir.exists() || !dir.isDirectory()) {
-                dir.mkdir();
-            }
-
-            dir = new File(dir + File.separator + "data");
-            if (!dir.exists() || !dir.isDirectory()) {
-                dir.mkdir();
-            }
-            
-            localStorageDirectory = dir;
-        }
-        
-        return localStorageDirectory;
-    }
-    
-    /**
      * Gets the path of the OMC compiler.
      * @return 
      */
-    private String getCompilerPath() {
+    private String getCompilerPath() throws SimulationServiceException {
         
         String pathOpenModelica, pathCompiler;
         File dirOpenModelica;
@@ -448,7 +422,8 @@ public class SimulationService
         } else {
             // ENV is not present: check if om is installed and ENV variable is set properly
         }
-        return null;
+
+        throw new SimulationServiceException("OpenModelica compiler not found!");
     }
     
     /**

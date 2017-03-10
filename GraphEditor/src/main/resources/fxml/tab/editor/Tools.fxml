@@ -10,7 +10,8 @@
 
 <VBox fx:id="editorTools" alignment="TOP_CENTER" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="200.0" spacing="20.0" HBox.hgrow="NEVER" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController">
     <children>
-      <SplitMenuButton fx:id="buttonMenuCreate" mnemonicParsing="false" onAction="#EnableCreatingNodes" text="Create"  >
+      <Button mnemonicParsing="false" onAction="#OpenResultsView" text="Results" />
+      <SplitMenuButton fx:id="buttonMenuCreate" mnemonicParsing="false" onAction="#EnableCreatingNodes" text="Create">
         <items>
           <MenuItem mnemonicParsing="false" text="Action 1" />
           <MenuItem mnemonicParsing="false" text="Action 2" />
@@ -31,8 +32,8 @@
             <children>
                 <HBox alignment="CENTER" spacing="5.0">
                     <children>
-                        <Button fx:id="buttonUndo" mnemonicParsing="false" text="Undo" disable="true" />
-                        <Button fx:id="buttonRedo" mnemonicParsing="false" text="Redo" disable="true" />
+                        <Button fx:id="buttonUndo" disable="true" mnemonicParsing="false" text="Undo" />
+                        <Button fx:id="buttonRedo" disable="true" mnemonicParsing="false" text="Redo" />
                     </children>
                 </HBox>
                 <TextArea fx:id="textLogArea" prefHeight="200.0" prefWidth="200.0">

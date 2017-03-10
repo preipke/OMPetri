@@ -28,6 +28,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -87,7 +89,7 @@ public class OpenModelicaExport
         /**
          * Settings.
          */
-        writer.append("  inner PNlib.Settings");
+        writer.append(INDENT + "inner PNlib.Settings");
         writer.append(" settings(showTokenFlow = true)");
         //writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
         writer.append(";");
@@ -114,7 +116,7 @@ public class OpenModelicaExport
             tmp2 = "";
             tmp3 = "";
 
-            writer.append("  ");
+            writer.append(INDENT);
             if (place.getPlaceType() == Place.Type.CONTINUOUS) {
                 if (isColoredPn) {
                     writer.append(identPlaceContinuousColored);
@@ -217,7 +219,7 @@ public class OpenModelicaExport
 
             function = transition.getFunction();
 
-            writer.append("  ");
+            writer.append(INDENT);
             if (isColoredPn) {
                 writer.append(identColoredTransitionContinuous);
                 functionType = "maximumSpeed";
@@ -384,7 +386,7 @@ public class OpenModelicaExport
 
         for (IPN_Arc a : arcs) {
 
-            writer.append("  ");
+            writer.append(INDENT);
             writer.append("connect(");
 
             arcSource = a.getSource();
@@ -421,7 +423,7 @@ public class OpenModelicaExport
             writer.append(";");
             writer.println();
         }
-        writer.append("  annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
+        writer.append(INDENT + "annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
         writer.println();
 
         writer.append("end '" + petriNet.getName() + "'");
@@ -439,10 +441,12 @@ public class OpenModelicaExport
      * @param fileMOS
      * @param fileMO
      * @param workDirectory
-     * @return
+     * @return map containing filter variables and the referenced elements
      * @throws IOException 
      */
-    public static File exportMOS(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public static Map<String,IPN_Element> exportMOS(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+        
+        Map<String,IPN_Element> filterVariableReferences = new HashMap();
         
         String filter = "variableFilter=\"";
         String tmp;
@@ -464,6 +468,7 @@ public class OpenModelicaExport
             tmp = "'" + place.getId() + "'.t";
             filter += tmp + "|";
             place.addFilterName(tmp);
+            filterVariableReferences.put(tmp , place);
             
             index = 1;
             for (IPN_Arc arc : place.getArcsOut()) {
@@ -471,10 +476,12 @@ public class OpenModelicaExport
                 tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
                 filter += tmp + "|";
                 arc.addFilterName(tmp);
+                filterVariableReferences.put(tmp , arc);
 
                 tmp = "der(" + tmp + ")";
                 filter += tmp + "|";
                 arc.addFilterName(tmp);
+                filterVariableReferences.put(tmp , arc);
                 
                 index++;
             }
@@ -485,10 +492,12 @@ public class OpenModelicaExport
                 tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
                 filter += tmp + "|";
                 arc.addFilterName(tmp);
+                filterVariableReferences.put(tmp , arc);
                 
                 tmp = "der(" + tmp + ")";
                 filter += tmp + "|";
                 arc.addFilterName(tmp);
+                filterVariableReferences.put(tmp , arc);
                 
                 index++;
             }
@@ -499,10 +508,12 @@ public class OpenModelicaExport
             tmp = "'" + transition.getId() + "'.fire|";
             filter += tmp + "|";
             transition.addFilterName(tmp);
-            
+            filterVariableReferences.put(tmp , transition);
+
             tmp = "'" + transition.getId() + "'.actualSpeed|";
             filter += tmp + "|";
             transition.addFilterName(tmp);
+            filterVariableReferences.put(tmp , transition);
         }
         
         filter = filter.substring(0 , filter.length() - 1);
@@ -529,7 +540,7 @@ public class OpenModelicaExport
 
         out.close();
         
-        return fileMOS;
+        return filterVariableReferences;
     }
     
     /**
