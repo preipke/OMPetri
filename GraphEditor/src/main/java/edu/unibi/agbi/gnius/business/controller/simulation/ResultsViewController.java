@@ -11,11 +11,11 @@ import edu.unibi.agbi.petrinet.entity.IPN_Element;
 import edu.unibi.agbi.petrinet.entity.PN_Element;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,28 +26,33 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 /**
  *
  * @author PR
  */
+@Controller
 public class ResultsViewController implements Initializable
 {
-    private final DateTimeFormatter simulationChoiceNameFormatter = DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss");
-    
-    private SimulationService simulationService;
+    @Autowired private SimulationService simulationService;
     
     @FXML private ChoiceBox simulationChoiceBox;
     @FXML private ChoiceBox elementChoiceBox;
     @FXML private ChoiceBox valueChoiceBox;
     @FXML private ColorPicker colorPicker;
-    
     @FXML private LineChart lineChart;
     
     private boolean isSimulationChanged;
     private boolean isElementChanged;
     
-    private Map<Simulation, Map<IPN_Element, Map<String, XYChart.Series>>> lineChartData;
+    private final DateTimeFormatter simulationChoiceNameFormatter = DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss");
+    
+    private final Map<Simulation, Map<IPN_Element, Map<String, XYChart.Series>>> lineChartData;
+    
+    public ResultsViewController() {
+        lineChartData = new HashMap();
+    }
     
     @FXML
     public void SelectingSimulation() {
@@ -129,11 +134,11 @@ public class ResultsViewController implements Initializable
         // Simulation not in map?
         if (!lineChartData.containsKey(simulation)) {
             
-            Map<String,XYChart.Series> valueSet = new HashMap();
-            valueSet.put(data.getValue(), new XYChart.Series());
+            Map<String,XYChart.Series> valueSerie = new HashMap();
+            valueSerie.put(data.getValue(), new XYChart.Series());
             
             Map<IPN_Element,Map<String,XYChart.Series>> elementMap = new HashMap();
-            elementMap.put(data.getElement(), valueSet);
+            elementMap.put(data.getElement(), valueSerie);
             
             lineChartData.put(simulation, elementMap);
             
@@ -171,7 +176,7 @@ public class ResultsViewController implements Initializable
         return true;
     }
     
-    public void RefreshSimulationChoices() {
+    private void RefreshSimulationChoices() {
         
         List<Simulation> simulations = simulationService.getSimulations();
         
@@ -185,10 +190,10 @@ public class ResultsViewController implements Initializable
         isSimulationChanged = true;
     }
     
-    public void RefreshElementChoices() {
+    private void RefreshElementChoices() {
         
         SimulationChoice simulationChoice = (SimulationChoice) simulationChoiceBox.getSelectionModel().getSelectedItem();
-        Collection<IPN_Element> elements = simulationChoice.getSimulation().getVariableReferences().values();
+        Set<IPN_Element> elements = simulationChoice.getSimulation().getElementFilterReferences().keySet();
         
         ObservableList<Object> elementChoices = FXCollections.observableArrayList();
         for (IPN_Element element : elements) {
@@ -206,10 +211,12 @@ public class ResultsViewController implements Initializable
         isElementChanged = true;
     }
     
-    public void RefreshValueChoices() {
+    private void RefreshValueChoices() {
         
+        SimulationChoice simulationChoice = (SimulationChoice) simulationChoiceBox.getSelectionModel().getSelectedItem();
         ElementChoice elementChoice = (ElementChoice) elementChoiceBox.getSelectionModel().getSelectedItem();
-        List<String> values = elementChoice.getElement().getFilterNames();
+        
+        List<String> values = simulationChoice.getSimulation().getElementFilterReferences().get(elementChoice.getElement());
         
         ObservableList<Object> valueChoices = FXCollections.observableArrayList();
         for (String value : values) {
@@ -219,10 +226,6 @@ public class ResultsViewController implements Initializable
         valueChoiceBox.setItems(valueChoices);
         
         isElementChanged = false;
-    }
-    
-    public void setSimulationService(SimulationService simulationService) {
-        this.simulationService = simulationService;
     }
 
     @Override

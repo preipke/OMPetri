@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.simulation;
 
 import edu.unibi.agbi.petrinet.entity.IPN_Element;
+import edu.unibi.agbi.petrinet.model.References;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +21,14 @@ public class Simulation
     private final LocalDateTime simulationTime;
     
     private final String[] simulationVariables;
-    private final Map<String,IPN_Element> simulationVariableReferences;
+    private final References simulationVariableReferences;
     private final List<Object>[] simulationResults;
     
     private String simulationName;
     private String simulationAuthor;
     private String simulationDescription;
     
-    public Simulation(String[] variables, Map<String,IPN_Element> variableReferences) {
+    public Simulation(String[] variables, References variableReferences) {
         
         simulationTime = LocalDateTime.now();
         
@@ -90,8 +91,8 @@ public class Simulation
      * Gets the variable references.
      * @return 
      */
-    public Map<String,IPN_Element> getVariableReferences() {
-        return simulationVariableReferences;
+    public Map<IPN_Element,List<String>> getElementFilterReferences() {
+        return simulationVariableReferences.getElementFilterReferences();
     }
     
     /**

@@ -27,11 +27,11 @@
                     </rowConstraints>
                      <children>
                         <Label alignment="TOP_LEFT" text="Simulation:" />
-                        <ChoiceBox fx:id="simulationChoiceBox" minWidth="150.0" onContextMenuRequested="#SelectingSimulation" GridPane.columnIndex="1" />
+                        <ChoiceBox fx:id="simulationChoiceBox" minWidth="150.0" onMouseClicked="#SelectingSimulation" GridPane.columnIndex="1" />
                         <Label text="Element:" GridPane.rowIndex="1" />
-                        <ChoiceBox fx:id="elementChoiceBox" minWidth="150.0" onContextMenuRequested="#SelectingElement" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <ChoiceBox fx:id="elementChoiceBox" minWidth="150.0" onMouseClicked="#SelectingElement" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                         <Label text="Value:" GridPane.rowIndex="2" />
-                        <ChoiceBox fx:id="valueChoiceBox" minWidth="150.0" onContextMenuRequested="#SelectingValue" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <ChoiceBox fx:id="valueChoiceBox" minWidth="150.0" onMouseClicked="#SelectingValue" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                         <Label text="Color:" GridPane.rowIndex="3" />
                         <ColorPicker fx:id="colorPicker" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                         <Button mnemonicParsing="false" onAction="#AddSelectedToChart" text="Add" GridPane.columnIndex="1" GridPane.rowIndex="5">
@@ -58,7 +58,7 @@
                      <children>
                         <LineChart fx:id="lineChart" HBox.hgrow="ALWAYS">
                           <xAxis>
-                            <CategoryAxis label="Time" />
+                            <NumberAxis label="Time" />
                           </xAxis>
                           <yAxis>
                             <NumberAxis label="Marks / Token" side="LEFT" />

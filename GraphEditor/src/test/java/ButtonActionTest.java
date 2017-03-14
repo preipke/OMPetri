@@ -51,7 +51,7 @@ public class ButtonActionTest extends TestFXBase
         clickOn("#sector9");
     }
     
-    @Test
+    //@Test
     public void testCreatingNodes() {
         
         BorderPane editorPane = find(EDITOR_PANE_ID);

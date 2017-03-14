@@ -43,26 +43,11 @@ public class SimulationController implements Initializable
     @FXML
     public void StartSimulation() {
         
-        try {
-            simulationService.setSimulationStopTime(getStopTime());
-        } catch (NumberFormatException ex) {
-            System.out.println("The value given for 'Stop Time' is not a number!");
-            return;
-        }
-        
-        try {
-            simulationService.setSimulationIntervals(getIntervals());
-        } catch (NumberFormatException ex) {
-            System.out.println("The value given for 'Intervals' is not a natural number!");
-        }
-        
-        simulationService.setSimulationIntegrator(getIntegrator());
-        
         simControlsStart.setDisable(true);
         simMenuControlsStart.setDisable(true);
         
         try {
-            simulationService.simulate();
+            simulationService.StartSimulation();
             
             simControlsStop.setDisable(false);
             simMenuControlsStop.setDisable(false);
@@ -88,23 +73,31 @@ public class SimulationController implements Initializable
         simMenuControlsStart.setDisable(false);
     }
     
-    @Override
-    public void initialize(URL location , ResourceBundle resources) {
+    public String getSimulationAuthor() {
+        return "Unknown";
     }
     
     public String getSimulationName() {
         return "Untitled";
     }
     
-    public double getStopTime() throws NumberFormatException {
+    public String getSimulationDescription() {
+        return "Not available";
+    }
+    
+    public double getSimulationStopTime() throws NumberFormatException {
         return Double.parseDouble(simControlsStopTime.getText());
     }
     
-    public int getIntervals() throws NumberFormatException {
+    public int getSimulationIntervals() throws NumberFormatException {
         return Integer.parseInt(simControlsIntervals.getText());
     }
     
-    public String getIntegrator() {
+    public String getSimulationIntegrator() {
         return simControlsIntegrator.getSelectionModel().getSelectedItem().toString();
+    }
+    
+    @Override
+    public void initialize(URL location , ResourceBundle resources) {
     }
 }

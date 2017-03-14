@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
+import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
@@ -49,6 +50,7 @@ public class DataGraphService
 {
     @Autowired private Calculator calculator;
     @Autowired private SelectionService selectionService;
+    @Autowired private EditorDetailsController editorDetailsController;
     
     private DataArc.Type defaultArcType = DataArc.Type.READ;
     private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
@@ -61,6 +63,10 @@ public class DataGraphService
     public DataGraphService(GraphDao graphDao, DataDao petriNetDao) {
         this.graphDao = graphDao;
         this.petriNetDao = petriNetDao;
+    }
+    
+    public void UpdateData() {
+        editorDetailsController.update();
     }
     
     /**

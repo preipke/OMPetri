@@ -13,9 +13,9 @@ import edu.unibi.agbi.petrinet.entity.abstr.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.PetriNet;
+import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
-
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
@@ -26,10 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -42,15 +39,20 @@ public class OpenModelicaExport
     
     private static final String OM_SIM_LIB = "PNlib";
     
-    private static final String identPlaceContinuous = "PNlib.PC";
-    private static final String identPlaceDiscrete = "PNlib.PD";
+    private static final String PLACE_CONTINUOUS = "PNlib.PC";
+    private static final String PLACE_DISCRETE = "PNlib.PD";
     
-    private static final String identTransitionContinuous = "PNlib.TC";
-    private static final String identTransitionDiscrete = "PNlib.TD";
-    private static final String identTransitionStochastic = "PNlib.TS";
+    private static final String TRANSITION_CONTINUOUS = "PNlib.TC";
+    private static final String TRANSITION_DISCRETE = "PNlib.TD";
+    private static final String TRANSITION_STOCHASTIC = "PNlib.TS";
     
-    private static final String identPlaceContinuousColored = "PNlib.Examples.Models.ColoredPlaces.CPC";
-    private static final String identColoredTransitionContinuous = "PNlib.Examples.Models.ColoredPlaces.CTC";
+    private static final String COLORED_PLACE_CONTINUOUS = "PNlib.Examples.Models.ColoredPlaces.CPC";
+    private static final String COLORED_TRANSITION_CONTINUOUS = "PNlib.Examples.Models.ColoredPlaces.CTC";
+    
+    public static References export(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+        fileMO = exportMO(petriNet, fileMO);
+        return exportMOS(petriNet, fileMOS, fileMO, workDirectory);
+    }
     
     public static File exportMO(PetriNet petriNet , File file) throws IOException {
 
@@ -119,16 +121,16 @@ public class OpenModelicaExport
             writer.append(INDENT);
             if (place.getPlaceType() == Place.Type.CONTINUOUS) {
                 if (isColoredPn) {
-                    writer.append(identPlaceContinuousColored);
+                    writer.append(COLORED_PLACE_CONTINUOUS);
                 } else {
-                    writer.append(identPlaceContinuous);
+                    writer.append(PLACE_CONTINUOUS);
                 }
                 tokenType = "Marks";
             } else {
                 if (isColoredPn) {
-                    writer.append(identPlaceDiscrete); // TODO ?
+                    throw new IOException("Colored discrete places are not yet supported!");
                 } else {
-                    writer.append(identPlaceDiscrete);
+                    writer.append(PLACE_DISCRETE);
                 }
                 tokenType = "Tokens";
             }
@@ -220,18 +222,26 @@ public class OpenModelicaExport
             function = transition.getFunction();
 
             writer.append(INDENT);
-            if (isColoredPn) {
-                writer.append(identColoredTransitionContinuous);
-                functionType = "maximumSpeed";
-            } else {
-                if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
-                    writer.append(identTransitionContinuous);
+            if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
+                if (isColoredPn) {
+                    writer.append(COLORED_TRANSITION_CONTINUOUS);
                     functionType = "maximumSpeed";
-                } else if (transition.getTransitionType() == Transition.Type.DISCRETE) {
-                    writer.append(identTransitionDiscrete);
-                    functionType = "delay";
                 } else {
-                    writer.append(identTransitionStochastic);
+                    writer.append(TRANSITION_CONTINUOUS);
+                    functionType = "maximumSpeed";
+                }
+            } else if (transition.getTransitionType() == Transition.Type.DISCRETE) {
+                if (isColoredPn) {
+                    throw new IOException("Colored discrete transitions are not yet supported!");
+                } else {
+                    writer.append(TRANSITION_DISCRETE);
+                    functionType = "delay";
+                }
+            } else {
+                if (isColoredPn) {
+                    throw new IOException("Colored stochastic transitions are not yet supported!");
+                } else {
+                    writer.append(TRANSITION_STOCHASTIC);
                     functionType = "h"; // TODO
                 }
             }
@@ -444,9 +454,9 @@ public class OpenModelicaExport
      * @return map containing filter variables and the referenced elements
      * @throws IOException 
      */
-    public static Map<String,IPN_Element> exportMOS(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public static References exportMOS(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
         
-        Map<String,IPN_Element> filterVariableReferences = new HashMap();
+        References references = new References();
         
         String filter = "variableFilter=\"";
         String tmp;
@@ -467,21 +477,21 @@ public class OpenModelicaExport
             
             tmp = "'" + place.getId() + "'.t";
             filter += tmp + "|";
-            place.addFilterName(tmp);
-            filterVariableReferences.put(tmp , place);
+            references.addElementReference(place, tmp);
+            references.addFilterReference(tmp, place);
             
             index = 1;
             for (IPN_Arc arc : place.getArcsOut()) {
                 
                 tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
                 filter += tmp + "|";
-                arc.addFilterName(tmp);
-                filterVariableReferences.put(tmp , arc);
+                references.addElementReference(arc, tmp);
+                references.addFilterReference(tmp, arc);
 
                 tmp = "der(" + tmp + ")";
                 filter += tmp + "|";
-                arc.addFilterName(tmp);
-                filterVariableReferences.put(tmp , arc);
+                references.addElementReference(arc, tmp);
+                references.addFilterReference(tmp, arc);
                 
                 index++;
             }
@@ -491,13 +501,13 @@ public class OpenModelicaExport
                 
                 tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
                 filter += tmp + "|";
-                arc.addFilterName(tmp);
-                filterVariableReferences.put(tmp , arc);
+                references.addElementReference(arc, tmp);
+                references.addFilterReference(tmp, arc);
                 
                 tmp = "der(" + tmp + ")";
                 filter += tmp + "|";
-                arc.addFilterName(tmp);
-                filterVariableReferences.put(tmp , arc);
+                references.addElementReference(arc, tmp);
+                references.addFilterReference(tmp, arc);
                 
                 index++;
             }
@@ -505,15 +515,15 @@ public class OpenModelicaExport
 
         for (IPN_Node transition : petriNet.getTransitions()) {
             
-            tmp = "'" + transition.getId() + "'.fire|";
+            tmp = "'" + transition.getId() + "'.fire";
             filter += tmp + "|";
-            transition.addFilterName(tmp);
-            filterVariableReferences.put(tmp , transition);
+            references.addElementReference(transition, tmp);
+            references.addFilterReference(tmp, transition);
 
-            tmp = "'" + transition.getId() + "'.actualSpeed|";
+            tmp = "'" + transition.getId() + "'.actualSpeed";
             filter += tmp + "|";
-            transition.addFilterName(tmp);
-            filterVariableReferences.put(tmp , transition);
+            references.addElementReference(transition, tmp);
+            references.addFilterReference(tmp, transition);
         }
         
         filter = filter.substring(0 , filter.length() - 1);
@@ -540,7 +550,7 @@ public class OpenModelicaExport
 
         out.close();
         
-        return filterVariableReferences;
+        return references;
     }
     
     /**
