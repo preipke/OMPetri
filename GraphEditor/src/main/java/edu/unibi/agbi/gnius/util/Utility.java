@@ -9,7 +9,7 @@ package edu.unibi.agbi.gnius.util;
  *
  * @author PR
  */
-public final class OS_Validator
+public final class Utility
 {
     private final static String OS = System.getProperty("os.name").toLowerCase();
 
@@ -32,5 +32,26 @@ public final class OS_Validator
     public static boolean isOsSolaris() {
         return (OS.contains("sunos"));
     }
-
+        
+    /**
+     * Parses a substring. Parses a subject String from a given starting String 
+     * to a given ending String. Returns NULL if the String cannot be parsed.
+     * @param subject
+     * @param start
+     * @param end
+     * @return 
+     */
+    public static String parseSubstring(String subject, String start, String end){
+        
+        if (subject == null)
+            return null;
+        
+        int s = subject.indexOf(start) + start.length();
+        int e = subject.indexOf(end, s);
+        
+        if (s >= e)
+            return null;
+        
+        return subject.substring(s, e);
+    }
 }

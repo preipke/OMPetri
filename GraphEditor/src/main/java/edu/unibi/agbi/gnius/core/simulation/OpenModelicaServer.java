@@ -7,7 +7,9 @@ package edu.unibi.agbi.gnius.core.simulation;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
-import edu.unibi.agbi.gnius.util.OS_Validator;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.util.Utility;
+import edu.unibi.agbi.petrinet.model.References;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Map;
+import javafx.application.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,7 +40,7 @@ public class OpenModelicaServer
     private DataInputStream inputStream;
 
     public OpenModelicaServer() {
-        if (OS_Validator.isOsWindows()) {
+        if (Utility.isOsWindows()) {
             SIZE_OF_INT = 4;
         } else {
             SIZE_OF_INT = 8;
@@ -47,10 +50,11 @@ public class OpenModelicaServer
     /**
      * Starts the server thread. Waits for the thread to start before returning.
      * @param port
-     * @param filterVariableReferences
+     * @param references
      * @return 
+     * @throws edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException 
      */
-    public Thread StartThread(int port, final Map filterVariableReferences) {
+    public Thread StartThread(int port, final References references) throws SimulationServiceException {
         
         final Boolean serverSync = true;
         Thread serverThread;
@@ -60,30 +64,54 @@ public class OpenModelicaServer
          */
         serverThread = new Thread(() -> {
             
-            Socket client;
-            String[] names;
-            Simulation simulation;
-            
             try {
                 isTerminated = false;
                 isRunning = true;
                 serverSocket = new java.net.ServerSocket(port);
+                
                 synchronized (serverSync) {
                     serverSync.notify();
                 }
+                
                 while (true) {
+                    
                     if (serverSocket.isClosed()) {
                         break;
                     }
+                    
+                    final Socket client;
+                    final String[] variables;
+                    
                     System.out.println("Waiting for client...");
                     client = serverSocket.accept();
                     System.out.println("Client connected!");
-                    
                     inputStream = new DataInputStream(client.getInputStream());
                     
-                    names = InitData();
-                    simulation = simulationService.InitSimulation(names , filterVariableReferences);
-                    ReadData(simulation);
+                    variables = ReadSimulationVariables();
+                    
+                    synchronized(client) {
+
+                        Platform.runLater(() -> {
+                            synchronized(client) {
+                                simulationService.InitSimulation(variables , references); // has to be executed on main thread, changelistener attached
+                                System.out.println("Simulation storage initialized!..");
+                                client.notify();
+                            }
+                        });
+                        
+                        try {
+                            System.out.println("Waiting for initialization of simulation storage...");
+                            client.wait();
+                        } catch (InterruptedException ex) {
+                            try {
+                                throw new SimulationServiceException("Simulation server got interrupted! " + ex);
+                            } catch (SimulationServiceException iex) {
+                                throw new IOException(iex);
+                            }
+                        }
+                    }
+                    
+                    StoreSimulationResults(simulationService.getLatestSimulation());
                     
                     System.out.println("Client disconnect!");
                 }
@@ -141,32 +169,34 @@ public class OpenModelicaServer
      * @param inputStream
      * @throws IOException 
      */
-    private String[] InitData() throws IOException {
+    private String[] ReadSimulationVariables() throws IOException {
         
         String[] names;
         
         int lengthMax = 2048;
         buffer = new byte[lengthMax];
         
+        // read status
         inputStream.readFully(buffer, 0, 1);
-//        id = (int) buffer[0];
-//        System.out.println("Server ID: " + id);
-        inputStream.readFully(buffer , 0 , 4);
+//        System.out.println("Server ID: " + (int) buffer[0]);
 
+        // read chunk size
+        inputStream.readFully(buffer , 0 , 4);
+        
         byteBuffer = ByteBuffer.wrap(buffer);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-        
         length = byteBuffer.getInt();
         if (lengthMax < length) {
             buffer = new byte[length];
         }
 
+        // read variables and incoming types
         inputStream.readFully(buffer , 0 , length);
         
         byteBuffer = ByteBuffer.wrap(buffer , 0 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-
         doubles = byteBuffer.getInt();
+        
         byteBuffer = ByteBuffer.wrap(buffer , 4 , 4);
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         ints = byteBuffer.getInt();
@@ -175,12 +205,11 @@ public class OpenModelicaServer
         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
         bools = byteBuffer.getInt();
 
-        expected = doubles * 8 + ints * SIZE_OF_INT + bools;
+//        byteBuffer = ByteBuffer.wrap(buffer , 12 , 4);
+//        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+//        System.out.println("strings: " + byteBuffer.getInt());
 
-        byteBuffer = ByteBuffer.wrap(buffer , 12 , 4);
-        byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-//        int strings = byteBuffer.getInt();
-//        System.out.println("string: " + strings);
+        expected = doubles * 8 + ints * SIZE_OF_INT + bools;
         
         names = new String(buffer , 16 , buffer.length - 17).split("\u0000");
         vars = names.length;
@@ -194,7 +223,7 @@ public class OpenModelicaServer
         return names;
     }
     
-    public void ReadData(Simulation simulation) {
+    public void StoreSimulationResults(Simulation simulation) {
 
         Object[] data;
         String[] messages;

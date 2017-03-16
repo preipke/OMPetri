@@ -6,8 +6,8 @@
 package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import java.util.ArrayList;
-import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -17,10 +17,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SimulationDao
 {
-    private final List<Simulation> simulations;
+    private final ObservableList<Simulation> simulations;
     
     public SimulationDao() {
-        simulations = new ArrayList();
+        simulations = FXCollections.observableArrayList();
     }
     
     public void addSimulation(Simulation simulation) {
@@ -31,7 +31,7 @@ public class SimulationDao
         return simulations.get(simulations.size() -1);
     }
     
-    public List<Simulation> getSimulations() {
+    public ObservableList<Simulation> getSimulations() {
         return simulations;
     }
 }

@@ -5,12 +5,14 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
+import edu.unibi.agbi.gnius.business.controller.simulation.SimulationController;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.dao.SimulationDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.core.simulation.OpenModelicaServer;
-import edu.unibi.agbi.gnius.util.OS_Validator;
+import edu.unibi.agbi.gnius.util.Utility;
+import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,8 +22,8 @@ import java.io.InputStreamReader;
 import static java.lang.Thread.sleep;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
+import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +35,8 @@ import org.springframework.stereotype.Service;
 public class SimulationService
 {
     @Autowired private OpenModelicaServer server;
+    @Autowired private DataGraphService dataGraphService;
+    @Autowired private SimulationController simulationController;
     
     private final SimulationDao simulationDao;
     private final DataDao dataDao;
@@ -53,23 +57,15 @@ public class SimulationService
         this.dataDao = dataDao;
     }
     
-    public List<Simulation> getSimulations() {
+    public ObservableList<Simulation> getSimulations() {
         return simulationDao.getSimulations();
     }
     
-    public void setSimulationIntegrator(String integrator) {
-        simIntegrator = integrator;
+    public Simulation getLatestSimulation() {
+        return simulationDao.getLatestSimulation();
     }
     
-    public void setSimulationIntervals(int intervals) {
-        simIntervals = intervals;
-    }
-    
-    public void setSimulationStopTime(double stopTime) {
-        simStopTime = stopTime;
-    }
-    
-    public Simulation InitSimulation(String[] variables, Map variableReferences) {
+    public Simulation InitSimulation(String[] variables, References variableReferences) {
         
         Simulation simulation = new Simulation(variables, variableReferences);
         simulationDao.addSimulation(simulation);
@@ -79,13 +75,19 @@ public class SimulationService
     
     public void simulate() throws SimulationServiceException {
         
+        dataGraphService.UpdateData();
+        
         final Process buildProcess, simulationProcess;
         final BufferedReader simulationOutput;
         ProcessBuilder pb;
         
         File dirStorage, fileMo, fileMos;
         String pathCompiler, pathSimulation, nameSimulation;
-        Map filterVariableReferences;
+        References references;
+        
+        simStopTime = simulationController.getSimulationStopTime();
+        simIntervals = simulationController.getSimulationIntervals();
+        simIntegrator = simulationController.getSimulationIntegrator();
         
         System.out.println("Getting working directory...");
         workingDirectory = getWorkingDirectory();
@@ -108,7 +110,7 @@ public class SimulationService
             fileMo = new File(dirStorage + File.separator + nameSimulation + ".mo");
             fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
             OpenModelicaExport.exportMO(dataDao , fileMo);
-            filterVariableReferences = OpenModelicaExport.exportMOS(dataDao , fileMos , fileMo , workingDirectory);
+            references = OpenModelicaExport.exportMOS(dataDao , fileMos , fileMo , workingDirectory);
             
         } catch (IOException ex) {
             throw new SimulationServiceException("Data export for OpenModelica failed! (" + ex + ")");
@@ -189,7 +191,7 @@ public class SimulationService
         /**
          * Start server.
          */
-        serverThread = server.StartThread(serverPort, filterVariableReferences);
+        serverThread = server.StartThread(serverPort, references);
         
         /**
          * Ausführen der Simulation.
@@ -405,11 +407,11 @@ public class SimulationService
             if (dirOpenModelica.exists() && dirOpenModelica.isDirectory()) {
 
                 pathCompiler = pathOpenModelica + "bin" + File.separator + "omc";
-                if (OS_Validator.isOsWindows()) {
+                if (Utility.isOsWindows()) {
                     pathCompiler = pathCompiler + ".exe";
-                } else if (OS_Validator.isOsUnix()) {
+                } else if (Utility.isOsUnix()) {
                     // TODO : OS is Linux
-                } else if (OS_Validator.isOsMac()) {
+                } else if (Utility.isOsMac()) {
                     // TODO : OS is Mac
                 } else {
                     // TODO : OS not supported
@@ -435,38 +437,16 @@ public class SimulationService
     private String parseSimulationExecutablePath(String output) {
         
         output = output.substring(output.lastIndexOf("{"));
-        output = parseSubstring(output, "\"", "\"");
+        output = Utility.parseSubstring(output, "\"", "\"");
         
         if (output == null) {
             return null;
         }
         
-        if (OS_Validator.isOsWindows()) {
+        if (Utility.isOsWindows()) {
             output += ".exe";
         }
         
         return output;
-    }
-        
-    /**
-     * Parses a substring. Parses a subject String from a given starting String 
-     * to a given ending String. Returns NULL if the String cannot be parsed.
-     * @param subject
-     * @param start
-     * @param end
-     * @return 
-     */
-    private static String parseSubstring(String subject, String start, String end){
-        
-        if (subject == null)
-            return null;
-        
-        int s = subject.indexOf(start) + start.length();
-        int e = subject.indexOf(end, s);
-        
-        if (s >= e)
-            return null;
-        
-        return subject.substring(s, e);
     }
 }

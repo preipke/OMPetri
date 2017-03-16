@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.tab.editor;
 
+import edu.unibi.agbi.gnius.business.controller.simulation.ResultsViewController;
 import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.service.exception.NodeCreationException;
@@ -45,6 +46,9 @@ public class EditorToolsController implements Initializable
     @FXML private SplitMenuButton buttonMenuCreate;
     @FXML private TextArea textLogArea;
     
+    private Stage resultsView;
+    private ResultsViewController resultsViewController;
+    
     public void CreateNode(MouseEvent target) {
         try {
             dataService.create(((NodeTypeChoice) choicesCreateNode.getSelectionModel().getSelectedItem()).getType() , target , Point2D.ZERO);
@@ -64,6 +68,13 @@ public class EditorToolsController implements Initializable
     @FXML
     public void OpenResultsView() {
         
+        if (resultsView != null) {
+            resultsView.show();
+            resultsView.centerOnScreen();
+            resultsViewController.UpdateChoices();
+            return;
+        }
+        
         Parent root;
         
         try {
@@ -73,15 +84,15 @@ public class EditorToolsController implements Initializable
             return;
         }
         
-        Stage stage = new Stage();
+        resultsView = new Stage();
         Scene scene = new Scene(root);
         
-//        scene.getStylesheets().add("/styles/Styles.css");
-//        scene.getStylesheets().add("/styles/gravis/nodes.css");
+        resultsView.setTitle("GraVisFX - Results View");
+        resultsView.setScene(scene);
+        resultsView.show();
         
-        stage.setTitle("GraVisFX - Results View");
-        stage.setScene(scene);
-        stage.show();
+        resultsViewController = (ResultsViewController) springFXMLLoader.getBean(ResultsViewController.class);
+        resultsViewController.UpdateChoices();
     }
     
     @FXML

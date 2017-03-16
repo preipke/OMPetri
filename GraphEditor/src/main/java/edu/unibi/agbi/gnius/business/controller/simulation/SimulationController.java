@@ -47,7 +47,7 @@ public class SimulationController implements Initializable
         simMenuControlsStart.setDisable(true);
         
         try {
-            simulationService.StartSimulation();
+            simulationService.simulate();
             
             simControlsStop.setDisable(false);
             simMenuControlsStop.setDisable(false);

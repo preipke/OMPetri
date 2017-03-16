@@ -39,4 +39,8 @@ public class SpringFXMLLoader {
         
         return loader.load();
     }
+    
+    public Object getBean(Class type) {
+        return context.getBean(type);
+    }
 }

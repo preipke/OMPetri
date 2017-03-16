@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javafx.beans.value.ObservableValue;
 
 /**
  *
@@ -119,6 +120,10 @@ public class Simulation
             return false;
         }
         
-        return simulation.getName().matches(simulationName);
+        if (simulationName != null) {
+            return simulationName.equals(simulation.getName());
+        } else {
+            return simulation.getName() == null;
+        }
     }
 }
