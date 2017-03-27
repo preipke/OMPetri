@@ -14,5 +14,5 @@ import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
  */
 public interface IGraphElement extends IGravisElement
 {
-    public IDataElement getRelatedDataElement();
+    public IDataElement getDataElement();
 }

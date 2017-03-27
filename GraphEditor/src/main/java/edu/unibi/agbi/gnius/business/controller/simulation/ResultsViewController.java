@@ -7,8 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.simulation;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
-import edu.unibi.agbi.petrinet.entity.IPN_Element;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -35,9 +34,13 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import edu.unibi.agbi.petrinet.entity.IElement;
 
 /**
- *
+ * TODO:
+ * - Column für Name in Legende hinzufügen, editierbar -> StringProperty
+ * - Achsennamen editierbar
+ * - Suchoptionen / Filter beim hinzufügen von Daten implementieren
  * @author PR
  */
 @Component
@@ -61,7 +64,7 @@ public class ResultsViewController implements Initializable
     
     private final DateTimeFormatter simulationChoiceNameFormatter = DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss");
     
-    private final Map<Simulation, Map<IPN_Element, Map<String, XYChart.Series>>> lineChartDataMap;
+    private final Map<Simulation, Map<IElement, Map<String, XYChart.Series>>> lineChartDataMap;
     private final ObservableList<LineChartData> lineChartDataList;
     
     public ResultsViewController() {
@@ -95,7 +98,7 @@ public class ResultsViewController implements Initializable
             }
         });
         
-        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getName()));
+        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getTime().format(simulationChoiceNameFormatter) + " " + cellData.getValue().getSimulation().getName()));
         columnElementType.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getElementType().toString()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getId()));
         columnValue.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
@@ -208,14 +211,14 @@ public class ResultsViewController implements Initializable
             Map<String,XYChart.Series> valueSerie = new HashMap();
             valueSerie.put(data.getValue(), data.getSeries());
             
-            Map<IPN_Element,Map<String,XYChart.Series>> elementMap = new HashMap();
+            Map<IElement,Map<String,XYChart.Series>> elementMap = new HashMap();
             elementMap.put(data.getElement(), valueSerie);
             
             lineChartDataMap.put(simulation, elementMap);
             
         } else {
             
-            IPN_Element element = data.getElement();
+            IElement element = data.getElement();
             
             // Element not in map?
             if (!lineChartDataMap.get(simulation).containsKey(element)) {
@@ -282,12 +285,12 @@ public class ResultsViewController implements Initializable
         int index, oldSize;
         
         SimulationChoice simulationChoice = (SimulationChoice) simulationChoiceBox.getSelectionModel().getSelectedItem();
-        Set<IPN_Element> elements = simulationChoice.getSimulation().getElementFilterReferences().keySet();
+        Set<IElement> elements = simulationChoice.getSimulation().getElementFilterReferences().keySet();
         
         ObservableList<Object> elementChoices = FXCollections.observableArrayList();
-        for (IPN_Element element : elements) {
+        for (IElement element : elements) {
             
-            if (element.getElementType() == PN_Element.Type.ARC) {
+            if (element.getElementType() == Element.Type.ARC) {
                 continue;
             }
             
@@ -326,12 +329,12 @@ public class ResultsViewController implements Initializable
     private class LineChartData
     {
         private final Simulation simulation;
-        private final IPN_Element element;
+        private final IElement element;
         private final String value;
         private final XYChart.Series series;
         private final BooleanProperty enabled;
         
-        private LineChartData(Simulation simulation, IPN_Element element, String value) {
+        private LineChartData(Simulation simulation, IElement element, String value) {
             this.simulation = simulation;
             this.element = element;
             this.value = value;
@@ -343,7 +346,7 @@ public class ResultsViewController implements Initializable
             return simulation;
         }
         
-        private IPN_Element getElement() {
+        private IElement getElement() {
             return element;
         }
         
@@ -403,13 +406,13 @@ public class ResultsViewController implements Initializable
     
     private class ElementChoice
     {
-        private final IPN_Element element;
+        private final IElement element;
         
-        private ElementChoice(IPN_Element element) {
+        private ElementChoice(IElement element) {
             this.element = element;
         }
         
-        private IPN_Element getElement() {
+        private IElement getElement() {
             return element;
         }
         

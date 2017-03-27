@@ -6,7 +6,6 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 
 /**
@@ -15,6 +14,5 @@ import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
  */
 public interface IGraphNode extends IGraphElement , IGravisNode
 {
-    public IDataNode getRelatedDataNode();
-    public void setRelatedElement(IDataNode dataNode) throws AssignmentDeniedException;
+    @Override public IDataNode getDataElement();
 }

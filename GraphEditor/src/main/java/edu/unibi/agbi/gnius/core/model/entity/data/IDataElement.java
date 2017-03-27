@@ -6,15 +6,15 @@
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.petrinet.entity.IPN_Element;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.List;
+import edu.unibi.agbi.petrinet.entity.IElement;
 
 /**
  *
  * @author PR
  */
-public interface IDataElement extends IPN_Element
+public interface IDataElement extends IElement
 {
     public List<Parameter> getParameter();
     public List<IGraphElement> getShapes();

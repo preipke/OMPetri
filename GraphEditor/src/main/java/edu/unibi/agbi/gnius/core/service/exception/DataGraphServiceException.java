@@ -9,17 +9,9 @@ package edu.unibi.agbi.gnius.core.service.exception;
  *
  * @author PR
  */
-public class EdgeCreationException extends Exception {
-    
-    public EdgeCreationException() {
-        super();
-    }
-    
-    public EdgeCreationException(String msg) {
+public class DataGraphServiceException extends Exception 
+{
+    public DataGraphServiceException(String msg) {
         super(msg);
-    }
-    
-    public EdgeCreationException(Throwable thr) {
-        super(thr);
     }
 }

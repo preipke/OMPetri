@@ -14,4 +14,7 @@ public class SimulationServiceException extends Exception
     public SimulationServiceException(String msg) {
         super(msg);
     }
+    public SimulationServiceException(Throwable throwable) {
+        super(throwable);
+    }
 }

@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.simulation;
 
-import edu.unibi.agbi.petrinet.entity.IPN_Element;
 import edu.unibi.agbi.petrinet.model.References;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javafx.beans.value.ObservableValue;
+import edu.unibi.agbi.petrinet.entity.IElement;
 
 /**
  *
@@ -92,7 +92,7 @@ public class Simulation
      * Gets the variable references.
      * @return 
      */
-    public Map<IPN_Element,List<String>> getElementFilterReferences() {
+    public Map<IElement,List<String>> getElementFilterReferences() {
         return simulationVariableReferences.getElementFilterReferences();
     }
     

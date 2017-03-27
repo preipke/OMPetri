@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.abstr.Place;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,10 +36,22 @@ public class DataPlace extends Place implements IDataNode
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
+    /**
+     * Sets the label text for this data node and all related shapes in the scene.
+     * @param text 
+     */
+    @Override
+    public void setLabelText(String text) {
+        for (IGraphElement shape : shapes) {
+            ((IGraphNode)shape).getLabel().setText(text);
+        }
+    }
+
+    @Override
     public void setName(String name) {
         this.name = name;
     }
@@ -48,7 +61,13 @@ public class DataPlace extends Place implements IDataNode
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    @Override
+    public String getLabelText() {
+        return ((IGraphNode)shapes.get(0)).getLabel().getText();
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 }

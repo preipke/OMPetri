@@ -13,14 +13,11 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
-import edu.unibi.agbi.gnius.core.service.exception.EdgeCreationException;
+import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.graph.entity.sub.IGravisSubElement;
-
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
-
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -32,7 +29,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -97,9 +93,17 @@ public class MouseEventHandler
             mouseEventMovedLatest = event;
             
             if (!isInitialized) {
-                mouseEventPressed = event;
+                mouseEventPressed = event; // avoid null-pointer
                 keyEventHandler.registerTo(graphPane.getScene());
                 isInitialized = true;
+            }
+            
+            if (!isPrimaryButtonDown) {
+                if (event.getTarget() instanceof IGravisElement) {
+                    selectionService.hover((IGravisElement)event.getTarget());
+                } else {
+                    selectionService.hover(null);
+                }
             }
         });
 
@@ -108,7 +112,11 @@ public class MouseEventHandler
          */
         graphPane.setOnMousePressed(( event ) -> {
             
-            editorDetailsController.update();
+            try {
+                editorDetailsController.StoreElementProperties();
+            } catch (DataGraphServiceException ex) {
+                editorToolsController.addToLog(ex.getMessage());
+            }
             
             isPrimaryButtonDown = false;
             isSecondaryButtonDown = false;
@@ -124,21 +132,21 @@ public class MouseEventHandler
                 
                 isPrimaryButtonDown = true;
 
-                if (event.getTarget() instanceof IGraphElement) {
+                /**
+                 * Clicking graph elements.
+                 */
                     
-                    /**
-                     * Clicking graph elements.
-                     */
+                if (event.getTarget() instanceof IGravisElement) {
                     
                     disableMode(isInNodeCreationMode);
                     
-                    IGravisElement ele;
+                    IGravisElement element;
                     final IGraphNode node;
                     
                     if (event.getTarget() instanceof IGravisSubElement) {
-                        ele = ((IGravisSubElement)event.getTarget()).getParentElement();
-                        if (ele instanceof IGraphNode) {
-                            node = (IGraphNode) ele;
+                        element = ((IGravisSubElement)event.getTarget()).getParentElement();
+                        if (element instanceof IGraphNode) {
+                            node = (IGraphNode) element;
                         } else {
                             node = null;
                         }
@@ -165,20 +173,20 @@ public class MouseEventHandler
                         if (isInFreeMode.get()) {
 
                             /**
-                             * Arc Creation Mode. Creating new arc after a 
+                             * Arc Creation Mode. Creates a new arc after a 
                              * certain time if event is not consumed.
                              */
                             
                             PauseTransition pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
                             pauseTransition.setOnFinished(e -> {
                                 if (!event.isConsumed()) {
-                                    editorDetailsController.hide();
+                                    editorDetailsController.HideElementProperties();
                                     try {
                                         setEditorMode(isInArcCreationMode);
                                         selectionService.unselectAll();
                                         selectionService.highlight(node);
                                         arcTemp = dataService.createTemporaryArc(node);
-                                    } catch (EditorModeLockException | AssignmentDeniedException ex) {
+                                    } catch (EditorModeLockException ex) {
                                         editorToolsController.addToLog(ex.getMessage());
                                     }
                                     System.out.println("Creating ARC!");
@@ -194,7 +202,7 @@ public class MouseEventHandler
                      * Clicking the pane.
                      */
                     
-                    editorDetailsController.hide();
+                    editorDetailsController.HideElementProperties();
 
                     if (!event.isControlDown()) {
                         selectionService.unselectAll(); // Clearing current selection.
@@ -223,9 +231,13 @@ public class MouseEventHandler
                         graphPane.getTopLayer().getChildren().add(selectionFrame);
                         
                     } else if (isInNodeCreationMode.get()) {
-
-                        editorToolsController.CreateNode(event); // Creating node at event location.
-
+                        
+                        // Creating node at event location.
+                        try {
+                            dataService.create(editorToolsController.getSelectedNodeType(), event);
+                        } catch (DataGraphServiceException ex) {
+                            editorToolsController.addToLog(ex);
+                        }
                     }
                     
                 }
@@ -290,12 +302,18 @@ public class MouseEventHandler
                     
                     try {
                         setEditorMode(isInDraggingMode);
-                        editorDetailsController.hide();
+                        editorDetailsController.HideElementProperties();
                     } catch (EditorModeLockException ex) {
                         editorToolsController.addToLog(ex.getMessage());
                     }
 
-                    if (event.getTarget() instanceof IGraphNode) {
+                    Object eventTarget = event.getTarget();
+
+                    if (eventTarget instanceof IGravisSubElement) {
+                        eventTarget = ((IGravisSubElement) eventTarget).getParentElement();
+                    }
+
+                    if (eventTarget instanceof IGraphNode) {
 
                         Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious);
                         Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest);
@@ -346,22 +364,21 @@ public class MouseEventHandler
                  * Arc Creation Mode. Binding or deleting arc.
                  */
                 
-                if (event.getPickResult().getIntersectedNode() instanceof IGraphNode) {
-                    
-                    IGraphNode target = (IGraphNode)event.getPickResult().getIntersectedNode();
-                    
+                Object eventTarget = event.getPickResult().getIntersectedNode();
+                
+                if (eventTarget instanceof IGravisSubElement) {
+                    eventTarget = ((IGravisSubElement)eventTarget).getParentElement();
+                }
+                if (eventTarget instanceof IGraphNode) {
                     try {
-                        dataService.connect(arcTemp.getSource() , target);
-                    } catch (EdgeCreationException | AssignmentDeniedException ex) {
+                        dataService.connect(arcTemp.getSource(), (IGraphNode)eventTarget);
+                    } catch (DataGraphServiceException ex) {
                         editorToolsController.addToLog(ex.getMessage());
                     }
-                } 
-                selectionService.unhighlight(arcTemp.getSource());
-                try {
-                    dataService.removeGraphArc(arcTemp);
-                } catch (AssignmentDeniedException ex) {
-                    editorToolsController.addToLog(ex.getMessage());
                 }
+                    
+                selectionService.unhighlight(arcTemp.getSource());
+                dataService.removeGraphArc(arcTemp);
                 
                 disableMode(isInArcCreationMode);
                 
@@ -373,15 +390,16 @@ public class MouseEventHandler
                      * Selecting elements by clicking.
                      */
                     
-                    if (event.getTarget() instanceof IGravisElement) {
+                    Object eventTarget = event.getTarget();
+                    IGraphElement node;
+                    
+                    if (eventTarget instanceof IGravisSubElement) {
+                        eventTarget = ((IGravisSubElement)event.getTarget()).getParentElement();
+                    }
+                    
+                    if (eventTarget instanceof IGravisElement) {
                         
-                        IGraphElement node;
-                        
-                        if (event.getTarget() instanceof IGravisSubElement) {
-                            node = (IGraphElement)((IGravisSubElement)event.getTarget()).getParentElement();
-                        } else {
-                            node = (IGraphElement)event.getTarget();
-                        }
+                        node = (IGraphElement) eventTarget;
                         
                         if (event.isControlDown()) {
                             if (node.getElementHandles().get(0).isSelected()) {
@@ -391,12 +409,12 @@ public class MouseEventHandler
                                 selectionService.select(node);
                                 selectionService.highlightRelated(node);
                             }
-                            editorDetailsController.hide();
+                            editorDetailsController.HideElementProperties();
                         } else {
                             selectionService.unselectAll();
                             selectionService.select(node);
                             selectionService.highlightRelated(node);
-                            editorDetailsController.getDetails(node);
+                            editorDetailsController.ShowElementProperties(node);
                         }
                     } 
                 }
@@ -408,12 +426,11 @@ public class MouseEventHandler
         // reihenfolge: pressed -> released & clicked
         graphPane.setOnMouseClicked(( event ) -> {
             
-            System.out.println("Clicked!");
             mouseEventPressed.consume();
+            event.consume();
+            
             isPrimaryButtonDown = false;
             disableMode(isInDraggingMode);
-            
-            event.consume();
         });
     };
     

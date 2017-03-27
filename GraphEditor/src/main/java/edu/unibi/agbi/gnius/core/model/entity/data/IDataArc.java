@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
-import edu.unibi.agbi.petrinet.entity.IPN_Arc;
+import edu.unibi.agbi.petrinet.entity.IArc;
 
 /**
  *
  * @author PR
  */
-public interface IDataArc extends IDataElement, IPN_Arc
+public interface IDataArc extends IDataElement, IArc
 {
     @Override public IDataNode getSource();
     @Override public IDataNode getTarget();

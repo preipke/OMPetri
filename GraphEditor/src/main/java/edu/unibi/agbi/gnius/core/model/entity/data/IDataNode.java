@@ -5,14 +5,18 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
-import edu.unibi.agbi.petrinet.entity.IPN_Node;
+import edu.unibi.agbi.petrinet.entity.INode;
 
 /**
  *
  * @author PR
  */
-public interface IDataNode extends IDataElement , IPN_Node
+public interface IDataNode extends IDataElement , INode
 {
     public String getName();
     public String getDescription();
+    public String getLabelText();
+    public void setName(String text);
+    public void setDescription(String text);
+    public void setLabelText(String text);
 }

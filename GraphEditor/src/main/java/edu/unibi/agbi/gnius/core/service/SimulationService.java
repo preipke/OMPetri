@@ -9,6 +9,7 @@ import edu.unibi.agbi.gnius.business.controller.simulation.SimulationController;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.dao.SimulationDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
+import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.core.simulation.OpenModelicaServer;
 import edu.unibi.agbi.gnius.util.Utility;
@@ -75,7 +76,11 @@ public class SimulationService
     
     public void simulate() throws SimulationServiceException {
         
-        dataGraphService.UpdateData();
+        try {
+            dataGraphService.UpdateData();
+        } catch (DataGraphServiceException ex) {
+            throw new SimulationServiceException(ex);
+        }
         
         final Process buildProcess, simulationProcess;
         final BufferedReader simulationOutput;

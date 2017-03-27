@@ -8,14 +8,11 @@ package edu.unibi.agbi.gnius.util;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 import java.util.List;
-
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

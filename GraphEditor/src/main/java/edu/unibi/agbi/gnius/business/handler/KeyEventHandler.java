@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.business.handler;
 import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
+import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -50,11 +50,7 @@ public class KeyEventHandler
             else if (event.getCode().equals(KeyCode.DELETE)) {
                 
                 Platform.runLater(() -> {
-                    try {
-                        dataService.removeSelectedShapes();
-                    } catch (AssignmentDeniedException ex) {
-                        editorToolsController.addToLog(ex.getMessage());
-                    }
+                    dataService.removeSelectedShapes();
                 });
             }
             
@@ -76,7 +72,11 @@ public class KeyEventHandler
                 } else if (event.getCode().equals(KeyCode.V)) {
 
                     selectionService.unselectAll();
-                    dataService.paste(isCloning);
+                    try {
+                        dataService.paste(isCloning);
+                    } catch (DataGraphServiceException ex) {
+                        editorToolsController.addToLog(ex);
+                    }
                 }
             }
 

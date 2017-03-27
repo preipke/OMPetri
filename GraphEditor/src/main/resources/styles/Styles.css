@@ -1,12 +1,30 @@
-.button {
+/*.button {
     -fx-font-weight: bold;
-    //-fx-border-color: steelblue;
-    //-fx-border-width: 2;
-    //-fx-border-style: dashed;
-}
+    -fx-border-color: steelblue;
+    -fx-border-width: 2;
+    -fx-border-style: dashed;
+}*/
 
 .editorPane {
     -fx-background-color: whitesmoke;
     -fx-border-color: black;
     -fx-border-width: 1;
 }
+
+/* Custom LineChart colors for later use */
+.default-color0.chart-line-symbol { -fx-background-color: #f9d900, white; }
+.default-color1.chart-line-symbol { -fx-background-color: #a9e200, white; }
+.default-color2.chart-line-symbol { -fx-background-color: #22bad9, white; }
+.default-color3.chart-line-symbol { -fx-background-color: #0181e2, white; }
+.default-color4.chart-line-symbol { -fx-background-color: #2f357f, white; }
+.default-color5.chart-line-symbol { -fx-background-color: #860061, white; }
+.default-color6.chart-line-symbol { -fx-background-color: #c62b00, white; }
+.default-color7.chart-line-symbol { -fx-background-color: #ff5700, white; }
+.default-color0.chart-series-line { -fx-stroke: #f9d900; }
+.default-color1.chart-series-line { -fx-stroke: #a9e200; }
+.default-color2.chart-series-line { -fx-stroke: #22bad9; }
+.default-color3.chart-series-line { -fx-stroke: #0181e2; }
+.default-color4.chart-series-line { -fx-stroke: #2f357f; }
+.default-color5.chart-series-line { -fx-stroke: #860061; }
+.default-color6.chart-series-line { -fx-stroke: #c62b00; }
+.default-color7.chart-series-line { -fx-stroke: #ff5700; }

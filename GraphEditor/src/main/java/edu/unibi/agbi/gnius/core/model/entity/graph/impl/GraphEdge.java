@@ -5,13 +5,10 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.AssignmentDeniedException;
-import edu.unibi.agbi.gravisfx.graph.entity.GravisEdge;
+import edu.unibi.agbi.gravisfx.graph.entity.parent.connection.GravisEdge;
 
 /**
  *
@@ -19,38 +16,16 @@ import edu.unibi.agbi.gravisfx.graph.entity.GravisEdge;
  */
 public class GraphEdge extends GravisEdge implements IGraphArc
 {
-    private DataArc dataArc;
+    private final DataArc dataArc;
     
-    public GraphEdge(IGraphNode source, IGraphNode target) {
+    public GraphEdge(IGraphNode source, IGraphNode target, DataArc dataArc) {
         super(source , target);
-    }
-    
-    public GraphEdge(IGraphNode source, IGraphNode target, IDataArc dataArc) throws AssignmentDeniedException {
-        this(source , target);
-        if (!(dataArc instanceof DataArc)) {
-            throw new AssignmentDeniedException("Must assign an arc! Action denied.");
-        }
-        this.dataArc = (DataArc) dataArc;
-    }
-
-    @Override
-    public void setRelatedElement(IDataArc dataArc) throws AssignmentDeniedException {
-        if (this.dataArc != null) {
-            throw new AssignmentDeniedException("Related arc has already been assigned! Action denied.");
-        } else if (!(dataArc instanceof DataArc)) {
-            throw new AssignmentDeniedException("Must assign an arc! Action denied.");
-        }
-        this.dataArc = (DataArc) dataArc;
+        this.dataArc = dataArc;
     }
     
     @Override
-    public DataArc getRelatedDataArc() {
+    public DataArc getDataElement() {
         return dataArc;
-    }
-    
-    @Override
-    public IDataElement getRelatedDataElement() {
-        return getRelatedDataArc();
     }
 
     @Override

@@ -13,8 +13,9 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 
-import edu.unibi.agbi.petrinet.entity.PN_Element;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -78,20 +79,20 @@ public class EditorDetailsController implements Initializable
     
     @FXML private GridPane arcPropertyGrid;
     @FXML private TextField propertyWeight;
-    @FXML private TextField propertySource;
-    @FXML private TextField propertyTarget;
     
-    private IDataElement activeDataNode;
+    private IDataElement selectedDataNode;
     
     /**
-     * Shows the details for the given entity.
+     * Shows the properties for the given graph element. The values are
+     * extracted from the related data element.
+     * 
      * @param element 
      */
-    public void getDetails(IGraphElement element) {
+    public void ShowElementProperties(IGraphElement element) {
         
-        clear();
+        nodePropertiesBox.getChildren().clear();
         
-        activeDataNode = element.getRelatedDataElement();
+        selectedDataNode = element.getDataElement();
 
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
         ObservableList<ColourChoice> choicesColour = FXCollections.observableArrayList();
@@ -100,11 +101,11 @@ public class EditorDetailsController implements Initializable
         
         int typeIndex = 0;
         
-        switch (activeDataNode.getElementType()) {
+        switch (selectedDataNode.getElementType()) {
                 
             case ARC:
                 
-                DataArc arc = (DataArc) activeDataNode;
+                DataArc arc = (DataArc) selectedDataNode;
                 
                 DataArc.Type arcType;
                 for (int i = 0; i < DataArc.Type.values().length; i++) {
@@ -128,15 +129,13 @@ public class EditorDetailsController implements Initializable
 //                    weight = weights.get(null);
 //                }
                 propertyWeight.setText(weight.getValue());
-                propertySource.setText(((IDataNode)arc.getSource()).getName());
-                propertyTarget.setText(((IDataNode)arc.getTarget()).getName());
                 
                 nodePropertiesBox.getChildren().add(arcPropertyGrid);
                 break;
             
             case PLACE:
                 
-                DataPlace place = (DataPlace) activeDataNode;
+                DataPlace place = (DataPlace) selectedDataNode;
                 
                 DataPlace.Type placeType;
                 for (int i = 0; i < DataPlace.Type.values().length; i++) {
@@ -147,9 +146,7 @@ public class EditorDetailsController implements Initializable
                     choicesSubtype.add(new PlaceTypeChoice(placeType));
                 }
                 
-                propertyName.setText(place.getName());
-                propertyLabel.setText(place.getId());
-                propertyDescription.setText(place.getDescription());
+                printNodeInfo(place);
                 
                 Map<Colour , Token> tokens = place.getTokenMap();
                 Token token = null;
@@ -173,7 +170,7 @@ public class EditorDetailsController implements Initializable
                 
             case TRANSITION:
                 
-                DataTransition transition = (DataTransition) activeDataNode;
+                DataTransition transition = (DataTransition) selectedDataNode;
                 
                 DataTransition.Type transitionType;
                 for (int i = 0; i < DataTransition.Type.values().length; i++) {
@@ -184,19 +181,16 @@ public class EditorDetailsController implements Initializable
                     choicesSubtype.add(new TransitionTypeChoice(transitionType));
                 }
                 
-                propertyName.setText(transition.getName());
-                propertyLabel.setText(transition.getId());
-                propertyDescription.setText(transition.getDescription());
+                printNodeInfo(transition);
                 
-                Function function = transition.getFunction();
-                propertyFunction.setText(function.toString());
+                propertyFunction.setText(transition.getFunction().toString());
                 
                 nodePropertiesBox.getChildren().add(idPropertyBox);
                 nodePropertiesBox.getChildren().add(transitionPropertyGrid);
                 break;
         }
         
-        propertyType.setText(activeDataNode.getElementType().toString());
+        propertyType.setText(selectedDataNode.getElementType().toString());
         propertySubtypeChoices.setItems(choicesSubtype);
         propertySubtypeChoices.getSelectionModel().select(typeIndex);
 
@@ -207,19 +201,20 @@ public class EditorDetailsController implements Initializable
     }
     
     /**
-     * Updates properties. Stores the values from the textfields within the
-     * according entity.
+     * Stores node properties. Stores the values from the textfields within the
+     * according entity, overwrites old values.
+     * @throws edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException
      */
-    public void update() {
+    public void StoreElementProperties() throws DataGraphServiceException {
         
-        if (activeDataNode == null) {
+        if (selectedDataNode == null) {
             return;
         }
         
         // TODO
         // store values according to the selected colour
         
-        PN_Element.Type elementType = activeDataNode.getElementType();
+        Element.Type elementType = selectedDataNode.getElementType();
         
         ColourChoice colourChoice;
         Colour colour;
@@ -231,13 +226,15 @@ public class EditorDetailsController implements Initializable
                 colourChoice = (ColourChoice)propertyColorChoices.getSelectionModel().getSelectedItem();
                 colour = colourChoice.getColour();
                 
-                DataArc arc = (DataArc) activeDataNode;
+                DataArc arc = (DataArc) selectedDataNode;
                 
                 ArcTypeChoice arcTypeChoice = (ArcTypeChoice) propertySubtypeChoices.getSelectionModel().getSelectedItem();
                 DataArc.Type arcType = arcTypeChoice.getType();
                 
-                arc.setArcType(arcType);
-                dataService.setArcTypeDefault(arcType);
+                if (arc.getArcType() != arcType) {
+                    dataService.setArcTypeDefault(arcType);
+                    dataService.setTypeFor(arc, arcType);
+                }
                 
                 Weight weight = new Weight(colour);
                 if (!propertyWeight.getText().isEmpty()) {
@@ -252,13 +249,15 @@ public class EditorDetailsController implements Initializable
                 colourChoice = (ColourChoice)propertyColorChoices.getSelectionModel().getSelectedItem();
                 colour = colourChoice.getColour();
                 
-                DataPlace place = (DataPlace) activeDataNode;
+                DataPlace place = (DataPlace) selectedDataNode;
                 
                 PlaceTypeChoice placeTypeChoice = (PlaceTypeChoice) propertySubtypeChoices.getSelectionModel().getSelectedItem();
                 DataPlace.Type placeType = placeTypeChoice.getType();
                 
-                place.setPlaceType(placeType);
-                dataService.setPlaceTypeDefault(placeType);
+                if (place.getPlaceType() != placeType) {
+                    dataService.setPlaceTypeDefault(placeType);
+                    dataService.setTypeFor(place, placeType);
+                }
                 
                 Token token = new Token(colour);
                 if (!propertyToken.getText().isEmpty()) {
@@ -284,24 +283,21 @@ public class EditorDetailsController implements Initializable
                 }
                 place.setToken(token);
                 
-                if (!propertyName.getText().isEmpty()) {
-                    place.setName(propertyName.getText());
-                }
-                if (!propertyDescription.getText().isEmpty()) {
-                    place.setDescription(propertyDescription.getText());
-                }
+                storeNodeInfo(place);
                 
                 break;
                 
             case TRANSITION:
                 
-                DataTransition transition = (DataTransition) activeDataNode;
+                DataTransition transition = (DataTransition) selectedDataNode;
                 
                 TransitionTypeChoice transitionTypeChoice = (TransitionTypeChoice) propertySubtypeChoices.getSelectionModel().getSelectedItem();
                 DataTransition.Type transitionType = transitionTypeChoice.getType();
                 
-                transition.setTransitionType(transitionType);
-                dataService.setTransitionTypeDefault(transitionType);
+                if (transition.getTransitionType() != transitionType) {
+                    dataService.setTransitionTypeDefault(transitionType);
+                    dataService.setTypeFor(transition, transitionType);
+                }
                 
                 Function function = new Function();
                 if (!propertyFunction.getText().isEmpty()) {
@@ -309,36 +305,56 @@ public class EditorDetailsController implements Initializable
                 }
                 transition.setFunction(function);
                 
-                if (!propertyName.getText().isEmpty()) {
-                    transition.setName(propertyName.getText());
-                }
-                if (!propertyDescription.getText().isEmpty()) {
-                    transition.setDescription(propertyDescription.getText());
-                }
+                storeNodeInfo(transition);
                 
                 break;
         }
     }
     
     /**
-     * Reset texfields. Discards changes and shows the current values.
+     * Hides node properties. Clears and hides the details frame.
      */
-    public void reset() {
-        
-    }
-    
-    /**
-     * Clear details. Hides the node specific grids.
-     */
-    public void clear() {
+    public void HideElementProperties() {
         nodePropertiesBox.getChildren().clear();
+        detailsBox.setVisible(false);
     }
     
     /**
-     * Hide details. Completely hides the details box.
+     * Prints info for the given node within the property info textfields.
+     * @param node 
      */
-    public void hide() {
-        clear();
+    private void printNodeInfo(IDataNode node) {
+
+        propertyName.setText(node.getName());
+        propertyLabel.setText(node.getLabelText());
+        propertyDescription.setText(node.getDescription());
+    }
+    
+    /**
+     * Stores info from the property textfields within the given node.
+     * @param node 
+     */
+    private void storeNodeInfo(IDataNode node) {
+        
+        if (!propertyName.getText().isEmpty()) {
+            node.setName(propertyName.getText());
+        } else {
+            node.setName("");
+        }
+        if (!propertyLabel.getText().isEmpty()) {
+            node.setLabelText(propertyLabel.getText());
+        } else {
+            node.setLabelText("");
+        }
+        if (!propertyDescription.getText().isEmpty()) {
+            node.setDescription(propertyDescription.getText());
+        } else {
+            node.setDescription("");
+        }
+    }
+
+    @Override
+    public void initialize(URL location , ResourceBundle resources) {
         detailsBox.setVisible(false);
     }
 
@@ -412,10 +428,5 @@ public class EditorDetailsController implements Initializable
         public String toString() {
             return type.toString();
         }
-    }
-
-    @Override
-    public void initialize(URL location , ResourceBundle resources) {
-        detailsBox.setVisible(false);
     }
 }

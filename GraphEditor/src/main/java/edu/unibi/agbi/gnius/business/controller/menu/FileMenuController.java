@@ -37,7 +37,7 @@ public class FileMenuController implements Initializable
         File file = fileChooser.showSaveDialog(editorPaneController.getStage());
         
         try {
-            OpenModelicaExport.exportMO(dataService.getPetriNet() , file);
+            OpenModelicaExport.exportMO(dataService.getDataDao() , file);
         } catch (IOException ex) {
 
         }
