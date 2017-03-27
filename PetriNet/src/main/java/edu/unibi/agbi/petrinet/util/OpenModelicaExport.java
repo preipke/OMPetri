@@ -5,9 +5,6 @@
  */
 package edu.unibi.agbi.petrinet.util;
 
-import edu.unibi.agbi.petrinet.entity.IPN_Arc;
-import edu.unibi.agbi.petrinet.entity.IPN_Element;
-import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.abstr.Place;
 import edu.unibi.agbi.petrinet.entity.abstr.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -27,6 +24,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.entity.INode;
 
 /**
  *
@@ -56,10 +56,10 @@ public class OpenModelicaExport
     
     public static File exportMO(PetriNet petriNet , File file) throws IOException {
 
-        Collection<IPN_Arc> arcs = petriNet.getArcs();
+        Collection<IArc> arcs = petriNet.getArcs();
         Collection<Colour> colors = petriNet.getColours();
-        Collection<IPN_Node> places = petriNet.getPlaces();
-        Collection<IPN_Node> transitions = petriNet.getTransitions();
+        Collection<INode> places = petriNet.getPlaces();
+        Collection<INode> transitions = petriNet.getTransitions();
 
         boolean isColoredPn = colors.size() != 1;
 
@@ -105,12 +105,13 @@ public class OpenModelicaExport
         Function function;
         Token token;
         Weight weight;
-        IPN_Node arcSource, arcTarget;
+        INode arcSource;
+        INode arcTarget;
         Place place;
         Transition transition;
         int index;
 
-        for (IPN_Node nPlace : places) {
+        for (INode nPlace : places) {
 
             place = (Place)nPlace;
 
@@ -215,7 +216,7 @@ public class OpenModelicaExport
         /**
          * Transitions.
          */
-        for (IPN_Node nTransition : transitions) {
+        for (INode nTransition : transitions) {
 
             transition = (Transition)nTransition;
 
@@ -260,7 +261,7 @@ public class OpenModelicaExport
             tmp1 = "";
             isFirst = true;
 
-            for (IPN_Arc arc : transition.getArcsIn()) {
+            for (IArc arc : transition.getArcsIn()) {
 
                 if (isFirst) {
 
@@ -323,7 +324,7 @@ public class OpenModelicaExport
             tmp2 = "";
             isFirst = true;
 
-            for (IPN_Arc arc : transition.getArcsOut()) {
+            for (IArc arc : transition.getArcsOut()) {
 
                 if (isFirst) {
 
@@ -394,7 +395,7 @@ public class OpenModelicaExport
         writer.append("equation");
         writer.println();
 
-        for (IPN_Arc a : arcs) {
+        for (IArc a : arcs) {
 
             writer.append(INDENT);
             writer.append("connect(");
@@ -403,7 +404,7 @@ public class OpenModelicaExport
             arcTarget = a.getTarget();
 
             index = 1;
-            for (IPN_Arc arc : arcSource.getArcsOut()) {
+            for (IArc arc : arcSource.getArcsOut()) {
                 if (arcTarget.equals(arc.getTarget())) {
                     break;
                 }
@@ -416,7 +417,7 @@ public class OpenModelicaExport
             }
 
             index = 1;
-            for (IPN_Arc arc : arcTarget.getArcsIn()) {
+            for (IArc arc : arcTarget.getArcsIn()) {
                 if (arcSource.equals(arc.getSource())) {
                     break;
                 }
@@ -463,17 +464,17 @@ public class OpenModelicaExport
         int index;
         
         // Removes previous filter names
-        for (IPN_Element ele : petriNet.getArcs()) {
+        for (IElement ele : petriNet.getArcs()) {
             ele.setFilterNames(new ArrayList());
         }
-        for (IPN_Element ele : petriNet.getPlaces()) {
+        for (IElement ele : petriNet.getPlaces()) {
             ele.setFilterNames(new ArrayList());
         }
-        for (IPN_Element ele : petriNet.getTransitions()) {
+        for (IElement ele : petriNet.getTransitions()) {
             ele.setFilterNames(new ArrayList());
         }
         
-        for (IPN_Node place : petriNet.getPlaces()) {
+        for (INode place : petriNet.getPlaces()) {
             
             tmp = "'" + place.getId() + "'.t";
             filter += tmp + "|";
@@ -481,7 +482,7 @@ public class OpenModelicaExport
             references.addFilterReference(tmp, place);
             
             index = 1;
-            for (IPN_Arc arc : place.getArcsOut()) {
+            for (IArc arc : place.getArcsOut()) {
                 
                 tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
                 filter += tmp + "|";
@@ -497,7 +498,7 @@ public class OpenModelicaExport
             }
             
             index = 1;
-            for (IPN_Arc arc : place.getArcsIn()) {
+            for (IArc arc : place.getArcsIn()) {
                 
                 tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
                 filter += tmp + "|";
@@ -513,7 +514,7 @@ public class OpenModelicaExport
             }
         }
 
-        for (IPN_Node transition : petriNet.getTransitions()) {
+        for (INode transition : petriNet.getTransitions()) {
             
             tmp = "'" + transition.getId() + "'.fire";
             filter += tmp + "|";

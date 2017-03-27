@@ -6,14 +6,12 @@
 package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
-import edu.unibi.agbi.petrinet.entity.PN_Node;
 
 /**
  *
  * @author PR
  */
-public abstract class Transition extends PN_Node
+public abstract class Transition extends Node
 {
     private static final String IDENT = "T";
     private static int COUNT = 0;
@@ -26,24 +24,24 @@ public abstract class Transition extends PN_Node
 
         super(IDENT + ++COUNT);
         
-        type = PN_Element.Type.TRANSITION;
+        type = Element.Type.TRANSITION;
         
         function = new Function();
     }
 
-    public void setFunction(Function function) {
+    public final void setFunction(Function function) {
         this.function = function;
     }
 
-    public Function getFunction() {
+    public final Function getFunction() {
         return function;
     }
     
-    public void setTransitionType(Type transitionType) {
+    public final void setTransitionType(Type transitionType) {
         this.transitionType = transitionType;
     }
     
-    public Type getTransitionType() {
+    public final Type getTransitionType() {
         return transitionType;
     }
     

@@ -5,9 +5,6 @@
  */
 package edu.unibi.agbi.petrinet.entity.abstr;
 
-import edu.unibi.agbi.petrinet.entity.IPN_Arc;
-import edu.unibi.agbi.petrinet.entity.IPN_Node;
-import edu.unibi.agbi.petrinet.entity.PN_Element;
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.PetriNet;
@@ -15,23 +12,25 @@ import edu.unibi.agbi.petrinet.model.Weight;
 
 import java.util.HashMap;
 import java.util.Map;
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.INode;
 
 /**
  *
  * @author PR
  */
-public abstract class Arc extends PN_Element implements IPN_Arc
+public abstract class Arc extends Element implements IArc
 {
     private Type arcType;
     
-    protected IPN_Node target;
-    protected IPN_Node source;
+    protected INode target;
+    protected INode source;
     
     private final Map<Colour,Weight> weights;
     
-    public Arc(IPN_Node source, IPN_Node target) {
+    public Arc(INode source, INode target) {
         
-        type = PN_Element.Type.ARC;
+        type = Element.Type.ARC;
         
         this.source = source;
         this.target = target;
@@ -42,7 +41,7 @@ public abstract class Arc extends PN_Element implements IPN_Arc
         weights.put(PetriNet.DEFAULT_COLOUR, new Weight(PetriNet.DEFAULT_COLOUR));
     }
 
-    public void setTarget(IPN_Node target) throws IllegalAssignmentException {
+    public void setTarget(INode target) throws IllegalAssignmentException {
         if (source != null) {
             if (source instanceof Place && target instanceof Place) {
                 throw new IllegalAssignmentException("Cannot assign target and source to be places!");
@@ -54,7 +53,7 @@ public abstract class Arc extends PN_Element implements IPN_Arc
         this.target = target;
     }
 
-    public void setSource(IPN_Node source) throws IllegalAssignmentException {
+    public void setSource(INode source) throws IllegalAssignmentException {
         if (target != null) {
             if (source instanceof Place && target instanceof Place) {
                 throw new IllegalAssignmentException("Cannot assign target and source to be places!");
@@ -67,12 +66,12 @@ public abstract class Arc extends PN_Element implements IPN_Arc
     }
 
     @Override
-    public IPN_Node getTarget() {
+    public INode getTarget() {
         return target;
     }
 
     @Override
-    public IPN_Node getSource() {
+    public INode getSource() {
         return source;
     }
     

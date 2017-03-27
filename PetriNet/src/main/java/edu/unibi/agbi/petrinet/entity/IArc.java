@@ -6,15 +6,18 @@
 package edu.unibi.agbi.petrinet.entity;
 
 import edu.unibi.agbi.petrinet.entity.abstr.Arc;
-import java.util.List;
+import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Weight;
+import java.util.Map;
 
 /**
  *
  * @author PR
  */
-public interface IPN_Node extends IPN_Element
+public interface IArc extends IElement
 {
-    public List<IPN_Arc> getArcsOut();
-    public List<IPN_Arc> getArcsIn();
-    public boolean isConstant();
+    public INode getSource();
+    public INode getTarget();
+    public Weight getWeight(Colour colour);
+    public Map<Colour,Weight> getWeightMap();
 }

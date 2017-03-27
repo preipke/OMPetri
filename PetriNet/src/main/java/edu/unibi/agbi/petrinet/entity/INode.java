@@ -5,18 +5,16 @@
  */
 package edu.unibi.agbi.petrinet.entity;
 
+import edu.unibi.agbi.petrinet.entity.abstr.Arc;
 import java.util.List;
 
 /**
  *
  * @author PR
  */
-public interface IPN_Element
+public interface INode extends IElement
 {
-    public String getId();
-    public void setFilterNames(List<String> names);
-    public void addFilterName(String name);
-    public List<String> getFilterNames();
-    public PN_Element.Type getElementType();
-    public boolean isEnabled();
+    public List<IArc> getArcsOut();
+    public List<IArc> getArcsIn();
+    public boolean isConstant();
 }

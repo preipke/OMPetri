@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity;
+package edu.unibi.agbi.petrinet.entity.abstr;
 
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
  *
  * @author pr
  */
-public abstract class PN_Element implements IPN_Element {
+public abstract class Element implements IElement {
     
     protected Type type;
     
@@ -24,7 +25,7 @@ public abstract class PN_Element implements IPN_Element {
     
     private final List<Parameter> parameter;
     
-    public PN_Element() {
+    public Element() {
         parameter = new ArrayList();
     }
     

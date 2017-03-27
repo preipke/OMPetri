@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity;
+package edu.unibi.agbi.petrinet.entity.abstr;
 
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Arc;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +15,14 @@ import java.util.List;
  *
  * @author PR
  */
-public abstract class PN_Node extends PN_Element implements IPN_Node
+public abstract class Node extends Element implements INode
 {
     private boolean isConstant = true;
     
-    private final List<IPN_Arc> arcsIn;
-    private final List<IPN_Arc> arcsOut;
+    private final List<IArc> arcsIn;
+    private final List<IArc> arcsOut;
     
-    public PN_Node(String internalId) {
+    public Node(String internalId) {
         
         id = internalId;
         
@@ -38,12 +40,12 @@ public abstract class PN_Node extends PN_Element implements IPN_Node
     }
 
     @Override
-    public List<IPN_Arc> getArcsIn() {
+    public List<IArc> getArcsIn() {
         return arcsIn;
     }
 
     @Override
-    public List<IPN_Arc> getArcsOut() {
+    public List<IArc> getArcsOut() {
         return arcsOut;
     }
 }

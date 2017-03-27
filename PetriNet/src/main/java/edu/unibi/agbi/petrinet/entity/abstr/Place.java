@@ -5,8 +5,6 @@
  */
 package edu.unibi.agbi.petrinet.entity.abstr;
 
-import edu.unibi.agbi.petrinet.entity.PN_Element;
-import edu.unibi.agbi.petrinet.entity.PN_Node;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -19,7 +17,7 @@ import java.util.Map;
  *
  * @author PR
  */
-public abstract class Place extends PN_Node
+public abstract class Place extends Node
 {
     private static final String IDENT = "P";
     private static int COUNT = 0;
@@ -32,33 +30,33 @@ public abstract class Place extends PN_Node
 
         super(IDENT + ++COUNT);
         
-        type = PN_Element.Type.PLACE;
+        type = Element.Type.PLACE;
         
         token = new HashMap();
         token.put(PetriNet.DEFAULT_COLOUR , new Token(PetriNet.DEFAULT_COLOUR));
     }
     
-    public void setToken(Token token) {
+    public final void setToken(Token token) {
         this.token.put(token.getColour() , token);
     }
     
-    public Token getToken(Colour colour) {
+    public final Token getToken(Colour colour) {
         return token.get(colour);
     }
     
-    public Collection<Token> getToken() {
+    public final Collection<Token> getToken() {
         return token.values();
     }
     
-    public Map<Colour, Token> getTokenMap() {
+    public final Map<Colour, Token> getTokenMap() {
         return token;
     }
     
-    public void setPlaceType(Type placeType) {
+    public final void setPlaceType(Type placeType) {
         this.placeType = placeType;
     }
     
-    public Type getPlaceType() {
+    public final Type getPlaceType() {
         return placeType;
     }
     

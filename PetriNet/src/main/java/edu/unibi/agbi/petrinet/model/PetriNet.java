@@ -5,8 +5,6 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
-import edu.unibi.agbi.petrinet.entity.IPN_Arc;
-import edu.unibi.agbi.petrinet.entity.IPN_Node;
 import edu.unibi.agbi.petrinet.entity.abstr.Place;
 import java.util.ArrayList;
 
@@ -14,6 +12,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.INode;
 
 /**
  *
@@ -29,10 +29,10 @@ public class PetriNet
     
     private final List<Colour> colors;
     
-    private final Map<String,IPN_Arc> arcs;
-    private final Map<String,IPN_Node> places;
-    private final Map<String,IPN_Node> transitions;
-    private final Map<String,IPN_Node> placesAndTransitions; // TODO remove if places and transitions can have the same names
+    private final Map<String,IArc> arcs;
+    private final Map<String,INode> places;
+    private final Map<String,INode> transitions;
+    private final Map<String,INode> placesAndTransitions; // TODO remove if places and transitions can have the same names
     
     public PetriNet() {
         colors = new ArrayList();
@@ -52,7 +52,7 @@ public class PetriNet
         return true;
     }
     
-    public boolean add(IPN_Arc arc) {
+    public boolean add(IArc arc) {
         if (arcs.containsKey(arc.getId())) {
             return false;
         } 
@@ -60,7 +60,7 @@ public class PetriNet
         return true;
     }
     
-    public boolean add(IPN_Node node) {
+    public boolean add(INode node) {
         if (placesAndTransitions.containsKey(node.getId())) {
             return false;
         } 
@@ -73,7 +73,7 @@ public class PetriNet
         return true;
     }
     
-    public Collection<IPN_Arc> getArcs() {
+    public Collection<IArc> getArcs() {
         return arcs.values();
     }
     
@@ -81,15 +81,15 @@ public class PetriNet
         return colors;
     }
     
-    public Collection<IPN_Node> getPlaces() {
+    public Collection<INode> getPlaces() {
         return places.values();
     }
     
-    public Collection<IPN_Node> getPlacesAndTransitions() {
+    public Collection<INode> getPlacesAndTransitions() {
         return placesAndTransitions.values();
     }
     
-    public Collection<IPN_Node> getTransitions() {
+    public Collection<INode> getTransitions() {
         return transitions.values();
     }
 
