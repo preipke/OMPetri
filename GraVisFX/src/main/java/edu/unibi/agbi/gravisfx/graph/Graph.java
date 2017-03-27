@@ -7,7 +7,8 @@ package edu.unibi.agbi.gravisfx.graph;
 
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.layer.EdgeLayer;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.graph.layer.ConnectionLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Graph. Serves as a service to access the underlying data models.
+ * The Graph model. Serves as an access object to the underlying data.
  * @author PR
  */
 public class Graph
@@ -24,10 +25,10 @@ public class Graph
     
     private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
-    private final EdgeLayer edgeLayer;
+    private final ConnectionLayer connectionLayer;
     
     private final List<IGravisNode> nodes;
-    private final List<IGravisConnection> edges;
+    private final List<IGravisConnection> connections;
     
     public Graph() {
         
@@ -35,10 +36,10 @@ public class Graph
         
         labelLayer = topLayer.getLabelLayer();
         nodeLayer = topLayer.getNodeLayer();
-        edgeLayer = topLayer.getEdgeLayer();
+        connectionLayer = topLayer.getConnectionLayer();
         
         nodes = new ArrayList();
-        edges = new ArrayList();
+        connections = new ArrayList();
     }
     
     public TopLayer getTopLayer() {
@@ -48,14 +49,15 @@ public class Graph
     public void add(IGravisNode node) {
         if (!nodes.contains(node)) {
             nodes.add(node);
-            nodeLayer.getChildren().addAll(node.getAllShapes());
+            nodeLayer.getChildren().addAll(node.getShapes());
+            labelLayer.getChildren().add(node.getLabel());
         }
     }
     
-    public void add(IGravisConnection edge) {
-        if (!edges.contains(edge)) {
-            edges.add(edge);
-            edgeLayer.getChildren().addAll(edge.getAllShapes());
+    public void add(IGravisConnection connection) {
+        if (!connections.contains(connection)) {
+            connections.add(connection);
+            connectionLayer.getChildren().addAll(connection.getShapes());
         }
     }
     
@@ -63,28 +65,29 @@ public class Graph
         return nodes.contains(node);
     }
     
-    public boolean contains(IGravisConnection edge) {
-        return edges.contains(edge);
+    public boolean contains(IGravisConnection connection) {
+        return connections.contains(connection);
     }
     
     public IGravisNode remove(IGravisNode node) {
         
-        for (IGravisConnection edge : node.getEdges()) {
-            remove(edge);
+        for (IGravisConnection connection : node.getConnections()) {
+            remove(connection);
         }
         
-        nodeLayer.getChildren().removeAll(node.getAllShapes());
+        labelLayer.getChildren().remove(node.getLabel());
+        nodeLayer.getChildren().removeAll(node.getShapes());
         nodes.remove(node);
         
         return node;
     }
     
-    public IGravisConnection remove(IGravisConnection edge) {
+    public IGravisConnection remove(IGravisConnection connection) {
         
-        edgeLayer.getChildren().removeAll(edge.getAllShapes());
-        edges.remove(edge);
+        connectionLayer.getChildren().removeAll(connection.getShapes());
+        connections.remove(connection);
         
-        return edge;
+        return connection;
     }
     
     public IGravisNode[] getNodes() {
@@ -95,11 +98,11 @@ public class Graph
         return nodesArray;
     }
     
-    public IGravisConnection[] getEdges() {
-        IGravisConnection[] edgesArray = new IGravisConnection[this.edges.size()];
-        for (int i = 0; i < edgesArray.length; i++) {
-            edgesArray[i] = this.edges.get(i);
+    public IGravisConnection[] getConnections() {
+        IGravisConnection[] connectionsArray = new IGravisConnection[this.connections.size()];
+        for (int i = 0; i < connectionsArray.length; i++) {
+            connectionsArray[i] = this.connections.get(i);
         }
-        return edgesArray;
+        return connectionsArray;
     }
 }

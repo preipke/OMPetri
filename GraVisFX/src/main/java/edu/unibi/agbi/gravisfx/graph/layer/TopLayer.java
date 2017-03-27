@@ -16,20 +16,20 @@ public class TopLayer extends Group
 {
     private final Scale scale;
     
-    private final EdgeLayer edgeLayer;
-    private final NodeLayer nodeLayer;
     private final LabelLayer labelLayer;
+    private final NodeLayer nodeLayer;
+    private final ConnectionLayer connectionLayer;
     
     public TopLayer() {
         scale = new Scale(1.0d, 1.0d);
         getTransforms().add(scale);
         
-        edgeLayer = new EdgeLayer();
+        connectionLayer = new ConnectionLayer();
         nodeLayer = new NodeLayer();
         labelLayer = new LabelLayer();
         
         // order matters!
-        getChildren().add(edgeLayer);
+        getChildren().add(connectionLayer);
         getChildren().add(nodeLayer);
         getChildren().add(labelLayer);
     }
@@ -46,8 +46,8 @@ public class TopLayer extends Group
         return nodeLayer;
     }
 
-    public EdgeLayer getEdgeLayer() {
-        return edgeLayer;
+    public ConnectionLayer getConnectionLayer() {
+        return connectionLayer;
     }
 
     public LabelLayer getLabelLayer() {

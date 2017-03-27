@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity;
+package edu.unibi.agbi.gravisfx.graph.entity.parent.connection;
 
-import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
-
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
@@ -19,7 +19,7 @@ import javafx.scene.shape.Shape;
  */
 public class GravisEdge extends Line implements IGravisConnection
 {
-    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    private final List<ElementHandle> elementHandles = new ArrayList();
     
     private final IGravisNode source;
     private final IGravisNode target;
@@ -33,7 +33,7 @@ public class GravisEdge extends Line implements IGravisConnection
         
         super();
         
-        elementHandles.add(new GravisElementHandle(this));
+        elementHandles.add(new ElementHandle(this));
         
         this.source = source;
         this.target = target;
@@ -56,7 +56,7 @@ public class GravisEdge extends Line implements IGravisConnection
     }
 
     @Override
-    public List<GravisElementHandle> getElementHandles() {
+    public List<ElementHandle> getElementHandles() {
         return elementHandles;
     }
     
@@ -66,7 +66,7 @@ public class GravisEdge extends Line implements IGravisConnection
     }
     
     @Override
-    public List<Shape> getAllShapes() {
+    public List<Shape> getShapes() {
         List<Shape> shapes = new ArrayList();
         shapes.add(this);
         return shapes;

@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.sub;
+package edu.unibi.agbi.gravisfx.graph.layer;
 
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
+import javafx.scene.Group;
 
 /**
  *
  * @author PR
  */
-public interface IGravisSubElement
+public class ConnectionLayer extends Group
 {
-    public IGravisElement getParentElement();
+    
 }

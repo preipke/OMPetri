@@ -3,11 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.sub;
+package edu.unibi.agbi.gravisfx.graph.entity.child;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.LineTo;
@@ -19,24 +21,30 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisArrow extends Path implements IGravisElement,IGravisSubElement
+public class GravisArrow extends Path implements IGravisSubElement
 {
-    private final List<GravisElementHandle> elementHandles = new ArrayList();
-    private final IGravisElement parentElement;
+    private final List<ElementHandle> elementHandles;
+    private final IGravisConnection parentElement;
     
-    public GravisArrow(IGravisElement parentElement) {
+    public GravisArrow(IGravisConnection parentElement) {
         
         super();
         
         this.parentElement = parentElement;
         
-        elementHandles.add(new GravisElementHandle(this));
+        elementHandles = new ArrayList();
+        elementHandles.add(new ElementHandle(this));
         
         getElements().add(new MoveTo(GravisProperties.ARROW_WIDTH / 3d , GravisProperties.ARROW_HEIGHT / 2d));
         getElements().add(new LineTo(0 , 0));
         getElements().add(new LineTo(GravisProperties.ARROW_WIDTH , GravisProperties.ARROW_HEIGHT / 2d));
         getElements().add(new LineTo(0 , GravisProperties.ARROW_HEIGHT));
         getElements().add(new LineTo(GravisProperties.ARROW_WIDTH / 3d , GravisProperties.ARROW_HEIGHT / 2d));
+    }
+    
+    @Override
+    public IGravisElement getParentElement() {
+        return parentElement;
     }
 
     @Override
@@ -45,7 +53,7 @@ public class GravisArrow extends Path implements IGravisElement,IGravisSubElemen
     }
 
     @Override
-    public List<GravisElementHandle> getElementHandles() {
+    public List<ElementHandle> getElementHandles() {
         return elementHandles;
     }
 
@@ -55,14 +63,9 @@ public class GravisArrow extends Path implements IGravisElement,IGravisSubElemen
     }
 
     @Override
-    public List<Shape> getAllShapes() {
+    public List<Shape> getShapes() {
         List<Shape> shapes = new ArrayList();
         shapes.add(this);
         return shapes;
-    }
-    
-    @Override
-    public IGravisElement getParentElement() {
-        return parentElement;
     }
 }

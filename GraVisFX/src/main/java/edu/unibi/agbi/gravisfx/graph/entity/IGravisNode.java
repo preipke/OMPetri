@@ -5,10 +5,12 @@
  */
 package edu.unibi.agbi.gravisfx.graph.entity;
 
+import edu.unibi.agbi.gravisfx.graph.entity.child.GravisLabel;
 import java.util.List;
 
 /**
- *
+ * Interface for interactive nodes within the graph. Used by the parent component
+ * of a node only, i.e. Circle, Rectangle, DoubleCircle, DoubleRectanle.
  * @author PR
  */
 public interface IGravisNode extends IGravisElement
@@ -18,7 +20,7 @@ public interface IGravisNode extends IGravisElement
     
     public void addParentNode(IGravisNode parent);
     public void addChildNode(IGravisNode child);
-    public void addEdge(IGravisConnection edge);
+    public void addConnection(IGravisConnection edge);
     
     public boolean removeParent(IGravisNode node);
     public boolean removeChild(IGravisNode node);
@@ -26,5 +28,11 @@ public interface IGravisNode extends IGravisElement
     
     public List<IGravisNode> getParents();
     public List<IGravisNode> getChildren();
-    public List<IGravisConnection> getEdges();
+    public List<IGravisConnection> getConnections();
+    
+    public boolean isChildShapesEnabled();
+    public void setChildShapesEnabled(boolean value);
+    public List<IGravisSubElement> getChildElements();
+    
+    public GravisLabel getLabel();
 }

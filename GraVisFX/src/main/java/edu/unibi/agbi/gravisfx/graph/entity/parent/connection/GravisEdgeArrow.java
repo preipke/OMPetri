@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity;
+package edu.unibi.agbi.gravisfx.graph.entity.parent.connection;
 
-import edu.unibi.agbi.gravisfx.graph.entity.sub.GravisArrow;
+import edu.unibi.agbi.gravisfx.graph.entity.child.GravisArrow;
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.abst.GravisElementHandle;
-
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
@@ -24,7 +24,7 @@ import javafx.scene.shape.Shape;
  */
 public class GravisEdgeArrow extends Path implements IGravisConnection
 {
-    private final List<GravisElementHandle> elementHandles = new ArrayList();
+    private final List<ElementHandle> elementHandles = new ArrayList();
     
     private final GravisArrow arrow;
 
@@ -37,7 +37,7 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
         
         arrow = new GravisArrow(this);
         
-        elementHandles.add(new GravisElementHandle(this));
+        elementHandles.add(new ElementHandle(this));
         elementHandles.add(arrow.getElementHandles().get(0));
 
         this.source = source;
@@ -75,8 +75,8 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
                 double x1 = source.translateXProperty().get() + source.getOffsetX();
                 double y1 = source.translateYProperty().get() + source.getOffsetY();
                 
-                double x2 = target.translateXProperty().get() + target.getOffsetX();
-                double y2 = target.translateYProperty().get() + target.getOffsetY();
+                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
                 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -109,7 +109,7 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
 //                System.out.println("r = " + r);
                 
                 double p = 2 * (y / x * b - y / x * y2 - x2) / (1 + y / x * y / x);
-                double q = (x2 * x2 + b * b + y2 * y2 - 2 * b * y2 - GravisProperties.ARROW_DISTANCE * GravisProperties.ARROW_DISTANCE) / (1 + y / x * y / x);
+                double q = (x2 * x2 + b * b + y2 * y2 - 2 * b * y2 - GravisProperties.ARROW_TARGET_DISTANCE * GravisProperties.ARROW_TARGET_DISTANCE) / (1 + y / x * y / x);
 
 //                System.out.println("p = " + p);
 //                System.out.println("q = " + q);
@@ -144,8 +144,8 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
                 double x1 = source.translateXProperty().get() + source.getOffsetX();
                 double y1 = source.translateYProperty().get() + source.getOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX();
-                double y2 = target.translateYProperty().get() + target.getOffsetY();
+                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
                 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -186,8 +186,8 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
                 double x1 = source.translateXProperty().get() + source.getOffsetX();
                 double y1 = source.translateYProperty().get() + source.getOffsetY();
                 
-                double x2 = target.translateXProperty().get() + target.getOffsetX();
-                double y2 = target.translateYProperty().get() + target.getOffsetY();
+                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
                 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -238,7 +238,7 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
     }
 
     @Override
-    public List<GravisElementHandle> getElementHandles() {
+    public List<ElementHandle> getElementHandles() {
         return elementHandles;
     }
     
@@ -248,7 +248,7 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
     }
     
     @Override
-    public List<Shape> getAllShapes() {
+    public List<Shape> getShapes() {
         List<Shape> shapes = new ArrayList();
         shapes.add(this);
         shapes.add(arrow);
