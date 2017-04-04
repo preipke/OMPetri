@@ -5,9 +5,8 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.ConnectionLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
@@ -16,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Graph model. Serves as an access object to the underlying data.
+ * The Graph model. Serves as an access object to the stored scene objects.
+ * 
  * @author PR
  */
 public class Graph
@@ -58,6 +58,12 @@ public class Graph
         if (!connections.contains(connection)) {
             connections.add(connection);
             connectionLayer.getChildren().addAll(connection.getShapes());
+            if (connection.getSource() != null && connection.getTarget() != null) {
+                connection.getSource().getChildren().add(connection.getTarget());
+                connection.getSource().getConnections().add(connection);
+                connection.getTarget().getParents().add(connection.getSource());
+                connection.getTarget().getConnections().add(connection);
+            }
         }
     }
     
@@ -70,23 +76,24 @@ public class Graph
     }
     
     public IGravisNode remove(IGravisNode node) {
-        
-        for (IGravisConnection connection : node.getConnections()) {
-            remove(connection);
+        while (!node.getConnections().isEmpty()) {
+            remove(node.getConnections().get(0)); // while to prevent concurrent modification
         }
-        
         labelLayer.getChildren().remove(node.getLabel());
         nodeLayer.getChildren().removeAll(node.getShapes());
         nodes.remove(node);
-        
         return node;
     }
     
     public IGravisConnection remove(IGravisConnection connection) {
-        
         connectionLayer.getChildren().removeAll(connection.getShapes());
         connections.remove(connection);
-        
+        if (connection.getSource() != null && connection.getTarget() != null) {
+            connection.getSource().getChildren().remove(connection.getTarget());
+            connection.getTarget().getParents().remove(connection.getSource());
+            connection.getSource().getConnections().remove(connection);
+            connection.getTarget().getConnections().remove(connection);
+        }
         return connection;
     }
     

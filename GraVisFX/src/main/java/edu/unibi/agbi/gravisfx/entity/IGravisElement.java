@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity;
+package edu.unibi.agbi.gravisfx.entity;
 
-import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.List;
 import javafx.beans.property.DoubleProperty;
 import javafx.collections.ObservableList;

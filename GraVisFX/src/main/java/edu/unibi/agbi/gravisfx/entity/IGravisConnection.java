@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity;
+package edu.unibi.agbi.gravisfx.entity;
 
 /**
  * Interface for interactive connections within the graph. Used by the parent

@@ -3,11 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.parent.node;
+package edu.unibi.agbi.gravisfx.entity.parent.node;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
-import edu.unibi.agbi.gravisfx.graph.entity.child.GravisSubRectangle;
+import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.child.GravisSubRectangle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Shape;

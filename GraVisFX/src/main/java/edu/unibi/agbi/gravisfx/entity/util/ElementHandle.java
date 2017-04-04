@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.util;
+package edu.unibi.agbi.gravisfx.entity.util;
 
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.css.PseudoClass;

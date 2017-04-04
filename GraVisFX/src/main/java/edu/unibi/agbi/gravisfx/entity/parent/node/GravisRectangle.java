@@ -3,24 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.parent.node;
+package edu.unibi.agbi.gravisfx.entity.parent.node;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
-import edu.unibi.agbi.gravisfx.graph.entity.child.GravisLabel;
-import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.child.GravisLabel;
+import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+
 import java.util.ArrayList;
 import java.util.List;
-import javafx.scene.shape.Circle;
+
+import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 
 /**
- *
+ * 
  * @author PR
  */
-public class GravisCircle extends Circle implements IGravisNode
+public class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<ElementHandle> elementHandles = new ArrayList();
     
@@ -32,22 +34,25 @@ public class GravisCircle extends Circle implements IGravisNode
     
     private boolean isChildShapesEnabled = true;
     
-    public GravisCircle() {
+    public GravisRectangle() {
         
         super();
         
         elementHandles.add(new ElementHandle(this));
         
-        setRadius(GravisProperties.CIRCLE_RADIUS);
+        setWidth(GravisProperties.RECTANGLE_WIDTH);
+        setHeight(GravisProperties.RECTANGLE_HEIGHT);
+        setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH);
+        setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
         
         label = new GravisLabel(this);
-        label.xProperty().bind(translateXProperty().add(GravisProperties.LABEL_OFFSET_X));
-        label.yProperty().bind(translateYProperty().add(GravisProperties.LABEL_OFFSET_Y));
+        label.xProperty().bind(translateXProperty().add(getOffsetX() + GravisProperties.LABEL_OFFSET_X));
+        label.yProperty().bind(translateYProperty().add(getOffsetY() + GravisProperties.LABEL_OFFSET_Y));
     }
     
     @Override
     public Object getBean() {
-        return GravisCircle.this;
+        return GravisRectangle.this;
     }
     
     @Override
@@ -69,27 +74,12 @@ public class GravisCircle extends Circle implements IGravisNode
 
     @Override
     public final double getOffsetX() {
-        return 0; // position is fixed to shape center
+        return getWidth() / 2;
     }
 
     @Override
     public final double getOffsetY() {
-        return 0; // position is fixed to shape center
-    }
-    
-    @Override
-    public final void addParentNode(IGravisNode parent) {
-        parents.add(parent);
-    }
-    
-    @Override
-    public final void addChildNode(IGravisNode child) {
-        children.add(child);
-    }
-    
-    @Override
-    public final void addConnection(IGravisConnection edge) {
-        edges.add(edge);
+        return getHeight() / 2;
     }
     
     @Override
@@ -105,21 +95,6 @@ public class GravisCircle extends Circle implements IGravisNode
     @Override
     public final List<IGravisConnection> getConnections() {
         return edges;
-    }
-    
-    @Override
-    public final boolean removeChild(IGravisNode node) {
-        return children.remove(node);
-    }
-    
-    @Override
-    public final boolean removeParent(IGravisNode node) {
-        return parents.remove(node);
-    }
-    
-    @Override
-    public final boolean removeConnection(IGravisConnection edge) {
-        return edges.remove(edge);
     }
     
     @Override

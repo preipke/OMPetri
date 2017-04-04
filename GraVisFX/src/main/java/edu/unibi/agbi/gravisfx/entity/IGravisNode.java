@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity;
+package edu.unibi.agbi.gravisfx.entity;
 
-import edu.unibi.agbi.gravisfx.graph.entity.child.GravisLabel;
+import edu.unibi.agbi.gravisfx.entity.child.GravisLabel;
 import java.util.List;
 
 /**
@@ -17,14 +17,6 @@ public interface IGravisNode extends IGravisElement
 {
     public double getOffsetX();
     public double getOffsetY();
-    
-    public void addParentNode(IGravisNode parent);
-    public void addChildNode(IGravisNode child);
-    public void addConnection(IGravisConnection edge);
-    
-    public boolean removeParent(IGravisNode node);
-    public boolean removeChild(IGravisNode node);
-    public boolean removeConnection(IGravisConnection node);
     
     public List<IGravisNode> getParents();
     public List<IGravisNode> getChildren();

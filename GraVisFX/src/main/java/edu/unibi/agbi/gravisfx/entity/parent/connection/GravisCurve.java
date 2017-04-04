@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.parent.connection;
+package edu.unibi.agbi.gravisfx.entity.parent.connection;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
 

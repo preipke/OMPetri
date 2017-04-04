@@ -3,28 +3,26 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.graph.entity.child;
+package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
-import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import javafx.scene.text.Text;
 
 /**
  *
  * @author PR
  */
-public class GravisSubCircle extends Circle implements IGravisSubElement 
-{
+public class GravisLabel extends Text implements IGravisSubElement {
+    
     private final List<ElementHandle> elementHandles;
     private final IGravisNode parentElement;
     
-    public GravisSubCircle(IGravisNode parentElement) {
+    public GravisLabel(IGravisNode parentElement) {
         
         super();
         
@@ -32,18 +30,16 @@ public class GravisSubCircle extends Circle implements IGravisSubElement
         
         elementHandles = new ArrayList();
         elementHandles.add(new ElementHandle(this));
-        
-        setRadius(GravisProperties.CIRCLE_RADIUS - GravisProperties.BASE_INNER_DISTANCE);
     }
-    
+
     @Override
-    public IGravisElement getParentElement() {
+    public IGravisNode getParentElement() {
         return parentElement;
     }
 
     @Override
     public Object getBean() {
-        return GravisSubCircle.this;
+        return this;
     }
 
     @Override
