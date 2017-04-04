@@ -10,9 +10,9 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
-import edu.unibi.agbi.gravisfx.graph.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +97,7 @@ public class SelectionService
      */
     public void highlightRelated(IGraphElement element) {
         IDataElement dataElement = element.getDataElement();
-        for (IGraphElement shape : dataElement.getShapes()) {
+        for (IGraphElement shape : dataElement.getGraphElements()) {
             if (!shape.getElementHandles().get(0).isSelected()) {
                 if (!shape.getElementHandles().get(0).isHighlighted()) {
                     highlight(shape);
@@ -127,14 +127,14 @@ public class SelectionService
         IDataElement dataElement = element.getDataElement();
         
         boolean isStillSelected = false;
-        for (IGraphElement relatedShape : dataElement.getShapes()) {
+        for (IGraphElement relatedShape : dataElement.getGraphElements()) {
             if (relatedShape.getElementHandles().get(0).isSelected()) {
                 isStillSelected = true;
                 break;
             }
         }
         if (!isStillSelected) {
-            for (IGraphElement relatedShape : dataElement.getShapes()) {
+            for (IGraphElement relatedShape : dataElement.getGraphElements()) {
                 unhighlight(relatedShape);
             }
         }
@@ -171,7 +171,7 @@ public class SelectionService
      */
     public void selectAll(IGraphElement element) {
         IDataElement dataElement = element.getDataElement();
-        for (IGraphElement relatedElement : dataElement.getShapes()) {
+        for (IGraphElement relatedElement : dataElement.getGraphElements()) {
             select(relatedElement);
         }
     }

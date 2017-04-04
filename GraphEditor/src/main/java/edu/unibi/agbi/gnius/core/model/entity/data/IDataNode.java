@@ -13,10 +13,4 @@ import edu.unibi.agbi.petrinet.entity.INode;
  */
 public interface IDataNode extends IDataElement , INode
 {
-    public String getName();
-    public String getDescription();
-    public String getLabelText();
-    public void setName(String text);
-    public void setDescription(String text);
-    public void setLabelText(String text);
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.simulation;
+package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
@@ -44,7 +44,7 @@ import edu.unibi.agbi.petrinet.entity.IElement;
  * @author PR
  */
 @Component
-public class ResultsViewController implements Initializable
+public class ResultsWindowController implements Initializable
 {
     @Autowired private SimulationService simulationService;
     
@@ -67,7 +67,7 @@ public class ResultsViewController implements Initializable
     private final Map<Simulation, Map<IElement, Map<String, XYChart.Series>>> lineChartDataMap;
     private final ObservableList<LineChartData> lineChartDataList;
     
-    public ResultsViewController() {
+    public ResultsWindowController() {
         lineChartDataMap = new HashMap();
         lineChartDataList = FXCollections.observableArrayList();
     }

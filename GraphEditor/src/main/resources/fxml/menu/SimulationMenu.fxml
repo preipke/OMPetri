@@ -8,11 +8,10 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<Menu fx:id="simulationMenu" mnemonicParsing="false" text="Simulation" xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.simulation.SimulationController">
+<Menu fx:id="simulationMenu" mnemonicParsing="false" text="Simulation" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
     <items>
-        <MenuItem fx:id="simMenuControlsStart" mnemonicParsing="false" text="Start" onAction="#StartSimulation" />
-        <MenuItem fx:id="simMenuControlsStop" mnemonicParsing="false" text="Stop" onAction="#StopSimulation" disable="true" />
+        <MenuItem fx:id="menuSimStart" mnemonicParsing="false" text="Start" />
+        <MenuItem fx:id="menuSimStop" mnemonicParsing="false" text="Stop" disable="true" />
         <SeparatorMenuItem mnemonicParsing="false" />
         <Menu mnemonicParsing="false" text="Open Recent" />
       <SeparatorMenuItem mnemonicParsing="false" />

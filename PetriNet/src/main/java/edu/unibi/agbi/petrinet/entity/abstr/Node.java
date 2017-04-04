@@ -7,7 +7,6 @@ package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.INode;
-import edu.unibi.agbi.petrinet.entity.abstr.Arc;
 import java.util.ArrayList;
 import java.util.List;
 

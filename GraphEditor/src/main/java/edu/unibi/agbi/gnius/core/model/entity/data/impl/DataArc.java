@@ -17,9 +17,12 @@ import java.util.List;
  *
  * @author PR
  */
-public class DataArc extends Arc implements IDataArc
+public final class DataArc extends Arc implements IDataArc
 {
     private final List<IGraphElement> shapes;
+    
+    private String name;
+    private String description;
     
     public DataArc(IDataNode source, IDataNode target, Arc.Type type) throws IllegalAssignmentException {
         super(source, target);
@@ -28,7 +31,7 @@ public class DataArc extends Arc implements IDataArc
     }
 
     @Override
-    public List<IGraphElement> getShapes() {
+    public List<IGraphElement> getGraphElements() {
         return shapes;
     }
 
@@ -40,5 +43,38 @@ public class DataArc extends Arc implements IDataArc
     @Override
     public IDataNode getTarget() {
         return (IDataNode) this.target;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
+     * Sets the label text for this data node and all related shapes in the scene.
+     * @param text 
+     */
+    @Override
+    public void setLabelText(String text) {
+    }
+
+    @Override
+    public String getLabelText() {
+        return "";
     }
 }

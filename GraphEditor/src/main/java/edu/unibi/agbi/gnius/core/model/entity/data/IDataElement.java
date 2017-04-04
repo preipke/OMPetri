@@ -14,8 +14,14 @@ import edu.unibi.agbi.petrinet.entity.IElement;
  *
  * @author PR
  */
-public interface IDataElement extends IElement
+public interface IDataElement extends IElement 
 {
+    public String getName();
+    public String getDescription();
+    public String getLabelText();
+    public void setName(String text);
+    public void setDescription(String text);
+    public void setLabelText(String text);
     public List<Parameter> getParameter();
-    public List<IGraphElement> getShapes();
+    public List<IGraphElement> getGraphElements();
 }

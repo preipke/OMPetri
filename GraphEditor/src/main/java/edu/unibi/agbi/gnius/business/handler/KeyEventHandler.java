@@ -5,16 +5,15 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
+import edu.unibi.agbi.gnius.business.controller.EditorToolsController;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
-
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +26,7 @@ public class KeyEventHandler
 {
     @Autowired private SelectionService selectionService;
     @Autowired private DataGraphService dataService;
+    @Autowired private MessengerService messengerService;
     
     @Autowired private MouseEventHandler mouseEventHandler;
     @Autowired private EditorToolsController editorToolsController;
@@ -75,7 +75,7 @@ public class KeyEventHandler
                     try {
                         dataService.paste(isCloning);
                     } catch (DataGraphServiceException ex) {
-                        editorToolsController.addToLog(ex);
+                        messengerService.addToLog(ex);
                     }
                 }
             }

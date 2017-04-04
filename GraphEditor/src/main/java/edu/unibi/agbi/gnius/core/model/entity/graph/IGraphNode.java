@@ -6,7 +6,8 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import java.util.List;
 
 /**
  *
@@ -15,4 +16,5 @@ import edu.unibi.agbi.gravisfx.graph.entity.IGravisNode;
 public interface IGraphNode extends IGraphElement , IGravisNode
 {
     @Override public IDataNode getDataElement();
+    public List<IGraphArc> getGraphConnections();
 }

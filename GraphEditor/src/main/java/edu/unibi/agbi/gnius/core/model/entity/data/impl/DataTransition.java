@@ -16,7 +16,7 @@ import java.util.List;
  *
  * @author PR
  */
-public class DataTransition extends Transition implements IDataNode
+public final class DataTransition extends Transition implements IDataNode
 {
     private final List<IGraphElement> shapes;
     
@@ -31,7 +31,7 @@ public class DataTransition extends Transition implements IDataNode
     }
 
     @Override
-    public List<IGraphElement> getShapes() {
+    public List<IGraphElement> getGraphElements() {
         return shapes;
     }
 

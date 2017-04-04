@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 
 /**
  *

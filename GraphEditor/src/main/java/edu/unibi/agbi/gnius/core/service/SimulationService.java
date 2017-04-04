@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.simulation.SimulationController;
+import edu.unibi.agbi.gnius.business.controller.SimulationControlsController;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.dao.SimulationDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
@@ -26,6 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,20 +38,17 @@ public class SimulationService
 {
     @Autowired private OpenModelicaServer server;
     @Autowired private DataGraphService dataGraphService;
-    @Autowired private SimulationController simulationController;
+    @Autowired private SimulationControlsController simulationControlsController;
     
     private final SimulationDao simulationDao;
     private final DataDao dataDao;
     
+    @Value("${openmodelica.home.env}")
+    private String envOpenModelicaHome;
+    private File workingDirectory = null;
+    
     private final int serverPort = 11111;
     private Thread serverThread;
-    
-    private String simIntegrator;
-    private double simStopTime;
-    private int simIntervals;
-    
-    private final String envOpenModelicaHome = "OPENMODELICAHOME";
-    private File workingDirectory = null;
     
     @Autowired 
     public SimulationService(SimulationDao simulationDao, DataDao dataDao) {
@@ -74,7 +72,7 @@ public class SimulationService
         return simulation;
     }
     
-    public void simulate() throws SimulationServiceException {
+    public void StartSimulation() throws SimulationServiceException {
         
         try {
             dataGraphService.UpdateData();
@@ -90,9 +88,9 @@ public class SimulationService
         String pathCompiler, pathSimulation, nameSimulation;
         References references;
         
-        simStopTime = simulationController.getSimulationStopTime();
-        simIntervals = simulationController.getSimulationIntervals();
-        simIntegrator = simulationController.getSimulationIntegrator();
+        double simStopTime = simulationControlsController.getSimulationStopTime();
+        int simIntervals = simulationControlsController.getSimulationIntervals();
+        String simIntegrator = simulationControlsController.getSimulationIntegrator();
         
         System.out.println("Getting working directory...");
         workingDirectory = getWorkingDirectory();
@@ -118,7 +116,7 @@ public class SimulationService
             references = OpenModelicaExport.exportMOS(dataDao , fileMos , fileMo , workingDirectory);
             
         } catch (IOException ex) {
-            throw new SimulationServiceException("Data export for OpenModelica failed! (" + ex + ")");
+            throw new SimulationServiceException("Data export for OpenModelica failed! (" + ex.getMessage() + ")");
         }
 
         /**
@@ -130,7 +128,7 @@ public class SimulationService
             System.out.println("Building simulation...");
             buildProcess = pb.start();
         } catch (IOException ex) {
-            throw new SimulationServiceException("Exception starting compilation process! (" + ex + ")");
+            throw new SimulationServiceException("Exception starting compilation process! (" + ex.getMessage() + ")");
         }
 
         /**
@@ -162,7 +160,7 @@ public class SimulationService
             buildProcess.waitFor();
 //            compilerWatcherThread.interrupt();
         } catch (InterruptedException ex) {
-            throw new SimulationServiceException("Exception while waiting for compiler thread! (" + ex + ")");
+            throw new SimulationServiceException("Exception while waiting for compiler thread! (" + ex.getMessage() + ")");
         }
 
         /**
@@ -190,7 +188,7 @@ public class SimulationService
                 throw new SimulationServiceException("Simulation could not be built!");
             }
         } catch (IOException ex) {
-            throw new SimulationServiceException("Exception reading process output! (" + ex + ")");
+            throw new SimulationServiceException("Exception reading process output! (" + ex.getMessage() + ")");
         }
         
         /**
@@ -273,7 +271,7 @@ public class SimulationService
         } catch (IOException ex) {
             // TODO Auto-generated catch block
             ex.printStackTrace();
-            throw new SimulationServiceException("Exception starting simulation! (" + ex + ")");
+            throw new SimulationServiceException("Exception starting simulation! (" + ex.getMessage() + ")");
         }
         
         /**
@@ -350,6 +348,10 @@ public class SimulationService
 //                        // w.updatePCPView();
 //                    }
 //                };
+    }
+    
+    public void StopSimulation() {
+        
     }
     
     /**
@@ -439,10 +441,14 @@ public class SimulationService
      * @param output
      * @return 
      */
-    private String parseSimulationExecutablePath(String output) {
+    private String parseSimulationExecutablePath(String output) throws SimulationServiceException {
         
-        output = output.substring(output.lastIndexOf("{"));
-        output = Utility.parseSubstring(output, "\"", "\"");
+        try {
+            output = output.substring(output.lastIndexOf("{"));
+            output = Utility.parseSubstring(output, "\"", "\"");
+        } catch (Exception ex) {
+            throw new SimulationServiceException(ex);
+        }
         
         if (output == null) {
             return null;

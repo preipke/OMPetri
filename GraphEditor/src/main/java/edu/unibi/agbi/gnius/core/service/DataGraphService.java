@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
+import edu.unibi.agbi.gnius.business.controller.ElementDetailsController;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
@@ -25,7 +25,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.exception.ColourException;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -36,6 +36,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Shape;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -47,46 +48,28 @@ public class DataGraphService
 {
     @Autowired private Calculator calculator;
     @Autowired private SelectionService selectionService;
-    @Autowired private EditorDetailsController editorDetailsController;
+    @Autowired private ElementDetailsController elementDetailsController;
     
     private final GraphDao graphDao;
     private final DataDao dataDao;
     
-    private final String arcStyleClass = "arcDefault";
-    private final String placeStyleClass = "placeDefault";
-    private final String transitionDefaultStyleClass = "transitionDefault";
-    private final String transitionStochasticStyleClass = "transitionStochastic";
+    @Value("${css.arc.default}")
+    private String arcStyleClass;
+    @Value("${css.place.default}")
+    private String placeStyleClass;
+    @Value("${css.transition.default}")
+    private String transitionDefaultStyleClass;
+    @Value("${css.transition.stochastic}")
+    private String transitionStochasticStyleClass;
     
     private DataArc.Type defaultArcType = DataArc.Type.READ;
     private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
     private DataTransition.Type defaultTransitionType = DataTransition.Type.CONTINUOUS;
     
     @Autowired
-    public DataGraphService(GraphDao graphDao, DataDao petriNetDao) {
+    public DataGraphService(GraphDao graphDao, DataDao dataDao) {
         this.graphDao = graphDao;
-        this.dataDao = petriNetDao;
-    }
-    
-    /**
-     * Converts a given arc. 
-     * @param shape
-     * @throws AssignmentDeniedException 
-     */
-    private IGraphArc getConvertedGraphArc(IGraphArc shape) {
-        
-        DataArc data = shape.getDataElement();
-        IGraphArc shapeConverted;
-        
-        if (shape instanceof GraphEdgeArrow) {
-            shapeConverted = new GraphCurveArrow(shape.getSource() , shape.getTarget() , data);
-        } else {
-            shapeConverted = new GraphEdgeArrow(shape.getSource() , shape.getTarget() , data);
-        }
-        shapeConverted.getElementHandles().forEach(ele -> {
-            ele.setActiveStyleClass(arcStyleClass);
-        });
-        
-        return shapeConverted;
+        this.dataDao = dataDao;
     }
     
     /**
@@ -98,7 +81,8 @@ public class DataGraphService
     public void connect(IGraphNode source , IGraphNode target) throws DataGraphServiceException {
         
         DataArc dataSourceToTarget;
-        IGraphArc shapeSourceToTarget;
+        IDataNode dataSource = source.getDataElement();
+        IDataNode dataTarget = target.getDataElement();
         
         try {
             dataSourceToTarget = new DataArc(source.getDataElement() , target.getDataElement() , defaultArcType);
@@ -106,9 +90,7 @@ public class DataGraphService
             throw new DataGraphServiceException(ex.toString());
         }
         
-        IDataNode dataSource = source.getDataElement();
-        IDataNode dataTarget = target.getDataElement();
-        
+        IGraphArc shapeSourceToTarget;
         IGraphNode relatedSourceShape;
         IGraphNode relatedSourceShapeChild;
         
@@ -121,7 +103,7 @@ public class DataGraphService
         if (source.getChildren().contains(target)) {
             throw new DataGraphServiceException("Nodes are already connected!");
         } 
-        for (IGraphElement relatedSourceElement : dataSource.getShapes()) {
+        for (IGraphElement relatedSourceElement : dataSource.getGraphElements()) {
             
             relatedSourceShape = (IGraphNode) relatedSourceElement;
             
@@ -207,7 +189,7 @@ public class DataGraphService
                 shape = createTransitionShape(new DataTransition(defaultTransitionType));
                 break;
             default:
-                throw new DataGraphServiceException("Cannot create element of an undefined type!");
+                throw new DataGraphServiceException("Cannot create element of undefined type!");
         }
         
         Point2D pos = calculator.getCorrectedMousePosition(target);
@@ -237,7 +219,7 @@ public class DataGraphService
                 copy = createTransitionShape(new DataTransition(((DataTransition)node).getTransitionType()));
                 break;
             default:
-                throw new DataGraphServiceException("Cannot copy element of an undefined type!");
+                throw new DataGraphServiceException("Cannot copy element of undefined type!");
         }
         
         return copy;
@@ -262,10 +244,9 @@ public class DataGraphService
                 clone = createTransitionShape((DataTransition)node);
                 break;
             default:
-                throw new DataGraphServiceException("Cannot clone element of an undefined type!");
+                throw new DataGraphServiceException("Cannot clone element of undefined type!");
         }
-        
-        node.getShapes().add(clone);
+        node.getGraphElements().add(clone);
         
         return clone;
     }
@@ -291,7 +272,7 @@ public class DataGraphService
             } else {
                 shape = copy(nodes.get(i));
             }
-
+            
             graphDao.add(shape);
             selectionService.selectAll(shape);
 
@@ -315,13 +296,7 @@ public class DataGraphService
         
         if (target != null) { // check null for temporary arcs
 
-            arc.getDataElement().getShapes().remove(arc);
-
-            source.getChildren().remove(target);
-            source.removeConnection(arc);
-            
-            target.getParents().remove(source);
-            target.removeConnection(arc);
+            arc.getDataElement().getGraphElements().remove(arc);
             
             // Find and convert double linked arc
             IGraphArc reverseArc;
@@ -338,7 +313,6 @@ public class DataGraphService
                     }
                 }
             }
-            
             validateDataArc(arc);
         }
         
@@ -350,20 +324,11 @@ public class DataGraphService
      * @param node 
      */
     public void removeGraphNode(IGraphNode node) {
-        
-        graphDao.remove(node);
-        node.getDataElement().getShapes().remove(node);
-        
-        for (int i = 0; i < node.getConnections().size(); i++) {
-            if (node.getConnections().get(i).getSource() == node) {
-                node.getConnections().get(i).getTarget().removeParent(node);
-                node.getConnections().get(i).getTarget().removeConnection(node.getConnections().get(i));
-            } else {
-                node.getConnections().get(i).getSource().removeChild(node);
-                node.getConnections().get(i).getSource().removeConnection(node.getConnections().get(i));
-            }
+        for (IGraphArc arc : node.getGraphConnections()) {
+            removeGraphArc(arc);
         }
-        node.getConnections().clear();
+        node.getDataElement().getGraphElements().remove(node);
+        graphDao.remove(node);
     }
     
     /**
@@ -402,7 +367,6 @@ public class DataGraphService
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined arc type!");
         }
-
 //        arc.setArcType(type);
     }
     
@@ -425,7 +389,6 @@ public class DataGraphService
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined place type!");
         }
-        
         place.setPlaceType(type);
     }
     
@@ -451,14 +414,35 @@ public class DataGraphService
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined transition type!");
         }
-        
         transition.setTransitionType(type);
+    }
+    
+    /**
+     * Converts a given arc from straight to curved / curved to straight. 
+     * @param shape
+     * @throws AssignmentDeniedException 
+     */
+    private IGraphArc getConvertedGraphArc(IGraphArc shape) {
+        
+        DataArc data = shape.getDataElement();
+        IGraphArc shapeConverted;
+        
+        if (shape instanceof GraphEdgeArrow) {
+            shapeConverted = new GraphCurveArrow(shape.getSource() , shape.getTarget() , data);
+        } else {
+            shapeConverted = new GraphEdgeArrow(shape.getSource() , shape.getTarget() , data);
+        }
+        shapeConverted.getElementHandles().forEach(ele -> {
+            ele.setActiveStyleClass(arcStyleClass);
+        });
+        
+        return shapeConverted;
     }
     
     private IGraphNode createPlaceShape(DataPlace node) throws DataGraphServiceException {
         
         IGraphNode shape = new GraphPlace(node);
-        node.getShapes().add(shape);
+        node.getGraphElements().add(shape);
         
         setTypeFor(node, defaultPlaceType);
         
@@ -468,7 +452,7 @@ public class DataGraphService
     private IGraphNode createTransitionShape(DataTransition node) throws DataGraphServiceException {
         
         IGraphNode shape = new GraphTransition(node);
-        node.getShapes().add(shape);
+        node.getGraphElements().add(shape);
         
         setTypeFor(node, defaultTransitionType);
         
@@ -493,11 +477,7 @@ public class DataGraphService
             dataTarget.getArcsIn().add(arc.getDataElement());
         }
         
-        arc.getSource().addChildNode(arc.getTarget());
-        arc.getTarget().addParentNode(arc.getSource());
-        arc.getSource().addConnection(arc);
-        arc.getTarget().addConnection(arc);
-        arc.getDataElement().getShapes().add(arc);
+        arc.getDataElement().getGraphElements().add(arc);
         graphDao.add(arc);
     }
     
@@ -517,8 +497,8 @@ public class DataGraphService
         IGraphNode relatedShape;
         IGraphNode relatedShapeChild;
         
-        // Validate all related shapes for any still existing connections between source and target
-        for (IGraphElement shape : source.getShapes()) {
+        // Validate all related shapes for any existing connections between source and target
+        for (IGraphElement shape : source.getGraphElements()) {
             
             relatedShape = (IGraphNode) shape;
             
@@ -550,7 +530,7 @@ public class DataGraphService
      */
     private void setElementStyle(IDataElement dataElement, String styleClass, boolean childrenEnabled) {
         
-        for (IGraphElement shapeElement : dataElement.getShapes()) {
+        for (IGraphElement shapeElement : dataElement.getGraphElements()) {
             
             shapeElement.getElementHandles().forEach(ele -> {
                 ele.setActiveStyleClass(styleClass);
@@ -566,7 +546,7 @@ public class DataGraphService
     }
     
     public void UpdateData() throws DataGraphServiceException {
-        editorDetailsController.StoreElementProperties();
+        elementDetailsController.StoreElementProperties();
     }
     
     public void add(Colour color) throws ColourException {

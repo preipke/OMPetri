@@ -5,18 +5,19 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorDetailsController;
-import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorToolsController;
+import edu.unibi.agbi.gnius.business.controller.ElementDetailsController;
+import edu.unibi.agbi.gnius.business.controller.EditorToolsController;
 import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.graph.entity.IGravisSubElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -30,6 +31,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,9 +43,10 @@ public class MouseEventHandler
 {
     @Autowired private SelectionService selectionService;
     @Autowired private DataGraphService dataService;
+    @Autowired @Lazy private MessengerService messengerService;
     
     @Autowired private EditorToolsController editorToolsController;
-    @Autowired private EditorDetailsController editorDetailsController;
+    @Autowired private ElementDetailsController editorDetailsController;
     
     @Autowired private KeyEventHandler keyEventHandler;
     @Autowired private Calculator calculator;
@@ -115,7 +118,7 @@ public class MouseEventHandler
             try {
                 editorDetailsController.StoreElementProperties();
             } catch (DataGraphServiceException ex) {
-                editorToolsController.addToLog(ex.getMessage());
+                messengerService.addToLog(ex.getMessage());
             }
             
             isPrimaryButtonDown = false;
@@ -187,7 +190,7 @@ public class MouseEventHandler
                                         selectionService.highlight(node);
                                         arcTemp = dataService.createTemporaryArc(node);
                                     } catch (EditorModeLockException ex) {
-                                        editorToolsController.addToLog(ex.getMessage());
+                                        messengerService.addToLog(ex.getMessage());
                                     }
                                     System.out.println("Creating ARC!");
                                 }
@@ -219,7 +222,7 @@ public class MouseEventHandler
                         try {
                             setEditorMode(isInSelectionFrameMode);
                         } catch (EditorModeLockException ex) {
-                            editorToolsController.addToLog(ex.getMessage());
+                            messengerService.addToLog(ex.getMessage());
                         }
 
                         Point2D pos = calculator.getCorrectedMousePosition(mouseEventPressed);
@@ -234,9 +237,9 @@ public class MouseEventHandler
                         
                         // Creating node at event location.
                         try {
-                            dataService.create(editorToolsController.getSelectedNodeType(), event);
+                            dataService.create(editorToolsController.getCreateNodeType(), event);
                         } catch (DataGraphServiceException ex) {
-                            editorToolsController.addToLog(ex);
+                            messengerService.addToLog(ex.getMessage());
                         }
                     }
                     
@@ -304,7 +307,7 @@ public class MouseEventHandler
                         setEditorMode(isInDraggingMode);
                         editorDetailsController.HideElementProperties();
                     } catch (EditorModeLockException ex) {
-                        editorToolsController.addToLog(ex.getMessage());
+                        messengerService.addToLog(ex.getMessage());
                     }
 
                     Object eventTarget = event.getTarget();
@@ -373,7 +376,7 @@ public class MouseEventHandler
                     try {
                         dataService.connect(arcTemp.getSource(), (IGraphNode)eventTarget);
                     } catch (DataGraphServiceException ex) {
-                        editorToolsController.addToLog(ex.getMessage());
+                        messengerService.addToLog(ex.getMessage());
                     }
                 }
                     
@@ -414,7 +417,7 @@ public class MouseEventHandler
                             selectionService.unselectAll();
                             selectionService.select(node);
                             selectionService.highlightRelated(node);
-                            editorDetailsController.ShowElementProperties(node);
+                            editorDetailsController.ShowElementDetails(node);
                         }
                     } 
                 }

@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.menu;
 
-import edu.unibi.agbi.gnius.business.controller.tab.editor.EditorPaneController;
+import edu.unibi.agbi.gnius.business.controller.GraphPaneController;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
 import java.io.File;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class FileMenuController implements Initializable
 {
     @Autowired private DataGraphService dataService;
-    @Autowired private EditorPaneController editorPaneController;
+    @Autowired private GraphPaneController editorPaneController;
     
     @FXML
     public void SaveFileAs() {

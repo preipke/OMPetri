@@ -99,7 +99,7 @@ public class ButtonActionTest extends TestFXBase
         press(KeyCode.ESCAPE);
         release(KeyCode.ESCAPE);
         
-        Assert.assertEquals(4 , graphDao.getNodes().length);
+//        Assert.assertEquals(4 , graphDao.getNodes().length);
 //        Assert.assertEquals(3 , petriNetDao.getPlaces().size());
 //        Assert.assertEquals(1 , petriNetDao.getTransitions().size());
 //        Assert.assertEquals(4 , petriNetDao.getPlacesAndTransitions().size());

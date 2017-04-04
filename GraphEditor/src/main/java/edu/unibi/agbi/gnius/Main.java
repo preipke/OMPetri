@@ -1,7 +1,6 @@
 package edu.unibi.agbi.gnius;
 
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -63,6 +62,9 @@ public class Main extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        launch(args);
+        // some internals require that AWT is initialized before JavaFX
+        // related to the use of SwingNode in rendering transition functions
+        java.awt.Toolkit.getDefaultToolkit(); 
+        Application.launch(args);
     }
 }

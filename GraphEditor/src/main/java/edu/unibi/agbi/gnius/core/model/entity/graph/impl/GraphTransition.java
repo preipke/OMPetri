@@ -6,8 +6,11 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.graph.entity.parent.node.GravisRectangleDouble;
+import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangleDouble;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -29,5 +32,14 @@ public class GraphTransition extends GravisRectangleDouble implements IGraphNode
     @Override
     public DataTransition getDataElement() {
         return dataTransition;
+    }
+
+    @Override
+    public List<IGraphArc> getGraphConnections() {
+        List<IGraphArc> connections = new ArrayList();
+        for (int i = 0; i < getConnections().size(); i++) {
+            connections.add((IGraphArc) getConnections().get(i));
+        }
+        return connections;
     }
 }
