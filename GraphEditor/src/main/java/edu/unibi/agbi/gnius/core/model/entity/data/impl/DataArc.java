@@ -21,7 +21,6 @@ public final class DataArc extends Arc implements IDataArc
 {
     private final List<IGraphElement> shapes;
     
-    private String name;
     private String description;
     
     public DataArc(IDataNode source, IDataNode target, Arc.Type type) throws IllegalAssignmentException {
@@ -43,16 +42,6 @@ public final class DataArc extends Arc implements IDataArc
     @Override
     public IDataNode getTarget() {
         return (IDataNode) this.target;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override

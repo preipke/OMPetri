@@ -21,6 +21,7 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -41,8 +42,14 @@ public class EditorToolsController implements Initializable
     @FXML private Button buttonClusterCreate;
     @FXML private Button buttonClusterRemove;
     
-    private ResultsWindowController resultsViewController;
-    private Stage resultsView;
+    @Value("${results.window.fxml}")
+    private String resultsWindowFxml;
+    @Value("${results.window.stylesheet}")
+    private String resultsWindowStylesheet;
+    @Value("${results.window.title}")
+    private String resultsWindowTitle;
+    private ResultsWindowController resultsWindowController;
+    private Stage resultsWindow;
     
     private Element.Type createNodeType;
     
@@ -53,27 +60,30 @@ public class EditorToolsController implements Initializable
     @FXML
     public void OpenResultsView() {
         
-        if (resultsView != null) {
-            resultsView.show();
-            resultsView.centerOnScreen();
-            resultsViewController.UpdateChoices();
+        if (resultsWindow != null) {
+            resultsWindow.show();
+            resultsWindow.centerOnScreen();
+            resultsWindowController.UpdateSimulationChoices();
             return;
         }
         
         Parent root;
         try {
-            root = springFXMLLoader.load("/fxml/Results.fxml");
+            root = springFXMLLoader.load(resultsWindowFxml);
         } catch (Exception ex) {
             ex.printStackTrace();
             return;
         }
-        resultsView = new Stage();
-        resultsView.setTitle("GraVisFX - Results View");
-        resultsView.setScene(new Scene(root));
-        resultsView.show();
+        Scene scene = new Scene(root);
+        scene.getStylesheets().add(resultsWindowStylesheet);
         
-        resultsViewController = (ResultsWindowController) springFXMLLoader.getBean(ResultsWindowController.class);
-        resultsViewController.UpdateChoices();
+        resultsWindow = new Stage();
+        resultsWindow.setTitle(resultsWindowTitle);
+        resultsWindow.setScene(scene);
+        resultsWindow.show();
+        
+        resultsWindowController = (ResultsWindowController) springFXMLLoader.getBean(ResultsWindowController.class);
+        resultsWindowController.UpdateSimulationChoices();
     }
     
     @FXML
@@ -112,5 +122,7 @@ public class EditorToolsController implements Initializable
         buttonCreate.getItems().clear();
         buttonCreate.getItems().add(createPlace);
         buttonCreate.getItems().add(createTransition);
+        
+        buttonClone.setOnAction(e -> OpenResultsView());
     }
 }

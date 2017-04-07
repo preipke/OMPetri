@@ -20,7 +20,6 @@ public final class DataPlace extends Place implements IDataNode
 {
     private final List<IGraphElement> shapes;
     
-    private String name;
     private String description;
     
     public DataPlace(Place.Type type) {
@@ -40,6 +39,11 @@ public final class DataPlace extends Place implements IDataNode
         this.description = description;
     }
 
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
     /**
      * Sets the label text for this data node and all related shapes in the scene.
      * @param text 
@@ -52,22 +56,7 @@ public final class DataPlace extends Place implements IDataNode
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
-    @Override
     public String getLabelText() {
         return ((IGraphNode)shapes.get(0)).getLabel().getText();
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 }

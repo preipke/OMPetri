@@ -19,42 +19,16 @@ public abstract class Element implements IElement {
     protected Type type;
     
     protected String id;
-    protected List<String> filterNames;
+    protected String name;
     
     protected boolean isEnabled = true;
     
-    private final List<Parameter> parameter;
+    protected final List<String> filter;
+    protected final List<Parameter> parameter;
     
     public Element() {
+        filter = new ArrayList();
         parameter = new ArrayList();
-    }
-    
-    @Override
-    public void setFilterNames(List<String> names) {
-        filterNames = names;
-    }
-    
-    @Override
-    public void addFilterName(String name) {
-        filterNames.add(name);
-    }
-    
-    @Override
-    public List<String> getFilterNames() {
-        return filterNames;
-    }
-    
-    public List<Parameter> getParameter() {
-        return parameter;
-    }
-
-    public void setEnabled(boolean isEnabled) {
-        this.isEnabled = isEnabled;
-    }
-    
-    @Override
-    public boolean isEnabled() {
-        return isEnabled;
     }
     
     @Override
@@ -65,6 +39,36 @@ public abstract class Element implements IElement {
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    @Override
+    public List<String> getFilter() {
+        return filter;
+    }
+    
+    @Override
+    public List<Parameter> getParameter() {
+        return parameter;
+    }
+
+    @Override
+    public void setEnabled(boolean isEnabled) {
+        this.isEnabled = isEnabled;
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
     }
     
     public enum Type {

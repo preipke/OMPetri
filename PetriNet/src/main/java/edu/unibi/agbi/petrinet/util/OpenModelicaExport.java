@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collection;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
@@ -93,7 +92,7 @@ public class OpenModelicaExport
          */
         writer.append(INDENT + "inner PNlib.Settings");
         writer.append(" settings(showTokenFlow = true)");
-        //writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
+//        writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
         writer.append(";");
         writer.println();
 
@@ -151,18 +150,14 @@ public class OpenModelicaExport
                 if (isColoredPn) {
 
                     if (isFirst) {
-
                         isFirst = false;
-
                     } else {
-
                         tmp1 += ",";
                         tmp2 += ",";
                         tmp3 += ",";
                     }
 
                     if (token != null) {
-
                         if (place.getPlaceType() == Place.Type.CONTINUOUS) {
                             tmp1 += token.getValueStart();
                             tmp2 += token.getValueMin();
@@ -172,13 +167,10 @@ public class OpenModelicaExport
                             tmp2 += (int)token.getValueMin();
                             tmp3 += (int)token.getValueMax();
                         }
-
                     } else {
-
                         tmp1 += "0";
                         tmp2 += "0";
                         tmp3 += "0";
-
                     }
 
                 } else {
@@ -206,9 +198,9 @@ public class OpenModelicaExport
             writer.append(",min" + tokenType + "=" + tmp2);
             writer.append(",max" + tokenType + "=" + tmp3);
                 
-            //writer.append(",t(final unit=\"custom unit\")");
+//            writer.append(",t(final unit=\"custom unit\")");
             writer.append(")");
-            //writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
+//            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
             writer.println();
         }
@@ -264,13 +256,9 @@ public class OpenModelicaExport
             for (IArc arc : transition.getArcsIn()) {
 
                 if (isFirst) {
-
                     isFirst = false;
-
                 } else {
-
                     tmp1 += ",";
-
                 }
 
                 tmp3 = "";
@@ -281,39 +269,27 @@ public class OpenModelicaExport
                     weight = arc.getWeight(color);
 
                     if (isInnerFirst) {
-
                         isInnerFirst = false;
-
                     } else {
-
                         tmp3 += ",";
-
                     }
 
                     if (isColoredPn) {
-
+                        
                         if (weight != null) {
-
                             tmp3 += weight.getValue();
-
                         } else {
-
                             tmp3 += "0";
-
                         }
-
+                        
                     } else {
-
                         tmp1 += weight.getValue();
-
                     }
 
                 }
 
                 if (isColoredPn) {
-
                     tmp1 += "{" + tmp3 + "}/*" + arc.getSource().getId() + "*/";
-
                 }
 
             }
@@ -327,13 +303,9 @@ public class OpenModelicaExport
             for (IArc arc : transition.getArcsOut()) {
 
                 if (isFirst) {
-
                     isFirst = false;
-
                 } else {
-
                     tmp2 += ",";
-
                 }
 
                 tmp3 = "";
@@ -344,31 +316,21 @@ public class OpenModelicaExport
                     weight = arc.getWeight(color);
 
                     if (isInnerFirst) {
-
                         isInnerFirst = false;
-
                     } else {
-
                         tmp3 += ",";
-
                     }
 
                     if (isColoredPn) {
 
                         if (weight != null) {
-
                             tmp3 += weight.getValue();
-
                         } else {
-
                             tmp3 += "0";
-
                         }
 
                     } else {
-
                         tmp2 += weight.getValue();
-
                     }
 
                 }
@@ -463,18 +425,13 @@ public class OpenModelicaExport
         String tmp;
         int index;
         
-        // Removes previous filter names
-        for (IElement ele : petriNet.getArcs()) {
-            ele.setFilterNames(new ArrayList());
-        }
-        for (IElement ele : petriNet.getPlaces()) {
-            ele.setFilterNames(new ArrayList());
-        }
-        for (IElement ele : petriNet.getTransitions()) {
-            ele.setFilterNames(new ArrayList());
+        for (IElement arc : petriNet.getArcs()) {
+            arc.getFilter().clear();
         }
         
         for (INode place : petriNet.getPlaces()) {
+            
+            place.getFilter().clear();
             
             tmp = "'" + place.getId() + "'.t";
             filter += tmp + "|";
@@ -515,6 +472,8 @@ public class OpenModelicaExport
         }
 
         for (INode transition : petriNet.getTransitions()) {
+            
+            transition.getFilter().clear();
             
             tmp = "'" + transition.getId() + "'.fire";
             filter += tmp + "|";

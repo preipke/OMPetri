@@ -6,6 +6,7 @@
 package edu.unibi.agbi.petrinet.entity;
 
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.List;
 
 /**
@@ -14,10 +15,12 @@ import java.util.List;
  */
 public interface IElement
 {
-    public String getId();
-    public void setFilterNames(List<String> names);
-    public void addFilterName(String name);
-    public List<String> getFilterNames();
     public Element.Type getElementType();
+    public String getId();
+    public String getName();
+    public void setName(String name);
+    public List<String> getFilter();
+    public List<Parameter> getParameter();
     public boolean isEnabled();
+    public void setEnabled(boolean value);
 }

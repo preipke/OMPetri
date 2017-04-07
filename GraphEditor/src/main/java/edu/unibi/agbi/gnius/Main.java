@@ -21,6 +21,15 @@ public class Main extends Application {
     private ConfigurableApplicationContext springContext;
     private Parent root;
     
+//    @Value("${main.window.fxml}")
+//    private String mainFxml;
+//    @Value("${main.window.stylesheet.graph}")
+//    private String graphStylesheet;
+//    @Value("${main.window.stylesheet.main}")
+//    private String mainStylesheet;
+//    @Value("${main.window.title}")
+//    private String title;
+    
     @Override
     public void init() throws Exception {
         springContext = SpringApplication.run(Main.class);  // main configuration class
@@ -32,10 +41,10 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         Scene scene = new Scene(root);
-        scene.getStylesheets().add("/styles/Styles.css");
-        scene.getStylesheets().add("/styles/gravis/nodes.css");
+        scene.getStylesheets().add("/styles/graph.css");
+        scene.getStylesheets().add("/styles/main.css");
         
-        stage.setTitle("GraVisFX - PetriNet Editor");
+        stage.setTitle("GraVisFX - Editor");
         stage.setScene(scene);
         stage.show();
     }

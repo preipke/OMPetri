@@ -20,29 +20,17 @@ public final class DataTransition extends Transition implements IDataNode
 {
     private final List<IGraphElement> shapes;
     
-    private String name;
-    private String description;
+    private String description = "";
     
     public DataTransition(Transition.Type type) {
         setTransitionType(type);
         name = super.id;
-        description = "";
         shapes = new ArrayList();
     }
 
     @Override
     public List<IGraphElement> getGraphElements() {
         return shapes;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
     }
 
     @Override
