@@ -5,10 +5,10 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangleDouble;
+import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircleRectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,18 +16,18 @@ import java.util.List;
  *
  * @author PR
  */
-public class GraphTransition extends GravisRectangleDouble implements IGraphNode {
+public class GraphCluster extends GravisCircleRectangle implements IGraphNode {
     
-    private final DataTransition dataTransition;
+    private final DataCluster dataCluster;
     
-    public GraphTransition(DataTransition dataTransition) {
+    public GraphCluster(DataCluster dataCluster) {
         super();
-        this.dataTransition = dataTransition;
+        this.dataCluster = dataCluster;
     }
-    
+
     @Override
-    public DataTransition getDataElement() {
-        return dataTransition;
+    public DataCluster getDataElement() {
+        return dataCluster;
     }
 
     @Override

@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.EditorToolsController;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
@@ -29,7 +28,6 @@ public class KeyEventHandler
     @Autowired private MessengerService messengerService;
     
     @Autowired private MouseEventHandler mouseEventHandler;
-    @Autowired private EditorToolsController editorToolsController;
     
     private boolean isCloning;
     
@@ -50,7 +48,8 @@ public class KeyEventHandler
             else if (event.getCode().equals(KeyCode.DELETE)) {
                 
                 Platform.runLater(() -> {
-                    dataService.removeSelectedShapes();
+                    dataService.removeShapes(selectionService.getSelectedElements());
+                    selectionService.unselectAll();
                 });
             }
             
@@ -73,7 +72,7 @@ public class KeyEventHandler
 
                     selectionService.unselectAll();
                     try {
-                        dataService.paste(isCloning);
+                        selectionService.selectAll(dataService.paste(selectionService.getCopiedNodes(), isCloning));
                     } catch (DataGraphServiceException ex) {
                         messengerService.addToLog(ex);
                     }

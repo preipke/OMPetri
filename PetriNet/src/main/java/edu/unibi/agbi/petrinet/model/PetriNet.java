@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
-import edu.unibi.agbi.petrinet.entity.abstr.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 import java.util.ArrayList;
 
 import java.util.Collection;
@@ -71,6 +71,17 @@ public class PetriNet
             transitions.put(node.getId(), node);
         }
         return true;
+    }
+    
+    public INode remove(INode node) {
+        if (placesAndTransitions.remove(node.getId()) == null) {
+            return null;
+        } 
+        if (node instanceof Place) {
+            return places.remove(node.getId());
+        } else {
+            return transitions.remove(node.getId());
+        }
     }
     
     public Collection<IArc> getArcs() {

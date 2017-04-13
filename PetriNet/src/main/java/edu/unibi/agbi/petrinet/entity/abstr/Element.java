@@ -72,6 +72,6 @@ public abstract class Element implements IElement {
     }
     
     public enum Type {
-        ARC, PLACE, TRANSITION;
+        ARC, CLUSTER, PLACE, TRANSITION;
     }
 }

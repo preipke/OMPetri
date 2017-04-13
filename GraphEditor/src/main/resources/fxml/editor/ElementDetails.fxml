@@ -8,7 +8,7 @@
 
 <VBox fx:id="elementDetails" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ElementDetailsController">
    <children>
-      <TitledPane animated="false" text="Type">
+      <TitledPane fx:id="typePane" animated="false" text="Type">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0">
                <children>
@@ -16,7 +16,7 @@
                      <children>
                         <Label text="Type" />
                         <TextField fx:id="elementType" editable="false" GridPane.columnIndex="1" />
-                        <ChoiceBox fx:id="elementSubtype" prefWidth="125.0" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
+                        <ChoiceBox fx:id="elementSubtype" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS" />
                         <Label text="Subtype" GridPane.rowIndex="1" />
                      </children>
                      <columnConstraints>
@@ -32,7 +32,7 @@
             </AnchorPane>
         </content>
       </TitledPane>
-      <TitledPane animated="false" text="Identifier">
+      <TitledPane fx:id="identPane" animated="false" text="Identifier">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0">
                <children>
@@ -66,7 +66,7 @@
             </AnchorPane>
         </content>
       </TitledPane>
-      <TitledPane animated="false" text="Properties">
+      <TitledPane fx:id="propertiesPane" animated="false" text="Properties">
         <content>
           <AnchorPane minHeight="0.0" minWidth="0.0">
                <children>
@@ -75,9 +75,9 @@
                         <GridPane fx:id="colorSelectionGrid" hgap="5.0">
                            <children>
                               <Label text="Color" />
-                              <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1">
+                              <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1">
                                  <children>
-                                    <ChoiceBox fx:id="colorChoice" prefWidth="100.0" HBox.hgrow="ALWAYS" />
+                                    <ChoiceBox fx:id="colorChoice" HBox.hgrow="ALWAYS" />
                                     <Button fx:id="colorCreate" mnemonicParsing="false" prefWidth="25.0" />
                                  </children>
                               </HBox>
@@ -152,6 +152,35 @@
                               <Label fx:id="transitionFunctionStatus" text="Label" />
                            </children>
                         </VBox>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </content>
+      </TitledPane>
+      <TitledPane animated="false" text="Cluster">
+        <content>
+          <AnchorPane minHeight="0.0" minWidth="0.0">
+               <children>
+                  <VBox alignment="TOP_CENTER" spacing="10.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <GridPane hgap="5.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="75.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="125.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Label" />
+                              <Label text="Description" GridPane.rowIndex="1" />
+                              <TextField fx:id="clusterLabel" GridPane.columnIndex="1" />
+                              <TextArea fx:id="clusterDescription" prefHeight="60.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                           </children>
+                        </GridPane>
+                        <ListView fx:id="clusterElementsList" />
                      </children>
                   </VBox>
                </children>

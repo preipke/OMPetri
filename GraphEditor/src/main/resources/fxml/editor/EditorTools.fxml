@@ -13,7 +13,12 @@
             <children>
                 <GridPane alignment="CENTER" hgap="10.0" vgap="10.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                     <children>
-                        <MenuButton fx:id="buttonCreate" mnemonicParsing="false" text="Create" GridPane.halignment="RIGHT" />
+                        <MenuButton fx:id="buttonCreate" mnemonicParsing="false" text="Create" GridPane.halignment="RIGHT">
+                            <items>
+                                <MenuItem fx:id="buttonCreatePlace" text="Place" />
+                                <MenuItem fx:id="buttonCreateTransition" text="Transition" />
+                            </items>
+                        </MenuButton>
                         <Button fx:id="buttonRemove" mnemonicParsing="false" text="Remove" GridPane.columnIndex="1" GridPane.halignment="LEFT" />
                         <Button fx:id="buttonCopy" mnemonicParsing="false" text="Copy" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
                         <Button fx:id="buttonClone" mnemonicParsing="false" text="Clone" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="1" />

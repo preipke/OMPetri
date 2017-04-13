@@ -8,20 +8,17 @@ package edu.unibi.agbi.gnius.business.controller;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
-
+import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
-
 import java.net.URL;
-
 import java.util.ResourceBundle;
-
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,6 +30,8 @@ public class GraphPaneController implements Initializable
 {
     @Autowired private GraphDao graph;
     
+    @Autowired private DataGraphService dataGraphService;
+    @Autowired private SelectionService selectionService;
     @Autowired private MouseEventHandler mouseEventHandler;
     @Autowired private ScrollEventHandler scrollEventHandler;
 
@@ -48,6 +47,9 @@ public class GraphPaneController implements Initializable
         graphScene.widthProperty().bind(editorPane.widthProperty());
         graphScene.heightProperty().bind(editorPane.heightProperty());
         graphScene.getGraphPane().getStyleClass().add(paneStyleClass);
+        
+        graphScene.getObjects().add(dataGraphService);
+        graphScene.getObjects().add(selectionService);
         
         editorPane.setCenter(graphScene);
             

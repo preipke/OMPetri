@@ -51,19 +51,11 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
         
-        <!-- run as if it was on an embedded system -->
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>openjfx-monocle</artifactId>
-            <version>1.8.0_20</version>
-        </dependency>
-		
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        
         <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>testfx-core</artifactId>
@@ -74,6 +66,12 @@
             <groupId>org.testfx</groupId>
             <artifactId>testfx-junit</artifactId>
             <version>4.0.4-alpha</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency><!-- run as if app was an embedded system -->
+            <groupId>org.jfxtras</groupId>
+            <artifactId>openjfx-monocle</artifactId>
+            <version>1.8.0_20</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

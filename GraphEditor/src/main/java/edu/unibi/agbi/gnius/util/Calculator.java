@@ -12,7 +12,6 @@ import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import java.util.List;
 import javafx.geometry.Point2D;
-import javafx.scene.input.MouseEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,14 +48,17 @@ public class Calculator
         return new Point2D(x , y);
     }
     
-    public Point2D getCorrectedMousePosition(MouseEvent event) {
+    public Point2D getCorrectedMousePosition(double posX, double posY) {
         double x, y;
-        x = (event.getX() - topLayer.translateXProperty().get()) / topLayer.getScale().getX();
-        y = (event.getY() - topLayer.translateYProperty().get()) / topLayer.getScale().getY();
+        x = (posX - topLayer.translateXProperty().get()) / topLayer.getScale().getX();
+        y = (posY - topLayer.translateYProperty().get()) / topLayer.getScale().getY();
         return new Point2D(x, y);
     }
     
     public Point2D getCorrectedMousePositionLatest() {
-        return getCorrectedMousePosition(mouseEventHandler.getMouseMovedEventLatest());
+        return getCorrectedMousePosition(
+                mouseEventHandler.getMouseMovedEventLatest().getX(), 
+                mouseEventHandler.getMouseMovedEventLatest().getY()
+        );
     }
 }

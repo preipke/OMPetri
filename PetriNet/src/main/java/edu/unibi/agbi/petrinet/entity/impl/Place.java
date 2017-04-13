@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.abstr;
+package edu.unibi.agbi.petrinet.entity.impl;
 
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -17,7 +19,7 @@ import java.util.Map;
  *
  * @author PR
  */
-public abstract class Place extends Node
+public class Place extends Node
 {
     private static final String IDENT = "P";
     private static int COUNT = 0;

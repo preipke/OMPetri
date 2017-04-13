@@ -21,12 +21,8 @@ public class GraphPlace extends GravisCircleDouble implements IGraphNode
     private final DataPlace dataPlace;
     
     public GraphPlace(DataPlace dataPlace) {
-        
         super();
-        
         this.dataPlace = dataPlace;
-        
-        getLabel().setText(getId());
     }
     
     @Override

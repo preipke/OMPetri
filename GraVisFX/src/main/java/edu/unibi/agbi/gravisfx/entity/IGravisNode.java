@@ -24,7 +24,7 @@ public interface IGravisNode extends IGravisElement
     
     public boolean isChildShapesEnabled();
     public void setChildShapesEnabled(boolean value);
-    public List<IGravisSubElement> getChildElements();
+    public List<IGravisChildElement> getChildElements();
     
     public GravisLabel getLabel();
 }

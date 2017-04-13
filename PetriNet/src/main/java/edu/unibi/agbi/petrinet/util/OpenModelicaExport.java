@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.petrinet.util;
 
-import edu.unibi.agbi.petrinet.entity.abstr.Place;
-import edu.unibi.agbi.petrinet.entity.abstr.Transition;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.PetriNet;

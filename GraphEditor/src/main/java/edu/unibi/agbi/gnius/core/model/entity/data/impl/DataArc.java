@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.petrinet.entity.abstr.Arc;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public final class DataArc extends Arc implements IDataArc
 {
     private final List<IGraphElement> shapes;
     
-    private String description;
+    private String description = "";
     
     public DataArc(IDataNode source, IDataNode target, Arc.Type type) throws IllegalAssignmentException {
         super(source, target);
@@ -54,10 +54,6 @@ public final class DataArc extends Arc implements IDataArc
         this.description = description;
     }
 
-    /**
-     * Sets the label text for this data node and all related shapes in the scene.
-     * @param text 
-     */
     @Override
     public void setLabelText(String text) {
     }

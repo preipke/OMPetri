@@ -97,19 +97,19 @@ public class Graph
         return connection;
     }
     
-    public IGravisNode[] getNodes() {
-        IGravisNode[] nodesArray = new IGravisNode[this.nodes.size()];
-        for (int i = 0; i < nodesArray.length; i++) {
-            nodesArray[i] = this.nodes.get(i);
+    public List<IGravisNode> getNodes() {
+        List<IGravisNode> listCopy = new ArrayList();
+        for (IGravisNode node : nodes) {
+            listCopy.add(node);
         }
-        return nodesArray;
+        return listCopy;
     }
     
-    public IGravisConnection[] getConnections() {
-        IGravisConnection[] connectionsArray = new IGravisConnection[this.connections.size()];
-        for (int i = 0; i < connectionsArray.length; i++) {
-            connectionsArray[i] = this.connections.get(i);
+    public List<IGravisConnection> getConnections() {
+        List<IGravisConnection> listCopy = new ArrayList();
+        for (IGravisConnection connection : connections) {
+            listCopy.add(connection);
         }
-        return connectionsArray;
+        return listCopy;
     }
 }

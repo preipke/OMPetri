@@ -1,38 +1,82 @@
-.arcDefault {
+.arc {
     -fx-fill: null;
     -fx-stroke: orange;
     -fx-stroke-width: 2px;
 }
-.arcDefault:hovered {
+.arc:hovered {
     -fx-stroke: orange;
     -fx-stroke-width: 3px;
 }
-.arcDefault:selected {
+.arc:selected {
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
-.arcDefault:highlighted {
+.arc:highlighted {
 }
 
 
 
-.placeDefault {
+.cluster {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
     -fx-stroke-width: 1px;
     -fx-stroke-type: outside;
 }
-.placeDefault:hovered {
+.cluster:hovered {
     -fx-stroke: forestgreen;
     -fx-stroke-width: 2px;
 }
-.placeDefault:selected {
+.cluster:selected {
     -fx-stroke: darkgreen;
     -fx-stroke-width: 2px;
 }
-.placeDefault:highlighted {
+.cluster:highlighted {
     -fx-stroke: darkgreen;
     -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 1px 8px;
+}
+
+
+
+.place {
+    -fx-fill: yellowgreen;
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 1px;
+    -fx-stroke-type: outside;
+}
+.place:hovered {
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 2px;
+}
+.place:selected {
+    -fx-stroke: darkgreen;
+    -fx-stroke-width: 2px;
+}
+.place:highlighted {
+    -fx-stroke: darkgreen;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 1px 8px;
+}
+
+
+
+.transition {
+    -fx-fill: lightblue;
+    -fx-stroke: blue;
+    -fx-stroke-width: 1px;
+    -fx-stroke-type: outside;
+}
+.transition:hovered {
+    -fx-stroke: blue;
+    -fx-stroke-width: 2px;
+}
+.transition:selected {
+    -fx-stroke: darkblue;
+    -fx-stroke-width: 3px;
+}
+.transition:highlighted {
+    -fx-stroke: darkblue;
+    -fx-stroke-width: 3px;
     -fx-stroke-dash-array: 1px 8px;
 }
 
@@ -54,28 +98,6 @@
 }
 .transitionStochastic:highlighted {
     -fx-stroke: black;
-    -fx-stroke-width: 3px;
-    -fx-stroke-dash-array: 1px 8px;
-}
-
-
-
-.transitionDefault {
-    -fx-fill: lightblue;
-    -fx-stroke: blue;
-    -fx-stroke-width: 1px;
-    -fx-stroke-type: outside;
-}
-.transitionDefault:hovered {
-    -fx-stroke: blue;
-    -fx-stroke-width: 2px;
-}
-.transitionDefault:selected {
-    -fx-stroke: darkblue;
-    -fx-stroke-width: 3px;
-}
-.transitionDefault:highlighted {
-    -fx-stroke: darkblue;
     -fx-stroke-width: 3px;
     -fx-stroke-dash-array: 1px 8px;
 }

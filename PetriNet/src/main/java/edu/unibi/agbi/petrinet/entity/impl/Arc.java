@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.abstr;
+package edu.unibi.agbi.petrinet.entity.impl;
 
 import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -14,12 +14,13 @@ import java.util.HashMap;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.INode;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 
 /**
  *
  * @author PR
  */
-public abstract class Arc extends Element implements IArc
+public class Arc extends Element implements IArc
 {
     private Type arcType;
     

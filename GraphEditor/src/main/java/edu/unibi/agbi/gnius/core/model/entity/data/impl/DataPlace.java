@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.petrinet.entity.abstr.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,12 +20,11 @@ public final class DataPlace extends Place implements IDataNode
 {
     private final List<IGraphElement> shapes;
     
-    private String description;
+    private String description = "";
     
     public DataPlace(Place.Type type) {
         setPlaceType(type);
-        name = super.id;
-        description = "";
+        name = id;
         shapes = new ArrayList();
     }
 

@@ -5,18 +5,19 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
+import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.SelectionDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
 import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 
 /**
  *
@@ -69,7 +70,7 @@ public class SelectionService
             if (element instanceof IGraphNode || element instanceof IGraphArc) {
                 highlightedElementsHandles = element.getElementHandles();
             } else { // not a node, so must be subelement
-                highlightedElementsHandles = ((IGravisSubElement) element).getParentElement().getElementHandles();
+                highlightedElementsHandles = ((IGravisChildElement) element).getParentElement().getElementHandles();
             }
 
             for (ElementHandle handle : highlightedElementsHandles) {
@@ -97,6 +98,9 @@ public class SelectionService
      */
     public void highlightRelated(IGraphElement element) {
         IDataElement dataElement = element.getDataElement();
+        if (dataElement == null) {
+            return;
+        }
         for (IGraphElement shape : dataElement.getGraphElements()) {
             if (!shape.getElementHandles().get(0).isSelected()) {
                 if (!shape.getElementHandles().get(0).isHighlighted()) {
@@ -141,13 +145,13 @@ public class SelectionService
     }
     
     /**
-     * Select element.
-     * @param element 
+     * Selects the given element.
+     * @param element
      */
     public void select(IGraphElement element) {
         
         hover(null);
-        
+
         if (element.getElementHandles().get(0).isHighlighted()) {
             selectionDao.removeHighlight(element);
             element.getElementHandles().forEach(ele -> {
@@ -173,6 +177,16 @@ public class SelectionService
         IDataElement dataElement = element.getDataElement();
         for (IGraphElement relatedElement : dataElement.getGraphElements()) {
             select(relatedElement);
+        }
+    }
+    
+    /**
+     * Selects the given nodes and all their related.
+     * @param nodes
+     */
+    public void selectAll(List<IGraphNode> nodes) {
+        for (IGraphElement element : nodes) {
+            selectAll(element);
         }
     }
     
@@ -217,7 +231,7 @@ public class SelectionService
      * Get copied nodes.
      * @return 
      */
-    public List<IGraphNode> getNodesCopy() {
+    public List<IGraphNode> getCopiedNodes() {
         return selectedNodesCopy;
     }
 }

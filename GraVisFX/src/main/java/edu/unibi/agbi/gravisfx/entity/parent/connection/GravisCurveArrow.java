@@ -75,41 +75,31 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                 x3 = (x1 + x2) / 2 ;
                 y3 = (y1 + y2) / 2 ;
                 
-                double x = (x1 - x2);
-                double y = (y2 - y1);
+                double deltaX = (x1 - x2);
+                double deltaY = (y2 - y1);
                 
-                if (x < 1 && x > -1) {
-                    if (x >= 0) {
-                        x = 1;
+                if (deltaX < 1 && deltaX > -1) {
+                    if (deltaX >= 0) {
+                        deltaX = 1;
                     } else {
-                        x = -1;
+                        deltaX = -1;
                     }
                 }
                 
-                if (y < 1 && y > -1) {
-                    if (y >= 0) {
-                        y = 1;
+                if (deltaY < 1 && deltaY > -1) {
+                    if (deltaY >= 0) {
+                        deltaY = 1;
                     } else {
-                        y = -1;
+                        deltaY = -1;
                     }
                 }
                     
-                double m2 = x / y;
-                
-                double b2 = y3 - m2 * x3;
+                double m = deltaX / deltaY;
+                double b = y3 - m * x3;
                 double r = GravisProperties.ARC_GAP / 2;
                 
-//                System.out.println("####");
-//                System.out.println("P1 ( " + x1 + " | " + y1 + " )");
-//                System.out.println("P2 ( " + x2 + " | " + y2 + " )");
-//                System.out.println("m2 = " + m2);
-//                System.out.println("b2 = " + b2);
-                
-                double p = 2 * (m2 * b2 - m2 * y3 - x3) / (1 + m2 * m2);
-                double q = (x3 * x3 + b2 * b2 + y3 * y3 - 2* b2 * y3 - r * r) / (1 + m2 * m2);
-                
-//                System.out.println("p = " + p);
-//                System.out.println("q = " + q);
+                double p = 2 * (m * b - m * y3 - x3) / (1 + m * m);
+                double q = (x3 * x3 + b * b + y3 * y3 - 2* b * y3 - r * r) / (1 + m * m);
                 
                 if (y2 >= y1) {
                     return - p / 2 + Math.sqrt(p * p / 4 - q);
@@ -207,22 +197,9 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                     }
                 }
                 
-//                double m = y / x;
                 double b = y1 - y / x * x1;
-//                double r = PropertiesController.ARROW_DISTANCE;
-                
-//                System.out.println("####");
-//                System.out.println("P1 ( " + x1 + " | " + y1 + " )");
-//                System.out.println("P2 ( " + x2 + " | " + y2 + " )");
-//                System.out.println("m = " + m);
-//                System.out.println("b = " + b);
-//                System.out.println("r = " + r);
-                
                 double p = 2 * (y / x * b - y / x * y2 - x2) / (1 + y / x * y / x);
                 double q = (x2 * x2 + b * b + y2 * y2 - 2 * b * y2 - GravisProperties.ARROW_TARGET_DISTANCE * GravisProperties.ARROW_TARGET_DISTANCE) / (1 + y / x * y / x);
-
-//                System.out.println("p = " + p);
-//                System.out.println("q = " + q);
 
                 if (x2 <= x1) {
                     return -p / 2 + Math.sqrt(p * p / 4 - q);
@@ -325,18 +302,11 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                  * Unten links: -90 bis 0   +180
                  */
                 
-                double alpha;
-                
                 if (x2 < x1) {
-                    alpha =  Math.toDegrees(Math.atan(y / x)) + 180;
+                    return  Math.toDegrees(Math.atan(y / x)) + 180;
                 } else {
-                    alpha =  Math.toDegrees(Math.atan(y / x));
+                    return  Math.toDegrees(Math.atan(y / x));
                 }
-                
-//                System.out.println("#####");
-//                System.out.println("Alpha = " + alpha);
-                
-                return alpha;
             }
         };
         arrow.rotateProperty().bind(arrowAngle);

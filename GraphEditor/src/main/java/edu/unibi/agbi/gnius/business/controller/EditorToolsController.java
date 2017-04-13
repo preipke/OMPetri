@@ -5,9 +5,11 @@
  */
 package edu.unibi.agbi.gnius.business.controller;
 
-import edu.unibi.agbi.gnius.business.mode.exception.EditorModeLockException;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
+import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.SpringFXMLLoader;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.net.URL;
@@ -31,11 +33,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class EditorToolsController implements Initializable
 {
-    @Autowired private MessengerService messengerService;
     @Autowired private MouseEventHandler mouseEventHandler;
     @Autowired private SpringFXMLLoader springFXMLLoader;
+    @Autowired private DataGraphService dataGraphService;
+    @Autowired private SelectionService selectionService;
+    @Autowired private MessengerService messengerService;
     
-    @FXML private MenuButton buttonCreate;
+    @FXML private MenuItem buttonCreatePlace;
+    @FXML private MenuItem buttonCreateTransition;
     @FXML private Button buttonRemove;
     @FXML private Button buttonCopy;
     @FXML private Button buttonClone;
@@ -55,6 +60,30 @@ public class EditorToolsController implements Initializable
     
     public Element.Type getCreateNodeType() {
         return createNodeType;
+    }
+    
+    public void EnableCreatingNodes() {
+        try {
+            mouseEventHandler.setNodeCreationMode();
+        } catch (Exception ex) {
+            messengerService.addToLog(ex.getMessage());
+        }
+    }
+    
+    private void CreateCluster() {
+        try {
+            dataGraphService.cluster(selectionService.getSelectedElements());
+        } catch (DataGraphServiceException ex) {
+            messengerService.addToLog(ex);
+        }
+    }
+    
+    private void RemoveCluster() {
+        try {
+            dataGraphService.uncluster(selectionService.getSelectedElements());
+        } catch (DataGraphServiceException ex) {
+            messengerService.addToLog(ex);
+        }
     }
     
     @FXML
@@ -85,44 +114,22 @@ public class EditorToolsController implements Initializable
         resultsWindowController = (ResultsWindowController) springFXMLLoader.getBean(ResultsWindowController.class);
         resultsWindowController.UpdateSimulationChoices();
     }
-    
-    @FXML
-    public void EnableCreatingNodes() {
-        try {
-            mouseEventHandler.setNodeCreationMode();
-        } catch (EditorModeLockException ex) {
-            messengerService.addToLog(ex.getMessage());
-        }
-    }
-    
-    @FXML
-    public void buttonCreateNodeEnable() {
-        try {
-            mouseEventHandler.setNodeCreationMode();
-        } catch (EditorModeLockException ex) {
-            messengerService.addToLog(ex.getMessage());
-        }
-    }
 
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        MenuItem createPlace = new MenuItem("Place");
-        createPlace.setOnAction(e -> { 
+        buttonCreatePlace.setOnAction(e -> { 
             createNodeType = Element.Type.PLACE; 
             EnableCreatingNodes();
         });
-        
-        MenuItem createTransition = new MenuItem("Transition");
-        createTransition.setOnAction(e -> { 
+        buttonCreateTransition.setOnAction(e -> { 
             createNodeType = Element.Type.TRANSITION; 
             EnableCreatingNodes();
         });
         
-        buttonCreate.getItems().clear();
-        buttonCreate.getItems().add(createPlace);
-        buttonCreate.getItems().add(createTransition);
-        
         buttonClone.setOnAction(e -> OpenResultsView());
+        
+        buttonClusterCreate.setOnAction(e -> CreateCluster());
+        buttonClusterRemove.setOnAction(e -> RemoveCluster());
     }
 }

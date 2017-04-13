@@ -11,6 +11,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
@@ -34,8 +35,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
@@ -60,6 +63,15 @@ public class ElementDetailsController implements Initializable
     
     // Container
     @FXML private VBox elementDetails;
+    @FXML private TitledPane clusterPane;
+    @FXML private TitledPane typePane;
+    @FXML private TitledPane identPane;
+    @FXML private TitledPane propertiesPane;
+    
+    // Cluster
+    @FXML private TextField clusterLabel;
+    @FXML private TextArea clusterDescription;
+    @FXML private ListView clusterElementsList;
     
     // Type
     @FXML private TextField elementType;
@@ -73,23 +85,24 @@ public class ElementDetailsController implements Initializable
     
     // Properties
     @FXML private VBox propertiesContainer;
-    
     @FXML private GridPane colorSelectionGrid;
+    @FXML private GridPane arcPropertiesGrid;
+    @FXML private GridPane placePropertiesGrid;
+    @FXML private VBox transitionPropertiesBox;
+    
+    // Color
     @FXML private ChoiceBox colorChoice;
     @FXML private Button colorCreate;
     
-    // Arc properties
-    @FXML private GridPane arcPropertiesGrid;
+    // Arc
     @FXML private TextField propertyWeight;
     
-    // Place properties
-    @FXML private GridPane placePropertiesGrid;
+    // Place
     @FXML private TextField propertyToken;
     @FXML private TextField propertyTokenMin;
     @FXML private TextField propertyTokenMax;
     
-    // Transition properties
-    @FXML private VBox transitionPropertiesBox;
+    // Transition
     @FXML private TextField transitionFunctionInput;
     @FXML private SwingNode transitionFunctionImage;
     @FXML private Label transitionFunctionStatus;
@@ -154,6 +167,10 @@ public class ElementDetailsController implements Initializable
                 }
                 arc.setWeight(weight);
                 
+                break;
+                
+            case CLUSTER:
+                System.out.println("TODO!");
                 break;
             
             case PLACE:
@@ -229,12 +246,26 @@ public class ElementDetailsController implements Initializable
      */
     private void LoadGuiElements(IDataElement element) {
         
+        elementDetails.getChildren().clear();
+        
+        if (element instanceof GraphCluster) {
+            elementDetails.getChildren().add(clusterPane);
+        } else {
+            elementDetails.getChildren().add(typePane);
+            elementDetails.getChildren().add(identPane);
+            elementDetails.getChildren().add(propertiesPane);
+        }
+        
         propertiesContainer.getChildren().clear();
         
         switch (element.getElementType()) {
                 
             case ARC:
                 propertiesContainer.getChildren().add(arcPropertiesGrid);
+                break;
+                
+            case CLUSTER:
+                System.out.println("TODO!");
                 break;
             
             case PLACE:
@@ -280,6 +311,10 @@ public class ElementDetailsController implements Initializable
 //                    weight = weights.get(null);
 //                }
                 propertyWeight.setText(weight.getValue());
+                break;
+                
+            case CLUSTER:
+                System.out.println("TODO");
                 break;
             
             case PLACE:
@@ -404,7 +439,7 @@ public class ElementDetailsController implements Initializable
     }
     
     /**
-     * Parses the input from the function related textfield to an image using 
+     * Parses the input from the function related textfield to an image by using 
      * PrettyFormula.
      * 
      * @param event 

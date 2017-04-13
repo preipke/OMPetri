@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.petrinet.entity.abstr.Transition;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +24,7 @@ public final class DataTransition extends Transition implements IDataNode
     
     public DataTransition(Transition.Type type) {
         setTransitionType(type);
-        name = super.id;
+        name = id;
         shapes = new ArrayList();
     }
 

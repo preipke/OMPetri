@@ -97,22 +97,9 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
                     }
                 }
                 
-//                double m = y / x;
                 double b = y1 - y / x * x1;
-//                double r = PropertiesController.ARROW_DISTANCE;
-                
-//                System.out.println("####");
-//                System.out.println("P1 ( " + x1 + " | " + y1 + " )");
-//                System.out.println("P2 ( " + x2 + " | " + y2 + " )");
-//                System.out.println("m = " + m);
-//                System.out.println("b = " + b);
-//                System.out.println("r = " + r);
-                
                 double p = 2 * (y / x * b - y / x * y2 - x2) / (1 + y / x * y / x);
                 double q = (x2 * x2 + b * b + y2 * y2 - 2 * b * y2 - GravisProperties.ARROW_TARGET_DISTANCE * GravisProperties.ARROW_TARGET_DISTANCE) / (1 + y / x * y / x);
-
-//                System.out.println("p = " + p);
-//                System.out.println("q = " + q);
 
                 if (x2 <= x1) {
                     return -p / 2 + Math.sqrt(p * p / 4 - q);
@@ -165,9 +152,6 @@ public class GravisEdgeArrow extends Path implements IGravisConnection
                         y = -1;
                     }
                 }
-                
-//                double m = y / x;
-//                double b = y1 - y / x * x1;
 
                 return y / x * bindingLineEndX.get() + y1 - y / x * x1;
             }

@@ -5,11 +5,11 @@
  */
 package edu.unibi.agbi.gravisfx.entity.parent.node;
 
-import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
 import edu.unibi.agbi.gravisfx.entity.child.GravisSubCircle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Shape;
+import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 
 /**
  *
@@ -49,8 +49,8 @@ public class GravisCircleDouble extends GravisCircle {
     }
     
     @Override
-    public List<IGravisSubElement> getChildElements() {
-        List<IGravisSubElement> childElements = new ArrayList();
+    public List<IGravisChildElement> getChildElements() {
+        List<IGravisChildElement> childElements = new ArrayList();
         childElements.add(innerCircle);
         return childElements;
     }

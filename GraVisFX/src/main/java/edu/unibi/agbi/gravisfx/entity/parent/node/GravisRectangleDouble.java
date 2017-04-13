@@ -6,11 +6,11 @@
 package edu.unibi.agbi.gravisfx.entity.parent.node;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
 import edu.unibi.agbi.gravisfx.entity.child.GravisSubRectangle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Shape;
+import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 
 /**
  *
@@ -25,6 +25,8 @@ public class GravisRectangleDouble extends GravisRectangle {
         super();
         
         innerRectangle = new GravisSubRectangle(this);
+        innerRectangle.setWidth(GravisProperties.RECTANGLE_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
+        innerRectangle.setHeight(GravisProperties.RECTANGLE_HEIGHT - GravisProperties.BASE_INNER_DISTANCE * 2);
         innerRectangle.translateXProperty().bind(translateXProperty().add(GravisProperties.BASE_INNER_DISTANCE));
         innerRectangle.translateYProperty().bind(translateYProperty().add(GravisProperties.BASE_INNER_DISTANCE));
         
@@ -50,8 +52,8 @@ public class GravisRectangleDouble extends GravisRectangle {
     }
     
     @Override
-    public List<IGravisSubElement> getChildElements() {
-        List<IGravisSubElement> childElements = new ArrayList();
+    public List<IGravisChildElement> getChildElements() {
+        List<IGravisChildElement> childElements = new ArrayList();
         childElements.add(innerRectangle);
         return childElements;
     }

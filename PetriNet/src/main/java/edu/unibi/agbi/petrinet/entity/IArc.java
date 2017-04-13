@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.petrinet.entity;
 
-import edu.unibi.agbi.petrinet.entity.abstr.Arc;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Weight;
 import java.util.Map;

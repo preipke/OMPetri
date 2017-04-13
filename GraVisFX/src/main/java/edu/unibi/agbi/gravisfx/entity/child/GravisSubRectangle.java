@@ -8,18 +8,18 @@ package edu.unibi.agbi.gravisfx.entity.child;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.IGravisSubElement;
 import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 
 /**
  *
  * @author PR
  */
-public class GravisSubRectangle extends Rectangle implements IGravisSubElement
+public class GravisSubRectangle extends Rectangle implements IGravisChildElement
 {
     private final List<ElementHandle> elementHandles;
     private final IGravisNode parentElement;

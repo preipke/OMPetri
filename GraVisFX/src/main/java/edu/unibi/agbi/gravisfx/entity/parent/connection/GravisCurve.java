@@ -89,32 +89,16 @@ public class GravisCurve extends QuadCurve implements IGravisConnection
                     }
                 }
                     
-                double m2 = x / y;
-                
-                double b2 = y3 - m2 * x3;
-                double r = GravisProperties.ARC_GAP / 2;
-                
-//                System.out.println("####");
-//                System.out.println("P1 ( " + x1 + " | " + y1 + " )");
-//                System.out.println("P2 ( " + x2 + " | " + y2 + " )");
-//                System.out.println("m2 = " + m2);
-//                System.out.println("b2 = " + b2);
-                
-                double p = 2 * (m2 * b2 - m2 * y3 - x3) / (1 + m2 * m2);
-                double q = (x3 * x3 + b2 * b2 + y3 * y3 - 2* b2 * y3 - r * r) / (1 + m2 * m2);
-                
-//                System.out.println("p = " + p);
-//                System.out.println("q = " + q);
-                
-                double x4;
+                double m = x / y;
+                double b = y3 - m * x3;
+                double p = 2 * (m * b - m * y3 - x3) / (1 + m * m);
+                double q = (x3 * x3 + b * b + y3 * y3 - 2* b * y3 - GravisProperties.ARC_GAP / 2 * GravisProperties.ARC_GAP / 2) / (1 + m * m);
                 
                 if (y2 >= y1) {
-                    x4 = - p / 2 + Math.sqrt(p * p / 4 - q);
+                    return - p / 2 + Math.sqrt(p * p / 4 - q);
                 } else {
-                    x4 = - p / 2 - Math.sqrt(p * p / 4 - q);
+                    return - p / 2 - Math.sqrt(p * p / 4 - q);
                 }
-                
-                return x4;
             }
         };
         controlXProperty().bind(bindingControlX);
@@ -154,10 +138,8 @@ public class GravisCurve extends QuadCurve implements IGravisConnection
                         y = -1;
                     }
                 }
-                    
-                double m2 = x / y;
                 
-                return m2 * controlXProperty().get() + ((y1 + y2) - m2 * (x1 + x2)) / 2;
+                return x / y * controlXProperty().get() + ((y1 + y2) - x / y * (x1 + x2)) / 2;
             }
         };
         controlYProperty().bind(bindingControlY);

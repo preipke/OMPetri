@@ -3,15 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.entity.abstr;
+package edu.unibi.agbi.petrinet.entity.impl;
 
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Function;
 
 /**
  *
  * @author PR
  */
-public abstract class Transition extends Node
+public class Transition extends Node
 {
     private static final String IDENT = "T";
     private static int COUNT = 0;
