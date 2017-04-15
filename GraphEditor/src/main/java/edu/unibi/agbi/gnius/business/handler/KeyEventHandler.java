@@ -48,7 +48,11 @@ public class KeyEventHandler
             else if (event.getCode().equals(KeyCode.DELETE)) {
                 
                 Platform.runLater(() -> {
-                    dataService.removeShapes(selectionService.getSelectedElements());
+                    try {
+                        dataService.remove(selectionService.getSelectedElements());
+                    } catch (DataGraphServiceException ex) {
+                        messengerService.addToLog(ex.getMessage());
+                    }
                     selectionService.unselectAll();
                 });
             }

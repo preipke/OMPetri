@@ -3,15 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.service.exception;
+package edu.unibi.agbi.petrinet.exception;
 
 /**
  *
  * @author PR
  */
-public class ColourException extends Exception
-{
-    public ColourException(String msg) {
+public class IdConflictException extends Exception {
+    public IdConflictException(String msg) {
         super(msg);
     }
 }

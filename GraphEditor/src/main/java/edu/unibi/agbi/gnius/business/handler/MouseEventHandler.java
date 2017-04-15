@@ -366,14 +366,18 @@ public class MouseEventHandler {
             }
             if (eventTarget instanceof IGraphNode) {
                 try {
-                    dataService.connect(arcTemp.getSource(), (IGraphNode) eventTarget, null);
+                    dataService.connect(arcTemp.getSource(), (IGraphNode) eventTarget);
                 } catch (DataGraphServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
             }
 
             selectionService.unhighlight(arcTemp.getSource());
-            dataService.removeShape(arcTemp);
+            try {
+                dataService.remove(arcTemp);
+            } catch (DataGraphServiceException ex) {
+                messengerService.addToLog(ex.getMessage());
+            }
 
             disableMode(isInArcCreationMode);
 

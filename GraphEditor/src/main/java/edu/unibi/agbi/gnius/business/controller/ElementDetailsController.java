@@ -158,7 +158,7 @@ public class ElementDetailsController implements Initializable
                 
                 if (arc.getArcType() != arcType) {
                     dataService.setArcTypeDefault(arcType);
-                    dataService.setTypeFor(arc, arcType);
+                    dataService.changeArcType(arc, arcType);
                 }
                 
                 Weight weight = new Weight(colour);
@@ -185,7 +185,7 @@ public class ElementDetailsController implements Initializable
                 
                 if (place.getPlaceType() != placeType) {
                     dataService.setPlaceTypeDefault(placeType);
-                    dataService.setTypeFor(place, placeType);
+                    dataService.changePlaceType(place, placeType);
                 }
                 
                 Token token = new Token(colour);
@@ -225,7 +225,7 @@ public class ElementDetailsController implements Initializable
                 
                 if (transition.getTransitionType() != transitionType) {
                     dataService.setTransitionTypeDefault(transitionType);
-                    dataService.setTypeFor(transition, transitionType);
+                    dataService.changeTransitionType(transition, transitionType);
                 }
                 
                 Function function = new Function();

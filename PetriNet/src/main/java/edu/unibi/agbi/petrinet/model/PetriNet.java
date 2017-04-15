@@ -7,13 +7,13 @@ package edu.unibi.agbi.petrinet.model;
 
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import java.util.ArrayList;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.INode;
+import edu.unibi.agbi.petrinet.exception.IdConflictException;
 
 /**
  *
@@ -44,39 +44,56 @@ public class PetriNet
         placesAndTransitions = new HashMap();
     }
     
-    public boolean add(Colour color) {
+    public void add(Colour color) throws IdConflictException {
         if (colors.contains(color)) {
-            return false;
+            throw new IdConflictException("A color with the same ID has already been stored!");
         } 
         colors.add(color);
-        return true;
     }
     
-    public boolean add(IArc arc) {
+    public void add(IArc arc) throws IdConflictException {
         if (arcs.containsKey(arc.getId())) {
-            return false;
-        } 
-        arcs.put(arc.getId(), arc);
-        return true;
+            if (!arcs.get(arc.getId()).equals(arc)) {
+                throw new IdConflictException("Another arc has already been stored using the same ID!");
+            }
+        } else {
+            arcs.put(arc.getId(), arc);
+        }
+        arc.getSource().getArcsOut().add(arc);
+        arc.getTarget().getArcsIn().add(arc);
     }
     
-    public boolean add(INode node) {
+    public void add(INode node) throws IdConflictException {
         if (placesAndTransitions.containsKey(node.getId())) {
-            return false;
-        } 
-        placesAndTransitions.put(node.getId(), node);
-        if (node instanceof Place) {
-            places.put(node.getId(), node);
+            if (!placesAndTransitions.get(node.getId()).equals(node)) {
+                throw new IdConflictException("Another node has already been stored using the same ID!");
+            }
         } else {
-            transitions.put(node.getId(), node);
+            placesAndTransitions.put(node.getId(), node);
+            if (node instanceof Place) {
+                places.put(node.getId(), node);
+            } else {
+                transitions.put(node.getId(), node);
+            }
         }
-        return true;
+    }
+    
+    public IArc remove(IArc arc) {
+        arc.getSource().getArcsOut().remove(arc);
+        arc.getTarget().getArcsIn().remove(arc);
+        return arcs.remove(arc.getId());
     }
     
     public INode remove(INode node) {
         if (placesAndTransitions.remove(node.getId()) == null) {
             return null;
         } 
+        while (!node.getArcsIn().isEmpty()) {
+            remove(node.getArcsIn().remove(0));
+        }
+        while (!node.getArcsOut().isEmpty()) {
+            remove(node.getArcsOut().remove(0));
+        }
         if (node instanceof Place) {
             return places.remove(node.getId());
         } else {
