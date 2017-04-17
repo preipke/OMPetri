@@ -135,9 +135,10 @@ public class DataGraphService {
     /**
      * Groups and hides all given nodes in a cluster element.
      * @param selected
+     * @return 
      * @throws DataGraphServiceException
      */
-    public void cluster(List<IGraphElement> selected) throws DataGraphServiceException {
+    public GraphCluster cluster(List<IGraphElement> selected) throws DataGraphServiceException {
         
         if (selected.isEmpty()) {
             throw new DataGraphServiceException("Nothing was selected for clustering!");
@@ -201,18 +202,18 @@ public class DataGraphService {
         clusterShape.translateYProperty().set(pos.getY());
         
         for (IGraphArc arc : arcsFromCluster) {
-            
             arc.getDataElement().getGraphElements().remove(arc);
-            
             arc = createConnection(clusterShape, arc.getTarget(), arc.getDataElement());
-            add(arc);
+            arc.getDataElement().getGraphElements().add(arc);
+            graphDao.add(arc);
+            styleElement(arc);
         }
         for (IGraphArc arc : arcsToCluster) {
-            
             arc.getDataElement().getGraphElements().remove(arc);
-            
             arc = createConnection(arc.getSource(), clusterShape, arc.getDataElement());
-            add(arc);
+            arc.getDataElement().getGraphElements().add(arc);
+            graphDao.add(arc);
+            styleElement(arc);
         }
         
         for (IGraphNode node : nodes) {
@@ -221,6 +222,8 @@ public class DataGraphService {
         for (IGraphArc arc : arcs) {
             graphDao.remove(arc);
         }
+        
+        return clusterShape;
     }
     
     /**
@@ -388,8 +391,8 @@ public class DataGraphService {
             }
             for (IGraphNode node : clusteredNodes) {
                 if (dataDao.getPlacesAndTransitions().contains(node.getDataElement())) {
-                    node.getDataElement().getGraphElements().remove(0);
-                    node.getDataElement().getGraphElements().add(node);
+//                    node.getDataElement().getGraphElements().remove(0);
+//                    node.getDataElement().getGraphElements().add(node);
                     graphDao.add(node);
                 }
             }

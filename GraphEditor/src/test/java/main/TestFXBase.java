@@ -4,7 +4,9 @@ import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
@@ -85,7 +87,7 @@ public class TestFXBase extends ApplicationTest {
      * Freezes the thread for the given amount of time (in milliseconds).
      * @param ms 
      */
-    public void freeze(int ms) {
+    protected void freeze(int ms) {
         try {
             synchronized(this){
                 wait(ms);
@@ -102,11 +104,11 @@ public class TestFXBase extends ApplicationTest {
      * @param fxId
      * @return
      */
-    public <T extends Node> T find(final String fxId) {
+    protected <T extends Node> T find(final String fxId) {
         return (T) lookup(fxId).queryAll().iterator().next();
     }
 
-    public void CreateConnections(List<IGraphNode> places, List<IGraphNode> transitions) throws DataGraphServiceException {
+    protected void ConnectNodes(List<IGraphNode> places, List<IGraphNode> transitions) throws DataGraphServiceException {
 
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
@@ -126,19 +128,7 @@ public class TestFXBase extends ApplicationTest {
         waitForFxThread(isFinished);
     }
 
-    public IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
-        return dataGraphService.connect(source, target);
-    }
-
-    public IGraphNode CreatePlace() throws DataGraphServiceException {
-        return dataGraphService.create(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
-    }
-
-    public IGraphNode CreateTransition() throws DataGraphServiceException {
-        return dataGraphService.create(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
-    }
-
-    public List<IGraphNode> CreatePlaces(int count) {
+    protected List<IGraphNode> CreatePlaces(int count) {
 
         final List<IGraphNode> places = new ArrayList();
 
@@ -159,7 +149,7 @@ public class TestFXBase extends ApplicationTest {
         return places;
     }
 
-    public List<IGraphNode> CreateTransitions(int count) {
+    protected List<IGraphNode> CreateTransitions(int count) {
 
         final List<IGraphNode> transitions = new ArrayList();
 
@@ -180,11 +170,62 @@ public class TestFXBase extends ApplicationTest {
         return transitions;
     }
     
-    public int getRandomIndex(List list) {
+    protected GraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataGraphServiceException {
+        
+        List<IGraphElement> elements = new ArrayList();
+        
+        while (elements.size() != nodesToCluster) {
+            if (Math.random() > 0.5) {
+                if (places.size() > 0) {
+                    elements.add(places.remove(getRandomIndex(places)));
+                }
+            } else {
+                if (transitions.size() > 0) {
+                    elements.add(transitions.remove(getRandomIndex(transitions)));
+                }
+            }
+        }
+        
+        final List<GraphCluster> cluster = new ArrayList();
+        
+        AtomicBoolean isFinished = new AtomicBoolean(false);
+        Platform.runLater(() -> {
+            try {
+                cluster.add(dataGraphService.cluster(elements));
+            } catch (DataGraphServiceException ex) {
+                System.out.println(ex.toString());
+            } finally {
+                isFinished.set(true);
+            }
+        });
+        waitForFxThread(isFinished);
+        
+        return cluster.get(0);
+    }
+    
+    protected void RemoveCluster(GraphCluster cluster) {
+        
+        final List<IGraphElement> clusters = new ArrayList();
+        clusters.add(cluster);
+        
+        AtomicBoolean isFinished = new AtomicBoolean(false);
+        Platform.runLater(() -> {
+            try {
+                dataGraphService.uncluster(clusters);
+            } catch (DataGraphServiceException ex) {
+                System.out.println(ex.toString());
+            } finally {
+                isFinished.set(true);
+            }
+        });
+        waitForFxThread(isFinished);
+    }
+    
+    protected int getRandomIndex(List list) {
         return (int) Math.floor(Math.random() * list.size());
     }
     
-    public void RemoveArc(IGraphArc arc) {
+    protected void RemoveArc(IGraphArc arc) {
         
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
@@ -199,7 +240,7 @@ public class TestFXBase extends ApplicationTest {
         waitForFxThread(isFinished);
     }
 
-    public void RemoveNode(IGraphNode node) {
+    protected void RemoveNode(IGraphNode node) {
         
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
@@ -214,7 +255,19 @@ public class TestFXBase extends ApplicationTest {
         waitForFxThread(isFinished);
     }
 
-    public void waitForFxThread(AtomicBoolean isFinished) {
+    private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
+        return dataGraphService.connect(source, target);
+    }
+
+    private IGraphNode CreatePlace() throws DataGraphServiceException {
+        return dataGraphService.create(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
+    }
+
+    private IGraphNode CreateTransition() throws DataGraphServiceException {
+        return dataGraphService.create(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
+    }
+
+    private void waitForFxThread(AtomicBoolean isFinished) {
         while (!isFinished.get()) {
             try {
                 synchronized (this) {

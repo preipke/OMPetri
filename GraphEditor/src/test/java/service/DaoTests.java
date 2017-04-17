@@ -1,14 +1,16 @@
-package service.datagraph;
+package service;
 
 import main.TestFXBase;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.INode;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Assert;
@@ -22,10 +24,11 @@ public class DaoTests extends TestFXBase {
 
     int placeCount = 5;
     int transitionCount = 3;
+    int nodesInCluster = 5;
     IGraphArc tmpArc;
     IGraphNode tmpNode;
 
-    @Test
+//    @Test
     public void CreateNodes() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -50,13 +53,13 @@ public class DaoTests extends TestFXBase {
                 graphDao.getConnections().size());
     }
 
-    @Test
+//    @Test
     public void ConnectAndValidateNodes() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
         
-        CreateConnections(places, transitions);
+        ConnectNodes(places, transitions);
 
         Assert.assertEquals(
                 places.size() * transitions.size() * 2,
@@ -107,12 +110,12 @@ public class DaoTests extends TestFXBase {
         }
     }
 
-    @Test
+//    @Test
     public void RemoveNodesAndValidate() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
-        CreateConnections(places, transitions);
+        ConnectNodes(places, transitions);
 
         IGraphNode node;
         IDataNode nodeData;
@@ -150,13 +153,13 @@ public class DaoTests extends TestFXBase {
         }
     }
 
-    @Test
+//    @Test
     public void RemoveConnectionsAndValidate() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
         
-        CreateConnections(places, transitions);
+        ConnectNodes(places, transitions);
         
         IGraphArc arc;
         IDataArc arcData;
@@ -176,5 +179,93 @@ public class DaoTests extends TestFXBase {
             Assert.assertEquals(false, arcData.getSource().getArcsOut().contains(arcData));
             Assert.assertEquals(false, arcData.getTarget().getArcsIn().contains(arcData));
         }
+    }
+    
+    @Test
+    public void ClusteringNodes() throws DataGraphServiceException {
+        
+        List<IGravisNode> nodesAfterClustering, nodesBeforeClustering;
+        List<IGravisConnection> connectionsAfterCluster, connectionsBeforeCluster;
+        
+        Collection<IArc> arcsAfterClustering, arcsBeforeClustering;
+        Collection<INode> placesAfterClustering, placesBeforeClustering;
+        Collection<INode> transitionsAfterClustering, transitionsBeforeClustering ;
+        
+        List<IGraphNode> places = CreatePlaces(placeCount);
+        List<IGraphNode> transitions = CreateTransitions(transitionCount);
+        ConnectNodes(places, transitions);
+        
+        nodesBeforeClustering = graphDao.getNodes();
+        connectionsBeforeCluster = graphDao.getConnections();
+        
+        arcsBeforeClustering = dataDao.getArcs();
+        placesBeforeClustering = dataDao.getPlaces();
+        transitionsBeforeClustering = dataDao.getTransitions();
+        
+        /**
+         * Creating cluster.
+         */
+        GraphCluster cluster = ClusterNodes(places, transitions, nodesInCluster);
+        
+        nodesAfterClustering = graphDao.getNodes();
+        connectionsAfterCluster = graphDao.getConnections();
+        
+        arcsAfterClustering = dataDao.getArcs();
+        placesAfterClustering = dataDao.getPlaces();
+        transitionsAfterClustering = dataDao.getTransitions();
+        
+        Assert.assertEquals(graphDao.getNodes().size() + cluster.getDataElement().getClusteredNodes().size() - 1, nodesBeforeClustering.size());
+        Assert.assertNotEquals(nodesBeforeClustering, nodesAfterClustering);
+        Assert.assertNotEquals(connectionsBeforeCluster, connectionsAfterCluster);
+        
+        // data should not have changed in the progress
+        Assert.assertEquals(arcsBeforeClustering, arcsAfterClustering);
+        Assert.assertEquals(placesBeforeClustering, placesAfterClustering);
+        Assert.assertEquals(transitionsBeforeClustering, transitionsAfterClustering);
+        
+        /**
+         * Removing cluster.
+         */
+        RemoveCluster(cluster);
+        
+        nodesAfterClustering = graphDao.getNodes();
+        connectionsAfterCluster = graphDao.getConnections();
+        
+        arcsAfterClustering = dataDao.getArcs();
+        placesAfterClustering = dataDao.getPlaces();
+        transitionsAfterClustering = dataDao.getTransitions();
+        
+        // all nodes have to be found
+        Assert.assertEquals(nodesBeforeClustering.size(), nodesAfterClustering.size());
+        for (IGravisNode node : nodesBeforeClustering) {
+            Assert.assertTrue(nodesAfterClustering.contains(node));
+        }
+        
+        // all nodes connections have to be established
+        Assert.assertEquals(connectionsBeforeCluster.size(), connectionsAfterCluster.size());
+        for (IGravisConnection conn1 : connectionsBeforeCluster) {
+            
+            boolean found = false;
+            IGravisNode source1 = conn1.getSource();
+            IGravisNode target1 = conn1.getTarget();
+            
+            for (IGravisConnection conn2 : connectionsAfterCluster) {
+                IGravisNode source2 = conn2.getSource();
+                IGravisNode target2 = conn2.getTarget();
+                if (source1.equals(source2) && target1.equals(target2)) {
+                    if (found) {
+                        throw new AssertionError("The same connection has been found twice!");
+                    } else {
+                        found = true;
+                    }
+                }
+            }
+            Assert.assertTrue(found);
+        }
+        
+        // data should not have changed in the progress
+        Assert.assertEquals(arcsBeforeClustering, arcsAfterClustering);
+        Assert.assertEquals(placesBeforeClustering, placesAfterClustering);
+        Assert.assertEquals(transitionsBeforeClustering, transitionsAfterClustering);
     }
 }
