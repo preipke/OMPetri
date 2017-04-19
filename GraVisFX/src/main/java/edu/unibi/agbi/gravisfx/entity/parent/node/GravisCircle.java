@@ -26,7 +26,7 @@ public class GravisCircle extends Circle implements IGravisNode
     
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
-    private final List<IGravisConnection> edges = new ArrayList();
+    private final List<IGravisConnection> connections = new ArrayList();
     
     private final GravisLabel label;
     
@@ -89,7 +89,7 @@ public class GravisCircle extends Circle implements IGravisNode
     
     @Override
     public final List<IGravisConnection> getConnections() {
-        return edges;
+        return connections;
     }
     
     @Override

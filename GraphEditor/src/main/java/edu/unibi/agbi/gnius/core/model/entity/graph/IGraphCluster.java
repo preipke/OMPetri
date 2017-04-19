@@ -5,14 +5,12 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 
 /**
  *
  * @author PR
  */
-public interface IGraphNode extends IGraphElement , IGravisNode
-{
-    @Override public IDataNode getDataElement();
+public interface IGraphCluster extends IGraphNode {
+    @Override public DataCluster getDataElement();
 }

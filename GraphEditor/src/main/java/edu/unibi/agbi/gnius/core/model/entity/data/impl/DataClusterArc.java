@@ -5,10 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.petrinet.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,41 +14,30 @@ import java.util.List;
  *
  * @author PR
  */
-public class DataArc extends Arc implements IDataArc
-{
+public final class DataClusterArc extends DataArc {
+    
     private final List<IGraphElement> shapes;
+    private final DataCluster dataCluster;
     
-    private String description = "";
-    
-    public DataArc(IDataNode source, IDataNode target, Arc.Type type) {
-        super(source, target);
-        super.setArcType(type);
+    public DataClusterArc(DataCluster dataCluster) {
+        super(dataCluster, dataCluster, null);
+        super.type = Element.Type.CLUSTERARC;
         this.shapes = new ArrayList();
+        this.dataCluster = dataCluster;
     }
-
-    @Override
-    public List<IGraphElement> getGraphElements() {
-        return shapes;
-    }
-
-    @Override
-    public IDataNode getSource() {
-        return (IDataNode) this.source;
-    }
-
-    @Override
-    public IDataNode getTarget() {
-        return (IDataNode) this.target;
+    
+    public DataCluster getDataCluster() {
+        return dataCluster;
     }
 
     @Override
     public String getDescription() {
-        return description;
+        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 
     @Override
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDescription(String text) {
+        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 
     @Override
@@ -61,5 +48,10 @@ public class DataArc extends Arc implements IDataArc
     @Override
     public void setLabelText(String text) {
         throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+    }
+
+    @Override
+    public List<IGraphElement> getGraphElements() {
+        return shapes;
     }
 }

@@ -28,7 +28,7 @@ public class DaoTests extends TestFXBase {
     IGraphArc tmpArc;
     IGraphNode tmpNode;
 
-//    @Test
+    @Test
     public void CreateNodes() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -53,7 +53,7 @@ public class DaoTests extends TestFXBase {
                 graphDao.getConnections().size());
     }
 
-//    @Test
+    @Test
     public void ConnectAndValidateNodes() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -69,8 +69,8 @@ public class DaoTests extends TestFXBase {
         IGraphArc arc;
         for (IGravisConnection connection : graphDao.getConnections()) {
             arc = (IGraphArc) connection;
-            Assert.assertEquals(true, arc.getSource().getGraphConnections().contains(arc));
-            Assert.assertEquals(true, arc.getTarget().getGraphConnections().contains(arc));
+            Assert.assertEquals(true, arc.getSource().getConnections().contains(arc));
+            Assert.assertEquals(true, arc.getTarget().getConnections().contains(arc));
             Assert.assertEquals(true, arc.getDataElement().getSource().getArcsOut().contains(arc.getDataElement()));
             Assert.assertEquals(true, arc.getDataElement().getTarget().getArcsIn().contains(arc.getDataElement()));
         }
@@ -83,12 +83,12 @@ public class DaoTests extends TestFXBase {
             }
             
             Assert.assertEquals(
-                    place.getGraphConnections().size() / 2,
-                    place.getDataElement().getArcsIn().size(),
+                    place.getConnections().size() / 2,
+                    (place.getDataElement()).getArcsIn().size(),
                     transitions.size());
             Assert.assertEquals(
-                    place.getGraphConnections().size() / 2,
-                    place.getDataElement().getArcsOut().size(),
+                    place.getConnections().size() / 2,
+                    (place.getDataElement()).getArcsOut().size(),
                     transitions.size());
         }
         
@@ -100,17 +100,17 @@ public class DaoTests extends TestFXBase {
             }
             
             Assert.assertEquals(
-                    transition.getGraphConnections().size() / 2,
-                    transition.getDataElement().getArcsIn().size(),
+                    transition.getConnections().size() / 2,
+                    (transition.getDataElement()).getArcsIn().size(),
                     places.size());
             Assert.assertEquals(
-                    transition.getGraphConnections().size() / 2,
-                    transition.getDataElement().getArcsOut().size(),
+                    transition.getConnections().size() / 2,
+                    (transition.getDataElement()).getArcsOut().size(),
                     places.size());
         }
     }
 
-//    @Test
+    @Test
     public void RemoveNodesAndValidate() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -122,7 +122,7 @@ public class DaoTests extends TestFXBase {
         
         while (!graphDao.getNodes().isEmpty()) {
 
-            node = (IGraphNode) graphDao.getNodes().remove(getRandomIndex(graphDao.getNodes()));
+            node = (IGraphNode) graphDao.getNodes().get(getRandomIndex(graphDao.getNodes()));
             nodeData = node.getDataElement();
             RemoveNode(node);
 
@@ -153,7 +153,7 @@ public class DaoTests extends TestFXBase {
         }
     }
 
-//    @Test
+    @Test
     public void RemoveConnectionsAndValidate() throws DataGraphServiceException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -173,8 +173,8 @@ public class DaoTests extends TestFXBase {
             Assert.assertEquals(false, graphDao.contains(arc));
             Assert.assertEquals(false, dataDao.getArcs().contains(arcData));
             
-            Assert.assertEquals(false, arc.getSource().getGraphConnections().contains(arc));
-            Assert.assertEquals(false, arc.getTarget().getGraphConnections().contains(arc));
+            Assert.assertEquals(false, arc.getSource().getConnections().contains(arc));
+            Assert.assertEquals(false, arc.getTarget().getConnections().contains(arc));
             
             Assert.assertEquals(false, arcData.getSource().getArcsOut().contains(arcData));
             Assert.assertEquals(false, arcData.getTarget().getArcsIn().contains(arcData));
@@ -214,7 +214,7 @@ public class DaoTests extends TestFXBase {
         placesAfterClustering = dataDao.getPlaces();
         transitionsAfterClustering = dataDao.getTransitions();
         
-        Assert.assertEquals(graphDao.getNodes().size() + cluster.getDataElement().getClusteredNodes().size() - 1, nodesBeforeClustering.size());
+        Assert.assertEquals(graphDao.getNodes().size() - 1 + cluster.getDataElement().getClusteredNodes().size(), nodesBeforeClustering.size());
         Assert.assertNotEquals(nodesBeforeClustering, nodesAfterClustering);
         Assert.assertNotEquals(connectionsBeforeCluster, connectionsAfterCluster);
         

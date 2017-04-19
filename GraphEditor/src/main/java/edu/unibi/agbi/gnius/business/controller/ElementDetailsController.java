@@ -170,7 +170,11 @@ public class ElementDetailsController implements Initializable
                 break;
                 
             case CLUSTER:
-                System.out.println("TODO!");
+                System.out.println("TODO StoreElementProperties CLUSTER");
+                break;
+                
+            case CLUSTERARC:
+                System.out.println("TODO StoreElementProperties CLUSTERARC");
                 break;
             
             case PLACE:
@@ -265,7 +269,11 @@ public class ElementDetailsController implements Initializable
                 break;
                 
             case CLUSTER:
-                System.out.println("TODO!");
+                System.out.println("TODO LoadGuiElements CLUSTER");
+                break;
+                
+            case CLUSTERARC:
+                System.out.println("TODO LoadGuiElements CLUSTERARC");
                 break;
             
             case PLACE:
@@ -287,7 +295,7 @@ public class ElementDetailsController implements Initializable
     private void LoadElementDetails(IDataElement element) {
 
         LoadElementType(element);
-        loadElementIdentifier(element);
+        LoadElementIdentifier(element);
         
         ObservableList<ColourChoice> choicesColour = FXCollections.observableArrayList();
         Collection<Colour> colors = dataService.getColours();
@@ -314,7 +322,11 @@ public class ElementDetailsController implements Initializable
                 break;
                 
             case CLUSTER:
-                System.out.println("TODO");
+                System.out.println("TODO LoadElementDetails CLUSTER");
+                break;
+                
+            case CLUSTERARC:
+                System.out.println("TODO LoadElementDetails CLUSTERARC");
                 break;
             
             case PLACE:
@@ -359,9 +371,10 @@ public class ElementDetailsController implements Initializable
     private void LoadElementType(IDataElement element) {
         
         elementType.setText(element.getElementType().toString());
+        elementSubtype.getItems().clear();
         
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
-        int typeIndex = 0;
+        int typeIndex = -1;
         
         switch (element.getElementType()) {
             
@@ -401,15 +414,17 @@ public class ElementDetailsController implements Initializable
                 }
                 break;
         }
-        elementSubtype.setItems(choicesSubtype);
-        elementSubtype.getSelectionModel().select(typeIndex);
+        if (typeIndex > -1) {
+            elementSubtype.setItems(choicesSubtype);
+            elementSubtype.getSelectionModel().select(typeIndex);
+        }
     }
     
     /**
      * Prints info for the given node within the property info textfields.
      * @param element 
      */
-    private void loadElementIdentifier(IDataElement element) {
+    private void LoadElementIdentifier(IDataElement element) {
         elementId.setText(element.getId());
         elementName.setText(element.getName());
         elementLabel.setText(element.getLabelText());

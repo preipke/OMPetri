@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
-import edu.unibi.agbi.petrinet.model.Parameter;
+import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,29 +19,25 @@ import java.util.List;
  *
  * @author PR
  */
-public class DataCluster implements IDataNode {
+public class DataCluster extends Node implements IDataNode {
     
-    private final static String CLUSTER_IDENT = "C";
-    private static int clusterCount = 1;
+    private static final String IDENT = "C";
+    private static int COUNT = 0;
     
     private final List<IGraphElement> shapes;
-    
-    private final String id;
-    private String name;
-    private String description = "";
     
     private final List<IGraphNode> nodes;
     private final List<IGraphArc> arcs;
     
+    private String description = "";
+    
     public DataCluster(List<IGraphNode> nodes, List<IGraphArc> arcs) {
-        
-        id = CLUSTER_IDENT + "_" + clusterCount++;
-        name = id;
-        
+        super(IDENT + ++COUNT);
+        super.type = Element.Type.CLUSTER;
+        super.name = id;
         this.nodes = nodes;
         this.arcs = arcs;
-        
-        shapes = new ArrayList();
+        this.shapes = new ArrayList();
     }
     
     public List<IGraphNode> getClusteredNodes() {
@@ -53,13 +49,13 @@ public class DataCluster implements IDataNode {
     }
 
     @Override
-    public void setDescription(String text) {
-        description = text;
+    public String getDescription() {
+        return description;
     }
 
     @Override
-    public String getDescription() {
-        return description;
+    public void setDescription(String text) {
+        description = text;
     }
 
     @Override
@@ -67,6 +63,10 @@ public class DataCluster implements IDataNode {
         return ((IGraphNode)shapes.get(0)).getLabel().getText();
     }
 
+    /**
+     * Sets the label text for this data node and all related shapes in the scene.
+     * @param text 
+     */
     @Override
     public void setLabelText(String text) {
         for (IGraphElement shape : shapes) {
@@ -80,57 +80,17 @@ public class DataCluster implements IDataNode {
     }
 
     @Override
-    public Element.Type getElementType() {
-        return Element.Type.CLUSTER;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    @Override
-    public List<String> getFilter() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public List<Parameter> getParameter() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public boolean isEnabled() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setEnabled(boolean value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
     public List<IArc> getArcsOut() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 
     @Override
     public List<IArc> getArcsIn() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 
     @Override
     public boolean isConstant() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 }

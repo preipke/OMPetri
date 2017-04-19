@@ -6,17 +6,14 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircleRectangle;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
  * @author PR
  */
-public class GraphCluster extends GravisCircleRectangle implements IGraphNode {
+public class GraphCluster extends GravisCircleRectangle implements IGraphCluster {
     
     private final DataCluster dataCluster;
     
@@ -24,18 +21,9 @@ public class GraphCluster extends GravisCircleRectangle implements IGraphNode {
         super();
         this.dataCluster = dataCluster;
     }
-
+    
     @Override
     public DataCluster getDataElement() {
         return dataCluster;
-    }
-
-    @Override
-    public List<IGraphArc> getGraphConnections() {
-        List<IGraphArc> connections = new ArrayList();
-        for (int i = 0; i < getConnections().size(); i++) {
-            connections.add((IGraphArc) getConnections().get(i));
-        }
-        return connections;
     }
 }
