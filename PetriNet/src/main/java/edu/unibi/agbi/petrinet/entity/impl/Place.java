@@ -10,7 +10,6 @@ import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Token;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +30,6 @@ public class Place extends Node
     public Place() {
 
         super(IDENT + ++COUNT);
-        
         type = Element.Type.PLACE;
         
         token = new HashMap();

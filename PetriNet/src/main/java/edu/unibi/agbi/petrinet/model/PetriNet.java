@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.INode;
-import edu.unibi.agbi.petrinet.exception.IdConflictException;
 
 /**
  *
@@ -44,38 +43,37 @@ public class PetriNet
         placesAndTransitions = new HashMap();
     }
     
-    public void add(Colour color) throws IdConflictException {
-        if (colors.contains(color)) {
-            throw new IdConflictException("A color with the same ID has already been stored!");
-        } 
+    public void add(Colour color) {
         colors.add(color);
     }
     
-    public void add(IArc arc) throws IdConflictException {
-        if (arcs.containsKey(arc.getId())) {
-            if (!arcs.get(arc.getId()).equals(arc)) {
-                throw new IdConflictException("Another arc has already been stored using the same ID!");
-            }
-        } else {
-            arcs.put(arc.getId(), arc);
-        }
+    public void add(IArc arc) {
+        arcs.put(arc.getId(), arc);
         arc.getSource().getArcsOut().add(arc);
         arc.getTarget().getArcsIn().add(arc);
     }
     
-    public void add(INode node) throws IdConflictException {
-        if (placesAndTransitions.containsKey(node.getId())) {
-            if (!placesAndTransitions.get(node.getId()).equals(node)) {
-                throw new IdConflictException("Another node has already been stored using the same ID!");
-            }
+    public void add(INode node) {
+        placesAndTransitions.put(node.getId(), node);
+        if (node instanceof Place) {
+            places.put(node.getId(), node);
         } else {
-            placesAndTransitions.put(node.getId(), node);
-            if (node instanceof Place) {
-                places.put(node.getId(), node);
-            } else {
-                transitions.put(node.getId(), node);
-            }
+            transitions.put(node.getId(), node);
         }
+    }
+    
+    public boolean containsAndNotEqual(IArc arc) {
+        if (!arcs.containsKey(arc.getId())) {
+            return false;
+        }
+        return !arcs.get(arc.getId()).equals(arc);
+    }
+    
+    public boolean containsAndNotEqual(INode node) {
+        if (!placesAndTransitions.containsKey(node.getId())) {
+            return false;
+        }
+        return !placesAndTransitions.get(node.getId()).equals(node);
     }
     
     public IArc remove(IArc arc) {

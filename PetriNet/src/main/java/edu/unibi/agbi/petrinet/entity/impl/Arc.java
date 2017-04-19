@@ -5,11 +5,9 @@
  */
 package edu.unibi.agbi.petrinet.entity.impl;
 
-import edu.unibi.agbi.petrinet.exception.IllegalAssignmentException;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Weight;
-
 import java.util.HashMap;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
@@ -31,39 +29,14 @@ public class Arc extends Element implements IArc
     
     public Arc(INode source, INode target) {
         
+        id = source.getId() + "_" + target.getId();
         type = Element.Type.ARC;
         
         this.source = source;
         this.target = target;
         
-        id = source.getId() + "_" + target.getId();
-        
         weights = new HashMap();
         weights.put(PetriNet.DEFAULT_COLOUR, new Weight(PetriNet.DEFAULT_COLOUR));
-    }
-
-    public void setTarget(INode target) throws IllegalAssignmentException {
-        if (source != null) {
-            if (source instanceof Place && target instanceof Place) {
-                throw new IllegalAssignmentException("Cannot assign target and source to be places!");
-            } else if (source instanceof Transition && target instanceof Transition) {
-                throw new IllegalAssignmentException("Cannot assign target and source to be transitions!");
-            }
-            this.id = source.getId() + "_" + target.getId();
-        }
-        this.target = target;
-    }
-
-    public void setSource(INode source) throws IllegalAssignmentException {
-        if (target != null) {
-            if (source instanceof Place && target instanceof Place) {
-                throw new IllegalAssignmentException("Cannot assign target and source to be places!");
-            } else if (source instanceof Transition && target instanceof Transition) {
-                throw new IllegalAssignmentException("Cannot assign target and source to be transitions!");
-            }
-            this.id = source.getId() + "_" + target.getId();
-        }
-        this.source = source;
     }
 
     @Override

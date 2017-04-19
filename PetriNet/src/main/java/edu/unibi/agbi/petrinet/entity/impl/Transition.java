@@ -25,7 +25,6 @@ public class Transition extends Node
     public Transition() {
 
         super(IDENT + ++COUNT);
-        
         type = Element.Type.TRANSITION;
         
         function = new Function();
