@@ -12,11 +12,11 @@ package edu.unibi.agbi.petrinet.model;
 public class Token
 {
     private final Colour colour;
-    
+
     private double valueMin = 0d;
     private double valueMax = Double.MAX_VALUE;
     private double valueStart = 0d;
-    
+
     public Token(Colour colour) {
         this.colour = colour;
     }

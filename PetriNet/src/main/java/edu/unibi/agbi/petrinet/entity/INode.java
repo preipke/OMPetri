@@ -14,6 +14,8 @@ import java.util.List;
 public interface INode extends IElement
 {
     public List<IArc> getArcsOut();
+
     public List<IArc> getArcsIn();
+
     public boolean isConstant();
 }

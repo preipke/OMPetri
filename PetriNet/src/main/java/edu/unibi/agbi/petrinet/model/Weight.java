@@ -13,7 +13,7 @@ public class Weight
 {
     private final Colour colour;
     private String weight = "1";
-    
+
     public Weight(Colour colour) {
         this.colour = colour;
     }

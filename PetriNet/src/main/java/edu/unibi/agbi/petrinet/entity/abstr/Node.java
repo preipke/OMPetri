@@ -17,14 +17,14 @@ import java.util.List;
 public abstract class Node extends Element implements INode
 {
     private boolean isConstant = true;
-    
+
     private final List<IArc> arcsIn;
     private final List<IArc> arcsOut;
-    
+
     public Node(String internalId) {
-        
+
         id = internalId;
-        
+
         arcsIn = new ArrayList();
         arcsOut = new ArrayList();
     }
@@ -32,7 +32,7 @@ public abstract class Node extends Element implements INode
     public void setConstant(boolean isConstant) {
         this.isConstant = isConstant;
     }
-    
+
     @Override
     public boolean isConstant() {
         return isConstant;

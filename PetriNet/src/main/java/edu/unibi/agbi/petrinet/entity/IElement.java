@@ -7,7 +7,7 @@ package edu.unibi.agbi.petrinet.entity;
 
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Parameter;
-import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -16,11 +16,31 @@ import java.util.List;
 public interface IElement
 {
     public Element.Type getElementType();
+
     public String getId();
+
     public String getName();
+
     public void setName(String name);
-    public List<String> getFilter();
-    public List<Parameter> getParameter();
+
+    /**
+     * Gets a set of all filter names related to this element. These names will
+     * be returned by the data stream from the OpenModelica simulation
+     * executable.
+     *
+     * @return
+     */
+    public Set<String> getFilter();
+
+    /**
+     * Gets all (local) parameters that have been created exclusively for this
+     * element.
+     *
+     * @return
+     */
+    public Set<Parameter> getParameters();
+
     public boolean isEnabled();
+
     public void setEnabled(boolean value);
 }

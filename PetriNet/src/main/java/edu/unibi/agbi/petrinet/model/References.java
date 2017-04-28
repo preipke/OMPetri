@@ -13,7 +13,8 @@ import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IElement;
 
 /**
- *
+ * Container for references between IElement data objects and filter variables
+ * used throughout OpenModelica's simulation. 
  * @author PR
  */
 public class References {
@@ -26,6 +27,12 @@ public class References {
         elementFilterReferences = new HashMap();
     }
     
+    /**
+     * Adds and maps the given IElement to the given String.
+     * @param filter String representing a filter variable
+     * @param element IElement data object
+     * @throws IOException 
+     */
     public void addFilterReference(String filter, IElement element) throws IOException {
         if (filterElementReferences.containsKey(filter)) {
             throw new IOException("Filter -> Element reference already exists! Don't overwrite!");
@@ -33,6 +40,11 @@ public class References {
         filterElementReferences.put(filter, element);
     }
     
+    /**
+     * Adds and maps the given String to the given IElement.
+     * @param element IElement data object
+     * @param filter String representing a filter variable
+     */
     public void addElementReference(IElement element, String filter) {
         if (!elementFilterReferences.containsKey(element)) {
             elementFilterReferences.put(element, new ArrayList());

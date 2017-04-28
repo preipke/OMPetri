@@ -21,20 +21,20 @@ import edu.unibi.agbi.petrinet.entity.abstr.Element;
 public class Arc extends Element implements IArc
 {
     private Type arcType;
-    
+
     protected INode target;
     protected INode source;
-    
-    private final Map<Colour,Weight> weights;
-    
+
+    private final Map<Colour, Weight> weights;
+
     public Arc(INode source, INode target) {
-        
+
         id = source.getId() + "_" + target.getId();
         type = Element.Type.ARC;
-        
+
         this.source = source;
         this.target = target;
-        
+
         weights = new HashMap();
         weights.put(PetriNet.DEFAULT_COLOUR, new Weight(PetriNet.DEFAULT_COLOUR));
     }
@@ -48,30 +48,31 @@ public class Arc extends Element implements IArc
     public INode getSource() {
         return source;
     }
-    
+
     public void setWeight(Weight weight) {
         weights.put(weight.getColour(), weight);
     }
-    
+
     @Override
     public Weight getWeight(Colour colour) {
         return weights.get(colour);
     }
-    
+
     @Override
-    public Map<Colour,Weight> getWeightMap() {
+    public Map<Colour, Weight> getWeightMap() {
         return weights;
     }
-    
+
     public void setArcType(Type arcType) {
         this.arcType = arcType;
     }
-    
+
     public Type getArcType() {
         return arcType;
     }
-    
-    public enum Type {
+
+    public enum Type
+    {
         READ, EQUAL, INHIBITORY, RESET;
     }
 }

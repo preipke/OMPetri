@@ -35,25 +35,25 @@ public class OpenModelicaExport
 {
     private static final String ENDL = System.getProperty("line.separator");
     private static final String INDENT = "  ";
-    
+
     private static final String OM_SIM_LIB = "PNlib";
-    
+
     private static final String PLACE_CONTINUOUS = "PNlib.PC";
     private static final String PLACE_DISCRETE = "PNlib.PD";
-    
+
     private static final String TRANSITION_CONTINUOUS = "PNlib.TC";
     private static final String TRANSITION_DISCRETE = "PNlib.TD";
     private static final String TRANSITION_STOCHASTIC = "PNlib.TS";
-    
+
     private static final String COLORED_PLACE_CONTINUOUS = "PNlib.Examples.Models.ColoredPlaces.CPC";
     private static final String COLORED_TRANSITION_CONTINUOUS = "PNlib.Examples.Models.ColoredPlaces.CTC";
-    
+
     public static References export(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
         fileMO = exportMO(petriNet, fileMO);
         return exportMOS(petriNet, fileMOS, fileMO, workDirectory);
     }
-    
-    public static File exportMO(PetriNet petriNet , File file) throws IOException {
+
+    public static File exportMO(PetriNet petriNet, File file) throws IOException {
 
         Collection<IArc> arcs = petriNet.getArcs();
         Collection<Colour> colors = petriNet.getColours();
@@ -69,21 +69,21 @@ public class OpenModelicaExport
          */
         writer.append("model '" + petriNet.getName() + "'");
         writer.println();
-        
+
         /**
          * Functions.
          */
         if (isColoredPn) {
             writer.append("function g1" + ENDL + "    input Real[2] inColors;" + ENDL + "    output Real[2] outWeights;" + ENDL + "  algorithm" + ENDL
-                          + "    if sum(inColors) < 1e-12 then" + ENDL + "      outWeights := fill(1, 2);" + ENDL + "    else" + ENDL
-                          + "      outWeights[1] := inColors[1] / sum(inColors);" + ENDL + "      outWeights[2] := inColors[2] / sum(inColors);" + ENDL + "    end if;" + ENDL
-                          + "  end g1;" + ENDL + "  function g2" + ENDL + "    input Real[2] inColors1;" + ENDL + "    input Real[2] inColors2;" + ENDL + "    output Real[2] outWeights;" + ENDL
-                          + "  algorithm" + ENDL + "    if sum(inColors1) < 1e-12 then" + ENDL + "      outWeights := fill(0.5, 2);" + ENDL + "    else" + ENDL
-                          + "      outWeights[1] := inColors1[1] / sum(inColors1) / 2;" + ENDL + "      outWeights[2] := inColors1[2] / sum(inColors1) / 2;" + ENDL
-                          + "    end if;" + ENDL + "" + ENDL + "    if sum(inColors2) < 1e-12 then" + ENDL + "      outWeights[1] := outWeights[1] + 0.5;" + ENDL
-                          + "      outWeights[2] := outWeights[2] + 0.5;" + ENDL + "    else" + ENDL
-                          + "      outWeights[1] := outWeights[1] + inColors2[1] / sum(inColors2) / 2;" + ENDL
-                          + "      outWeights[2] := outWeights[2] + inColors2[2] / sum(inColors2) / 2;" + ENDL + "    end if;" + ENDL + "  end g2;" + ENDL);
+                    + "    if sum(inColors) < 1e-12 then" + ENDL + "      outWeights := fill(1, 2);" + ENDL + "    else" + ENDL
+                    + "      outWeights[1] := inColors[1] / sum(inColors);" + ENDL + "      outWeights[2] := inColors[2] / sum(inColors);" + ENDL + "    end if;" + ENDL
+                    + "  end g1;" + ENDL + "  function g2" + ENDL + "    input Real[2] inColors1;" + ENDL + "    input Real[2] inColors2;" + ENDL + "    output Real[2] outWeights;" + ENDL
+                    + "  algorithm" + ENDL + "    if sum(inColors1) < 1e-12 then" + ENDL + "      outWeights := fill(0.5, 2);" + ENDL + "    else" + ENDL
+                    + "      outWeights[1] := inColors1[1] / sum(inColors1) / 2;" + ENDL + "      outWeights[2] := inColors1[2] / sum(inColors1) / 2;" + ENDL
+                    + "    end if;" + ENDL + "" + ENDL + "    if sum(inColors2) < 1e-12 then" + ENDL + "      outWeights[1] := outWeights[1] + 0.5;" + ENDL
+                    + "      outWeights[2] := outWeights[2] + 0.5;" + ENDL + "    else" + ENDL
+                    + "      outWeights[1] := outWeights[1] + inColors2[1] / sum(inColors2) / 2;" + ENDL
+                    + "      outWeights[2] := outWeights[2] + inColors2[2] / sum(inColors2) / 2;" + ENDL + "    end if;" + ENDL + "  end g2;" + ENDL);
             writer.println();
         }
 
@@ -112,7 +112,7 @@ public class OpenModelicaExport
 
         for (INode nPlace : places) {
 
-            place = (Place)nPlace;
+            place = (Place) nPlace;
 
             tmp1 = "";
             tmp2 = "";
@@ -163,9 +163,9 @@ public class OpenModelicaExport
                             tmp2 += token.getValueMin();
                             tmp3 += token.getValueMax();
                         } else {
-                            tmp1 += (int)token.getValueStart();
-                            tmp2 += (int)token.getValueMin();
-                            tmp3 += (int)token.getValueMax();
+                            tmp1 += (int) token.getValueStart();
+                            tmp2 += (int) token.getValueMin();
+                            tmp3 += (int) token.getValueMax();
                         }
                     } else {
                         tmp1 += "0";
@@ -180,14 +180,14 @@ public class OpenModelicaExport
                         tmp2 += token.getValueMin();
                         tmp3 += token.getValueMax();
                     } else {
-                        tmp1 += (int)token.getValueStart();
-                        tmp2 += (int)token.getValueMin();
-                        tmp3 += (int)token.getValueMax();
+                        tmp1 += (int) token.getValueStart();
+                        tmp2 += (int) token.getValueMin();
+                        tmp3 += (int) token.getValueMax();
                     }
                 }
 
             }
-            
+
             if (isColoredPn) {
                 tmp1 = "{" + tmp1 + "}";
                 tmp2 = "{" + tmp2 + "}";
@@ -197,7 +197,7 @@ public class OpenModelicaExport
             writer.append(",start" + tokenType + "=" + tmp1);
             writer.append(",min" + tokenType + "=" + tmp2);
             writer.append(",max" + tokenType + "=" + tmp3);
-                
+
 //            writer.append(",t(final unit=\"custom unit\")");
             writer.append(")");
 //            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
@@ -210,7 +210,7 @@ public class OpenModelicaExport
          */
         for (INode nTransition : transitions) {
 
-            transition = (Transition)nTransition;
+            transition = (Transition) nTransition;
 
             function = transition.getFunction();
 
@@ -275,13 +275,13 @@ public class OpenModelicaExport
                     }
 
                     if (isColoredPn) {
-                        
+
                         if (weight != null) {
                             tmp3 += weight.getValue();
                         } else {
                             tmp3 += "0";
                         }
-                        
+
                     } else {
                         tmp1 += weight.getValue();
                     }
@@ -402,45 +402,45 @@ public class OpenModelicaExport
         writer.append("end '" + petriNet.getName() + "'");
         writer.append(";");
         writer.println();
-        
+
         writer.close();
-        
+
         return file;
     }
-    
+
     /**
-     * 
+     *
      * @param petriNet
      * @param fileMOS
      * @param fileMO
      * @param workDirectory
      * @return map containing filter variables and the referenced elements
-     * @throws IOException 
+     * @throws IOException
      */
     public static References exportMOS(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
-        
+
         References references = new References();
-        
+
         String filter = "variableFilter=\"";
         String tmp;
         int index;
-        
+
         for (IElement arc : petriNet.getArcs()) {
             arc.getFilter().clear();
         }
-        
+
         for (INode place : petriNet.getPlaces()) {
-            
+
             place.getFilter().clear();
-            
+
             tmp = "'" + place.getId() + "'.t";
             filter += tmp + "|";
             references.addElementReference(place, tmp);
             references.addFilterReference(tmp, place);
-            
+
             index = 1;
             for (IArc arc : place.getArcsOut()) {
-                
+
                 tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
                 filter += tmp + "|";
                 references.addElementReference(arc, tmp);
@@ -450,31 +450,31 @@ public class OpenModelicaExport
                 filter += tmp + "|";
                 references.addElementReference(arc, tmp);
                 references.addFilterReference(tmp, arc);
-                
+
                 index++;
             }
-            
+
             index = 1;
             for (IArc arc : place.getArcsIn()) {
-                
+
                 tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
                 filter += tmp + "|";
                 references.addElementReference(arc, tmp);
                 references.addFilterReference(tmp, arc);
-                
+
                 tmp = "der(" + tmp + ")";
                 filter += tmp + "|";
                 references.addElementReference(arc, tmp);
                 references.addFilterReference(tmp, arc);
-                
+
                 index++;
             }
         }
 
         for (INode transition : petriNet.getTransitions()) {
-            
+
             transition.getFilter().clear();
-            
+
             tmp = "'" + transition.getId() + "'.fire";
             filter += tmp + "|";
             references.addElementReference(transition, tmp);
@@ -485,23 +485,23 @@ public class OpenModelicaExport
             references.addElementReference(transition, tmp);
             references.addFilterReference(tmp, transition);
         }
-        
-        filter = filter.substring(0 , filter.length() - 1);
+
+        filter = filter.substring(0, filter.length() - 1);
         filter = filter.replace(".", "\\\\."); // might cause problems when custom names are used
         filter = filter.replace("[", "\\\\[");
         filter = filter.replace("]", "\\\\]");
         filter = filter.replace("(", "\\\\(");
         filter = filter.replace(")", "\\\\)");
         filter += "\"";
-        
+
         FileWriter fstream = new FileWriter(fileMOS);
         BufferedWriter out = new BufferedWriter(fstream);
-        
-        out.write("cd(\"" + workDirectory.getPath().replace('\\' , '/') + "/\"); ");
+
+        out.write("cd(\"" + workDirectory.getPath().replace('\\', '/') + "/\"); ");
         out.write("getErrorString();\r\n");
         out.write("loadModel(" + OM_SIM_LIB + ");");
         out.write("getErrorString();\r\n");
-        out.write("loadFile(\"" + fileMO.getPath().replace('\\' , '/')+ "\"); ");
+        out.write("loadFile(\"" + fileMO.getPath().replace('\\', '/') + "\"); ");
         out.write("getErrorString();\r\n");
         out.write("setCommandLineOptions(\"--preOptModules+=unitChecking\");");
         out.write("getErrorString();\r\n");
@@ -509,21 +509,21 @@ public class OpenModelicaExport
         out.write("getErrorString();\r\n");
 
         out.close();
-        
+
         return references;
     }
-    
+
     /**
-     * Creates a temporary file. 
-     * File can only be read, written or executed by the creator. 
-     * Automatically deletes the file on application exit.
+     * Creates a temporary file. File can only be read, written or executed by
+     * the creator. Automatically deletes the file on application exit.
+     *
      * @param prefix file prefix
      * @param suffix file suffix
      * @return the created file
-     * @throws java.io.IOException 
+     * @throws java.io.IOException
      */
     public static File CreateTempFile(String prefix, String suffix) throws IOException {
-        
+
         /*if (tempDirectoryPath == null) {
             tempDirectoryPath = Files.createTempDirectory(null);
             System.getSecurityManager().checkDelete(tempDirectoryPath.toFile().toString());
@@ -531,27 +531,26 @@ public class OpenModelicaExport
             System.out.println("Temp path: " + tempDirectoryPath.toString());
             System.out.println("Temp path: " + tempDirectoryPath.toFile().toString());
         }*/
-        
         File tempFile = null;
         InputStream input = null;
         OutputStream output = null;
-        
+
         try {
             // Create temporary file
             //tempFile = File.createTempFile(tempDirectoryPath.getFileName() + File.separator + fileName , null);
             //System.out.println("Temp file: " + tempFile);
-            tempFile = File.createTempFile(prefix + "_" , suffix);
-            tempFile.setReadable(false , false);
-            tempFile.setReadable(true , true);
-            tempFile.setWritable(true , true);
-            tempFile.setExecutable(true , true);
+            tempFile = File.createTempFile(prefix + "_", suffix);
+            tempFile.setReadable(false, false);
+            tempFile.setReadable(true, true);
+            tempFile.setWritable(true, true);
+            tempFile.setExecutable(true, true);
             tempFile.deleteOnExit();
-            
+
             // Read resource and write to temp file
             output = new FileOutputStream(tempFile);
-            
+
         } catch (IOException ex) {
-            throw(ex);
+            throw (ex);
         } finally {
             close(input);
             close(output);
@@ -561,6 +560,7 @@ public class OpenModelicaExport
 
     /**
      * Closes a given Closable.
+     *
      * @param stream
      */
     public static void close(final Closeable stream) {

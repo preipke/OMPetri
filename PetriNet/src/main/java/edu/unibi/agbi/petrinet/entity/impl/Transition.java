@@ -17,16 +17,16 @@ public class Transition extends Node
 {
     private static final String IDENT = "T";
     private static int COUNT = 0;
-    
+
     private Function function;
-    
+
     private Type transitionType;
-    
+
     public Transition() {
 
         super(IDENT + ++COUNT);
         type = Element.Type.TRANSITION;
-        
+
         function = new Function();
     }
 
@@ -37,16 +37,17 @@ public class Transition extends Node
     public final Function getFunction() {
         return function;
     }
-    
+
     public final void setTransitionType(Type transitionType) {
         this.transitionType = transitionType;
     }
-    
+
     public final Type getTransitionType() {
         return transitionType;
     }
-    
-    public enum Type {
+
+    public enum Type
+    {
         CONTINUOUS, DISCRETE, STOCHASTIC;
     }
 }

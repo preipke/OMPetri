@@ -6,13 +6,15 @@
 package edu.unibi.agbi.petrinet.model;
 
 import edu.unibi.agbi.petrinet.entity.impl.Place;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -26,25 +28,32 @@ public class PetriNet
     private String name;
     private String description;
     
-    private final List<Colour> colors;
+    private final Set<Colour> colors;
+    private final Map<String,Parameter> parameter;
     
+    private final Set<String> nodeIds;
     private final Map<String,IArc> arcs;
     private final Map<String,INode> places;
     private final Map<String,INode> transitions;
-    private final Map<String,INode> placesAndTransitions; // TODO remove if places and transitions can have the same names
     
     public PetriNet() {
-        colors = new ArrayList();
-        colors.add(DEFAULT_COLOUR);
         
+        colors = new HashSet();
+        colors.add(DEFAULT_COLOUR);
+        parameter = new HashMap();
+        
+        nodeIds = new HashSet();
         arcs = new HashMap();
         places = new HashMap();
         transitions = new HashMap();
-        placesAndTransitions = new HashMap();
     }
     
     public void add(Colour color) {
         colors.add(color);
+    }
+    
+    public void add(Parameter param) {
+        parameter.put(param.getId(), param);
     }
     
     public void add(IArc arc) {
@@ -54,7 +63,7 @@ public class PetriNet
     }
     
     public void add(INode node) {
-        placesAndTransitions.put(node.getId(), node);
+        nodeIds.add(node.getId());
         if (node instanceof Place) {
             places.put(node.getId(), node);
         } else {
@@ -70,10 +79,21 @@ public class PetriNet
     }
     
     public boolean containsAndNotEqual(INode node) {
-        if (!placesAndTransitions.containsKey(node.getId())) {
+        if (!nodeIds.contains(node.getId())) {
             return false;
         }
-        return !placesAndTransitions.get(node.getId()).equals(node);
+        if (node.getElementType() == Element.Type.PLACE) {
+            return !places.get(node.getId()).equals(node);
+        } else {
+            return !transitions.get(node.getId()).equals(node);
+        }
+    }
+    
+    public boolean containsAndNotEqual(Parameter param) {
+        if (!parameter.containsKey(param.getId())) {
+            return false;
+        }
+        return !parameter.get(param.getId()).equals(param);
     }
     
     public IArc remove(IArc arc) {
@@ -83,7 +103,7 @@ public class PetriNet
     }
     
     public INode remove(INode node) {
-        if (placesAndTransitions.remove(node.getId()) == null) {
+        if (!nodeIds.remove(node.getId())) {
             return null;
         } 
         while (!node.getArcsIn().isEmpty()) {
@@ -99,20 +119,31 @@ public class PetriNet
         }
     }
     
+    public Parameter remove(Parameter param) {
+        for (IElement node : param.getReferingNodes()) {
+            node.getParameters().remove(param);
+        }
+        return parameter.remove(param.getId());
+    }
+    
     public Collection<IArc> getArcs() {
         return arcs.values();
     }
     
-    public List<Colour> getColours() {
+    public Set<Colour> getColours() {
         return colors;
+    }
+    
+    public Set<String> getNodeIds() {
+        return nodeIds;
+    }
+    
+    public Collection<Parameter> getParameter() {
+        return parameter.values();
     }
     
     public Collection<INode> getPlaces() {
         return places.values();
-    }
-    
-    public Collection<INode> getPlacesAndTransitions() {
-        return placesAndTransitions.values();
     }
     
     public Collection<INode> getTransitions() {

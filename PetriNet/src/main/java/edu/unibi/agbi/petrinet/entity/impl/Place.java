@@ -22,45 +22,46 @@ public class Place extends Node
 {
     private static final String IDENT = "P";
     private static int COUNT = 0;
-    
+
     private Type placeType;
-    
-    private final Map<Colour,Token> token;
-    
+
+    private final Map<Colour, Token> token;
+
     public Place() {
 
         super(IDENT + ++COUNT);
         type = Element.Type.PLACE;
-        
+
         token = new HashMap();
-        token.put(PetriNet.DEFAULT_COLOUR , new Token(PetriNet.DEFAULT_COLOUR));
+        token.put(PetriNet.DEFAULT_COLOUR, new Token(PetriNet.DEFAULT_COLOUR));
     }
-    
+
     public final void setToken(Token token) {
-        this.token.put(token.getColour() , token);
+        this.token.put(token.getColour(), token);
     }
-    
+
     public final Token getToken(Colour colour) {
         return token.get(colour);
     }
-    
+
     public final Collection<Token> getToken() {
         return token.values();
     }
-    
+
     public final Map<Colour, Token> getTokenMap() {
         return token;
     }
-    
+
     public final void setPlaceType(Type placeType) {
         this.placeType = placeType;
     }
-    
+
     public final Type getPlaceType() {
         return placeType;
     }
-    
-    public enum Type {
+
+    public enum Type
+    {
         CONTINUOUS, DISCRETE;
     }
 }

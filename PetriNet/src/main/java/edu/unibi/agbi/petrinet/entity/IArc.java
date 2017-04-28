@@ -16,7 +16,10 @@ import java.util.Map;
 public interface IArc extends IElement
 {
     public INode getSource();
+
     public INode getTarget();
+
     public Weight getWeight(Colour colour);
-    public Map<Colour,Weight> getWeightMap();
+
+    public Map<Colour, Weight> getWeightMap();
 }
