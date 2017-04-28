@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.ElementDetailsController;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
@@ -31,8 +30,8 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Shape;
@@ -45,11 +44,10 @@ import org.springframework.stereotype.Service;
  * @author PR
  */
 @Service
-public class DataGraphService {
-
+public class DataGraphService
+{
     @Autowired private Calculator calculator;
     @Autowired private MessengerService messengerService;
-    @Autowired private ElementDetailsController elementDetailsController;
 
     private final GraphDao graphDao;
     private final DataDao dataDao;
@@ -72,9 +70,35 @@ public class DataGraphService {
     }
 
     /**
+     * Adds the given colour.
+     *
+     * @param colour
+     * @throws DataGraphServiceException
+     */
+    public void add(Colour colour) throws DataGraphServiceException {
+        if (dataDao.getColours().contains(colour)) {
+            throw new DataGraphServiceException("Conflict! Another colour has already been stored using the same ID!");
+        }
+        dataDao.add(colour);
+    }
+
+    /**
+     * Adds the given parameter.
+     *
+     * @param param
+     * @throws DataGraphServiceException
+     */
+    public void add(Parameter param) throws DataGraphServiceException {
+        if (dataDao.containsAndNotEqual(param)) {
+            throw new DataGraphServiceException("Conflict! Another parameter has already been stored using the same ID!");
+        }
+        dataDao.add(param);
+    }
+
+    /**
      * Changes the subtype for the given arc to the given type. Styles all
      * related shapes in the scene accordingly.
-     * 
+     *
      * @param arc
      * @param type
      * @throws DataGraphServiceException
@@ -87,7 +111,7 @@ public class DataGraphService {
     /**
      * Changes the subtype for the given place to the given type. Styles all
      * related shapes in the scene accordingly.
-     * 
+     *
      * @param place
      * @param type
      * @throws DataGraphServiceException
@@ -98,8 +122,9 @@ public class DataGraphService {
     }
 
     /**
-     * Changes the subtype for the given transition to the given type. Styles all
-     * related shapes in the scene accordingly.
+     * Changes the subtype for the given transition to the given type. Styles
+     * all related shapes in the scene accordingly.
+     *
      * @param transition
      * @param type
      * @throws DataGraphServiceException
@@ -112,17 +137,17 @@ public class DataGraphService {
     /**
      * Groups and hides all given elements in a cluster element. Removes any
      * clusters within the selection before grouping inside a new cluster.
-     * 
+     *
      * @param selected
-     * @return 
+     * @return
      * @throws DataGraphServiceException
      */
     public GraphCluster cluster(List<IGraphElement> selected) throws DataGraphServiceException {
-        
+
         if (selected.isEmpty()) {
             throw new DataGraphServiceException("Nothing was selected for clustering!");
         }
-        
+
         List<IGraphCluster> clusters = new ArrayList();
         List<IGraphNode> nodes = new ArrayList();
         List<IGraphArc> arcs = new ArrayList();
@@ -146,25 +171,25 @@ public class DataGraphService {
         if (nodes.size() + clusters.size() <= 1) {
             throw new DataGraphServiceException("Not enough elements selected for clustering!");
         }
-        
+
         // Combine nodes and arcs from existing clusters.
         for (IGraphCluster cluster : clusters) {
             arcs.addAll(cluster.getDataElement().getClusteredArcs());
             nodes.addAll(cluster.getDataElement().getClusteredNodes());
             clusterRemove(cluster);
         }
-        
+
         return clusterCreate(nodes, arcs);
     }
-    
+
     /**
      * Connects the given graph nodes. Validates the connection, then creates
      * and adds a new graph arc to the scene.
-     * 
+     *
      * @param source
      * @param target
      * @return
-     * @throws DataGraphServiceException 
+     * @throws DataGraphServiceException
      */
     public IGraphArc connect(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
         validateConnection(source, target);
@@ -177,7 +202,7 @@ public class DataGraphService {
      * @param type
      * @param posX
      * @param posY
-     * @return 
+     * @return
      * @throws DataGraphServiceException
      */
     public IGraphNode create(Element.Type type, double posX, double posY) throws DataGraphServiceException {
@@ -196,12 +221,12 @@ public class DataGraphService {
         Point2D pos = calculator.getCorrectedMousePosition(posX, posY);
         shape.translateXProperty().set(pos.getX());
         shape.translateYProperty().set(pos.getY());
-        
+
         return add(shape);
     }
 
     /**
-     * Creates arc. Binds it to the target node.
+     * Creates an arc that binds its source to the given node.
      *
      * @param source
      * @return
@@ -217,26 +242,27 @@ public class DataGraphService {
 
         return edge;
     }
-    
+
     /**
      * Removes the given graph arc from the scene.
+     *
      * @param arc
      * @return
-     * @throws DataGraphServiceException 
+     * @throws DataGraphServiceException
      */
     public IGraphArc remove(IGraphArc arc) throws DataGraphServiceException {
         arc = removeShape(arc);
         validateData(arc.getDataElement());
         return arc;
     }
-    
+
     /**
-     * Removes the given graph node from the scene. Also removes all arcs 
+     * Removes the given graph node from the scene. Also removes all arcs
      * connected to the given node.
-     * 
+     *
      * @param node
      * @return
-     * @throws DataGraphServiceException 
+     * @throws DataGraphServiceException
      */
     public IGraphNode remove(IGraphNode node) throws DataGraphServiceException {
         while (!node.getConnections().isEmpty()) {
@@ -248,9 +274,9 @@ public class DataGraphService {
     }
 
     /**
-     * Removes the given graph elements from the scene. Also removes all 
+     * Removes the given graph elements from the scene. Also removes all
      * connections to the given nodes.
-     * 
+     *
      * @param elements
      * @throws DataGraphServiceException
      */
@@ -265,16 +291,30 @@ public class DataGraphService {
     }
 
     /**
+     * Removes the given parameter.
+     *
+     * @param param
+     * @throws DataGraphServiceException
+     */
+    public void remove(Parameter param) throws DataGraphServiceException {
+        if (!param.getReferingNodes().isEmpty()) {
+            throw new DataGraphServiceException("There is nodes refering to this parameter! Cannot delete parameter.");
+        }
+        dataDao.remove(param);
+    }
+
+    /**
      * Restores and shows all the nodes stored within the given cluster(s).
+     *
      * @param selected
      * @throws DataGraphServiceException
      */
     public void uncluster(List<IGraphElement> selected) throws DataGraphServiceException {
-        
+
         if (selected.isEmpty()) {
             throw new DataGraphServiceException("Nothing was selected for unclustering!");
         }
-        
+
         List<IGraphCluster> clusters = new ArrayList();
 
         for (IGraphElement element : selected) {
@@ -286,7 +326,7 @@ public class DataGraphService {
                     messengerService.addToLog("Unsuitable element selected for unclustering! (" + element.toString() + ")");
             }
         }
-        
+
         for (IGraphCluster cluster : clusters) {
             clusterRemove(cluster);
         }
@@ -298,7 +338,7 @@ public class DataGraphService {
      *
      * @param nodes
      * @param clone
-     * @return 
+     * @return
      * @throws DataGraphServiceException
      */
     public List<IGraphNode> paste(List<IGraphNode> nodes, boolean clone) throws DataGraphServiceException {
@@ -320,16 +360,17 @@ public class DataGraphService {
 
             shape.translateXProperty().set(nodes.get(i).translateXProperty().get() - center.getX() + position.getX());
             shape.translateYProperty().set(nodes.get(i).translateYProperty().get() - center.getY() + position.getY());
-            
+
             shapes.add(shape);
         }
         return shapes;
     }
 
     /**
-     * Adds arc to scene and data model. 
+     * Adds arc to scene and data model.
+     *
      * @param arc
-     * @return 
+     * @return
      */
     private IGraphArc add(IGraphArc arc) throws DataGraphServiceException {
         if (arc.getDataElement() != null) {
@@ -345,11 +386,12 @@ public class DataGraphService {
         styleElement(arc);
         return arc;
     }
-    
+
     /**
      * Adds node to scene and data model.
+     *
      * @param node
-     * @return 
+     * @return
      */
     private IGraphNode add(IGraphNode node) throws DataGraphServiceException {
         if (node.getDataElement() != null) {
@@ -365,16 +407,17 @@ public class DataGraphService {
         styleElement(node);
         return node;
     }
-    
+
     /**
      * Creates a cluster, grouping all given nodes and arcs.
+     *
      * @param nodes
      * @param arcs
      * @return
-     * @throws DataGraphServiceException 
+     * @throws DataGraphServiceException
      */
     private GraphCluster clusterCreate(List<IGraphNode> nodes, List<IGraphArc> arcs) throws DataGraphServiceException {
-        
+
         List<IGraphArc> arcsToCluster = new ArrayList();
         List<IGraphArc> arcsFromCluster = new ArrayList();
 
@@ -391,27 +434,26 @@ public class DataGraphService {
 
                 if (!arcs.contains(tmp)) {
                     arcs.add(tmp);
-                    
+
                     if (!nodes.contains(tmp.getSource())) { // source is OUTSIDE
                         arcsToCluster.add(tmp);
-                        
                     } else if (!nodes.contains(tmp.getTarget())) { // target is OUTSIDE
                         arcsFromCluster.add(tmp);
                     }
                 }
             }
         }
-        
+
         // Create cluster object
         clusterData = new DataCluster(nodes, arcs);
         clusterDataArc = new DataClusterArc(clusterData);
         clusterShape = new GraphCluster(clusterData);
         add(clusterShape);
-        
+
         Point2D pos = calculator.getCenter(nodes);
         clusterShape.translateXProperty().set(pos.getX());
         clusterShape.translateYProperty().set(pos.getY());
-        
+
         for (IGraphArc arc : arcsFromCluster) {
             if (!clusterShape.getChildren().contains(arc.getTarget())) {
                 arc = createConnection(clusterShape, arc.getTarget(), clusterDataArc);
@@ -424,29 +466,30 @@ public class DataGraphService {
                 arc = add(arc);
             }
         }
-        
+
         for (IGraphArc arc : arcs) {
             graphDao.remove(arc);
         }
         for (IGraphNode node : nodes) {
             graphDao.remove(node);
         }
-        
+
         return clusterShape;
     }
-    
+
     /**
      * Removes the given cluster and ungroups all elements stored inside.
+     *
      * @param cluster
-     * @return 
+     * @return
      */
     private IGraphCluster clusterRemove(IGraphCluster cluster) throws DataGraphServiceException {
-        
+
         List<IGraphArc> clusteredArcs = cluster.getDataElement().getClusteredArcs();
         List<IGraphNode> clusteredNodes = cluster.getDataElement().getClusteredNodes();
 
         for (IGraphNode node : clusteredNodes) {
-            if (dataDao.getPlacesAndTransitions().contains(node.getDataElement())) {
+            if (dataDao.getNodeIds().contains(node.getDataElement().getId())) {
                 graphDao.add(node);
             }
         }
@@ -456,16 +499,16 @@ public class DataGraphService {
             }
         }
         remove(cluster);
-        
+
         return cluster;
     }
 
     /**
-     * Gets the converted shape for a given arc. Converts straight to curved or 
+     * Gets the converted shape for a given arc. Converts straight to curved or
      * curved to straight, respectively.
-     * 
+     *
      * @param shape
-     * @return 
+     * @return
      * @throws DataGraphServiceException
      */
     private IGraphArc getConvertedArcShape(IGraphArc shape) throws DataGraphServiceException {
@@ -479,7 +522,7 @@ public class DataGraphService {
     /**
      * Clones the given node. Results in a node of the same type that references
      * the data object of the given node.
-     * 
+     *
      * @param target
      * @return
      * @throws DataGraphServiceException
@@ -497,9 +540,9 @@ public class DataGraphService {
     }
 
     /**
-     * Creates a copy of the given node. Results in a node of the same type
-     * as the given node.
-     * 
+     * Creates a copy of the given node. Results in a node of the same type as
+     * the given node.
+     *
      * @param target
      * @return
      * @throws DataGraphServiceException
@@ -517,18 +560,19 @@ public class DataGraphService {
     }
 
     /**
-     * Creates an arc connecting the given nodes. 
+     * Creates an arc connecting the given nodes.
+     *
      * @param source
      * @param target
      * @param dataArc
-     * @return 
+     * @return
      * @throws DataGraphServiceException
      */
     private IGraphArc createConnection(IGraphNode source, IGraphNode target, IDataArc dataArc) throws DataGraphServiceException {
-        
+
         if (dataArc == null) {
             dataArc = new DataArc(source.getDataElement(), target.getDataElement(), defaultArcType);
-        } 
+        }
 
         IGraphArc shapeSourceToTarget;
 
@@ -563,6 +607,38 @@ public class DataGraphService {
     }
 
     /**
+     * Removes the given node. Also removes all related local parameters.
+     *
+     * @param node
+     * @return
+     */
+    private void remove(IDataArc arc) throws DataGraphServiceException {
+        for (Parameter param : arc.getParameters()) {
+            param.getReferingNodes().remove(arc);
+            if (param.getType() == Parameter.Type.LOCAL) {
+                remove(param);
+            }
+        }
+        dataDao.remove(arc);
+    }
+
+    /**
+     * Removes the given node. Also removes all related local parameters.
+     *
+     * @param node
+     * @return
+     */
+    private void remove(IDataNode node) throws DataGraphServiceException {
+        for (Parameter param : node.getParameters()) {
+            param.getReferingNodes().remove(node);
+            if (param.getType() == Parameter.Type.LOCAL) {
+                remove(param);
+            }
+        }
+        dataDao.remove(node);
+    }
+
+    /**
      * Removes the given graph arc from the scene. In case of double linked
      * connections the remaining connection will be converted.
      *
@@ -578,7 +654,7 @@ public class DataGraphService {
         }
 
         // Check null for temporary arcs
-        if (arc.getTarget() == null) { 
+        if (arc.getTarget() == null) {
             return arc;
         }
         IGraphNode source = arc.getSource();
@@ -603,8 +679,8 @@ public class DataGraphService {
      * Removes the given graph node from the scene.
      *
      * @param node
-     * @return 
-     * @throws DataGraphServiceException 
+     * @return
+     * @throws DataGraphServiceException
      */
     private IGraphNode removeShape(IGraphNode node) throws DataGraphServiceException {
         graphDao.remove(node);
@@ -613,12 +689,13 @@ public class DataGraphService {
         }
         return node;
     }
-    
+
     /**
      * Styles the graph element in the scene according to the type assigned to
      * its data element.
+     *
      * @param element
-     * @throws DataGraphServiceException 
+     * @throws DataGraphServiceException
      */
     private void styleElement(IGraphElement element) throws DataGraphServiceException {
         switch (element.getDataElement().getElementType()) {
@@ -643,8 +720,9 @@ public class DataGraphService {
     }
 
     /**
-     * Sets the given style to all elements in the scene that are related to
-     * the given data element.
+     * Sets the given style to all elements in the scene that are related to the
+     * given data element.
+     *
      * @param dataElement
      * @param styleClass
      * @param childrenEnabled wether scene element's children are to be shown
@@ -661,12 +739,13 @@ public class DataGraphService {
             }
         }
     }
-    
+
     /**
-     * Sets the given style to all elements in the scene that are related to
-     * the given data arc.
+     * Sets the given style to all elements in the scene that are related to the
+     * given data arc.
+     *
      * @param element
-     * @param styleClass 
+     * @param styleClass
      */
     private void styleArc(IDataArc element, String styleClass) {
         for (IGraphElement elem : element.getGraphElements()) {
@@ -675,7 +754,7 @@ public class DataGraphService {
             });
         }
     }
-    
+
     private void setArcStyle(DataArc arc) throws DataGraphServiceException {
         if (arc.getArcType() != null) {
             switch (arc.getArcType()) {
@@ -693,7 +772,7 @@ public class DataGraphService {
             }
         }
     }
-    
+
     private void setPlaceStyle(DataPlace place) throws DataGraphServiceException {
         switch (place.getPlaceType()) {
             case CONTINUOUS:
@@ -706,7 +785,7 @@ public class DataGraphService {
                 throw new DataGraphServiceException("Cannot create shape for an undefined place type!");
         }
     }
-    
+
     private void setTransitionStyle(DataTransition transition) throws DataGraphServiceException {
         switch (transition.getTransitionType()) {
             case CONTINUOUS:
@@ -722,18 +801,20 @@ public class DataGraphService {
                 throw new DataGraphServiceException("Cannot create shape for an undefined transition type!");
         }
     }
-    
+
     /**
-     * Validates a connection between two graph nodes. 
+     * Validates a connection between two graph nodes.
+     *
      * @param source
      * @param target
-     * @throws DataGraphServiceException thrown in case the connection is not valid
+     * @throws DataGraphServiceException thrown in case the connection is not
+     *                                   valid
      */
     private void validateConnection(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
 
         IDataNode dataSource = source.getDataElement();
         IDataNode dataTarget = target.getDataElement();
-        
+
         IGraphNode relatedSourceShape;
         IGraphNode relatedSourceShapeChild;
 
@@ -763,7 +844,7 @@ public class DataGraphService {
     }
 
     /**
-     * Validates the given data node. Removes it from the data model when no 
+     * Validates the given data node. Removes it from the data model when no
      * remaining reference can be found within the scene.
      *
      * @param arc
@@ -774,41 +855,26 @@ public class DataGraphService {
         }
         if (arc.getElementType() == Element.Type.ARC) {
             if (arc.getGraphElements().isEmpty()) {
-                dataDao.remove(arc);
+                remove(arc);
             }
         }
     }
-    
+
     /**
      * Validates the given data arc. Removes it from the data model when no
      * remaining reference can be found within the scene.
      *
      * @param arc
      */
-    private void validateData(IDataNode node) {
+    private void validateData(IDataNode node) throws DataGraphServiceException {
         if (node == null) {
             return;
         }
         if (node.getElementType() != Element.Type.CLUSTER) {
             if (node.getGraphElements().isEmpty()) {
-                dataDao.remove(node);
+                remove(node);
             }
         }
-    }
-
-    public void UpdateData() throws DataGraphServiceException {
-        elementDetailsController.StoreElementProperties();
-    }
-
-    public void add(Colour color) throws DataGraphServiceException {
-        if (dataDao.getColours().contains(color)) {
-            throw new DataGraphServiceException("Conflict! A color with the same ID has already been stored!");
-        }
-        dataDao.add(color);
-    }
-
-    public Collection<Colour> getColours() {
-        return dataDao.getColours();
     }
 
     public DataDao getDataDao() {

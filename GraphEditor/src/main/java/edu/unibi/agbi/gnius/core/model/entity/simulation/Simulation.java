@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import javafx.beans.value.ObservableValue;
 import edu.unibi.agbi.petrinet.entity.IElement;
 
 /**

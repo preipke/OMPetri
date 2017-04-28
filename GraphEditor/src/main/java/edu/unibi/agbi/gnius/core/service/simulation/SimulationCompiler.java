@@ -1,0 +1,176 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package edu.unibi.agbi.gnius.core.service.simulation;
+
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.service.SimulationService;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.util.Utility;
+import edu.unibi.agbi.petrinet.model.References;
+import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+/**
+ *
+ * @author PR
+ */
+public class SimulationCompiler {
+
+    private final SimulationService simulationService;
+    private final DataDao dataDao;
+
+    private File simWorkingDirectory;
+    private String simCompilerPath;
+    private String simExecutablePath;
+    private References simVariableReferences;
+
+    public SimulationCompiler(SimulationService simulationService, DataDao dataDao) {
+        this.simulationService = simulationService;
+        this.dataDao = dataDao;
+    }
+
+    public String getSimulationCompilerPath() {
+        return simCompilerPath;
+    }
+
+    public String getSimulationExecutablePath() {
+        return simExecutablePath;
+    }
+
+    public File getSimulationWorkingDirectory() {
+        return simWorkingDirectory;
+    }
+
+    public References getSimulationVariableReferences() {
+        return simVariableReferences;
+    }
+
+    public void compile() throws SimulationServiceException {
+
+        final Process process;
+        ProcessBuilder pb;
+
+        File dirStorage, fileMo, fileMos;
+        String nameSimulation;
+
+        /**
+         * Get the required directories.
+         */
+        try {
+//            System.out.println("Getting compiler path...");
+            simCompilerPath = simulationService.getOpenModelicaCompilerPath();
+//            System.out.println("Getting working directory...");
+            simWorkingDirectory = simulationService.getWorkingDirectory();
+//            System.out.println("Getting storage directory...");
+            dirStorage = createStorageDirectory(simWorkingDirectory);
+        } catch (SimulationServiceException ex) {
+            throw new SimulationServiceException("Failed to get the required directories! [" + ex.getMessage() + "]");
+        }
+
+        /**
+         * Exort data for OpenModelica.
+         */
+        try {
+//            System.out.println("Exporting data for OpenModelica compiler...");
+            nameSimulation = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME).replace(":", "").substring(0, 6) + "-" + dataDao.getName();
+
+            fileMo = new File(dirStorage + File.separator + nameSimulation + ".mo");
+            fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
+            OpenModelicaExport.exportMO(dataDao, fileMo);
+            simVariableReferences = OpenModelicaExport.exportMOS(dataDao, fileMos, fileMo, simWorkingDirectory);
+        } catch (IOException ex) {
+            throw new SimulationServiceException("Failed to export the data for OpenModelica! [" + ex.getMessage() + "]");
+        }
+
+        /**
+         * Build the simulation.
+         */
+        pb = new ProcessBuilder(simCompilerPath, fileMos.getPath());
+        pb.directory(simWorkingDirectory);
+        try {
+//            System.out.println("Building simulation...");
+            process = pb.start();
+        } catch (IOException ex) {
+            throw new SimulationServiceException("Failed to starting the build process! [" + ex.getMessage() + "]");
+        }
+
+        /**
+         * Wait for the build process to finish.
+         */
+        try {
+            process.waitFor();
+        } catch (InterruptedException ex) {
+            throw new SimulationServiceException("Failed to wait for the build process! [" + ex.getMessage() + "]");
+        }
+
+        /**
+         * Read the build process output and parse the path to the executable.
+         */
+        try {
+            simExecutablePath = parseSimulationExecutablePath(process.getInputStream());
+        } catch (SimulationServiceException ex) {
+            throw new SimulationServiceException(ex.getMessage());
+        }
+    }
+
+    /**
+     * Gets the directory for storing data files used for building the simulation.
+     * @return
+     */
+    private File createStorageDirectory(File workingDirectory) throws SimulationServiceException {
+
+        File dir;
+
+        dir = new File(workingDirectory + File.separator + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        if (!dir.exists() || !dir.isDirectory()) {
+            dir.mkdir();
+        }
+
+        return dir;
+    }
+
+    /**
+     * Parses name of the simulation executable. Parses the String generated by
+     * the compiler to output the name of the executable simulation file.
+     *
+     * @param output
+     * @return
+     */
+    private String parseSimulationExecutablePath(InputStream os) throws SimulationServiceException {
+
+        byte[] bytes;
+        String output;
+
+        try {
+            bytes = new byte[os.available()];
+            os.read(bytes);
+            output = new String(bytes);
+        } catch (IOException ex) {
+            throw new SimulationServiceException("Exception reading the build process output!");
+        }
+
+        try {
+            output = output.substring(output.lastIndexOf("{"));
+            output = Utility.parseSubstring(output, "\"", "\"");
+        } catch (Exception ex) {
+            throw new SimulationServiceException("Path for simulation executable can not be parsed! ['" + output + "']");
+        }
+
+        if (output == null) {
+            throw new SimulationServiceException("Path for simulation executable is not available. Build failed! ['" + output + "']");
+        }
+
+        if (Utility.isOsWindows()) {
+            output += ".exe";
+        }
+
+        return output;
+    }
+}

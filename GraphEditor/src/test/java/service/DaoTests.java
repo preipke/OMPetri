@@ -39,7 +39,7 @@ public class DaoTests extends TestFXBase {
 
         Assert.assertEquals(
                 places.size() + transitions.size(),
-                dataDao.getPlacesAndTransitions().size(),
+                dataDao.getNodeIds().size(),
                 graphDao.getNodes().size());
         Assert.assertEquals(
                 places.size(),
@@ -129,7 +129,7 @@ public class DaoTests extends TestFXBase {
             Assert.assertEquals(false, graphDao.contains(node));
             Assert.assertEquals(false, dataDao.getPlaces().contains(nodeData));
             Assert.assertEquals(false, dataDao.getTransitions().contains(nodeData));
-            Assert.assertEquals(false, dataDao.getPlacesAndTransitions().contains(nodeData));
+            Assert.assertEquals(false, dataDao.getNodeIds().contains(nodeData.getId()));
             
             // removed node can neither be parent nor child of any other node
             for (IGravisNode parent : node.getParents()) {

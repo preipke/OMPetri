@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.embed.swing.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="elementDetailsBox" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ElementController">
+    <children>
+        <TitledPane fx:id="identifierPane" animated="false" text="Identifier">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <GridPane hgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <Label text="Type" />
+                                <TextField fx:id="elementType" disable="true" editable="false" GridPane.columnIndex="1" />
+                                <Label text="Id" GridPane.rowIndex="1" />
+                                <TextField fx:id="elementId" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <Label text="Name" GridPane.rowIndex="2" />
+                                <TextField fx:id="elementName" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <Label text="Label" GridPane.rowIndex="3" />
+                                <TextField fx:id="elementLabel" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <Label text="Description" GridPane.rowIndex="4" />
+                                <TextArea fx:id="elementDescription" prefHeight="80.0" promptText="Enter a short description here..." GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                    <GridPane.margin>
+                                        <Insets top="3.0" />
+                                    </GridPane.margin>
+                                    <font>
+                                        <Font size="11.0" />
+                                    </font>
+                                </TextArea>
+                            </children>
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                            </rowConstraints>
+                        </GridPane>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+        <TitledPane fx:id="propertiesPane" animated="false" text="Properties">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <VBox fx:id="propertiesBox" alignment="TOP_CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <GridPane fx:id="propertiesSubtype" hgap="5.0">
+                                    <children>
+                                        <ChoiceBox fx:id="elementSubtype" GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" />
+                                        <Label text="Subtype" />
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                </GridPane>
+                                <GridPane fx:id="propertiesColor" hgap="5.0">
+                                    <children>
+                                        <Label text="Color" />
+                                        <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1">
+                                            <children>
+                                                <ChoiceBox fx:id="colorChoice" disable="true" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="colorCreate" disable="true" mnemonicParsing="false" text="Add" />
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <VBox.margin>
+                                        <Insets />
+                                    </VBox.margin>
+                                </GridPane>
+                                <GridPane fx:id="propertiesArc" hgap="5.0">
+                                    <children>
+                                        <Label text="Weight" />
+                                        <TextField fx:id="propertyWeight" GridPane.columnIndex="1" />
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                </GridPane>
+                                <GridPane fx:id="propertiesPlace" hgap="5.0">
+                                    <children>
+                                        <Label text="Token" />
+                                        <Label text="Token (min.)" GridPane.rowIndex="1" />
+                                        <Label text="Token (max.)" GridPane.rowIndex="2" />
+                                        <TextField fx:id="propertyTokenMax" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextField fx:id="propertyTokenMin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextField fx:id="propertyToken" GridPane.columnIndex="1" />
+                                    </children>
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                </GridPane>
+                                <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
+                                    <children>
+                                        <Label text="Function" />
+                                        <TextField fx:id="transitionFunctionInput" />
+                                        <HBox alignment="TOP_CENTER" spacing="5.0">
+                                            <children>
+                                                <Button fx:id="buttonParameterShow" mnemonicParsing="false" text="Parameter" />
+                                                <MenuButton fx:id="buttonParameterInsert" mnemonicParsing="false" text="Insert" />
+                                            </children>
+                                        </HBox>
+                                        <ScrollPane fitToHeight="true">
+                                            <content>
+                                                <AnchorPane>
+                                                    <children>
+                                                        <SwingNode fx:id="transitionFunctionImage" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                    </children>
+                                                </AnchorPane>
+                                            </content>
+                                        </ScrollPane>
+                                        <Label fx:id="transitionFunctionStatus" text="Label" />
+                                    </children>
+                                    <padding>
+                                        <Insets top="5.0" />
+                                    </padding>
+                                </VBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+    </children>
+</VBox>

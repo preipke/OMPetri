@@ -9,7 +9,7 @@ import edu.unibi.agbi.petrinet.model.PetriNet;
 import org.springframework.stereotype.Repository;
 
 /**
- * 
+ *
  * @author PR
  */
 @Repository

@@ -5,25 +5,19 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.SimulationControlsController;
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
-import edu.unibi.agbi.gnius.core.model.dao.SimulationDao;
+import edu.unibi.agbi.gnius.business.controller.ElementController;
+import edu.unibi.agbi.gnius.business.controller.SimulationController;
+import edu.unibi.agbi.gnius.core.model.dao.SimulationResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
-import edu.unibi.agbi.gnius.core.simulation.OpenModelicaServer;
+import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
+import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
+import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
 import edu.unibi.agbi.gnius.util.Utility;
 import edu.unibi.agbi.petrinet.model.References;
-import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import static java.lang.Thread.sleep;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Map;
+import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,428 +30,258 @@ import org.springframework.stereotype.Service;
 @Service
 public class SimulationService
 {
-    @Autowired private OpenModelicaServer server;
+    private final SimulationResultsDao simulationDao;
+
+    @Value("${application.working.dir.property}") private String varWorkingDirProperty;
+    @Value("${application.working.dir.subfolder}") private String varWorkingDirSubfolder;
+    @Value("${openmodelica.home.env}") private String varOpenModelicaHomeDir;
+    
     @Autowired private DataGraphService dataGraphService;
-    @Autowired private SimulationControlsController simulationControlsController;
+    @Autowired private SimulationService simulationService;
+    @Autowired private MessengerService messengerService;
     
-    private final SimulationDao simulationDao;
-    private final DataDao dataDao;
-    
-    @Value("${openmodelica.home.env}")
-    private String envOpenModelicaHome;
-    private File workingDirectory = null;
-    
-    private final int serverPort = 11111;
-    private Thread serverThread;
+    @Autowired private SimulationController simulationControlsController;
+    @Autowired private ElementController elementDetailsController;
     
     @Autowired 
-    public SimulationService(SimulationDao simulationDao, DataDao dataDao) {
+    public SimulationService(SimulationResultsDao simulationDao) {
         this.simulationDao = simulationDao;
-        this.dataDao = dataDao;
     }
     
     public ObservableList<Simulation> getSimulations() {
         return simulationDao.getSimulations();
     }
     
-    public Simulation getLatestSimulation() {
-        return simulationDao.getLatestSimulation();
-    }
-    
     public Simulation InitSimulation(String[] variables, References variableReferences) {
-        
         Simulation simulation = new Simulation(variables, variableReferences);
-        simulationDao.addSimulation(simulation);
-        
+        simulationDao.add(simulation);
         return simulation;
     }
     
     public void StartSimulation() throws SimulationServiceException {
         
         try {
-            dataGraphService.UpdateData();
+            elementDetailsController.StoreElementProperties();
         } catch (DataGraphServiceException ex) {
             throw new SimulationServiceException(ex);
         }
-        
-        final Process buildProcess, simulationProcess;
-        final BufferedReader simulationOutput;
-        ProcessBuilder pb;
-        
-        File dirStorage, fileMo, fileMos;
-        String pathCompiler, pathSimulation, nameSimulation;
-        References references;
-        
-        double simStopTime = simulationControlsController.getSimulationStopTime();
-        int simIntervals = simulationControlsController.getSimulationIntervals();
-        String simIntegrator = simulationControlsController.getSimulationIntegrator();
-        
-        System.out.println("Getting working directory...");
-        workingDirectory = getWorkingDirectory();
-        
-        System.out.println("Getting storage directory...");
-        dirStorage = getStorageDirectory(workingDirectory);
-        
-        System.out.println("Getting compiler path...");
-        pathCompiler = getCompilerPath();
-        
-        if (server.isRunning()) {
-            throw new SimulationServiceException("Server is still running!");
-        }
 
-        try {
-            System.out.println("Exporting data for OpenModelica compiler...");
+//        if (server.isRunning()) {
+//            throw new SimulationServiceException("Server is still running!");
+//        }
+        messengerService.addToLog("Starting simulation...");
 
-            nameSimulation = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME).replace(":" , "").substring(0 , 6) + "-" + dataDao.getName();
+        Thread thread = new Thread(() -> {
+            try {
+                /**
+                 * Execute compiler.
+                 */
+                SimulationCompiler simulationCompiler = new SimulationCompiler(this, dataGraphService.getDataDao());
+                try {
+                    Platform.runLater(() -> {
+                        simulationControlsController.setSimulationProgress(-1);
+                    });
+                    simulationCompiler.compile();
+                } catch (SimulationServiceException ex) {
+                    throw new SimulationServiceException("Simulation failed during compilation! [" + ex.getMessage() + "]");
+                }
 
-            fileMo = new File(dirStorage + File.separator + nameSimulation + ".mo");
-            fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
-            OpenModelicaExport.exportMO(dataDao , fileMo);
-            references = OpenModelicaExport.exportMOS(dataDao , fileMos , fileMo , workingDirectory);
-            
-        } catch (IOException ex) {
-            throw new SimulationServiceException("Data export for OpenModelica failed! (" + ex.getMessage() + ")");
-        }
-
-        /**
-         * Building simulation.
-         */
-        pb = new ProcessBuilder(pathCompiler , fileMos.getPath());
-        pb.directory(workingDirectory);
-        try {
-            System.out.println("Building simulation...");
-            buildProcess = pb.start();
-        } catch (IOException ex) {
-            throw new SimulationServiceException("Exception starting compilation process! (" + ex.getMessage() + ")");
-        }
-
-        /**
-         * Terminates process after 20 minutes.
-         */
-//        Thread compilerWatcherThread = new Thread()
-//        {
-//            @Override
-//            public void run() {
-//                long totalTime = 1200000;
-//                try {
-//                    for (long t = 0; t < totalTime; t += 1000) {
-//                        if (buildProcess.isAlive()) {
-//                            sleep(1000);
-//                        }
-//                    }
-//                    buildProcess.destroy();
-//                    // stopped = true;
-//                } catch (Exception e) {
-//                }
-//            }
-//        };
-//        compilerWatcherThread.start();
-        
-        /**
-         * Waits for build process and interrupt waiting thread.
-         */
-        try {
-            buildProcess.waitFor();
-//            compilerWatcherThread.interrupt();
-        } catch (InterruptedException ex) {
-            throw new SimulationServiceException("Exception while waiting for compiler thread! (" + ex.getMessage() + ")");
-        }
-
-        /**
-         * Reading build process output.
-         */
-        InputStream os = buildProcess.getInputStream();
-        try {
-            byte[] bytes = new byte[os.available()];
-            os.read(bytes);
-            String buildOutput = new String(bytes);
-            
-            System.out.println(buildOutput);
-
-//            // Evaluating for warnings
-//            if (buildOutput.contains("Warning: ")) {
-//                String[] split = buildOutput.split("Warning: ");
-//                System.out.println("Compilation output contains warnings!");
-//                for (int i = 1; i < split.length; i++) {
-//                    System.out.println(i + ": " + split[i]);
-//                }
-//            }
-            
-            pathSimulation = parseSimulationExecutablePath(buildOutput);
-            if (pathSimulation == null) {
-                throw new SimulationServiceException("Simulation could not be built!");
-            }
-        } catch (IOException ex) {
-            throw new SimulationServiceException("Exception reading process output! (" + ex.getMessage() + ")");
-        }
-        
-        /**
-         * Start server.
-         */
-        serverThread = server.StartThread(serverPort, references);
-        
-        /**
-         * Ausführen der Simulation.
-         */
-        boolean noEmmit = true;
-
-        String override = "-override=outputFormat=ia,stopTime=" + simStopTime + ",stepSize=" + simStopTime / simIntervals + ",tolerance=0.0001";
-        
-//                    if (flags.isParameterChanged()) {
-//
-//                        Iterator<Parameter> it = pw.getChangedParameters().keySet().iterator();
-//                        GraphElementAbstract gea;
-//                        Parameter param;
-//
-//                        while (it.hasNext()) {
-//                            param = it.next();
-//                            gea = pw.getChangedParameters().get(param);
-//                            BiologicalNodeAbstract bna;
-//                            if (gea instanceof BiologicalNodeAbstract) {
-//                                bna = (BiologicalNodeAbstract)gea;
-//                                override += ",'_" + bna.getName() + "_" + param.getName() + "'=" + param.getValue();
-//                            }
-//                        }
-//                    }
-
-//                    if (flags.isInitialValueChanged()) {
-//                        Iterator<Place> it = pw.getChangedInitialValues().keySet().iterator();
-//                        Place p;
-//                        Double d;
-//                        while (it.hasNext()) {
-//                            p = it.next();
-//                            d = pw.getChangedInitialValues().get(p);
-//                            override += ",'" + p.getName() + "'.startMarks=" + d;
-//                        }
-//                    }
-//                    if (flags.isBoundariesChanged()) {
-//                        Iterator<Place> it = pw.getChangedBoundaries().keySet().iterator();
-//                        Place p;
-//                        Boundary b;
-//                        while (it.hasNext()) {
-//                            p = it.next();
-//                            b = pw.getChangedBoundaries().get(p);
-//                            if (b.isLowerBoundarySet()) {
-//                                override += ",'" + p.getName() + "'.minMarks=" + b.getLowerBoundary();
-//                            }
-//                            if (b.isUpperBoundarySet()) {
-//                                override += ",'" + p.getName() + "'.maxMarks=" + b.getUpperBoundary();
-//                            }
-//                        }
-//                    }
-            
-        pb = new ProcessBuilder();
-//        noEmmit = false;
-        if (noEmmit) {
-            pb.command(pathSimulation , "-s=" + simIntegrator , override , "-port=11111" , "-noEventEmit" , "-lv=LOG_STATS");
-        } else {
-            pb.command(pathSimulation , override , "-port=11111" );
-        }
-        pb.directory(workingDirectory);
-        pb.redirectOutput();
-
-        Map<String , String> env = pb.environment();
-        
-        pathCompiler = pathCompiler.substring(0 , pathCompiler.lastIndexOf(File.separator));
-        env.put("PATH" , env.get("PATH") + ";" + pathCompiler);
-
-        System.out.println("Path: " + pb.environment().get("PATH"));
-        System.out.println("Override: " + override);
-
-        try {
-            System.out.println("Starting simulation...");
-            simulationProcess = pb.start();
-            simulationOutput = new BufferedReader(new InputStreamReader(simulationProcess.getInputStream()));
-        } catch (IOException ex) {
-            // TODO Auto-generated catch block
-            ex.printStackTrace();
-            throw new SimulationServiceException("Exception starting simulation! (" + ex.getMessage() + ")");
-        }
-        
-        /**
-         * Simulation Output. (?)
-         */
-        Thread t3 = new Thread()
-        {
-            public void run() {
-                String line;
-                if (simulationOutput != null) {
-                    while (server.isRunning()) {
-                        try {
-                            line = simulationOutput.readLine();
-                            if (line != null && line.length() > 0) {
-                                System.out.println(line);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                /**
+                 * Start server.
+                 */
+                SimulationServer simulationServer = new SimulationServer();
+                simulationServer.start();
+                synchronized (simulationServer) {
                     try {
-                        System.out.println("Server stopped");
-                        while ((line = simulationOutput.readLine()) != null && line.length() > 0) {
-                            System.out.println(line);
-                        }
-                        simulationOutput.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        simulationServer.wait(); // wait for notification from server -> started or failed
+                    } catch (InterruptedException ex) {
+                        throw new SimulationServiceException("Simulation failed while waiting for server start! [" + ex.getMessage() + "]");
                     }
                 }
+                if (!simulationServer.isRunning()) {
+                    if (simulationServer.isFailed()) {
+                        throw new SimulationServiceException("Simulation failed while starting the server! [" + simulationServer.getErrorMessage() + "]");
+                    } else {
+                        throw new SimulationServiceException("Simulation server is not running!");
+                    }
+                }
+
+                /**
+                 * Start simulation.
+                 */
+                SimulationExecuter simulationExecuter = new SimulationExecuter(simulationCompiler, simulationServer);
+                simulationExecuter.setSimulationStopTime(simulationControlsController.getSimulationStopTime());
+                simulationExecuter.setSimulationIntervals(simulationControlsController.getSimulationIntervals());
+                simulationExecuter.setSimulationIntegrator(simulationControlsController.getSimulationIntegrator());
+                simulationExecuter.start();
+                synchronized (simulationExecuter) {
+                    if (simulationExecuter.getSimulationOutputReader() == null) {
+                        try {
+                            simulationExecuter.wait(); // wait for notification from executer -> process started or failed
+                        } catch (InterruptedException ex) {
+                            throw new SimulationServiceException("Simulation failed while waiting for simulation process start! [" + ex.getMessage() + "]");
+                        }
+                    }
+                }
+                if (simulationExecuter.isFailed()) {
+                    throw new SimulationServiceException("Simulation failed while starting the simulation process! [" + simulationExecuter.getErrorMessage() + "]");
+                }
+
+                /**
+                 * Initialize simulation data storage.
+                 */
+                synchronized (simulationServer) {
+                    if (simulationServer.isRunning() && simulationServer.getSimulationVariables() == null) {
+                        try {
+                            simulationServer.wait(); // wait for notification from server -> variables initialized or failed
+                        } catch (InterruptedException ex) {
+                            throw new SimulationServiceException("Simulation failed while waiting for data storage initialization! [" + ex.getMessage() + "]");
+                        }
+                    }
+                }
+                if (!simulationServer.isRunning()) {
+                    if (simulationServer.isFailed()) {
+                        throw new SimulationServiceException("Simulation failed while initializing variables! [" + simulationServer.getErrorMessage() + "]");
+                    } else {
+                        throw new SimulationServiceException("Simulation server is not running!");
+                    }
+                }
+
+                Platform.runLater(() -> {
+                    Simulation simulation = simulationService.InitSimulation(simulationServer.getSimulationVariables(), simulationCompiler.getSimulationVariableReferences());
+                    simulationServer.setSimulation(simulation);
+                    synchronized (simulationServer) {
+                        simulationServer.notify(); // notify server that storage has been initalized
+                    }
+                });
+
+                try {
+                    synchronized (this) {
+                        while (simulationServer.isRunning()) {
+                            Platform.runLater(() -> {
+                                simulationControlsController.setSimulationProgress(simulationServer.getSimulationIterationCount() / simulationControlsController.getSimulationIntervals());
+                            });
+                            this.wait(250);
+                        }
+                    }
+                    simulationExecuter.join();
+                    simulationServer.join();
+                } catch (InterruptedException ex) {
+                    
+                }
+            } catch (SimulationServiceException ex) {
+                messengerService.addToLog(ex.getMessage());
+            } finally {
+                messengerService.addToLog("Finished simulating!");
+                simulationControlsController.setSimulationProgress(1);
+                simulationControlsController.StopSimulation();
             }
-        };
-        t3.start();
-        
-        /**
-         * Zeichnen der Graphen.
-         */
-//                Thread t2 = new Thread()
-//                {
-//                    public void run() {
-//                        pw.getGraph().getVisualizationViewer().requestFocus();
-//                        w.redrawGraphs();
-//                        // CHRIS sometimes nullpointer
-//                        List<Double> v = pw.getPetriNet().getSimResController().get().getTime().getAll();
-//                        // System.out.println("running");
-//                        while (s.isRunning()) {
-//                            w.redrawGraphs();
-//
-//                            // double time =
-//                            if (v.size() > 0) {
-//                                menue.setTime((v.get(v.size() - 1)).toString());
+
+//            /**
+//             * Read simulation output. (?)
+//             */
+//            Thread t3 = new Thread() {
+//                public void run() {
+//                    String line;
+//                    if (simulationOutput != null) {
+//                        while (server.isRunning()) {
+//                            try {
+//                                line = simulationOutput.readLine();
+//                                if (line != null && line.length() > 0) {
+//                                    System.out.println(line);
+//                                }
+//                            } catch (IOException e) {
+//                                e.printStackTrace();
 //                            }
 //                            try {
 //                                sleep(100);
 //                            } catch (InterruptedException e) {
-//                                // TODO Auto-generated catch block
 //                                e.printStackTrace();
 //                            }
 //                        }
-//                        menue.stopped();
-//                        System.out.println("end of simulation");
-//                        w.updatePCPView();
-//                        w.redrawGraphs();
-//
-//                        w.repaint();
-//                        if (v.size() > 0) {
-//                            menue.setTime((v.get(v.size() - 1)).toString());
+//                        try {
+//                            System.out.println("Server stopped");
+//                            while ((line = simulationOutput.readLine()) != null && line.length() > 0) {
+//                                System.out.println(line);
+//                            }
+//                            simulationOutput.close();
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
 //                        }
-//                        // w.updatePCPView();
 //                    }
-//                };
+//                }
+//            };
+//            t3.start();
+        });
+        thread.start();
     }
     
     public void StopSimulation() {
-        
+        // if !isSimulating -> return
     }
-    
+
     /**
-     * Gets the working directory. Used for storing and executing the compiled 
-     * sources.
-     * @return 
+     * Gets the path of the OMC compiler.
+     * @return
+     * @throws SimulationServiceException
      */
-    private File getWorkingDirectory() throws SimulationServiceException {
+    public String getOpenModelicaCompilerPath() throws SimulationServiceException {
+
+        String pathOpenModelica, pathCompiler;
+        File dirOpenModelica;
+
+        pathOpenModelica = System.getenv(varOpenModelicaHomeDir);
+
+        if (pathOpenModelica == null) {
+            throw new SimulationServiceException("'" + varOpenModelicaHomeDir + "' environment variable is not set! Please install OpenModelica or set the variable correctly.");
+        }
+
+        dirOpenModelica = new File(pathOpenModelica);
+        if (dirOpenModelica.exists() && dirOpenModelica.isDirectory()) {
+
+            pathCompiler = pathOpenModelica + "bin" + File.separator + "omc";
+            if (Utility.isOsWindows()) {
+                pathCompiler = pathCompiler + ".exe";
+            } else if (Utility.isOsUnix()) {
+                // TODO : OS is Linux
+            } else if (Utility.isOsMac()) {
+                // TODO : OS is Mac
+            } else {
+                // TODO : OS not maybe supported
+            }
+            return pathCompiler;
+
+        } else {
+            throw new SimulationServiceException("'" + varOpenModelicaHomeDir + "' environment variable is not set correctly! Please set the variable correctly or reinstall OpenModelica.");
+        }
+    }
+
+    /**
+     * Gets the working directory. Used for storing and executing the compiled
+     * sources.
+     *
+     * @return
+     * @throws SimulationServiceException
+     */
+    public File getWorkingDirectory() throws SimulationServiceException {
 
         File dir;
+        String[] subDir;
 
-        dir = new File(System.getProperty("java.io.tmpdir"));
+        dir = new File(System.getProperty(varWorkingDirProperty));
         if (!dir.exists() || !dir.isDirectory()) {
             throw new SimulationServiceException("Application's working directory not accessible!");
         }
 
-        dir = new File(dir + File.separator + "GraVisFX");
-        if (!dir.exists() || !dir.isDirectory()) {
-            dir.mkdir();
-        }
+        subDir = varWorkingDirSubfolder.split("/");
 
-        dir = new File(dir + File.separator + "data");
-        if (!dir.exists() || !dir.isDirectory()) {
-            dir.mkdir();
-        }
-
-        return dir;
-    }
-    
-    /**
-     * Gets the directory for storing files used for building the simulation.
-     * @return 
-     */
-    private File getStorageDirectory(File workingDirectory) throws SimulationServiceException {
-        
-        File dir;
-        
-        dir = new File(workingDirectory + File.separator + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
-        if (!dir.exists() || !dir.isDirectory()) {
-            dir.mkdir();
-        }
-        
-        return dir;
-    }
-    
-    /**
-     * Gets the path of the OMC compiler.
-     * @return 
-     */
-    private String getCompilerPath() throws SimulationServiceException {
-        
-        String pathOpenModelica, pathCompiler;
-        File dirOpenModelica;
-
-        pathOpenModelica = System.getenv(envOpenModelicaHome);
-
-        if (pathOpenModelica != null) {
-
-            dirOpenModelica = new File(pathOpenModelica);
-            if (dirOpenModelica.exists() && dirOpenModelica.isDirectory()) {
-
-                pathCompiler = pathOpenModelica + "bin" + File.separator + "omc";
-                if (Utility.isOsWindows()) {
-                    pathCompiler = pathCompiler + ".exe";
-                } else if (Utility.isOsUnix()) {
-                    // TODO : OS is Linux
-                } else if (Utility.isOsMac()) {
-                    // TODO : OS is Mac
-                } else {
-                    // TODO : OS not supported
-                }
-                return pathCompiler;
-
-            } else {
-                // ENV is present, but directory does not exist: check if om is installed and ENV variable is set properly 
+        for (String folder : subDir) {
+            dir = new File(dir + File.separator + folder);
+            if (!dir.exists() || !dir.isDirectory()) {
+                dir.mkdir();
             }
-        } else {
-            // ENV is not present: check if om is installed and ENV variable is set properly
         }
 
-        throw new SimulationServiceException("OpenModelica compiler not found!");
-    }
-    
-    /**
-     * Parses name of the simulation executable. Parses the String generated
-     * by the compiler to output the name of the executable simulation file.
-     * @param output
-     * @return 
-     */
-    private String parseSimulationExecutablePath(String output) throws SimulationServiceException {
-        
-        try {
-            output = output.substring(output.lastIndexOf("{"));
-            output = Utility.parseSubstring(output, "\"", "\"");
-        } catch (Exception ex) {
-            throw new SimulationServiceException(ex);
-        }
-        
-        if (output == null) {
-            return null;
-        }
-        
-        if (Utility.isOsWindows()) {
-            output += ".exe";
-        }
-        
-        return output;
+        return dir;
     }
 }

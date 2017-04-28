@@ -6,7 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ResultsWindowController">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ResultsController">
     <children>
         <TitledPane animated="false" text="Add">
             <content>
@@ -26,15 +26,15 @@
                                 <RowConstraints vgrow="SOMETIMES" />
                             </rowConstraints>
                             <children>
-                                <Label alignment="TOP_LEFT" text="Simulation:" />
-                                <ChoiceBox fx:id="simulationChoiceBox" minWidth="150.0" GridPane.columnIndex="1" />
-                                <TextField fx:id="simulationChoiceFilter" promptText="Filter simulation name..." GridPane.columnIndex="2" />
+                                <Label text="Simulation:" alignment="TOP_LEFT" />
+                                <ChoiceBox fx:id="simulationChoices" minWidth="150.0" GridPane.columnIndex="1" />
+                                <TextField fx:id="simulationFilterInput" promptText="Filter simulation name..." GridPane.columnIndex="2" />
                                 <Label text="Element:" GridPane.rowIndex="1" />
-                                <ChoiceBox fx:id="elementChoiceBox" minWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                <TextField fx:id="elementChoiceFilter" promptText="Filter element name..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                <ChoiceBox fx:id="elementChoices" minWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <TextField fx:id="elementFilterInput" promptText="Filter element name..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
                                 <Label text="Value:" GridPane.rowIndex="2" />
-                                <ChoiceBox fx:id="valueChoiceBox" minWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                <TextField fx:id="valueChoiceFilter" promptText="Filter value..." GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                <ChoiceBox fx:id="valueChoices" minWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <TextField fx:id="valueFilterInput" promptText="Filter value..." GridPane.columnIndex="2" GridPane.rowIndex="2" />
                                 <Button mnemonicParsing="false" onAction="#AddSelectedToChart" text="Add" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                             </children>
                         </GridPane>

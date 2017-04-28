@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
 
-<TitledPane animated="false" text="Tools" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.EditorToolsController">
+<TitledPane animated="false" text="Tools" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ToolsController">
     <content>
         <AnchorPane>
             <children>
@@ -25,17 +25,17 @@
                         <Button fx:id="buttonClusterCreate" mnemonicParsing="false" text="Cluster" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
                         <Button fx:id="buttonClusterRemove" mnemonicParsing="false" text="Spread" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.rowIndex="4" />
                     </children>
-               <columnConstraints>
-                  <ColumnConstraints />
-                  <ColumnConstraints />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
+                    <columnConstraints>
+                        <ColumnConstraints />
+                        <ColumnConstraints />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                        <RowConstraints />
+                    </rowConstraints>
                 </GridPane>
             </children>
         </AnchorPane>

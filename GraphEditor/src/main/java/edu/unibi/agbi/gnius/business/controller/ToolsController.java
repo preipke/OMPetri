@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class EditorToolsController implements Initializable
+public class ToolsController implements Initializable
 {
     @Autowired private MouseEventHandler mouseEventHandler;
     @Autowired private SpringFXMLLoader springFXMLLoader;
@@ -46,13 +46,10 @@ public class EditorToolsController implements Initializable
     @FXML private Button buttonClusterCreate;
     @FXML private Button buttonClusterRemove;
     
-    @Value("${results.window.fxml}")
-    private String resultsWindowFxml;
-    @Value("${results.window.stylesheet}")
-    private String resultsWindowStylesheet;
-    @Value("${results.window.title}")
-    private String resultsWindowTitle;
-    private ResultsWindowController resultsWindowController;
+    @Value("${results.window.fxml}") private String resultsWindowFxml;
+    @Value("${results.window.stylesheet}") private String resultsWindowStylesheet;
+    @Value("${results.window.title}") private String resultsWindowTitle;
+    private ResultsController resultsWindowController;
     private Stage resultsWindow;
     
     private Element.Type createNodeType;
@@ -91,7 +88,7 @@ public class EditorToolsController implements Initializable
         if (resultsWindow != null) {
             resultsWindow.show();
             resultsWindow.centerOnScreen();
-            resultsWindowController.UpdateSimulationChoices();
+            resultsWindowController.RefreshSimulationChoices();
             return;
         }
         
@@ -110,8 +107,8 @@ public class EditorToolsController implements Initializable
         resultsWindow.setScene(scene);
         resultsWindow.show();
         
-        resultsWindowController = (ResultsWindowController) springFXMLLoader.getBean(ResultsWindowController.class);
-        resultsWindowController.UpdateSimulationChoices();
+        resultsWindowController = (ResultsController) springFXMLLoader.getBean(ResultsController.class);
+        resultsWindowController.RefreshSimulationChoices();
     }
 
     @Override

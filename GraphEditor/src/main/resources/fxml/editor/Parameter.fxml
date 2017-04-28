@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.embed.swing.*?>
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ParameterController">
+    <children>
+        <TitledPane animated="false" text="Create Parameter">
+            <content>
+                <AnchorPane>
+                    <children>
+                        <VBox alignment="TOP_CENTER" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <GridPane>
+                                    <columnConstraints>
+                                        <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                    <children>
+                                        <Label text="Name" />
+                                        <Label text="Value" GridPane.rowIndex="2" />
+                                        <TextField fx:id="paramInputName" GridPane.columnIndex="1" GridPane.columnSpan="2" />
+                                        <Label text="Note" GridPane.rowIndex="1" />
+                                        <TextField fx:id="paramInputNote" GridPane.columnIndex="1" GridPane.columnSpan="2" GridPane.rowIndex="1" />
+                                        <ChoiceBox fx:id="paramReferencePlaceChoice" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <ChoiceBox fx:id="paramReferenceTokenChoice" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                        <TextField fx:id="paramInputValue" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                                    </children>
+                                </GridPane>
+                                <ScrollPane fitToHeight="true">
+                                    <content>
+                                        <AnchorPane>
+                                            <children>
+                                                <SwingNode fx:id="paramFunctionNode" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                            </children>
+                                        </AnchorPane>
+                                    </content>
+                                </ScrollPane>
+                                <HBox alignment="TOP_CENTER" spacing="5.0">
+                                    <children>
+                                        <Button fx:id="paramAddLocal" mnemonicParsing="false" text="Create Local" />
+                                        <Button fx:id="paramAddGlobal" mnemonicParsing="false" text="Create Global" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+        <TitledPane animated="false" text="Local Parameter">
+            <content>
+                <AnchorPane>
+                    <children>
+                        <TableView fx:id="paramTableLocal" prefHeight="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="paramNameLocal" prefWidth="75.0" text="Name" />
+                                <TableColumn fx:id="paramNoteLocal" prefWidth="75.0" text="Note" />
+                                <TableColumn fx:id="paramValueLocal" prefWidth="75.0" text="Value" />
+                                <TableColumn fx:id="paramDeleteLocal" prefWidth="75.0" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+        <TitledPane animated="false" text="Global Parameter">
+            <content>
+                <AnchorPane>
+                    <children>
+                        <TableView fx:id="paramTableGlobal" prefHeight="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="paramNameGlobal" prefWidth="75.0" text="Name" />
+                                <TableColumn fx:id="paramNoteGlobal" prefWidth="75.0" text="Note" />
+                                <TableColumn fx:id="paramValueGlobal" prefWidth="75.0" text="Value" />
+                                <TableColumn fx:id="paramDeleteGlobal" prefWidth="75.0" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+    </children>
+</VBox>

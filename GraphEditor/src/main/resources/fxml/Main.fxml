@@ -8,7 +8,7 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefWidth="1000.0" prefHeight="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox prefWidth="1000.0" prefHeight="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.MainController">
     <children>
         <MenuBar id="menuBar" VBox.vgrow="NEVER">
             <menus>
@@ -20,23 +20,28 @@
         </MenuBar>
         <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
             <tabs>
-                <Tab text="Presentation">
+                <Tab text="PN 1">
                     <content>
                         <StackPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
                             <children>
                                 <fx:include source="editor/GraphPane.fxml" StackPane.alignment="CENTER" />
-                                <VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" HBox.hgrow="NEVER" StackPane.alignment="TOP_LEFT">
+                                <VBox alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" HBox.hgrow="NEVER" StackPane.alignment="TOP_LEFT">
                                     <children>
-                                        <fx:include source="editor/EditorTools.fxml" />
-                                        <fx:include source="editor/SimulationControls.fxml" />
+                                        <fx:include source="editor/Tools.fxml" />
+                                        <fx:include source="editor/Simulation.fxml" />
                                     </children>
                                 </VBox>
-                                <fx:include source="editor/ElementDetails.fxml" StackPane.alignment="TOP_RIGHT" />
+                                <VBox alignment="TOP_RIGHT" fx:id="elementBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" HBox.hgrow="NEVER" StackPane.alignment="TOP_RIGHT">
+                                    <children>
+                                        <fx:include source="editor/Element.fxml" fx:id="detailsContainer" />
+                                        <fx:include source="editor/Parameter.fxml" fx:id="parameterContainer" />
+                                    </children>
+                                </VBox>
                             </children>
                         </StackPane>
                     </content>
                 </Tab>
-                <Tab text="Node List">
+                <Tab text="PN ...">
                     <content>
                         <ListView />
                     </content>
