@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.SpringFXMLLoader;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.net.URL;

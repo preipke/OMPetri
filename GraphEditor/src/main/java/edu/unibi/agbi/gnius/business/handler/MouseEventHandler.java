@@ -14,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;

@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.SelectionDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;

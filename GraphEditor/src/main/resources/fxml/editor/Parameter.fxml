@@ -64,9 +64,9 @@
                         <TableView fx:id="paramTableLocal" prefHeight="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <columns>
                                 <TableColumn fx:id="paramNameLocal" prefWidth="75.0" text="Name" />
-                                <TableColumn fx:id="paramNoteLocal" prefWidth="75.0" text="Note" />
                                 <TableColumn fx:id="paramValueLocal" prefWidth="75.0" text="Value" />
-                                <TableColumn fx:id="paramDeleteLocal" prefWidth="75.0" />
+                                <TableColumn fx:id="paramNoteLocal" prefWidth="100.0" text="Note" />
+                                <TableColumn fx:id="paramDeleteLocal" prefWidth="25.0" />
                             </columns>
                         </TableView>
                     </children>
@@ -80,9 +80,10 @@
                         <TableView fx:id="paramTableGlobal" prefHeight="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <columns>
                                 <TableColumn fx:id="paramNameGlobal" prefWidth="75.0" text="Name" />
-                                <TableColumn fx:id="paramNoteGlobal" prefWidth="75.0" text="Note" />
                                 <TableColumn fx:id="paramValueGlobal" prefWidth="75.0" text="Value" />
-                                <TableColumn fx:id="paramDeleteGlobal" prefWidth="75.0" />
+                                <TableColumn fx:id="paramNoteGlobal" prefWidth="100.0" text="Note" />
+                                <TableColumn fx:id="paramReferencesGlobal" prefWidth="50.0" text="Ref." />
+                                <TableColumn fx:id="paramDeleteGlobal" prefWidth="25.0" />
                             </columns>
                         </TableView>
                     </children>

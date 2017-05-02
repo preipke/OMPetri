@@ -6,7 +6,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.IArc;

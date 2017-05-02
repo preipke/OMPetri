@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationLineChartData;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
-import edu.unibi.agbi.gnius.core.service.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import java.net.URL;
@@ -166,8 +166,10 @@ public class ResultsController implements Initializable
         ObservableList choices = choiceBox.getItems();
         ObservableList choicesFiltered = FXCollections.observableArrayList();
 
+        text = text.toLowerCase();
+        
         for (Object choice : choices) {
-            if (choice.toString().contains(text)) {
+            if (choice.toString().toLowerCase().contains(text)) {
                 choicesFiltered.add(choice);
                 if (choice.equals(selectedChoice)) {
                     selectedIndex = index;

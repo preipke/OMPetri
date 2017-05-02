@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;

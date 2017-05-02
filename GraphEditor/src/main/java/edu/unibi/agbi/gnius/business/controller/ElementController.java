@@ -13,7 +13,8 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
@@ -63,10 +64,6 @@ public class ElementController implements Initializable
     @Autowired private DataGraphService dataService;
     @Autowired private MessengerService messengerService;
 
-    private IDataElement selectedElement;
-    private boolean isFunctionValid;
-    private int latestCaretPosition;
-
     // Top Container
     @FXML private TitledPane identifierPane;
     @FXML private TitledPane propertiesPane;
@@ -105,6 +102,10 @@ public class ElementController implements Initializable
     @FXML private Label transitionFunctionStatus;
     @FXML private Button buttonParameterShow;
     @FXML private MenuButton buttonParameterInsert;
+
+    private IDataElement selectedElement;
+    private String latestValidInput;
+    private int latestCaretPosition;
 
     /**
      * Hides the element details container.
@@ -232,12 +233,11 @@ public class ElementController implements Initializable
                     dataService.changeTransitionType(transition, transitionType);
                 }
 
-                if (isFunctionValid) {
-                    Function function = new Function();
-                    if (!transitionFunctionInput.getText().isEmpty()) {
-                        function.setFunction(transitionFunctionInput.getText());
-                    }
-                    transition.setFunction(function);
+                ParseFunctionInput(null);
+                if (!transitionFunctionInput.getText().isEmpty()) {
+                    transition.getFunction().set(latestValidInput);
+                } else {
+                    transition.getFunction().set("1");
                 }
 
                 break;
@@ -305,7 +305,7 @@ public class ElementController implements Initializable
 
                 Map<Colour, Weight> weights = arc.getWeightMap();
                 Weight weight;
-                
+
                 for (Colour color : colors) {
                     if (weights.get(color) != null) {
                         choicesColour.add(new ColourChoice(color));
@@ -341,10 +341,9 @@ public class ElementController implements Initializable
                 DataTransition transition = (DataTransition) element;
 
                 transitionFunctionInput.setText(transition.getFunction().toString());
-                transitionFunctionInput.positionCaret(transitionFunctionInput.getText().length());
+                latestCaretPosition = transitionFunctionInput.getText().length();
                 LoadParameterChoices(transition);
-                parseFunctionToImage(null);
-                
+                ParseFunctionInput(null);
                 break;
         }
 
@@ -357,31 +356,17 @@ public class ElementController implements Initializable
      * available for the given element.
      */
     private void LoadParameterChoices(IDataElement element) {
-
         List<Parameter> params = parameterController.getParameter(element);
-        MenuItem paramItem;
-
+        MenuItem item;
         buttonParameterInsert.getItems().clear();
         for (final Parameter param : params) {
-            paramItem = new MenuItem(param.getName() + " = " + param.getValue());
-            paramItem.setOnAction(e -> {
+            item = new MenuItem(param.getId() + " = " + param.getValue());
+            item.setOnAction(e -> {
                 InsertParamToFunctionInput(param);
+                ParseFunctionInput(null);
             });
-            buttonParameterInsert.getItems().add(paramItem);
+            buttonParameterInsert.getItems().add(item);
         }
-    }
-    
-    /**
-     * Inserts the given parameter to the function input. Inserts the function
-     * at the latest caret position.
-     * @param param 
-     */
-    private void InsertParamToFunctionInput(Parameter param) {
-        String function;
-        function = transitionFunctionInput.getText().substring(0, latestCaretPosition);
-        function += param.getValue();
-        function += transitionFunctionInput.getText().substring(latestCaretPosition);
-        transitionFunctionInput.setText(function);
     }
 
     /**
@@ -443,7 +428,7 @@ public class ElementController implements Initializable
     }
 
     /**
-     * Prints info for the given node within the property info textfields.
+     * Prints info for the given element to the property textfields.
      *
      * @param element
      */
@@ -457,7 +442,7 @@ public class ElementController implements Initializable
     }
 
     /**
-     * Stores info from the property textfields within the given node.
+     * Stores info from the property textfields to the given element.
      *
      * @param element
      */
@@ -486,33 +471,34 @@ public class ElementController implements Initializable
     }
 
     /**
-     * Parses the input from the function related textfield to an image by using
-     * PrettyFormula.
+     * Inserts the given parameter to the function input. Inserts the function
+     * at the latest caret position.
      *
-     * @param event
+     * @param param
      */
-    private void parseFunctionToImage(KeyEvent event) {
+    private void InsertParamToFunctionInput(Parameter param) {
+        System.out.println("Caret position: " + latestCaretPosition);
+        String function;
+        function = transitionFunctionInput.getText().substring(0, latestCaretPosition);
+        function += param.getId();
+        function += transitionFunctionInput.getText().substring(latestCaretPosition);
+        transitionFunctionInput.setText(function);
+    }
 
-        transitionFunctionStatus.setText("");
-        latestCaretPosition = transitionFunctionInput.getCaretPosition();
-        transitionFunctionInput.deselect();
-        isFunctionValid = false;
+    private void ParseFunctionInput(KeyEvent event) {
 
-        //// CHECK FOR PARAMETER INSIDE THE FUNCTION
-        // check if param is contained in function string
-        
-        //// DO THE FOLLOWING WHEN ADDING A PARAM TO THE FUNCTION
-        // add node to param as reference
+        final DataTransition transition;
+        final BufferedImage image;
 
-        //// DO THE FOLLOWING WHEN DELETING A PARAM FROM THE FUNCTION
-        // remove param from node
-        // remove node from param
-        
-        //// WHEN DELETING A PARAM THAT STILL HAS REFERENCES
-        // replace string by value in function ?
-        
+        if (selectedElement.getElementType() != Element.Type.TRANSITION) {
+            return;
+        } else {
+            transition = (DataTransition) selectedElement;
+        }
+
         try {
-            BufferedImage image = PrettyFormulaParser.parseToImage(transitionFunctionInput.getText());
+            parameterController.ValidateFunctionInput(transition, transitionFunctionInput.getText());
+            image = PrettyFormulaParser.parseToImage(transitionFunctionInput.getText());
             SwingUtilities.invokeLater(() -> {
                 if (transitionFunctionImage.getContent() != null) {
                     transitionFunctionImage.getContent().removeAll();
@@ -521,18 +507,18 @@ public class ElementController implements Initializable
                 img.setImage(image);
                 transitionFunctionImage.setContent(img);
             });
+            latestValidInput = transitionFunctionInput.getText();
             transitionFunctionStatus.setTextFill(Color.GREEN);
             transitionFunctionStatus.setText("Valid!");
-            isFunctionValid = true;
         } catch (DetailedParseCancellationException ex) {
             if (event != null && event.getCode() != KeyCode.RIGHT && event.getCode() != KeyCode.LEFT) {
-                transitionFunctionInput.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine()); // check behavior
+                transitionFunctionInput.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
             }
             transitionFunctionStatus.setTextFill(Color.RED);
-            transitionFunctionStatus.setText(ex.getMessage());
+            transitionFunctionStatus.setText("Invalid input! [" + ex.getMessage() + "]");
         } catch (Exception ex) {
             transitionFunctionStatus.setTextFill(Color.RED);
-            transitionFunctionStatus.setText(ex.getMessage());
+            transitionFunctionStatus.setText("Invalid input! [" + ex.getMessage() + "]");
         }
     }
 
@@ -540,8 +526,21 @@ public class ElementController implements Initializable
     public void initialize(URL location, ResourceBundle resources) {
         identifierPane.setVisible(false);
         propertiesPane.setVisible(false);
-        transitionFunctionInput.setOnKeyReleased(e -> parseFunctionToImage(e));
-        buttonParameterShow.setOnAction(e -> mainController.ShowParameter(selectedElement));
+        transitionFunctionInput.setOnMouseClicked(e -> {
+            latestCaretPosition = transitionFunctionInput.getCaretPosition();
+        });
+        transitionFunctionInput.setOnKeyReleased(e -> {
+            latestCaretPosition = transitionFunctionInput.getCaretPosition();
+            ParseFunctionInput(e);
+        });
+        buttonParameterShow.setOnAction(e -> {
+            try {
+                StoreElementProperties();
+            } catch (DataGraphServiceException ex) {
+                messengerService.addToLog(ex.getMessage());
+            }
+            mainController.ShowParameter(selectedElement);
+        });
     }
 
     private class ColourChoice

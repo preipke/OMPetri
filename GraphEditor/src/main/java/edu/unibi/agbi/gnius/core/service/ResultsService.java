@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.service;
 import edu.unibi.agbi.gnius.core.model.dao.SimulationResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationLineChartData;
-import edu.unibi.agbi.gnius.core.service.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import java.util.List;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;

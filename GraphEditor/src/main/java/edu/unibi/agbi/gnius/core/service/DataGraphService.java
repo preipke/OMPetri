@@ -24,7 +24,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdgeArrow;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
@@ -33,6 +33,7 @@ import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Shape;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -244,6 +245,25 @@ public class DataGraphService
     }
 
     /**
+     * Gets the parameter with the given id.
+     *
+     * @param id
+     * @return
+     */
+    public Parameter getParameter(String id) {
+        return dataDao.getParameters().get(id);
+    }
+
+    /**
+     * Gets the list of currently used parameter ids.
+     *
+     * @return
+     */
+    public Set<String> getParameterIds() {
+        return dataDao.getParameters().keySet();
+    }
+
+    /**
      * Removes the given graph arc from the scene.
      *
      * @param arc
@@ -298,7 +318,7 @@ public class DataGraphService
      */
     public void remove(Parameter param) throws DataGraphServiceException {
         if (!param.getReferingNodes().isEmpty()) {
-            throw new DataGraphServiceException("There is nodes refering to this parameter! Cannot delete parameter.");
+            throw new DataGraphServiceException("Cannot delete parameter! There is nodes refering to it.");
         }
         dataDao.remove(param);
     }
@@ -613,10 +633,11 @@ public class DataGraphService
      * @return
      */
     private void remove(IDataArc arc) throws DataGraphServiceException {
-        for (Parameter param : arc.getParameters()) {
-            param.getReferingNodes().remove(arc);
+        for (Parameter param : arc.getParameters().values()) {
             if (param.getType() == Parameter.Type.LOCAL) {
                 remove(param);
+            } else {
+                param.getReferingNodes().remove(arc);
             }
         }
         dataDao.remove(arc);
@@ -629,10 +650,11 @@ public class DataGraphService
      * @return
      */
     private void remove(IDataNode node) throws DataGraphServiceException {
-        for (Parameter param : node.getParameters()) {
-            param.getReferingNodes().remove(node);
+        for (Parameter param : node.getParameters().values()) {
             if (param.getType() == Parameter.Type.LOCAL) {
                 remove(param);
+            } else {
+                param.getReferingNodes().remove(node);
             }
         }
         dataDao.remove(node);

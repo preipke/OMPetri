@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
-import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;

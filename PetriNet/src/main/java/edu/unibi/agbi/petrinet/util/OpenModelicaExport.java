@@ -26,6 +26,7 @@ import java.util.Collection;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
+import edu.unibi.agbi.petrinet.model.Parameter;
 
 /**
  *
@@ -95,6 +96,13 @@ public class OpenModelicaExport
 //        writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
         writer.append(";");
         writer.println();
+        
+        /**
+         * Parameter.
+         */
+        for (Parameter param : petriNet.getParameters().values()) {
+            
+        }
 
         /**
          * Places.

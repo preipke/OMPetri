@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;

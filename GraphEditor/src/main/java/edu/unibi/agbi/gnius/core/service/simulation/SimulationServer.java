@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.service.simulation;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.util.Utility;
 import java.io.DataInputStream;
 import java.io.IOException;

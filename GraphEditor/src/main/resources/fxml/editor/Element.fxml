@@ -125,14 +125,7 @@
                                 <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
                                     <children>
                                         <Label text="Function" />
-                                        <TextField fx:id="transitionFunctionInput" />
-                                        <HBox alignment="TOP_CENTER" spacing="5.0">
-                                            <children>
-                                                <Button fx:id="buttonParameterShow" mnemonicParsing="false" text="Parameter" />
-                                                <MenuButton fx:id="buttonParameterInsert" mnemonicParsing="false" text="Insert" />
-                                            </children>
-                                        </HBox>
-                                        <ScrollPane fitToHeight="true">
+                                        <ScrollPane fitToHeight="true" maxWidth="400.0">
                                             <content>
                                                 <AnchorPane>
                                                     <children>
@@ -141,7 +134,18 @@
                                                 </AnchorPane>
                                             </content>
                                         </ScrollPane>
-                                        <Label fx:id="transitionFunctionStatus" text="Label" />
+                                        <TextField fx:id="transitionFunctionInput" />
+                                        <HBox alignment="TOP_CENTER" spacing="5.0">
+                                            <children>
+                                                <Button fx:id="buttonParameterShow" mnemonicParsing="false" text="Parameter" />
+                                                <MenuButton fx:id="buttonParameterInsert" mnemonicParsing="false" text="Insert" />
+                                            </children>
+                                        </HBox>
+                              <HBox alignment="CENTER">
+                                 <children>
+                                              <Label fx:id="transitionFunctionStatus" text="Label" />
+                                 </children>
+                              </HBox>
                                     </children>
                                     <padding>
                                         <Insets top="5.0" />

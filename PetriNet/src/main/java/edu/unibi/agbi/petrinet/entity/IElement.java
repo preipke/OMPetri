@@ -7,6 +7,7 @@ package edu.unibi.agbi.petrinet.entity;
 
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Parameter;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,7 +39,7 @@ public interface IElement
      *
      * @return
      */
-    public Set<Parameter> getParameters();
+    public Map<String, Parameter> getParameters();
 
     public boolean isEnabled();
 

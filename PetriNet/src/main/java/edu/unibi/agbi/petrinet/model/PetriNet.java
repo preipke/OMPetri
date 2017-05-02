@@ -29,7 +29,7 @@ public class PetriNet
     private String description;
     
     private final Set<Colour> colors;
-    private final Map<String,Parameter> parameter;
+    private final Map<String,Parameter> parameters;
     
     private final Set<String> nodeIds;
     private final Map<String,IArc> arcs;
@@ -40,7 +40,7 @@ public class PetriNet
         
         colors = new HashSet();
         colors.add(DEFAULT_COLOUR);
-        parameter = new HashMap();
+        parameters = new HashMap();
         
         nodeIds = new HashSet();
         arcs = new HashMap();
@@ -53,7 +53,7 @@ public class PetriNet
     }
     
     public void add(Parameter param) {
-        parameter.put(param.getId(), param);
+        parameters.put(param.getId(), param);
     }
     
     public void add(IArc arc) {
@@ -90,10 +90,10 @@ public class PetriNet
     }
     
     public boolean containsAndNotEqual(Parameter param) {
-        if (!parameter.containsKey(param.getId())) {
+        if (!parameters.containsKey(param.getId())) {
             return false;
         }
-        return !parameter.get(param.getId()).equals(param);
+        return !parameters.get(param.getId()).equals(param);
     }
     
     public IArc remove(IArc arc) {
@@ -120,10 +120,7 @@ public class PetriNet
     }
     
     public Parameter remove(Parameter param) {
-        for (IElement node : param.getReferingNodes()) {
-            node.getParameters().remove(param);
-        }
-        return parameter.remove(param.getId());
+        return parameters.remove(param.getId());
     }
     
     public Collection<IArc> getArcs() {
@@ -137,9 +134,9 @@ public class PetriNet
     public Set<String> getNodeIds() {
         return nodeIds;
     }
-    
-    public Collection<Parameter> getParameter() {
-        return parameter.values();
+
+    public Map<String, Parameter> getParameters() {
+        return parameters;
     }
     
     public Collection<INode> getPlaces() {

@@ -5,11 +5,13 @@
  */
 package edu.unibi.agbi.gnius.business.controller;
 
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.gnius.core.service.exception.DataGraphServiceException;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -30,9 +32,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -44,7 +50,6 @@ public class ParameterController implements Initializable
 {
     @Autowired private DataGraphService dataGraphService;
     @Autowired private MessengerService messengerService;
-    @Autowired private ElementController elementDetailsController;
 
     @FXML private TextField paramInputName;
     @FXML private TextField paramInputNote;
@@ -66,35 +71,82 @@ public class ParameterController implements Initializable
     @FXML private TableColumn<Parameter, String> paramNameGlobal;
     @FXML private TableColumn<Parameter, String> paramValueGlobal;
     @FXML private TableColumn<Parameter, String> paramNoteGlobal;
+    @FXML private TableColumn<Parameter, Number> paramReferencesGlobal;
     @FXML private TableColumn<Parameter, Button> paramDeleteGlobal;
 
-    private final ObservableList<Parameter> localParameter;
-    private final ObservableList<Parameter> globalParameter;
+    @Value("${param.validation.regex.split}") private String paramValidationRegexSplit;
+    @Value("${param.validation.regex.match}") private String paramValidationRegexMatch;
 
-    private IDataElement element;
+    private final ObservableList<Parameter> localParameters;
+    private final ObservableList<Parameter> globalParameters;
+
+    private IDataElement selectedElement;
 
     public ParameterController() {
-        localParameter = FXCollections.observableArrayList();
-        globalParameter = FXCollections.observableArrayList();
+        localParameters = FXCollections.observableArrayList();
+        globalParameters = FXCollections.observableArrayList();
     }
 
     public void ShowParameterDetails(IDataElement elem) {
         RefreshLocalParameters(elem);
+        RefreshGlobalParameterReferences();
         RefreshReferenceChoices();
     }
 
+    /**
+     * Validates the function input for a transition.
+     * 
+     * @param element
+     * @param functionInput
+     * @throws InputValidationException 
+     */
+    public void ValidateFunctionInput(DataTransition element, String functionInput) throws InputValidationException {
+
+        String[] candidates = functionInput.split(paramValidationRegexSplit);
+        List<Parameter> currentParameter = new ArrayList();
+        Parameter param;
+
+        for (String candidate : candidates) {
+            if (!candidate.matches(paramValidationRegexMatch)) {
+                if (dataGraphService.getParameterIds().contains(candidate)) {
+                    param = dataGraphService.getParameter(candidate);
+                    if (param.getType() == Parameter.Type.LOCAL) {
+                        if (!element.getParameters().keySet().contains(candidate)) {
+                            throw new InputValidationException("'" + candidate + "' is a LOCAL parameter for a different element");
+                        }
+                    }
+                    param.addReferingNode(element);
+                    currentParameter.add(param);
+                } else {
+                    throw new InputValidationException("Parameter '" + candidate + "' does not exist");
+                }
+            } 
+        }
+
+        element.getFunction().getParameter().clear();
+        currentParameter.forEach(parameter -> {
+            element.getFunction().getParameter().add(parameter);
+        });
+    }
+
+    /**
+     * Gets all parameters usable for an element.
+     * 
+     * @param elem
+     * @return 
+     */
     public List<Parameter> getParameter(IDataElement elem) {
-        
+
         List<Parameter> parameters = new ArrayList();
         List<Parameter> tmp;
-        
+
         tmp = new ArrayList();
-        tmp.addAll(elem.getParameters());
+        tmp.addAll(elem.getParameters().values());
         tmp.sort(Comparator.comparing(Parameter::toString));
         parameters.addAll(tmp);
-        
+
         tmp.clear();
-        tmp.addAll(globalParameter);
+        tmp.addAll(globalParameters);
         tmp.sort(Comparator.comparing(Parameter::toString));
         parameters.addAll(tmp);
 
@@ -102,24 +154,57 @@ public class ParameterController implements Initializable
     }
 
     /**
-     * Clears and sets the available local parameters for the given element.
-     * @param elem 
+     * Refreshs the available local parameters for an element.
+     *
+     * @param elem
      */
     private void RefreshLocalParameters(IDataElement elem) {
-        
         List<Parameter> parameters = new ArrayList();
-        element = elem;
-        
-        localParameter.clear();
+        selectedElement = elem;
+        localParameters.clear();
         if (elem != null) {
-            parameters.addAll(elem.getParameters());
+            parameters.addAll(elem.getParameters().values());
             parameters.sort(Comparator.comparing(Parameter::toString));
-            localParameter.addAll(parameters);
+            localParameters.addAll(parameters);
         }
     }
 
     /**
-     * Clears and sets the choices for places to choose from as value references.
+     * Refreshs the number of refering nodes for each global parameter.
+     */
+    private void RefreshGlobalParameterReferences() {
+        globalParameters.parallelStream().forEach(param -> {
+            IDataElement[] elements = new IDataElement[param.getReferingNodes().size()];
+            param.getReferingNodes().toArray(elements);
+            for (IDataElement element : elements) {
+                if (!ElementReferencesParameter(element, param)) {
+                    param.removeReferingNode(element);
+                }
+            }
+        });
+    }
+
+    /**
+     * Validates wether an element references a parameter or not.
+     *
+     * @param elem
+     * @param param
+     * @return
+     */
+    private boolean ElementReferencesParameter(IDataElement elem, Parameter param) {
+        switch (elem.getElementType()) {
+            case TRANSITION:
+                DataTransition transition = (DataTransition) elem;
+                if (transition.getFunction().getParameter().contains(param)) {
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    /**
+     * Clears and sets the choices for places to choose from as value
+     * references.
      */
     private void RefreshReferenceChoices() {
 
@@ -184,10 +269,10 @@ public class ParameterController implements Initializable
      *
      * @return
      */
-    private String parseValueInput() {
+    private String parseValue(String input) {
         String value;
         try {
-            value = Double.toString(Double.parseDouble(paramInputValue.getText()));
+            value = Double.toString(Double.parseDouble(input));
         } catch (NumberFormatException ex) {
             messengerService.addToLog("The specified value is not a number! [" + ex.getMessage() + "]");
             return null;
@@ -209,10 +294,10 @@ public class ParameterController implements Initializable
      */
     private void createLocalParameter(IDataElement elem) {
         try {
-            Parameter param = createParameter("LOCAL_" + elem.getId(), Parameter.Type.LOCAL);
-            localParameter.add(param);
-            elem.getParameters().add(param);
-        } catch (DataGraphServiceException ex) {
+            Parameter param = createParameter(Parameter.Type.LOCAL);
+            elem.getParameters().put(param.getId(), param);
+            localParameters.add(param);
+        } catch (InputValidationException ex) {
             messengerService.addToLog("Exception creating local parameter! [" + ex.getMessage() + "]");
         }
     }
@@ -222,9 +307,9 @@ public class ParameterController implements Initializable
      */
     private void createGlobalParameter() {
         try {
-            Parameter param = createParameter("GLOBAL_", Parameter.Type.GLOBAL);
-            globalParameter.add(param);
-        } catch (DataGraphServiceException ex) {
+            Parameter param = createParameter(Parameter.Type.GLOBAL);
+            globalParameters.add(param);
+        } catch (InputValidationException ex) {
             messengerService.addToLog("Exception creating global parameter! [" + ex.getMessage() + "]");
         }
     }
@@ -241,33 +326,42 @@ public class ParameterController implements Initializable
      *                                   conflicts while storing the new
      *                                   parameter
      */
-    private Parameter createParameter(String id, Parameter.Type type) throws DataGraphServiceException {
+    private Parameter createParameter(Parameter.Type type) throws InputValidationException {
 
-        String name, note, value;
+        String id, note, value;
         Parameter param;
 
-        if (!paramInputName.getText().isEmpty()) {
-            name = paramInputName.getText();
-            note = paramInputNote.getText();
-            id = id + "_" + name;
-        } else {
-            throw new DataGraphServiceException("You have to specify a name for the new parameter!");
+        if (paramInputName.getText().isEmpty()) {
+            throw new InputValidationException("You have to specify a name for the new parameter!");
         }
+        id = paramInputName.getText();
+        note = paramInputNote.getText();
 
         if (isReferenceChosen()) {
             TokenReferenceChoice choice = (TokenReferenceChoice) paramReferenceTokenChoice.getSelectionModel().getSelectedItem();
             value = Double.toString(choice.getToken().getValueStart());
         } else if (!paramInputValue.getText().isEmpty()) {
-            value = parseValueInput();
+            value = parseValue(paramInputValue.getText());
             if (value == null) {
-                throw new DataGraphServiceException("The specified value can not be parsed!");
+                paramInputValue.selectAll();
+                throw new InputValidationException("The specified value can not be parsed!");
             }
         } else {
-            throw new DataGraphServiceException("You have to specify a value for the new parameter!");
+            throw new InputValidationException("You have to specify a value for the new parameter!");
         }
 
-        param = new Parameter(id, name, note, value, type);
-        dataGraphService.add(param);
+        param = new Parameter(id, note, value, type);
+        try {
+            dataGraphService.add(param);
+        } catch (DataGraphServiceException ex) {
+            paramInputName.selectAll();
+            throw new InputValidationException(ex.getMessage());
+        }
+
+        paramInputName.clear();
+        paramInputNote.clear();
+        paramInputValue.clear();
+
         return param;
     }
 
@@ -283,31 +377,57 @@ public class ParameterController implements Initializable
      */
     private void deleteParameter(Parameter param, IDataElement element) throws DataGraphServiceException {
         dataGraphService.remove(param);
+        if (element != null) {
+            element.getParameters().remove(param.getId());
+        }
         if (param.getType() == Parameter.Type.LOCAL) {
-            element.getParameters().remove(param);
-            localParameter.remove(param);
+            localParameters.remove(param);
         } else {
-            globalParameter.remove(param);
+            globalParameters.remove(param);
         }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-        paramAddLocal.setOnAction(e -> createLocalParameter(element));
+        paramAddLocal.setOnAction(e -> createLocalParameter(selectedElement));
         paramAddGlobal.setOnAction(e -> createGlobalParameter());
 
         paramReferencePlaceChoice.valueProperty().addListener((ObservableValue obs, Object o, Object n) -> RefreshTokenChoices());
 
-        paramTableLocal.setItems(localParameter);
-        paramNameLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getName()));
-        paramNoteLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getNote()));
+        paramTableLocal.setItems(localParameters);
+        paramTableLocal.setEditable(true);
+        
+        paramNameLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getId()));
+        
         paramValueLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
+        paramValueLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
+        paramValueLocal.setOnEditCommit(
+                (CellEditEvent<Parameter, String> t) -> {
+                    String value = parseValue(t.getNewValue());
+                    if (value == null) {
+                        messengerService.setRightStatus("Given value cannot be parsed!");
+                    } else {
+                        ((Parameter) t.getTableView()
+                                .getItems()
+                                .get(t.getTablePosition().getRow()))
+                                .setValue(t.getNewValue());
+                    }
+                });
+        
+        paramNoteLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getNote()));
+        paramNoteLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
+        paramNoteLocal.setOnEditCommit(
+                (CellEditEvent<Parameter, String> t) -> {
+                    ((Parameter) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).setNote(t.getNewValue());
+                });
+        
         paramDeleteLocal.setCellValueFactory(cellData -> {
             Button btn = new Button();
             btn.setOnAction(e -> {
                 try {
-                    deleteParameter(cellData.getValue(), element);
+                    deleteParameter(cellData.getValue(), selectedElement);
                 } catch (DataGraphServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
@@ -315,15 +435,33 @@ public class ParameterController implements Initializable
             return new ReadOnlyObjectWrapper(btn);
         });
 
-        paramTableGlobal.setItems(globalParameter);
-        paramNameGlobal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getName()));
-        paramNoteGlobal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getNote()));
-        paramValueGlobal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
+        paramTableGlobal.setItems(globalParameters);
+        paramTableGlobal.setEditable(true);
+        
+        paramNameGlobal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getId()));
+        
+        paramValueGlobal.setCellValueFactory(new PropertyValueFactory("value"));
+        paramValueGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
+        paramValueGlobal.setOnEditCommit(
+                (CellEditEvent<Parameter, String> t) -> {
+                    ((Parameter) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).setValue(t.getNewValue());
+                });
+        
+        paramNoteGlobal.setCellValueFactory(new PropertyValueFactory("note"));
+        paramNoteGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
+        paramNoteGlobal.setOnEditCommit(
+                (CellEditEvent<Parameter, String> t) -> {
+                    ((Parameter) t.getTableView().getItems().get(
+                            t.getTablePosition().getRow())).setNote(t.getNewValue());
+                });
+        
+        paramReferencesGlobal.setCellValueFactory(cellData -> cellData.getValue().getReferingNodesCountProperty());
         paramDeleteGlobal.setCellValueFactory(cellData -> {
             Button btn = new Button();
             btn.setOnAction(e -> {
                 try {
-                    deleteParameter(cellData.getValue(), element);
+                    deleteParameter(cellData.getValue(), null);
                 } catch (DataGraphServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
