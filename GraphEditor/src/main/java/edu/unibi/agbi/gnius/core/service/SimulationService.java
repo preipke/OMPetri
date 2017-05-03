@@ -173,8 +173,10 @@ public class SimulationService
                 messengerService.addToLog(ex.getMessage());
             } finally {
                 messengerService.addToLog("Finished simulating!");
-                simulationControlsController.setSimulationProgress(1);
-                simulationControlsController.StopSimulation();
+                Platform.runLater(() -> {
+                    simulationControlsController.setSimulationProgress(1);
+                    simulationControlsController.StopSimulation();
+                });
             }
 
 //            /**

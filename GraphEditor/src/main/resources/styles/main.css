@@ -5,6 +5,27 @@
     -fx-border-style: dashed;
 }*/
 
+.button-tableRowDelete {
+    -fx-background-color: lightgrey;
+    -fx-background-image: url('/icons/delete.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-border-width: 0;
+    -fx-label-padding: -10 0 0 0;
+    -fx-pref-height: 15px;
+    -fx-pref-width: 15px;
+}
+.button-tableRowDelete:hover {
+    -fx-background-color: orange;
+}
+.button-tableRowDelete:armed {
+    -fx-background-color: red;
+}
+
+.table-cell {
+    -fx-alignment: CENTER;
+}
+
 .editorPane {
     -fx-background-color: white;
 /*    -fx-border-color: black;

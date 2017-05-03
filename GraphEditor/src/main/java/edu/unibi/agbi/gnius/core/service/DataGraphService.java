@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
+import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
@@ -24,7 +25,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdgeArrow;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
@@ -264,6 +265,24 @@ public class DataGraphService
     }
 
     /**
+     * Validates wether an element references a parameter or not.
+     *
+     * @param elem
+     * @param param
+     * @return
+     */
+    public boolean isElementReferencingParameter(IDataElement elem, Parameter param) {
+        switch (elem.getElementType()) {
+            case TRANSITION:
+                DataTransition transition = (DataTransition) elem;
+                if (transition.getFunction().getParameter().contains(param)) {
+                    return true;
+                }
+        }
+        return false;
+    }
+
+    /**
      * Removes the given graph arc from the scene.
      *
      * @param arc
@@ -318,7 +337,7 @@ public class DataGraphService
      */
     public void remove(Parameter param) throws DataGraphServiceException {
         if (!param.getReferingNodes().isEmpty()) {
-            throw new DataGraphServiceException("Cannot delete parameter! There is nodes refering to it.");
+            throw new DataGraphServiceException("Cannot delete parameter '" + param.getId() + "'! There is elements refering to it.");
         }
         dataDao.remove(param);
     }

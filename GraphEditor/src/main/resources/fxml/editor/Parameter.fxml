@@ -40,7 +40,7 @@
                                     <content>
                                         <AnchorPane>
                                             <children>
-                                                <SwingNode fx:id="paramFunctionNode" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                <SwingNode fx:id="paramFunctionImageNode" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                             </children>
                                         </AnchorPane>
                                     </content>
@@ -51,6 +51,7 @@
                                         <Button fx:id="paramAddGlobal" mnemonicParsing="false" text="Create Global" />
                                     </children>
                                 </HBox>
+                        <Label fx:id="paramInputStatusMessage" />
                             </children>
                         </VBox>
                     </children>
@@ -61,14 +62,19 @@
             <content>
                 <AnchorPane>
                     <children>
-                        <TableView fx:id="paramTableLocal" prefHeight="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <columns>
-                                <TableColumn fx:id="paramNameLocal" prefWidth="75.0" text="Name" />
-                                <TableColumn fx:id="paramValueLocal" prefWidth="75.0" text="Value" />
-                                <TableColumn fx:id="paramNoteLocal" prefWidth="100.0" text="Note" />
-                                <TableColumn fx:id="paramDeleteLocal" prefWidth="25.0" />
-                            </columns>
-                        </TableView>
+                  <VBox alignment="TOP_CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                              <TableView fx:id="paramTableLocal" prefHeight="200.0">
+                                  <columns>
+                                      <TableColumn fx:id="paramNameLocal" prefWidth="100.0" text="Name" />
+                                      <TableColumn fx:id="paramValueLocal" prefWidth="100.0" text="Value" />
+                                      <TableColumn fx:id="paramNoteLocal" prefWidth="100.0" text="Note" />
+                                      <TableColumn fx:id="paramDeleteLocal" prefWidth="25.0" />
+                                  </columns>
+                              </TableView>
+                        <Label fx:id="paramLocalStatusMessage" />
+                     </children>
+                  </VBox>
                     </children>
                 </AnchorPane>
             </content>
@@ -77,15 +83,20 @@
             <content>
                 <AnchorPane>
                     <children>
-                        <TableView fx:id="paramTableGlobal" prefHeight="200.0" AnchorPane.bottomAnchor="-0.0" AnchorPane.leftAnchor="-0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <columns>
-                                <TableColumn fx:id="paramNameGlobal" prefWidth="75.0" text="Name" />
-                                <TableColumn fx:id="paramValueGlobal" prefWidth="75.0" text="Value" />
-                                <TableColumn fx:id="paramNoteGlobal" prefWidth="100.0" text="Note" />
-                                <TableColumn fx:id="paramReferencesGlobal" prefWidth="50.0" text="Ref." />
-                                <TableColumn fx:id="paramDeleteGlobal" prefWidth="25.0" />
-                            </columns>
-                        </TableView>
+                  <VBox alignment="TOP_CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                              <TableView fx:id="paramTableGlobal" prefHeight="200.0">
+                                  <columns>
+                                      <TableColumn fx:id="paramNameGlobal" prefWidth="100.0" text="Name" />
+                                      <TableColumn fx:id="paramValueGlobal" prefWidth="100.0" text="Value" />
+                                      <TableColumn fx:id="paramNoteGlobal" prefWidth="100.0" text="Note" />
+                                      <TableColumn fx:id="paramReferencesGlobal" prefWidth="35.0" text="Ref." />
+                                      <TableColumn fx:id="paramDeleteGlobal" prefWidth="25.0" />
+                                  </columns>
+                              </TableView>
+                        <Label fx:id="paramGlobalStatusMessage" />
+                     </children>
+                  </VBox>
                     </children>
                 </AnchorPane>
             </content>

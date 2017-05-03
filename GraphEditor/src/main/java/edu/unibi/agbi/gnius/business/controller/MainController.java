@@ -13,6 +13,7 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -29,6 +30,10 @@ public class MainController implements Initializable {
     @FXML private VBox elementBox;
     @FXML private VBox detailsContainer;
     @FXML private VBox parameterContainer;
+
+    public Stage getStage() {
+        return (Stage) elementBox.getScene().getWindow();
+    }
     
     public void HideElementBox() {
         elementBox.setVisible(false);

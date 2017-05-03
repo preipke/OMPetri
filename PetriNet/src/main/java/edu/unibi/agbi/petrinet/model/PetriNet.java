@@ -10,9 +10,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -115,8 +115,18 @@ public class PetriNet
         if (node instanceof Place) {
             return places.remove(node.getId());
         } else {
-            return transitions.remove(node.getId());
+            return remove((Transition) transitions.get(node.getId()));
         }
+    }
+    
+    private INode remove(Transition transition) {
+        transition.getFunction().getParameter().stream().forEach(param -> {
+            param.removeReferingNode(transition);
+        });
+        for (Parameter param : transition.getParameters().values()) {
+            parameters.remove(param.getId());
+        }
+        return transitions.remove(transition.getId());
     }
     
     public Parameter remove(Parameter param) {

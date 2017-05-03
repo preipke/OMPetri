@@ -15,6 +15,7 @@ import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,14 +30,19 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -56,7 +62,8 @@ public class ParameterController implements Initializable
     @FXML private ChoiceBox paramReferencePlaceChoice;
     @FXML private ChoiceBox paramReferenceTokenChoice;
     @FXML private TextField paramInputValue;
-    @FXML private SwingNode paramFunctionNode;
+    @FXML private SwingNode paramFunctionImageNode;
+    @FXML private Label paramInputStatusMessage;
 
     @FXML private Button paramAddLocal;
     @FXML private Button paramAddGlobal;
@@ -66,6 +73,7 @@ public class ParameterController implements Initializable
     @FXML private TableColumn<Parameter, String> paramValueLocal;
     @FXML private TableColumn<Parameter, String> paramNoteLocal;
     @FXML private TableColumn<Parameter, Button> paramDeleteLocal;
+    @FXML private Label paramLocalStatusMessage;
 
     @FXML private TableView paramTableGlobal;
     @FXML private TableColumn<Parameter, String> paramNameGlobal;
@@ -73,13 +81,15 @@ public class ParameterController implements Initializable
     @FXML private TableColumn<Parameter, String> paramNoteGlobal;
     @FXML private TableColumn<Parameter, Number> paramReferencesGlobal;
     @FXML private TableColumn<Parameter, Button> paramDeleteGlobal;
+    @FXML private Label paramGlobalStatusMessage;
 
+    @Value("${css.button.tablerow.delete}") private String buttonTableRowDeleteStyle;
     @Value("${param.validation.regex.split}") private String paramValidationRegexSplit;
     @Value("${param.validation.regex.match}") private String paramValidationRegexMatch;
 
     private final ObservableList<Parameter> localParameters;
     private final ObservableList<Parameter> globalParameters;
-
+    
     private IDataElement selectedElement;
 
     public ParameterController() {
@@ -88,9 +98,9 @@ public class ParameterController implements Initializable
     }
 
     public void ShowParameterDetails(IDataElement elem) {
+        RefreshInputAndReferenceChoices();
         RefreshLocalParameters(elem);
         RefreshGlobalParameterReferences();
-        RefreshReferenceChoices();
     }
 
     /**
@@ -154,6 +164,34 @@ public class ParameterController implements Initializable
     }
 
     /**
+     * Clears inputs and sets the choices for places to choose from as value
+     * references.
+     */
+    private void RefreshInputAndReferenceChoices() {
+        
+        paramInputName.clear();
+        paramInputNote.clear();
+        paramInputValue.clear();
+        if (paramFunctionImageNode.getContent() != null) {
+            paramFunctionImageNode.getContent().removeAll();
+        }
+        paramInputStatusMessage.setText("");
+
+        Collection<INode> places = dataGraphService.getDataDao().getPlaces();
+        ObservableList<PlaceReferenceChoice> placeReferenceChoices = FXCollections.observableArrayList();
+
+        for (INode place : places) {
+            placeReferenceChoices.add(new PlaceReferenceChoice((DataPlace) place));
+        }
+        placeReferenceChoices.sort(Comparator.comparing(PlaceReferenceChoice::toString));
+
+//        paramReferencePlaceChoice.getItems().clear();
+        paramReferencePlaceChoice.setItems(placeReferenceChoices);
+        paramReferencePlaceChoice.getItems().add(0, "- no reference -");
+        paramReferencePlaceChoice.getSelectionModel().select(0);
+    }
+
+    /**
      * Refreshs the available local parameters for an element.
      *
      * @param elem
@@ -166,7 +204,13 @@ public class ParameterController implements Initializable
             parameters.addAll(elem.getParameters().values());
             parameters.sort(Comparator.comparing(Parameter::toString));
             localParameters.addAll(parameters);
+            localParameters.stream().forEach(param -> {
+                if (!dataGraphService.isElementReferencingParameter(elem, param)) {
+                    param.removeReferingNode(elem);
+                }
+            });
         }
+        paramLocalStatusMessage.setText("");
     }
 
     /**
@@ -177,49 +221,12 @@ public class ParameterController implements Initializable
             IDataElement[] elements = new IDataElement[param.getReferingNodes().size()];
             param.getReferingNodes().toArray(elements);
             for (IDataElement element : elements) {
-                if (!ElementReferencesParameter(element, param)) {
+                if (!dataGraphService.isElementReferencingParameter(element, param)) {
                     param.removeReferingNode(element);
                 }
             }
         });
-    }
-
-    /**
-     * Validates wether an element references a parameter or not.
-     *
-     * @param elem
-     * @param param
-     * @return
-     */
-    private boolean ElementReferencesParameter(IDataElement elem, Parameter param) {
-        switch (elem.getElementType()) {
-            case TRANSITION:
-                DataTransition transition = (DataTransition) elem;
-                if (transition.getFunction().getParameter().contains(param)) {
-                    return true;
-                }
-        }
-        return false;
-    }
-
-    /**
-     * Clears and sets the choices for places to choose from as value
-     * references.
-     */
-    private void RefreshReferenceChoices() {
-
-        Collection<INode> places = dataGraphService.getDataDao().getPlaces();
-        ObservableList<PlaceReferenceChoice> placeReferenceChoices = FXCollections.observableArrayList();
-
-        for (INode place : places) {
-            placeReferenceChoices.add(new PlaceReferenceChoice((DataPlace) place));
-        }
-        placeReferenceChoices.sort(Comparator.comparing(PlaceReferenceChoice::toString));
-
-        paramReferencePlaceChoice.getItems().clear();
-        paramReferencePlaceChoice.setItems(placeReferenceChoices);
-        paramReferencePlaceChoice.getItems().add(0, "- no reference -");
-        paramReferencePlaceChoice.getSelectionModel().select(0);
+        paramGlobalStatusMessage.setText("");
     }
 
     /**
@@ -235,7 +242,7 @@ public class ParameterController implements Initializable
             return;
         }
 
-        PlaceReferenceChoice choice = (PlaceReferenceChoice) paramReferenceTokenChoice.getSelectionModel().getSelectedItem();
+        PlaceReferenceChoice choice = (PlaceReferenceChoice) paramReferencePlaceChoice.getSelectionModel().getSelectedItem();
 
         if (choice == null) {
             return;
@@ -297,8 +304,11 @@ public class ParameterController implements Initializable
             Parameter param = createParameter(Parameter.Type.LOCAL);
             elem.getParameters().put(param.getId(), param);
             localParameters.add(param);
+            paramInputStatusMessage.setText("Created LOCAL parameter '" + param.getId() + "'!");
+            paramInputStatusMessage.setTextFill(Color.GREEN);
         } catch (InputValidationException ex) {
-            messengerService.addToLog("Exception creating local parameter! [" + ex.getMessage() + "]");
+            paramInputStatusMessage.setText("Cannot create parameter! [" + ex.getMessage() + "]");
+            paramInputStatusMessage.setTextFill(Color.RED);
         }
     }
 
@@ -309,8 +319,11 @@ public class ParameterController implements Initializable
         try {
             Parameter param = createParameter(Parameter.Type.GLOBAL);
             globalParameters.add(param);
+            paramInputStatusMessage.setText("Created GLOBAL parameter '" + param.getId() + "'!");
+            paramInputStatusMessage.setTextFill(Color.GREEN);
         } catch (InputValidationException ex) {
-            messengerService.addToLog("Exception creating global parameter! [" + ex.getMessage() + "]");
+            paramInputStatusMessage.setText("Cannot create parameter! [" + ex.getMessage() + "]");
+            paramInputStatusMessage.setTextFill(Color.RED);
         }
     }
 
@@ -332,7 +345,7 @@ public class ParameterController implements Initializable
         Parameter param;
 
         if (paramInputName.getText().isEmpty()) {
-            throw new InputValidationException("You have to specify a name for the new parameter!");
+            throw new InputValidationException("Specify a parameter name");
         }
         id = paramInputName.getText();
         note = paramInputNote.getText();
@@ -344,10 +357,10 @@ public class ParameterController implements Initializable
             value = parseValue(paramInputValue.getText());
             if (value == null) {
                 paramInputValue.selectAll();
-                throw new InputValidationException("The specified value can not be parsed!");
+                throw new InputValidationException("The given value cannot be parsed");
             }
         } else {
-            throw new InputValidationException("You have to specify a value for the new parameter!");
+            throw new InputValidationException("Specify a value for the parameter");
         }
 
         param = new Parameter(id, note, value, type);
@@ -393,13 +406,15 @@ public class ParameterController implements Initializable
         paramAddLocal.setOnAction(e -> createLocalParameter(selectedElement));
         paramAddGlobal.setOnAction(e -> createGlobalParameter());
 
-        paramReferencePlaceChoice.valueProperty().addListener((ObservableValue obs, Object o, Object n) -> RefreshTokenChoices());
+        paramReferencePlaceChoice.valueProperty().addListener((ObservableValue obs, Object o, Object n) -> {
+            System.out.println("Fire!");
+            RefreshTokenChoices();
+        });
 
         paramTableLocal.setItems(localParameters);
         paramTableLocal.setEditable(true);
         
         paramNameLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getId()));
-        
         paramValueLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
         paramValueLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramValueLocal.setOnEditCommit(
@@ -414,7 +429,6 @@ public class ParameterController implements Initializable
                                 .setValue(t.getNewValue());
                     }
                 });
-        
         paramNoteLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getNote()));
         paramNoteLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramNoteLocal.setOnEditCommit(
@@ -422,14 +436,17 @@ public class ParameterController implements Initializable
                     ((Parameter) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setNote(t.getNewValue());
                 });
-        
         paramDeleteLocal.setCellValueFactory(cellData -> {
             Button btn = new Button();
+            btn.getStyleClass().add(buttonTableRowDeleteStyle);
             btn.setOnAction(e -> {
                 try {
                     deleteParameter(cellData.getValue(), selectedElement);
+                    paramLocalStatusMessage.setText("Deleted LOCAL parameter '" + cellData.getValue().getId() + "'!");
+                    paramLocalStatusMessage.setTextFill(Color.GREEN);
                 } catch (DataGraphServiceException ex) {
-                    messengerService.addToLog(ex.getMessage());
+                    paramLocalStatusMessage.setText(ex.getMessage());
+                    paramLocalStatusMessage.setTextFill(Color.RED);
                 }
             });
             return new ReadOnlyObjectWrapper(btn);
@@ -439,7 +456,6 @@ public class ParameterController implements Initializable
         paramTableGlobal.setEditable(true);
         
         paramNameGlobal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getId()));
-        
         paramValueGlobal.setCellValueFactory(new PropertyValueFactory("value"));
         paramValueGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramValueGlobal.setOnEditCommit(
@@ -447,7 +463,6 @@ public class ParameterController implements Initializable
                     ((Parameter) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setValue(t.getNewValue());
                 });
-        
         paramNoteGlobal.setCellValueFactory(new PropertyValueFactory("note"));
         paramNoteGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramNoteGlobal.setOnEditCommit(
@@ -455,15 +470,18 @@ public class ParameterController implements Initializable
                     ((Parameter) t.getTableView().getItems().get(
                             t.getTablePosition().getRow())).setNote(t.getNewValue());
                 });
-        
         paramReferencesGlobal.setCellValueFactory(cellData -> cellData.getValue().getReferingNodesCountProperty());
         paramDeleteGlobal.setCellValueFactory(cellData -> {
             Button btn = new Button();
+            btn.getStyleClass().add(buttonTableRowDeleteStyle);
             btn.setOnAction(e -> {
                 try {
                     deleteParameter(cellData.getValue(), null);
+                    paramGlobalStatusMessage.setText("Deleted GLOBAL parameter '" + cellData.getValue().getId() + "'!");
+                    paramGlobalStatusMessage.setTextFill(Color.GREEN);
                 } catch (DataGraphServiceException ex) {
-                    messengerService.addToLog(ex.getMessage());
+                    paramGlobalStatusMessage.setText(ex.getMessage());
+                    paramGlobalStatusMessage.setTextFill(Color.RED);
                 }
             });
             return new ReadOnlyObjectWrapper(btn);

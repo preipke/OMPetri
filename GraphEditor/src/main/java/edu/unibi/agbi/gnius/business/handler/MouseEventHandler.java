@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.ElementController;
 import edu.unibi.agbi.gnius.business.controller.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -47,7 +46,6 @@ public class MouseEventHandler {
     @Autowired private MainController mainController;
     @Autowired private ToolsController editorToolsController;
 
-    @Autowired private KeyEventHandler keyEventHandler;
     @Autowired private Calculator calculator;
 
     private boolean isInitialized = false;
@@ -55,6 +53,8 @@ public class MouseEventHandler {
     private boolean isSecondaryButtonDown = false;
 
     private final double secondsBeforeCreatingArc = .35d; // TODO assign custom value in preferences
+
+    private final Rectangle selectionFrame;
 
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
@@ -67,9 +67,15 @@ public class MouseEventHandler {
     private MouseEvent mouseEventMovedPrevious;
     private MouseEvent mouseEventPressed;
 
-    private Rectangle selectionFrame;
-
     private GraphEdge arcTemp;
+    
+    public MouseEventHandler() {
+        selectionFrame = new Rectangle(0, 0, 0, 0);
+        selectionFrame.setStroke(Color.BLUE);
+        selectionFrame.setStrokeWidth(1);
+        selectionFrame.setStrokeLineCap(StrokeLineCap.ROUND);
+        selectionFrame.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.6));
+    }
 
     /**
      * Registers several mouse and scroll event handlers.
@@ -77,17 +83,8 @@ public class MouseEventHandler {
      * @param graphPane
      */
     public void registerTo(GraphPane graphPane) {
-
-        // Preparing selection rectangle.
-        selectionFrame = new Rectangle(0, 0, 0, 0);
-        selectionFrame.setStroke(Color.BLUE);
-        selectionFrame.setStrokeWidth(1);
-        selectionFrame.setStrokeLineCap(StrokeLineCap.ROUND);
-        selectionFrame.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.6));
-
         graphPane.setOnMouseMoved(e -> onMouseMoved(e, graphPane));
         graphPane.setOnMouseDragged(e -> onMouseDragged(e, graphPane));
-
         graphPane.setOnMousePressed(e -> onMousePressed(e, graphPane));
         graphPane.setOnMouseReleased(e -> onMouseReleased(e, graphPane));
         graphPane.setOnMouseClicked(e -> onMouseClicked(e));
@@ -105,7 +102,6 @@ public class MouseEventHandler {
 
         if (!isInitialized) {
             mouseEventPressed = event; // to avoid null-pointer on dragged
-            keyEventHandler.registerTo(pane.getScene());
             isInitialized = true;
         }
 
@@ -268,7 +264,6 @@ public class MouseEventHandler {
                         PauseTransition pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
                         pauseTransition.setOnFinished(e -> {
                             if (!event.isConsumed()) {
-                                mainController.HideElementBox();
                                 try {
                                     setEditorMode(isInArcCreationMode);
                                     selectionService.unselectAll();
@@ -288,10 +283,11 @@ public class MouseEventHandler {
                 /**
                  * Clicking the pane.
                  */
-                mainController.HideElementBox();
 
                 if (!event.isControlDown()) {
                     selectionService.unselectAll(); // Clearing current selection.
+                } else {
+                    mainController.HideElementBox();
                 }
 
                 if (event.isShiftDown()) {

@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.menu;
 
-import edu.unibi.agbi.gnius.business.controller.GraphPaneController;
+import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
 import java.io.File;
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class FileMenuController implements Initializable
 {
     @Autowired private DataGraphService dataService;
-    @Autowired private GraphPaneController editorPaneController;
+    @Autowired private MainController mainController;
     
     @FXML
     public void SaveFileAs() {
@@ -34,7 +34,7 @@ public class FileMenuController implements Initializable
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Petri Net");
         
-        File file = fileChooser.showSaveDialog(editorPaneController.getStage());
+        File file = fileChooser.showSaveDialog(mainController.getStage());
         
         try {
             OpenModelicaExport.exportMO(dataService.getDataDao() , file);

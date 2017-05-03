@@ -29,9 +29,12 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -52,6 +55,8 @@ public class ResultsController implements Initializable
     @FXML private TextField simulationFilterInput;
     @FXML private TextField elementFilterInput;
     @FXML private TextField valueFilterInput;
+    @FXML private Button buttonAddChoice;
+    @FXML private Label statusMessageLabel;
 
     @FXML private TableView<SimulationLineChartData> tableView;
     @FXML private TableColumn<SimulationLineChartData, String> columnSimulation;
@@ -60,33 +65,30 @@ public class ResultsController implements Initializable
     @FXML private TableColumn<SimulationLineChartData, String> columnValue;
     @FXML private TableColumn<SimulationLineChartData, CheckBox> columnEnable;
     @FXML private TableColumn<SimulationLineChartData, Button> columnDrop;
-
-    @FXML private TextField xLabelInput;
-    @FXML private TextField yLabelInput;
-
+    
     @FXML private LineChart lineChart;
+    @FXML private TextField inputChartTitle;
+    @FXML private TextField inputChartLabelX;
+    @FXML private TextField inputChartLabelY;
+    
+    @Value("${css.button.table.row.delete}") private String buttonTableRowDeleteStyle;
 
-    @Value("${results.window.choice.dateformat}") private String dateFormat;
-    @Value("${results.window.linechart.y.label}") private String xAxisLabel;
-    @Value("${results.window.linechart.x.label}") private String yAxisLabel;
+    @Value("${results.choice.simulation.dateformat}") private String dateFormat;
+    @Value("${results.linechart.default.title}") private String defaultTitle;
+    @Value("${results.linechart.default.xlabel}") private String defaultXLabel;
+    @Value("${results.linechart.default.ylabel}") private String defaultYLabel;
     
     private DateTimeFormatter simulationChoiceDateTimeFormatter;
-
-    @FXML
-    public void AddSelectedToChart() {
-
-        SimulationChoice simulationChoice = (SimulationChoice) simulationChoices.getSelectionModel().getSelectedItem();
-        ElementChoice elementChoice = (ElementChoice) elementChoices.getSelectionModel().getSelectedItem();
-        ValueChoice valueChoice = (ValueChoice) valueChoices.getSelectionModel().getSelectedItem();
-        
-        SimulationLineChartData data = new SimulationLineChartData(simulationChoice.getSimulation(), elementChoice.getElement(), valueChoice.getValue());
-
-        if (resultsService.add(lineChart, data)) {
-            resultsService.UpdateSeries(data);
-            resultsService.show(lineChart, data);
-        } else {
-            System.out.println("The selected data has already been added to the graph. Check the table if showing has been disabled!");
-        }
+    private Stage stage;
+    
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+    
+    public void ShowWindow() {
+        stage.show();
+        stage.centerOnScreen();
+//        RefreshSimulationChoices();
     }
 
     public synchronized void RefreshSimulationChoices() {
@@ -152,6 +154,34 @@ public class ResultsController implements Initializable
         FilterChoices(valueChoices, valueFilterInput.getText());
     }
 
+    private void addSelectedChoiceToChart() {
+
+        SimulationChoice simulationChoice = (SimulationChoice) simulationChoices.getSelectionModel().getSelectedItem();
+        ElementChoice elementChoice = (ElementChoice) elementChoices.getSelectionModel().getSelectedItem();
+        ValueChoice valueChoice = (ValueChoice) valueChoices.getSelectionModel().getSelectedItem();
+        
+        if (simulationChoice == null) {
+            setStatus("Select a simulation before adding!", true);
+            return;
+        } else if (elementChoice == null) {
+            setStatus("Select an element before adding!", true);
+            return;
+        } else if (valueChoice == null) {
+            setStatus("Select a value before adding!", true);
+            return;
+        }
+        
+        SimulationLineChartData data = new SimulationLineChartData(simulationChoice.getSimulation(), elementChoice.getElement(), valueChoice.getValue());
+
+        if (resultsService.add(lineChart, data)) {
+            resultsService.UpdateSeries(data);
+            resultsService.show(lineChart, data);
+            setStatus("The selected data has been added!", false);
+        } else {
+            setStatus("The selected data has already been added! Please check the table below.", true);
+        }
+    }
+
     private void FilterChoices(ChoiceBox choiceBox, String text) {
 
         if (text == null || text.matches("")) {
@@ -183,6 +213,15 @@ public class ResultsController implements Initializable
             choiceBox.getSelectionModel().select(selectedIndex);
         }
     }
+    
+    private void setStatus(String msg, boolean isError) {
+        statusMessageLabel.setText(msg);
+        if (isError) {
+            statusMessageLabel.setTextFill(Color.RED);
+        } else {
+            statusMessageLabel.setTextFill(Color.GREEN);
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -191,10 +230,12 @@ public class ResultsController implements Initializable
          * LineChart specs.
          */
         lineChart.createSymbolsProperty().set(false);
-        lineChart.getXAxis().labelProperty().bind(xLabelInput.textProperty());
-        lineChart.getYAxis().labelProperty().bind(yLabelInput.textProperty());
-        xLabelInput.setText(xAxisLabel);
-        yLabelInput.setText(yAxisLabel);
+        lineChart.titleProperty().bind(inputChartTitle.textProperty());
+        lineChart.getXAxis().labelProperty().bind(inputChartLabelX.textProperty());
+        lineChart.getYAxis().labelProperty().bind(inputChartLabelY.textProperty());
+        inputChartTitle.setText(defaultTitle);
+        inputChartLabelX.setText(defaultXLabel);
+        inputChartLabelY.setText(defaultYLabel);
 
         /**
          * ChoiceBox and TextField actions.
@@ -229,6 +270,8 @@ public class ResultsController implements Initializable
             elementChoices.hide();
             valueChoices.show();
         });
+        
+        buttonAddChoice.setOnAction(e -> addSelectedChoiceToChart());
 
         /**
          * TableView specs.
@@ -273,8 +316,13 @@ public class ResultsController implements Initializable
         });
         columnDrop.setCellValueFactory(cellData -> {
             Button btn = new Button();
+            btn.getStyleClass().add(buttonTableRowDeleteStyle);
             btn.setOnAction(e -> {
                 resultsService.drop(lineChart, cellData.getValue());
+                setStatus("Data has been dropped! ('" 
+                        + cellData.getValue().getSimulation().toString() + "', '" 
+                        + cellData.getValue().getElement().toString() + "', '" 
+                        + cellData.getValue().getValue() + "')", false);
             });
             return new ReadOnlyObjectWrapper(btn);
         });
