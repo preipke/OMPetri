@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ResultsController">
+   <children>
+      <GridPane hgap="5.0" vgap="5.0">
+         <children>
+            <Label text="Simulation:" />
+            <Label text="Element:" GridPane.columnIndex="1" />
+            <Label text="Value:" GridPane.columnIndex="2" />
+            <ChoiceBox fx:id="simulationChoices" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="elementChoices" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="valueChoices" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <TextField fx:id="simulationFilterInput" promptText="Filter simulation name..." GridPane.rowIndex="1" />
+            <TextField fx:id="elementFilterInput" promptText="Filter element name..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="valueFilterInput" promptText="Filter value..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <Button fx:id="buttonClearFilter" mnemonicParsing="false" text="Clear" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+         </children>
+         <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" />
+         </columnConstraints>
+         <padding>
+            <Insets left="10.0" right="10.0" top="10.0" />
+         </padding>
+         <rowConstraints>
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+         </rowConstraints>
+      </GridPane>
+      <HBox spacing="10.0">
+         <children>
+            <Button fx:id="buttonAddChoice" mnemonicParsing="false" text="Add" />
+            <Label fx:id="statusMessageLabel" />
+         </children>
+         <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+         </padding>
+      </HBox>
+      <SplitPane dividerPositions="0.4" VBox.vgrow="ALWAYS">
+        <items>
+          <AnchorPane minHeight="0.0" minWidth="0.0">
+               <children>
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
+                           <columns>
+                              <TableColumn fx:id="columnSimulation" maxWidth="1.7976931348623157E308" text="Simulation" />
+                              <TableColumn fx:id="columnElementId" maxWidth="1.7976931348623157E308" prefWidth="50.0" text="ID" />
+                              <TableColumn fx:id="columnElementName" maxWidth="1.7976931348623157E308" text="Name" />
+                              <TableColumn fx:id="columnValue" maxWidth="1.7976931348623157E308" text="Value" />
+                              <TableColumn fx:id="columnEnable" maxWidth="1.7976931348623157E308" prefWidth="25.0" />
+                              <TableColumn fx:id="columnDrop" maxWidth="1.7976931348623157E308" prefWidth="25.0" />
+                           </columns>
+                        </TableView>
+                        <GridPane hgap="5.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Chart Title" />
+                              <TextField fx:id="inputChartTitle" GridPane.columnIndex="1" />
+                              <Label text="X-Label" GridPane.rowIndex="1" />
+                              <TextField fx:id="inputChartLabelX" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                              <Label text="Y-Label" GridPane.rowIndex="2" />
+                              <TextField fx:id="inputChartLabelY" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                           </children>
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </VBox.margin>
+                        </GridPane>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0">
+               <children>
+                  <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     <children>
+                        <LineChart fx:id="lineChart" VBox.vgrow="ALWAYS">
+                           <xAxis>
+                              <NumberAxis />
+                           </xAxis>
+                           <yAxis>
+                              <NumberAxis side="LEFT" />
+                           </yAxis>
+                        </LineChart>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <VBox.margin>
+                              <Insets bottom="10.0" left="10.0" right="10.0" />
+                           </VBox.margin>
+                        </HBox>
+                     </children>
+                  </VBox>
+               </children>
+            </AnchorPane>
+        </items>
+      </SplitPane>
+   </children>
+</VBox>
