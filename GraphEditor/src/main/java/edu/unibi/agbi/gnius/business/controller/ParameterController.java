@@ -15,7 +15,6 @@ import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,19 +29,20 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
+import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -83,7 +83,6 @@ public class ParameterController implements Initializable
     @FXML private TableColumn<Parameter, Button> paramDeleteGlobal;
     @FXML private Label paramGlobalStatusMessage;
 
-    @Value("${css.button.tablerow.delete}") private String buttonTableRowDeleteStyle;
     @Value("${param.validation.regex.split}") private String paramValidationRegexSplit;
     @Value("${param.validation.regex.match}") private String paramValidationRegexMatch;
 
@@ -402,14 +401,15 @@ public class ParameterController implements Initializable
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        Callback<TableColumn<Parameter, Button>, TableCell<Parameter, Button>> paramDeleteLocalCellFactory;
+        Callback<TableColumn<Parameter, Button>, TableCell<Parameter, Button>> paramDeleteGlobalCellFactory; 
+        Callback<TableColumn<Parameter, Number>, TableCell<Parameter, Number>> paramReferencesGlobalCellFactory;
 
         paramAddLocal.setOnAction(e -> createLocalParameter(selectedElement));
         paramAddGlobal.setOnAction(e -> createGlobalParameter());
 
-        paramReferencePlaceChoice.valueProperty().addListener((ObservableValue obs, Object o, Object n) -> {
-            System.out.println("Fire!");
-            RefreshTokenChoices();
-        });
+        paramReferencePlaceChoice.valueProperty().addListener((ObservableValue obs, Object o, Object n) -> RefreshTokenChoices());
 
         paramTableLocal.setItems(localParameters);
         paramTableLocal.setEditable(true);
@@ -437,9 +437,10 @@ public class ParameterController implements Initializable
                             t.getTablePosition().getRow())).setNote(t.getNewValue());
                 });
         paramDeleteLocal.setCellValueFactory(cellData -> {
-            Button btn = new Button();
-            btn.getStyleClass().add(buttonTableRowDeleteStyle);
-            btn.setOnAction(e -> {
+            CheckBox cb = new CheckBox();
+            cb.setAllowIndeterminate(true);
+            cb.setIndeterminate(true);
+            cb.setOnAction(e -> {
                 try {
                     deleteParameter(cellData.getValue(), selectedElement);
                     paramLocalStatusMessage.setText("Deleted LOCAL parameter '" + cellData.getValue().getId() + "'!");
@@ -449,7 +450,14 @@ public class ParameterController implements Initializable
                     paramLocalStatusMessage.setTextFill(Color.RED);
                 }
             });
-            return new ReadOnlyObjectWrapper(btn);
+            return new ReadOnlyObjectWrapper(cb);
+        });
+        paramDeleteLocalCellFactory = paramDeleteLocal.getCellFactory();
+        paramDeleteLocal.setCellFactory(c -> {
+            TableCell cell = paramDeleteLocalCellFactory.call(c);
+            Tooltip tooltip = new Tooltip("Removes this parameter");
+            cell.setTooltip(tooltip);
+            return cell;
         });
 
         paramTableGlobal.setItems(globalParameters);
@@ -471,10 +479,19 @@ public class ParameterController implements Initializable
                             t.getTablePosition().getRow())).setNote(t.getNewValue());
                 });
         paramReferencesGlobal.setCellValueFactory(cellData -> cellData.getValue().getReferingNodesCountProperty());
+        paramReferencesGlobalCellFactory = paramReferencesGlobal.getCellFactory();
+        paramReferencesGlobal.setCellFactory(c -> {
+            TableCell cell = paramReferencesGlobalCellFactory.call(c);
+            Tooltip tooltip = new Tooltip();
+            tooltip.textProperty().bind(cell.itemProperty().asString().concat(" elements are using this parameter."));
+            cell.setTooltip(tooltip);
+            return cell;
+        });
         paramDeleteGlobal.setCellValueFactory(cellData -> {
-            Button btn = new Button();
-            btn.getStyleClass().add(buttonTableRowDeleteStyle);
-            btn.setOnAction(e -> {
+            CheckBox cb = new CheckBox();
+            cb.setAllowIndeterminate(true);
+            cb.setIndeterminate(true);
+            cb.setOnAction(e -> {
                 try {
                     deleteParameter(cellData.getValue(), null);
                     paramGlobalStatusMessage.setText("Deleted GLOBAL parameter '" + cellData.getValue().getId() + "'!");
@@ -484,7 +501,14 @@ public class ParameterController implements Initializable
                     paramGlobalStatusMessage.setTextFill(Color.RED);
                 }
             });
-            return new ReadOnlyObjectWrapper(btn);
+            return new ReadOnlyObjectWrapper(cb);
+        });
+        paramDeleteGlobalCellFactory = paramDeleteGlobal.getCellFactory();
+        paramDeleteGlobal.setCellFactory(c -> {
+            TableCell cell = paramDeleteGlobalCellFactory.call(c);
+            Tooltip tooltip = new Tooltip("Removes this parameter");
+            cell.setTooltip(tooltip);
+            return cell;
         });
     }
 

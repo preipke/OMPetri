@@ -30,11 +30,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -56,6 +59,7 @@ public class ResultsController implements Initializable
     @FXML private TextField elementFilterInput;
     @FXML private TextField valueFilterInput;
     @FXML private Button buttonAddChoice;
+    @FXML private Button buttonClearFilter;
     @FXML private Label statusMessageLabel;
 
     @FXML private TableView<SimulationLineChartData> tableView;
@@ -70,15 +74,13 @@ public class ResultsController implements Initializable
     @FXML private TextField inputChartTitle;
     @FXML private TextField inputChartLabelX;
     @FXML private TextField inputChartLabelY;
-    
-    @Value("${css.button.table.row.delete}") private String buttonTableRowDeleteStyle;
 
-    @Value("${results.choice.simulation.dateformat}") private String dateFormat;
     @Value("${results.linechart.default.title}") private String defaultTitle;
     @Value("${results.linechart.default.xlabel}") private String defaultXLabel;
     @Value("${results.linechart.default.ylabel}") private String defaultYLabel;
+    @Value("${simulation.datetime.format}") private String dateTimeFormat;
     
-    private DateTimeFormatter simulationChoiceDateTimeFormatter;
+    private DateTimeFormatter simulationDateTimeFormat;
     private Stage stage;
     
     public void setStage(Stage stage) {
@@ -87,8 +89,7 @@ public class ResultsController implements Initializable
     
     public void ShowWindow() {
         stage.show();
-        stage.centerOnScreen();
-//        RefreshSimulationChoices();
+        stage.toFront();
     }
 
     public synchronized void RefreshSimulationChoices() {
@@ -181,6 +182,12 @@ public class ResultsController implements Initializable
             setStatus("The selected data has already been added! Please check the table below.", true);
         }
     }
+    
+    private void clearFilterInputs() {
+        simulationFilterInput.clear();
+        elementFilterInput.clear();
+        valueFilterInput.clear();
+    }
 
     private void FilterChoices(ChoiceBox choiceBox, String text) {
 
@@ -225,6 +232,9 @@ public class ResultsController implements Initializable
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        
+        Callback<TableColumn<SimulationLineChartData, Button>, TableCell<SimulationLineChartData, Button>> columnDropCellFactory;
+        Callback<TableColumn<SimulationLineChartData, CheckBox>, TableCell<SimulationLineChartData, CheckBox>> columnEnableCellFactory;
 
         /**
          * LineChart specs.
@@ -240,7 +250,7 @@ public class ResultsController implements Initializable
         /**
          * ChoiceBox and TextField actions.
          */
-        simulationChoiceDateTimeFormatter = DateTimeFormatter.ofPattern(dateFormat);
+        simulationDateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
         simulationService.getSimulations().addListener(new ListChangeListener()
         {
             @Override
@@ -271,6 +281,7 @@ public class ResultsController implements Initializable
             valueChoices.show();
         });
         
+        buttonClearFilter.setOnAction(e -> clearFilterInputs());
         buttonAddChoice.setOnAction(e -> addSelectedChoiceToChart());
 
         /**
@@ -283,7 +294,7 @@ public class ResultsController implements Initializable
             System.out.println(ex.getMessage());
         }
 
-        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getTime().format(simulationChoiceDateTimeFormatter) + " " + cellData.getValue().getSimulation().getName()));
+        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getTime().format(simulationDateTimeFormat) + " " + cellData.getValue().getSimulation().getName()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getId()));
         columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getName()));
         columnValue.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
@@ -314,17 +325,32 @@ public class ResultsController implements Initializable
             });
             return new ReadOnlyObjectWrapper(cb);
         });
+        columnEnableCellFactory = columnEnable.getCellFactory();
+        columnEnable.setCellFactory(c -> {
+            TableCell cell = columnEnableCellFactory.call(c);
+            Tooltip tooltip = new Tooltip("Disables or enables data in the chart");
+            cell.setTooltip(tooltip);
+            return cell;
+        });
         columnDrop.setCellValueFactory(cellData -> {
-            Button btn = new Button();
-            btn.getStyleClass().add(buttonTableRowDeleteStyle);
-            btn.setOnAction(e -> {
+            CheckBox cb = new CheckBox();
+            cb.setAllowIndeterminate(true);
+            cb.setIndeterminate(true);
+            cb.setOnAction(e -> {
                 resultsService.drop(lineChart, cellData.getValue());
-                setStatus("Data has been dropped! ('" 
+                setStatus("Data has been dropped! ['" 
                         + cellData.getValue().getSimulation().toString() + "', '" 
                         + cellData.getValue().getElement().toString() + "', '" 
-                        + cellData.getValue().getValue() + "')", false);
+                        + cellData.getValue().getValue() + "']", false);
             });
-            return new ReadOnlyObjectWrapper(btn);
+            return new ReadOnlyObjectWrapper(cb);
+        });
+        columnDropCellFactory = columnDrop.getCellFactory();
+        columnDrop.setCellFactory(c -> {
+            TableCell cell = columnDropCellFactory.call(c);
+            Tooltip tooltip = new Tooltip("Removes data from chart and table");
+            cell.setTooltip(tooltip);
+            return cell;
         });
     }
 
@@ -378,7 +404,7 @@ public class ResultsController implements Initializable
 
         @Override
         public String toString() {
-            return simulation.getTime().format(simulationChoiceDateTimeFormatter) + " " + simulation.getName();
+            return simulation.getTime().format(simulationDateTimeFormat) + " " + simulation.getName();
         }
     }
 }

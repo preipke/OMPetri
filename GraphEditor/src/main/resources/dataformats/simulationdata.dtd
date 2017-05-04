@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT simulations (simulation*)>
+<!ELEMENT simulation (elements)>
+<!ELEMENT elements (element*)>
+<!ELEMENT element (elementdata*)>
+<!ELEMENT elementdata (data*)>
+<!ELEMENT data (time,value)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT value (#PCDATA)>
+
+<!ATTLIST simulation
+    datetime    CDATA   #REQUIRED
+    model       CDATA   #REQUIRED
+    author      CDATA   #REQUIRED
+>
+
+<!ATTLIST element
+    id          CDATA   #REQUIRED
+    name        CDATA   #REQUIRED
+>

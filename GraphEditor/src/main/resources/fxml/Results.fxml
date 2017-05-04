@@ -20,6 +20,7 @@
             <TextField fx:id="elementFilterInput" promptText="Filter element name..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="valueFilterInput" promptText="Filter value..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Button fx:id="buttonClearFilter" mnemonicParsing="false" text="Clear" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Button fx:id="buttonAddChoice" mnemonicParsing="false" text="Add" GridPane.columnIndex="3" GridPane.rowIndex="2" />
          </children>
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
@@ -36,15 +37,11 @@
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
          </rowConstraints>
       </GridPane>
-      <HBox spacing="10.0">
-         <children>
-            <Button fx:id="buttonAddChoice" mnemonicParsing="false" text="Add" />
-            <Label fx:id="statusMessageLabel" />
-         </children>
-         <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-         </padding>
-      </HBox>
+      <Label fx:id="statusMessageLabel">
+         <VBox.margin>
+            <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+         </VBox.margin>
+      </Label>
       <SplitPane dividerPositions="0.4" VBox.vgrow="ALWAYS">
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0">

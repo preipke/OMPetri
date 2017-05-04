@@ -258,6 +258,7 @@ public class ElementController implements Initializable
 
             case CLUSTER:
                 System.out.println("TODO LoadGuiElements CLUSTER");
+                propertiesPane.setVisible(false);
                 break;
 
             default:

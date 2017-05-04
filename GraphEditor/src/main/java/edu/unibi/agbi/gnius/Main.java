@@ -73,6 +73,13 @@ public class Main extends Application {
         
         mainStage.setTitle(mainTitle);
         mainStage.setScene(mainScene);
+        mainStage.setOnCloseRequest(e -> {
+            try {
+                System.exit(0);
+            } catch (Exception ex) {
+                System.out.println(ex);
+            }
+        });
         mainStage.show();
         
         KeyEventHandler keyEventHandler = (KeyEventHandler) springContext.getBean(KeyEventHandler.class);
