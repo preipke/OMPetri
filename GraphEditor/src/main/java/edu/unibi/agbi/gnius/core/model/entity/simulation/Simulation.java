@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.util.Objects;
 
 /**
  *
@@ -19,110 +20,118 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 public class Simulation
 {
     private final LocalDateTime simulationTime;
-    
-    private final String[] simulationVariables;
-    private final References simulationVariableReferences;
-    private final List<Object>[] simulationResults;
-    
-    private String simulationName;
-    private String simulationAuthor;
-    private String simulationDescription;
-    
-    public Simulation(String[] variables, References variableReferences) {
-        
-        simulationTime = LocalDateTime.now();
-        
-        simulationVariables = variables;
-        simulationVariableReferences = variableReferences;
-        
-        simulationResults = new ArrayList[simulationVariables.length];
-        for (int i = 0; i < simulationResults.length; i++) {
-            simulationResults[i] = new ArrayList();
+    private final String author;
+    private final String modelName;
+    private final String[] variables;
+    private final References variableReferences;
+    private final List<Object>[] results;
+
+    public Simulation(String authorName, String modelName, String[] variables, References variableReferences) {
+        this.simulationTime = LocalDateTime.now();
+        this.author = authorName;
+        this.modelName = modelName;
+        this.variables = variables;
+        this.variableReferences = variableReferences;
+        this.results = new ArrayList[variables.length];
+        for (int i = 0; i < results.length; i++) {
+            this.results[i] = new ArrayList();
         }
     }
-    
-    public void addResult(Object[] data) {
-        for (int i = 0; i < simulationResults.length; i++) {
-            simulationResults[i].add(data[i]);
-        }
-    }
-    
+
     /**
-     * Gets the author of the simulation.
-     * @return 
+     * Adds a result and appends it to the existing result lists.
+     *
+     * @param data
+     */
+    public void addResult(Object[] data) {
+        for (int i = 0; i < results.length; i++) {
+            results[i].add(data[i]);
+        }
+    }
+
+    /**
+     * Gets simulation author's name.
+     *
+     * @return
      */
     public String getAuthor() {
-        return simulationAuthor;
+        return author;
     }
-    
+
     /**
-     * Gets the description for the simulation.
-     * @return 
+     * Gets the simulation model's name.
+     *
+     * @return
      */
-    public String getDescription() {
-        return simulationDescription;
+    public String getModelName() {
+        return modelName;
     }
-    
+
     /**
-     * Gets the name of the simulation.
-     * @return 
-     */
-    public String getName() {
-        return simulationName;
-    }
-    
-    /**
-     * Gets the date and time at which the simulation was performed.
-     * @return 
+     * Gets the date and time at which this simulation was created.
+     *
+     * @return
      */
     public LocalDateTime getTime() {
         return simulationTime;
     }
-    
+
     /**
      * Gets the available variables.
-     * @return 
+     *
+     * @return
      */
     public String[] getVariables() {
-        return simulationVariables;
+        return variables;
     }
-    
+
     /**
      * Gets the variable references.
-     * @return 
+     *
+     * @return
      */
-    public Map<IElement,List<String>> getElementFilterReferences() {
-        return simulationVariableReferences.getElementFilterReferences();
+    public Map<IElement, List<String>> getElementFilterReferences() {
+        return variableReferences.getElementFilterReferences();
     }
-    
+
     /**
      * Gets the variable name associated results.
-     * @return 
+     *
+     * @return
      */
     public List<Object>[] getResults() {
-        return simulationResults;
+        return results;
     }
-    
+
     @Override
     public boolean equals(Object object) {
-        
+
         if (object == null) {
             return false;
         }
         if (!(object instanceof Simulation)) {
             return false;
         }
-        
+
         Simulation simulation = (Simulation) object;
-        
+
         if (!simulation.getTime().isEqual(simulationTime)) {
             return false;
         }
-        
-        if (simulationName != null) {
-            return simulationName.equals(simulation.getName());
-        } else {
-            return simulation.getName() == null;
+
+        if (!modelName.matches(simulation.getModelName())) {
+            return false;
         }
+
+        return author.matches(simulation.getAuthor());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + Objects.hashCode(this.simulationTime);
+        hash = 59 * hash + Objects.hashCode(this.author);
+        hash = 59 * hash + Objects.hashCode(this.modelName);
+        return hash;
     }
 }

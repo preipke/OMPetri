@@ -48,7 +48,7 @@ public class SimulationResultsDao
         if (!simulationChartDataSeries.get(data.getSimulation()).containsKey(data.getElement())) {
             simulationChartDataSeries.get(data.getSimulation()).put(data.getElement(), new HashMap());
         }
-        simulationChartDataSeries.get(data.getSimulation()).get(data.getElement()).put(data.getValue(), data.getSeries());
+        simulationChartDataSeries.get(data.getSimulation()).get(data.getElement()).put(data.getVariable(), data.getSeries());
     }
     
     public void add(LineChart lineChart, SimulationLineChartData data) {
@@ -68,6 +68,10 @@ public class SimulationResultsDao
     
     public boolean remove(LineChart lineChart, SimulationLineChartData data) {
         return simulationChartTableLists.get(lineChart).remove(data);
+    }
+    
+    public ObservableList<SimulationLineChartData> getResultsTableList(LineChart lineChart) {
+        return simulationChartTableLists.get(lineChart);
     }
     
     public ObservableList<Simulation> getSimulations() {

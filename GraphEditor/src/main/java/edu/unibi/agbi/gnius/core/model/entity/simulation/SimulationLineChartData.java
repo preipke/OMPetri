@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.simulation;
 
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.util.Objects;
 import javafx.scene.chart.XYChart;
 
 /**
@@ -37,7 +38,7 @@ public class SimulationLineChartData
         return element;
     }
 
-    public String getValue() {
+    public String getVariable() {
         return value;
     }
 
@@ -68,6 +69,15 @@ public class SimulationLineChartData
         if (!data.getElement().getId().matches(element.getId())) {
             return false;
         }
-        return data.getValue().matches(value);
+        return data.getVariable().matches(value);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.simulation);
+        hash = 97 * hash + Objects.hashCode(this.element);
+        hash = 97 * hash + Objects.hashCode(this.value);
+        return hash;
     }
 }

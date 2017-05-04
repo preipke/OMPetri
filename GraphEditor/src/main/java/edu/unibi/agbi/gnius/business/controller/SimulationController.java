@@ -49,7 +49,7 @@ public class SimulationController implements Initializable
     @Value("${simulation.value.start}") private String simStartTime;
     @Value("${simulation.value.stop}") private String simStopTime;
     
-    public String getSimulationAuthor() {
+    public String getSimulationAuthorName() {
         return "Unknown";
     }
     

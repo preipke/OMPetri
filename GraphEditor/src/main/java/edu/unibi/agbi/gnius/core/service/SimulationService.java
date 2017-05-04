@@ -52,8 +52,8 @@ public class SimulationService
         return simulationDao.getSimulations();
     }
     
-    public Simulation InitSimulation(String[] variables, References variableReferences) {
-        Simulation simulation = new Simulation(variables, variableReferences);
+    public Simulation InitSimulation(String authorName, String modelName, String[] variables, References variableReferences) {
+        Simulation simulation = new Simulation(authorName, modelName, variables, variableReferences);
         simulationDao.add(simulation);
         return simulation;
     }
@@ -148,7 +148,12 @@ public class SimulationService
                 }
 
                 Platform.runLater(() -> {
-                    Simulation simulation = simulationService.InitSimulation(simulationServer.getSimulationVariables(), simulationCompiler.getSimulationVariableReferences());
+                    Simulation simulation = simulationService.InitSimulation(
+                            dataGraphService.getDataDao().getAuthor(), 
+                            dataGraphService.getDataDao().getName(), 
+                            simulationServer.getSimulationVariables(), 
+                            simulationCompiler.getSimulationVariableReferences()
+                    );
                     simulationServer.setSimulation(simulation);
                     synchronized (simulationServer) {
                         simulationServer.notify(); // notify server that storage has been initalized

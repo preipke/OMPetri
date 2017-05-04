@@ -10,8 +10,10 @@ import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationLineChartData
 import edu.unibi.agbi.gnius.core.service.ResultsService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.util.XmlExporter;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.io.File;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -26,6 +28,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -36,6 +39,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +55,7 @@ public class ResultsController implements Initializable
 {
     @Autowired private SimulationService simulationService;
     @Autowired private ResultsService resultsService;
+    @Autowired private XmlExporter xmlExporter;
 
     @FXML private ChoiceBox simulationChoices;
     @FXML private ChoiceBox elementChoices;
@@ -61,12 +66,19 @@ public class ResultsController implements Initializable
     @FXML private Button buttonAddChoice;
     @FXML private Button buttonClearFilter;
     @FXML private Label statusMessageLabel;
+    
+    @FXML private Button buttonExportData;
+    @FXML private Button buttonImportData;
 
     @FXML private TableView<SimulationLineChartData> tableView;
     @FXML private TableColumn<SimulationLineChartData, String> columnSimulation;
     @FXML private TableColumn<SimulationLineChartData, String> columnElementId;
     @FXML private TableColumn<SimulationLineChartData, String> columnElementName;
-    @FXML private TableColumn<SimulationLineChartData, String> columnValue;
+    @FXML private TableColumn<SimulationLineChartData, String> columnValueName;
+    @FXML private TableColumn<SimulationLineChartData, String> columnValueStart;
+    @FXML private TableColumn<SimulationLineChartData, String> columnValueEnd;
+    @FXML private TableColumn<SimulationLineChartData, String> columnValueMin;
+    @FXML private TableColumn<SimulationLineChartData, String> columnValueMax;
     @FXML private TableColumn<SimulationLineChartData, CheckBox> columnEnable;
     @FXML private TableColumn<SimulationLineChartData, Button> columnDrop;
     
@@ -89,6 +101,7 @@ public class ResultsController implements Initializable
     
     public void ShowWindow() {
         stage.show();
+        stage.setIconified(false);
         stage.toFront();
     }
 
@@ -229,26 +242,67 @@ public class ResultsController implements Initializable
             statusMessageLabel.setTextFill(Color.GREEN);
         }
     }
+    
+    private void exportData() {
+        
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save selected data to XML file");
+        
+        File file = fileChooser.showSaveDialog(stage);
+        
+        try {
+            xmlExporter.exportXml(file, resultsService.getSelectedData(lineChart));
+            setStatus("Data successfully exported!", false);
+        } catch (Exception ex) {
+            setStatus("Export to XML file failed! [" + ex.getMessage() + "]", true);
+        }
+    }
+    
+    private void importData() {
+        System.out.println("TODO!");
+    }
+    
+    private String getStartValueString(List<Data> data) {
+        return data.get(0).getYValue().toString();
+    }
+    
+    private String getEndValueString(List<Data> data) {
+        return data.get(data.size() - 1).getYValue().toString();
+    }
+    
+    private String getMinValueString(List<Data> data) {
+        if (data.get(0).getYValue() instanceof Double) {
+            Double min = (double) data.get(0).getYValue();
+            for (Data d : data) {
+                if (((double) d.getYValue()) < min) {
+                    min = (double) d.getYValue();
+                }
+            }
+            return String.valueOf(min);
+        } else {
+            return "-";
+        }
+    }
+    
+    private String getMaxValueString(List<Data> data) {
+        if (data.get(0).getYValue() instanceof Double) {
+            Double max = (double) data.get(0).getYValue();
+            for (Data d : data) {
+                if (((double) d.getYValue()) > max) {
+                    max = (double) d.getYValue();
+                }
+            }
+            return String.valueOf(max);
+        } else {
+            return "-";
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        
-        Callback<TableColumn<SimulationLineChartData, Button>, TableCell<SimulationLineChartData, Button>> columnDropCellFactory;
-        Callback<TableColumn<SimulationLineChartData, CheckBox>, TableCell<SimulationLineChartData, CheckBox>> columnEnableCellFactory;
 
         /**
-         * LineChart specs.
-         */
-        lineChart.createSymbolsProperty().set(false);
-        lineChart.titleProperty().bind(inputChartTitle.textProperty());
-        lineChart.getXAxis().labelProperty().bind(inputChartLabelX.textProperty());
-        lineChart.getYAxis().labelProperty().bind(inputChartLabelY.textProperty());
-        inputChartTitle.setText(defaultTitle);
-        inputChartLabelX.setText(defaultXLabel);
-        inputChartLabelY.setText(defaultYLabel);
-
-        /**
-         * ChoiceBox and TextField actions.
+         * Data selection and filtering.
          */
         simulationDateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
         simulationService.getSimulations().addListener(new ListChangeListener()
@@ -283,10 +337,30 @@ public class ResultsController implements Initializable
         
         buttonClearFilter.setOnAction(e -> clearFilterInputs());
         buttonAddChoice.setOnAction(e -> addSelectedChoiceToChart());
+        
+        /**
+         * Import export buttons.
+         */
+        buttonImportData.setOnAction(e -> importData());
+        buttonExportData.setOnAction(e -> exportData());
 
         /**
-         * TableView specs.
+         * LineChart.
          */
+        lineChart.createSymbolsProperty().set(false);
+        lineChart.titleProperty().bind(inputChartTitle.textProperty());
+        lineChart.getXAxis().labelProperty().bind(inputChartLabelX.textProperty());
+        lineChart.getYAxis().labelProperty().bind(inputChartLabelY.textProperty());
+        inputChartTitle.setText(defaultTitle);
+        inputChartLabelX.setText(defaultXLabel);
+        inputChartLabelY.setText(defaultYLabel);
+
+        /**
+         * TableView.
+         */
+        Callback<TableColumn<SimulationLineChartData, Button>, TableCell<SimulationLineChartData, Button>> columnDropCellFactory;
+        Callback<TableColumn<SimulationLineChartData, CheckBox>, TableCell<SimulationLineChartData, CheckBox>> columnEnableCellFactory;
+        
         tableView.setItems(FXCollections.observableArrayList());
         try {
             resultsService.add(lineChart, tableView.getItems());
@@ -294,10 +368,15 @@ public class ResultsController implements Initializable
             System.out.println(ex.getMessage());
         }
 
-        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getTime().format(simulationDateTimeFormat) + " " + cellData.getValue().getSimulation().getName()));
+        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getTime().format(simulationDateTimeFormat) + " " + cellData.getValue().getSimulation().getModelName()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getId()));
         columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getName()));
-        columnValue.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
+        columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getVariable()));
+        columnValueStart.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getStartValueString(cellData.getValue().getSeries().getData())));
+        columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getEndValueString(cellData.getValue().getSeries().getData())));
+        columnValueMin.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getMinValueString(cellData.getValue().getSeries().getData())));
+        columnValueMax.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getMaxValueString(cellData.getValue().getSeries().getData())));
+        
         columnEnable.setCellValueFactory(cellData -> {
             CheckBox cb = new CheckBox();
             cb.setSelected(true);
@@ -338,10 +417,7 @@ public class ResultsController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 resultsService.drop(lineChart, cellData.getValue());
-                setStatus("Data has been dropped! ['" 
-                        + cellData.getValue().getSimulation().toString() + "', '" 
-                        + cellData.getValue().getElement().toString() + "', '" 
-                        + cellData.getValue().getValue() + "']", false);
+                setStatus("Data has been dropped!", false);
             });
             return new ReadOnlyObjectWrapper(cb);
         });
@@ -404,7 +480,7 @@ public class ResultsController implements Initializable
 
         @Override
         public String toString() {
-            return simulation.getTime().format(simulationDateTimeFormat) + " " + simulation.getName();
+            return simulation.getTime().format(simulationDateTimeFormat) + " " + simulation.getModelName();
         }
     }
 }

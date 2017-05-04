@@ -34,7 +34,7 @@ import org.testfx.api.*;
  */
 public class TestFXBase extends ApplicationTest {
 
-    private final static boolean isHeadless = false;
+    private final static boolean isHeadless = true;
     
     private final String EDITOR_PANE_ID = "#editorPane";
     

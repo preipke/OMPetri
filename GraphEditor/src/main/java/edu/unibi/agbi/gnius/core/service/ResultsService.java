@@ -66,6 +66,10 @@ public class ResultsService
         hide(lineChart, data);
         simulationResultsDao.remove(lineChart, data);
     }
+    
+    public List<SimulationLineChartData> getSelectedData(LineChart lineChart) {
+        return simulationResultsDao.getResultsTableList(lineChart);
+    }
 
     /**
      * Removes the given data from the given chart.
@@ -113,7 +117,7 @@ public class ResultsService
         
         if (results[0].size() > series.getData().size()) { // update only if additional values available
             String[] variables = simulation.getVariables();
-            String variableTarget = data.getValue();
+            String variableTarget = data.getVariable();
             int index = 0;
             for (String variable : variables) {
                 if (variable.matches(variableTarget)) {
