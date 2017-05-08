@@ -443,23 +443,29 @@ public class ElementController implements Initializable
                 });
 //        placeReferenceChoices.sort(Comparator.comparing(PlaceReferenceChoice::toString));
 
-        buttonParameterInsert.getItems().clear();
-        buttonParameterInsert.getItems().add(menuPlaces);
-        buttonParameterInsert.getItems().add(menuTransitions);
-        buttonParameterInsert.getItems().add(new SeparatorMenuItem());
-
-        List<Parameter> params = parameterController.getParameter(element);
-        MenuItem item;
-
+        Menu menuLocalParams = new Menu("Local Parameter");
+        List<Parameter> params = parameterService.getLocalParameters(element);
+        
+        MenuItem itemLocal;
         for (final Parameter param : params) {
-            item = new MenuItem(param.getId() + " = " + param.getValue());
-            item.setOnAction(e -> {
+            itemLocal = new MenuItem(param.getId() + " = " + param.getValue());
+            itemLocal.setOnAction(e -> {
                 InsertIntoFunctionInput(param.getId());
                 ParseFunctionInputToImage(null);
             });
 
-            buttonParameterInsert.getItems().add(item);
+            buttonParameterInsert.getItems().add(itemLocal);
         }
+        
+        Menu menuGlobalParams = new Menu("Global Parameter");
+        
+
+        buttonParameterInsert.getItems().clear();
+        buttonParameterInsert.getItems().add(menuPlaces);
+        buttonParameterInsert.getItems().add(menuTransitions);
+        buttonParameterInsert.getItems().add(new SeparatorMenuItem());
+        buttonParameterInsert.getItems().add(menuLocalParams);
+        buttonParameterInsert.getItems().add(menuGlobalParams);
     }
 
     private void CreateReferencingParameter(String id, String value, IElement element) {
@@ -639,7 +645,7 @@ public class ElementController implements Initializable
         }
 
         try {
-            parameterController.ValidateFunctionInput(transition, transitionFunctionInput.getText());
+            parameterService.ValidateFunctionInput(transition, transitionFunctionInput.getText());
             image = PrettyFormulaParser.parseToImage(transitionFunctionInput.getText());
             SwingUtilities.invokeLater(() -> {
                 if (transitionFunctionImage.getContent() != null) {
