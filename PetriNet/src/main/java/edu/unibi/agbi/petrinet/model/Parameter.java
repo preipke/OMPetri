@@ -7,6 +7,7 @@ package edu.unibi.agbi.petrinet.model;
 
 import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -17,7 +18,7 @@ import javafx.beans.property.StringProperty;
  *
  * @author PR
  */
-public class Parameter implements Comparable
+public class Parameter //implements Comparable
 {
     private final String id;
     private final StringProperty value;
@@ -145,29 +146,60 @@ public class Parameter implements Comparable
     public IntegerProperty getReferingNodesCountProperty() {
         return referingNodesCount;
     }
-
-    /**
-     * Compares the name strings of two parameters lexicographically. Uses the
-     * compareTo method for strings to compare the parameter's ids.
-     *
-     * @param o
-     * @return
-     */
+    
     @Override
-    public int compareTo(Object o) {
-        Parameter param = (Parameter) o;
-        if (this.getType() != param.getType()) {
-            if (this.getType() == Type.LOCAL) {
-                return -1;
-            } else {
-                return 1;
-            }
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Parameter)) {
+            return false;
         }
-        return this.getId().compareTo(param.getId());
+        Parameter param = (Parameter) obj;
+        if (!param.getId().matches(id)) {
+            return false;
+        }
+        if (!param.getValue().matches(getValue())) {
+            return false;
+        }
+        return param.getType() == type;
     }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 97 * hash + Objects.hashCode(this.id);
+        hash = 97 * hash + Objects.hashCode(this.value);
+        hash = 97 * hash + Objects.hashCode(this.type);
+        return hash;
+    }
+
+//    /**
+//     * Compares the name strings of two parameters lexicographically. Uses the
+//     * compareTo method for strings to compare the parameter's ids.
+//     *
+//     * @param o
+//     * @return
+//     */
+//    @Override
+//    public int compareTo(Object o) {
+//        Parameter param = (Parameter) o;
+//        if (this.getType() != param.getType()) {
+//            switch(getType()) {
+//                case LOCAL:
+//                    return -1;
+//                case GLOBAL:
+//                    if (param.getType() == Type.LOCAL) {
+//                        return 1;
+//                    } else {
+//                        return -1;
+//                    }
+//                default:
+//                    return 1;
+//            }
+//        }
+//        return this.getId().compareTo(param.getId());
+//    }
 
     public enum Type
     {
-        LOCAL, GLOBAL;
+        LOCAL, GLOBAL, REFERENCE;
     }
 }

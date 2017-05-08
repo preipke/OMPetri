@@ -16,59 +16,53 @@ import edu.unibi.agbi.petrinet.model.Weight;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Collection;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
-import edu.unibi.agbi.petrinet.model.Parameter;
+import edu.unibi.agbi.petrinet.model.FunctionElement;
+import java.util.Properties;
 
 /**
  *
  * @author PR
  */
-public class OpenModelicaExport
+public class OpenModelicaExporter
 {
     private static final String ENDL = System.getProperty("line.separator");
     private static final String INDENT = "  ";
 
-    private static final String OM_SIM_LIB = "PNlib";
+    private final String propertiesPath = "/openmodelica.properties";
+    private final Properties properties;
+    
+    public OpenModelicaExporter() throws IOException {
+        properties = new Properties();
+        properties.load(OpenModelicaExporter.class.getResourceAsStream(propertiesPath));
+    }
 
-    private static final String PLACE_CONTINUOUS = "PNlib.PC";
-    private static final String PLACE_DISCRETE = "PNlib.PD";
-
-    private static final String TRANSITION_CONTINUOUS = "PNlib.TC";
-    private static final String TRANSITION_DISCRETE = "PNlib.TD";
-    private static final String TRANSITION_STOCHASTIC = "PNlib.TS";
-
-    private static final String COLORED_PLACE_CONTINUOUS = "PNlib.Examples.Models.ColoredPlaces.CPC";
-    private static final String COLORED_TRANSITION_CONTINUOUS = "PNlib.Examples.Models.ColoredPlaces.CTC";
-
-    public static References export(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public References export(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
         fileMO = exportMO(petriNet, fileMO);
         return exportMOS(petriNet, fileMOS, fileMO, workDirectory);
     }
 
-    public static File exportMO(PetriNet petriNet, File file) throws IOException {
-
-        Collection<IArc> arcs = petriNet.getArcs();
-        Collection<Colour> colors = petriNet.getColours();
-        Collection<INode> places = petriNet.getPlaces();
-        Collection<INode> transitions = petriNet.getTransitions();
-
-        boolean isColoredPn = colors.size() != 1;
+    public File exportMO(PetriNet model, File file) throws IOException {
 
         PrintWriter writer = new PrintWriter(file);
+
+        Collection<IArc> arcs = model.getArcs();
+        Collection<Colour> colors = model.getColours();
+        Collection<INode> places = model.getPlaces();
+        Collection<INode> transitions = model.getTransitions();
+
+        boolean isColoredPn = colors.size() != 1;
 
         /**
          * Model name.
          */
-        writer.append("model '" + petriNet.getName() + "'");
+        writer.append("model '" + model.getName() + "'");
         writer.println();
 
         /**
@@ -93,22 +87,23 @@ public class OpenModelicaExport
          */
         writer.append(INDENT + "inner PNlib.Settings");
         writer.append(" settings(showTokenFlow = true)");
-//        writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
         writer.append(";");
         writer.println();
-        
+
         /**
          * Parameter.
          */
-        for (Parameter param : petriNet.getParameters().values()) {
-            
-        }
+//        model.getParameters().values().stream().forEach(param -> {
+//            writer.append(INDENT + "parameter Real '" + param.getId() + "'(final unit=\"\") = " + param.getValue() + ";");
+//            writer.println();
+//        });
+        // handled when parsing the function, replacing inside the function
 
         /**
          * Places.
          */
         boolean isFirst, isInnerFirst;
-        String tmp1, tmp2, tmp3, tokenType, functionType;
+        String tmp, tmp1, tmp2, tmp3, tokenType, functionType, functionString;
         Function function;
         Token token;
         Weight weight;
@@ -127,20 +122,29 @@ public class OpenModelicaExport
             tmp3 = "";
 
             writer.append(INDENT);
-            if (place.getPlaceType() == Place.Type.CONTINUOUS) {
-                if (isColoredPn) {
-                    writer.append(COLORED_PLACE_CONTINUOUS);
-                } else {
-                    writer.append(PLACE_CONTINUOUS);
-                }
-                tokenType = "Marks";
-            } else {
-                if (isColoredPn) {
-                    throw new IOException("Colored discrete places are not yet supported!");
-                } else {
-                    writer.append(PLACE_DISCRETE);
-                }
-                tokenType = "Tokens";
+            switch (place.getPlaceType()) {
+                
+                case CONTINUOUS:
+                    if (isColoredPn) {
+                        writer.append(properties.getProperty("pnlib.colored.place.continuous"));
+                    } else {
+                        writer.append(properties.getProperty("pnlib.place.continuous"));
+                    }
+                    tokenType = "Marks";
+                    break;
+                    
+                case DISCRETE:
+                    if (isColoredPn) {
+                        writer.append(properties.getProperty("pnlib.colored.place.discrete"));
+                        throw new IOException("Colored discrete places are not yet supported!"); // TODO
+                    } else {
+                        writer.append(properties.getProperty("pnlib.place.discrete"));
+                    }
+                    tokenType = "Tokens";
+                    break;
+                    
+                default:
+                    throw new IOException("Unhandled place type detected! [" + place.getPlaceType() + "]");
             }
             writer.append(" '" + place.getId() + "'");
             writer.append("(nIn=" + place.getArcsIn().size());
@@ -220,40 +224,62 @@ public class OpenModelicaExport
 
             transition = (Transition) nTransition;
 
-            function = transition.getFunction();
-
             writer.append(INDENT);
-            if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
-                if (isColoredPn) {
-                    writer.append(COLORED_TRANSITION_CONTINUOUS);
-                    functionType = "maximumSpeed";
-                } else {
-                    writer.append(TRANSITION_CONTINUOUS);
-                    functionType = "maximumSpeed";
-                }
-            } else if (transition.getTransitionType() == Transition.Type.DISCRETE) {
-                if (isColoredPn) {
-                    throw new IOException("Colored discrete transitions are not yet supported!");
-                } else {
-                    writer.append(TRANSITION_DISCRETE);
-                    functionType = "delay";
-                }
-            } else {
-                if (isColoredPn) {
-                    throw new IOException("Colored stochastic transitions are not yet supported!");
-                } else {
-                    writer.append(TRANSITION_STOCHASTIC);
-                    functionType = "h"; // TODO
-                }
+            switch (transition.getTransitionType()) {
+                
+                case CONTINUOUS:
+                    if (isColoredPn) {
+                        writer.append(properties.getProperty("pnlib.colored.transition.continuous"));
+                        functionType = "maximumSpeed";
+                    } else {
+                        writer.append(properties.getProperty("pnlib.transition.continuous"));
+                        functionType = "maximumSpeed";
+                    }
+                    break;
+                    
+                case DISCRETE:
+                    if (isColoredPn) {
+                        writer.append(properties.getProperty("pnlib.colored.transition.discrete"));
+                        throw new IOException("Colored discrete transitions are not yet supported!");
+                    } else {
+                        writer.append(properties.getProperty("pnlib.transition.discrete"));
+                        functionType = "delay";
+                    }
+                    break;
+                    
+                case STOCHASTIC:
+                    if (isColoredPn) {
+                        writer.append(properties.getProperty("pnlib.colored.transition.stochastic"));
+                        throw new IOException("Colored stochastic transitions are not yet supported!");
+                    } else {
+                        writer.append(properties.getProperty("pnlib.transition.stochastic"));
+                        functionType = "h"; // TODO
+                    }
+                    break;
+                    
+                default:
+                    throw new IOException("Unhandelt transition type detected! [" + transition.getTransitionType() + "]");
             }
             writer.append(" '" + transition.getId() + "'");
             writer.append("(nIn=" + transition.getArcsIn().size());
             writer.append(",nOut=" + transition.getArcsOut().size());
             writer.append("," + functionType);
+            
+            function = transition.getFunction();
             if (!function.getUnit().isEmpty()) {
                 writer.append("(final unit=\"" + function.getUnit() + "\")");
             }
-            writer.append("=" + function.toString());
+            
+            // Function and parameters
+            functionString = "";
+            for (FunctionElement element : function.getElements()) {
+                if (element.getType() == FunctionElement.Type.PARAMETER) {
+                    functionString += model.getParameters().get(element.get()).getValue();
+                } else {
+                    functionString += element.get();
+                }
+            }
+            writer.append("=" + functionString);
 
             /**
              * Weights, incoming
@@ -354,7 +380,7 @@ public class OpenModelicaExport
             writer.append(",arcWeightIn={" + tmp1 + "}");
             writer.append(",arcWeightOut={" + tmp2 + "}");
             writer.append(")");
-            //writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
+//            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
             writer.println();
         }
@@ -407,7 +433,7 @@ public class OpenModelicaExport
         writer.append(INDENT + "annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
         writer.println();
 
-        writer.append("end '" + petriNet.getName() + "'");
+        writer.append("end '" + model.getName() + "'");
         writer.append(";");
         writer.println();
 
@@ -418,14 +444,14 @@ public class OpenModelicaExport
 
     /**
      *
-     * @param petriNet
+     * @param model
      * @param fileMOS
      * @param fileMO
      * @param workDirectory
      * @return map containing filter variables and the referenced elements
      * @throws IOException
      */
-    public static References exportMOS(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public References exportMOS(PetriNet model, File fileMOS, File fileMO, File workDirectory) throws IOException {
 
         References references = new References();
 
@@ -433,11 +459,11 @@ public class OpenModelicaExport
         String tmp;
         int index;
 
-        for (IElement arc : petriNet.getArcs()) {
+        for (IElement arc : model.getArcs()) {
             arc.getFilter().clear();
         }
 
-        for (INode place : petriNet.getPlaces()) {
+        for (INode place : model.getPlaces()) {
 
             place.getFilter().clear();
 
@@ -479,19 +505,17 @@ public class OpenModelicaExport
             }
         }
 
-        for (INode transition : petriNet.getTransitions()) {
+        for (INode transition : model.getTransitions()) {
 
             transition.getFilter().clear();
 
-            tmp = "'" + transition.getId() + "'.fire";
-            filter += tmp + "|";
-            references.addElementReference(transition, tmp);
-            references.addFilterReference(tmp, transition);
-
-            tmp = "'" + transition.getId() + "'.actualSpeed";
-            filter += tmp + "|";
-            references.addElementReference(transition, tmp);
-            references.addFilterReference(tmp, transition);
+            String[] vars = new String[]{"fire", "actualSpeed"};
+            for (String var : vars) {
+                tmp = "'" + transition.getId() + "'." + var;
+                filter += tmp + "|";
+                references.addElementReference(transition, tmp);
+                references.addFilterReference(tmp, transition);
+            }
         }
 
         filter = filter.substring(0, filter.length() - 1);
@@ -507,13 +531,13 @@ public class OpenModelicaExport
 
         out.write("cd(\"" + workDirectory.getPath().replace('\\', '/') + "/\"); ");
         out.write("getErrorString();\r\n");
-        out.write("loadModel(" + OM_SIM_LIB + ");");
+        out.write("loadModel(" + properties.getProperty("openmodelica.library") + ");");
         out.write("getErrorString();\r\n");
         out.write("loadFile(\"" + fileMO.getPath().replace('\\', '/') + "\"); ");
         out.write("getErrorString();\r\n");
         out.write("setCommandLineOptions(\"--preOptModules+=unitChecking\");");
         out.write("getErrorString();\r\n");
-        out.write("buildModel('" + petriNet.getName() + "', " + filter + "); ");
+        out.write("buildModel('" + model.getName() + "', " + filter + "); ");
         out.write("getErrorString();\r\n");
 
         out.close();
@@ -522,56 +546,11 @@ public class OpenModelicaExport
     }
 
     /**
-     * Creates a temporary file. File can only be read, written or executed by
-     * the creator. Automatically deletes the file on application exit.
-     *
-     * @param prefix file prefix
-     * @param suffix file suffix
-     * @return the created file
-     * @throws java.io.IOException
-     */
-    public static File CreateTempFile(String prefix, String suffix) throws IOException {
-
-        /*if (tempDirectoryPath == null) {
-            tempDirectoryPath = Files.createTempDirectory(null);
-            System.getSecurityManager().checkDelete(tempDirectoryPath.toFile().toString());
-            System.out.println("Temp path: " + tempDirectoryPath);
-            System.out.println("Temp path: " + tempDirectoryPath.toString());
-            System.out.println("Temp path: " + tempDirectoryPath.toFile().toString());
-        }*/
-        File tempFile = null;
-        InputStream input = null;
-        OutputStream output = null;
-
-        try {
-            // Create temporary file
-            //tempFile = File.createTempFile(tempDirectoryPath.getFileName() + File.separator + fileName , null);
-            //System.out.println("Temp file: " + tempFile);
-            tempFile = File.createTempFile(prefix + "_", suffix);
-            tempFile.setReadable(false, false);
-            tempFile.setReadable(true, true);
-            tempFile.setWritable(true, true);
-            tempFile.setExecutable(true, true);
-            tempFile.deleteOnExit();
-
-            // Read resource and write to temp file
-            output = new FileOutputStream(tempFile);
-
-        } catch (IOException ex) {
-            throw (ex);
-        } finally {
-            close(input);
-            close(output);
-        }
-        return tempFile;
-    }
-
-    /**
      * Closes a given Closable.
      *
      * @param stream
      */
-    public static void close(final Closeable stream) {
+    public void close(final Closeable stream) {
         if (stream != null) {
             try {
                 stream.close();

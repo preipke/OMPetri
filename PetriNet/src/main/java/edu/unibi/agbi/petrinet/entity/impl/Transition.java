@@ -8,6 +8,7 @@ package edu.unibi.agbi.petrinet.entity.impl;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Function;
+import edu.unibi.agbi.petrinet.model.FunctionElement;
 
 /**
  *
@@ -28,6 +29,7 @@ public class Transition extends Node
         type = Element.Type.TRANSITION;
 
         function = new Function();
+        function.getElements().add(new FunctionElement("1", FunctionElement.Type.NUMBER));
     }
 
     public final void setFunction(Function function) {

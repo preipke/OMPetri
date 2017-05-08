@@ -19,6 +19,7 @@ import edu.unibi.agbi.petrinet.entity.IElement;
  */
 public class References {
     
+    private String pathSimulationExecutable;
     private final Map<String,IElement> filterElementReferences;
     private final Map<IElement,List<String>> elementFilterReferences;
     
@@ -58,5 +59,13 @@ public class References {
     
     public Map<IElement,List<String>> getElementFilterReferences() {
         return elementFilterReferences;
+    }
+    
+    public void setSimulationExecutablePath(String pathSimulationExecutable) {
+        this.pathSimulationExecutable = pathSimulationExecutable;
+    }
+    
+    public String getSimulationExectuablePath() {
+        return pathSimulationExecutable;
     }
 }

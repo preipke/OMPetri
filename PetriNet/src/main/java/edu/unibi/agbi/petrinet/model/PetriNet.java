@@ -120,7 +120,7 @@ public class PetriNet
     }
     
     private INode remove(Transition transition) {
-        transition.getFunction().getParameter().stream().forEach(param -> {
+        transition.getFunction().getParameters().stream().forEach(param -> {
             param.removeReferingNode(transition);
         });
         for (Parameter param : transition.getParameters().values()) {
