@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
+import edu.unibi.agbi.gnius.business.controller.ElementController;
 import edu.unibi.agbi.gnius.business.controller.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -44,6 +45,7 @@ public class MouseEventHandler {
     @Autowired private MessengerService messengerService;
 
     @Autowired private MainController mainController;
+    @Autowired private ElementController elementController;
     @Autowired private ToolsController editorToolsController;
 
     @Autowired private Calculator calculator;
@@ -200,7 +202,7 @@ public class MouseEventHandler {
     private void onMousePressed(MouseEvent event, GraphPane pane) {
 
         try {
-            mainController.StoreElementProperties();
+            elementController.StoreElementDetails();
         } catch (DataGraphServiceException ex) {
             messengerService.addToLog(ex.getMessage());
         }

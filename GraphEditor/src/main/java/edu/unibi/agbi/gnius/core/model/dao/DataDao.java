@@ -19,6 +19,6 @@ public final class DataDao extends PetriNet
         super();
         this.setName("Untitled");
         this.setAuthor(System.getProperty("user.name"));
-        this.setDescription("New petri net.");
+        this.setDescription("New data model.");
     }
 }

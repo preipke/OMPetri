@@ -19,16 +19,16 @@ import java.util.Objects;
  */
 public class Simulation
 {
-    private final LocalDateTime simulationTime;
-    private final String author;
+    private final LocalDateTime dateTime;
+    private final String authorName;
     private final String modelName;
     private final String[] variables;
     private final References variableReferences;
     private final List<Object>[] results;
 
     public Simulation(String authorName, String modelName, String[] variables, References variableReferences) {
-        this.simulationTime = LocalDateTime.now();
-        this.author = authorName;
+        this.dateTime = LocalDateTime.now();
+        this.authorName = authorName;
         this.modelName = modelName;
         this.variables = variables;
         this.variableReferences = variableReferences;
@@ -54,8 +54,8 @@ public class Simulation
      *
      * @return
      */
-    public String getAuthor() {
-        return author;
+    public String getAuthorName() {
+        return authorName;
     }
 
     /**
@@ -68,12 +68,12 @@ public class Simulation
     }
 
     /**
-     * Gets the date and time at which this simulation was created.
+     * Gets the date and time at which this simulation was performed.
      *
      * @return
      */
-    public LocalDateTime getTime() {
-        return simulationTime;
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     /**
@@ -95,7 +95,8 @@ public class Simulation
     }
 
     /**
-     * Gets the variable name associated results.
+     * Gets the results. The lists at each index represents the data for a
+     * variable name at the exact same index position in the variables list.
      *
      * @return
      */
@@ -115,7 +116,7 @@ public class Simulation
 
         Simulation simulation = (Simulation) object;
 
-        if (!simulation.getTime().isEqual(simulationTime)) {
+        if (!simulation.getDateTime().isEqual(dateTime)) {
             return false;
         }
 
@@ -123,14 +124,14 @@ public class Simulation
             return false;
         }
 
-        return author.matches(simulation.getAuthor());
+        return authorName.matches(simulation.getAuthorName());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.simulationTime);
-        hash = 59 * hash + Objects.hashCode(this.author);
+        hash = 59 * hash + Objects.hashCode(this.dateTime);
+        hash = 59 * hash + Objects.hashCode(this.authorName);
         hash = 59 * hash + Objects.hashCode(this.modelName);
         return hash;
     }

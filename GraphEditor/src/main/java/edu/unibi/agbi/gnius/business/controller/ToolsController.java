@@ -69,10 +69,17 @@ public class ToolsController implements Initializable
             messengerService.addToLog(ex);
         }
     }
+    
+    private void RemoveSelected() {
+        try {
+            dataGraphService.remove(selectionService.getSelectedElements());
+        } catch (DataGraphServiceException ex) {
+            messengerService.addToLog(ex);
+        }
+    }
 
     @Override
     public void initialize(URL location , ResourceBundle resources) {
-        
         buttonCreatePlace.setOnAction(e -> { 
             createNodeType = Element.Type.PLACE; 
             EnableCreatingNodes();
@@ -81,7 +88,9 @@ public class ToolsController implements Initializable
             createNodeType = Element.Type.TRANSITION; 
             EnableCreatingNodes();
         });
-        
+        buttonCopy.setDisable(true);
+        buttonClone.setDisable(true);
+        buttonRemove.setOnAction(e -> RemoveSelected());
         buttonClusterCreate.setOnAction(e -> CreateCluster());
         buttonClusterRemove.setOnAction(e -> RemoveCluster());
     }

@@ -15,35 +15,54 @@ import javafx.scene.chart.XYChart;
  *
  * @author PR
  */
-public class SimulationLineChartData
+public class SimulationData
 {
     private final Simulation simulation;
-    private final IElement element;
-    private final String value;
-    private final XYChart.Series series;
+    private final String elementId;
+    private final String elementName;
+    private final String variable;
+    private XYChart.Series series;
+    
+    private boolean isShown;
     private long timeLastStatusChange;
 
-    public SimulationLineChartData(Simulation simulation, IElement element, String value) {
+    public SimulationData(Simulation simulation, IElement element, String value) {
         this.simulation = simulation;
-        this.element = element;
-        this.value = value;
-        this.series = new XYChart.Series();
+        this.elementId = element.getId();
+        this.elementName = element.getName();
+        this.variable = value;
     }
 
     public Simulation getSimulation() {
         return simulation;
     }
-
-    public IElement getElement() {
-        return element;
+    
+    public String getElementId() {
+        return elementId;
+    }
+    
+    public String getElementName() {
+        return elementName;
     }
 
     public String getVariable() {
-        return value;
+        return variable;
+    }
+    
+    public void setSeries(XYChart.Series series) {
+        this.series = series;
     }
 
     public XYChart.Series getSeries() {
         return series;
+    }
+    
+    public void setShown(boolean value) {
+        isShown = value;
+    }
+    
+    public boolean isShown() {
+        return isShown;
     }
 
     public void updateMilliSecondLastStatusChange() {
@@ -59,25 +78,25 @@ public class SimulationLineChartData
         if (object == null) {
             return false;
         }
-        if (!(object instanceof SimulationLineChartData)) {
+        if (!(object instanceof SimulationData)) {
             return false;
         }
-        SimulationLineChartData data = (SimulationLineChartData) object;
+        SimulationData data = (SimulationData) object;
         if (!data.getSimulation().equals(simulation)) {
             return false;
         }
-        if (!data.getElement().getId().matches(element.getId())) {
+        if (!data.getElementId().matches(elementId)) {
             return false;
         }
-        return data.getVariable().matches(value);
+        return data.getVariable().matches(variable);
     }
 
     @Override
     public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.simulation);
-        hash = 97 * hash + Objects.hashCode(this.element);
-        hash = 97 * hash + Objects.hashCode(this.value);
+        int hash = 5;
+        hash = 23 * hash + Objects.hashCode(this.simulation);
+        hash = 23 * hash + Objects.hashCode(this.elementId);
+        hash = 23 * hash + Objects.hashCode(this.variable);
         return hash;
     }
 }

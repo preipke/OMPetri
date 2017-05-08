@@ -14,11 +14,15 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.ParameterService;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import edu.unibi.agbi.prettyformulafx.main.DetailedParseCancellationException;
 import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
@@ -28,6 +32,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingNode;
@@ -36,8 +42,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
@@ -59,8 +67,10 @@ public class ElementController implements Initializable
 {
     @Autowired private MainController mainController;
     @Autowired private ParameterController parameterController;
+    @Autowired private ParameterService parameterService;
     @Autowired private DataGraphService dataService;
     @Autowired private MessengerService messengerService;
+    @Autowired private FunctionBuilder functionBuilder;
 
     // Top Container
     @FXML private TitledPane identifierPane;
@@ -128,120 +138,21 @@ public class ElementController implements Initializable
         }
 
         LoadGuiElements(selectedElement);
+        LoadElementInfo(selectedElement);
         LoadElementType(selectedElement);
-        LoadElementIdentifier(selectedElement);
         LoadElementProperties(selectedElement);
     }
 
-    /**
-     * Stores node properties. Stores the values from the textfields within the
-     * according entity, overwrites old values.
-     *
-     * @throws DataGraphServiceException
-     */
-    public void StoreElementProperties() throws DataGraphServiceException {
+    public void StoreElementDetails() throws DataGraphServiceException {
 
         if (selectedElement == null) {
             return;
         }
 
-        // TODO store values according to the selected colour
-        ColourChoice colourChoice;
-        Colour colour;
+        StoreElementInfo(selectedElement);
+        StoreElementProperties(selectedElement);
 
-        switch (selectedElement.getElementType()) {
-
-            case ARC:
-
-                colourChoice = (ColourChoice) colorChoice.getSelectionModel().getSelectedItem();
-                colour = colourChoice.getColour();
-
-                DataArc arc = (DataArc) selectedElement;
-
-                ArcTypeChoice arcTypeChoice = (ArcTypeChoice) elementSubtype.getSelectionModel().getSelectedItem();
-                DataArc.Type arcType = arcTypeChoice.getType();
-
-                if (arc.getArcType() != arcType) {
-                    dataService.setArcTypeDefault(arcType);
-                    dataService.changeArcType(arc, arcType);
-                }
-
-                Weight weight = new Weight(colour);
-                if (!propertyWeight.getText().isEmpty()) {
-                    weight.setValue(propertyWeight.getText());
-                }
-                arc.setWeight(weight);
-
-                break;
-
-            case CLUSTER:
-                System.out.println("TODO StoreElementProperties CLUSTER");
-                break;
-
-            case PLACE:
-
-                colourChoice = (ColourChoice) colorChoice.getSelectionModel().getSelectedItem();
-                colour = colourChoice.getColour();
-
-                DataPlace place = (DataPlace) selectedElement;
-
-                PlaceTypeChoice placeTypeChoice = (PlaceTypeChoice) elementSubtype.getSelectionModel().getSelectedItem();
-                DataPlace.Type placeType = placeTypeChoice.getType();
-
-                if (place.getPlaceType() != placeType) {
-                    dataService.setPlaceTypeDefault(placeType);
-                    dataService.changePlaceType(place, placeType);
-                }
-
-                Token token = new Token(colour);
-                if (!propertyToken.getText().isEmpty()) {
-                    try {
-                        token.setValueStart(Double.parseDouble(propertyToken.getText()));
-                    } catch (NumberFormatException ex) {
-                        messengerService.addToLog("Value for 'Token' is not a number!");
-                    }
-                }
-                if (!propertyTokenMin.getText().isEmpty()) {
-                    try {
-                        token.setValueMin(Double.parseDouble(propertyTokenMin.getText()));
-                    } catch (NumberFormatException ex) {
-                        messengerService.addToLog("Value for 'Token (min.)' is not a number!");
-                    }
-                }
-                if (!propertyTokenMax.getText().isEmpty()) {
-                    try {
-                        token.setValueMax(Double.parseDouble(propertyTokenMax.getText()));
-                    } catch (NumberFormatException ex) {
-                        messengerService.addToLog("Value for 'Token (max.)' is not a number!");
-                    }
-                }
-                place.setToken(token);
-
-                break;
-
-            case TRANSITION:
-
-                DataTransition transition = (DataTransition) selectedElement;
-
-                TransitionTypeChoice transitionTypeChoice = (TransitionTypeChoice) elementSubtype.getSelectionModel().getSelectedItem();
-                DataTransition.Type transitionType = transitionTypeChoice.getType();
-
-                if (transition.getTransitionType() != transitionType) {
-                    dataService.setTransitionTypeDefault(transitionType);
-                    dataService.changeTransitionType(transition, transitionType);
-                }
-
-                ParseFunctionInput(null);
-                if (!transitionFunctionInput.getText().isEmpty()) {
-                    transition.getFunction().set(latestValidInput);
-                } else {
-                    transition.getFunction().set("1");
-                }
-
-                break;
-        }
-
-        storeNodeInfo(selectedElement);
+        selectedElement = null;
     }
 
     /**
@@ -283,88 +194,6 @@ public class ElementController implements Initializable
             case TRANSITION:
                 propertiesBox.getChildren().add(propertiesTransition);
                 break;
-        }
-    }
-
-    /**
-     * Populates the GUI with the properties of the given element.
-     *
-     * @param element
-     */
-    private void LoadElementProperties(IDataElement element) {
-
-        ObservableList<ColourChoice> choicesColour = FXCollections.observableArrayList();
-        Collection<Colour> colors = dataService.getDataDao().getColours();
-
-        switch (element.getElementType()) {
-
-            case ARC:
-
-                DataArc arc = (DataArc) element;
-
-                Map<Colour, Weight> weights = arc.getWeightMap();
-                Weight weight;
-
-                for (Colour color : colors) {
-                    if (weights.get(color) != null) {
-                        choicesColour.add(new ColourChoice(color));
-                    }
-                }
-                weight = weights.get(choicesColour.get(0).getColour());
-                propertyWeight.setText(weight.getValue());
-                break;
-
-            case CLUSTER:
-                System.out.println("TODO LoadElementDetails CLUSTER");
-                break;
-
-            case PLACE:
-
-                DataPlace place = (DataPlace) element;
-
-                Map<Colour, Token> tokens = place.getTokenMap();
-                Token token = null;
-                for (Colour color : colors) {
-                    if (tokens.get(color) != null) {
-                        choicesColour.add(new ColourChoice(color));
-                    }
-                }
-                token = tokens.get(choicesColour.get(0).getColour());
-                propertyToken.setText(Double.toString(token.getValueStart()));
-                propertyTokenMin.setText(Double.toString(token.getValueMin()));
-                propertyTokenMax.setText(Double.toString(token.getValueMax()));
-                break;
-
-            case TRANSITION:
-
-                DataTransition transition = (DataTransition) element;
-
-                transitionFunctionInput.setText(transition.getFunction().toString());
-                latestCaretPosition = transitionFunctionInput.getText().length();
-                LoadParameterChoices(transition);
-                ParseFunctionInput(null);
-                break;
-        }
-
-        colorChoice.setItems(choicesColour);
-        colorChoice.getSelectionModel().select(0);
-    }
-
-    /**
-     * Creates MenuItem choices for inserting parameter from the parameters
-     * available for the given element.
-     */
-    private void LoadParameterChoices(IDataElement element) {
-        List<Parameter> params = parameterController.getParameter(element);
-        MenuItem item;
-        buttonParameterInsert.getItems().clear();
-        for (final Parameter param : params) {
-            item = new MenuItem(param.getId() + " = " + param.getValue());
-            item.setOnAction(e -> {
-                InsertParamToFunctionInput(param);
-                ParseFunctionInput(null);
-            });
-            buttonParameterInsert.getItems().add(item);
         }
     }
 
@@ -431,7 +260,7 @@ public class ElementController implements Initializable
      *
      * @param element
      */
-    private void LoadElementIdentifier(IDataElement element) {
+    private void LoadElementInfo(IDataElement element) {
         elementId.setText(element.getId());
         elementName.setText(element.getName());
         if (!elementLabel.isDisabled()) {
@@ -441,11 +270,326 @@ public class ElementController implements Initializable
     }
 
     /**
+     * Populates the GUI with the properties of the given element.
+     *
+     * @param element
+     */
+    private void LoadElementProperties(IDataElement element) {
+
+        ObservableList<ColourChoice> choicesColour = FXCollections.observableArrayList();
+        Collection<Colour> colors = dataService.getDataDao().getColours();
+
+        switch (element.getElementType()) {
+
+            case ARC:
+
+                DataArc arc = (DataArc) element;
+
+                Map<Colour, Weight> weights = arc.getWeightMap();
+                Weight weight;
+
+                for (Colour color : colors) {
+                    if (weights.get(color) != null) {
+                        choicesColour.add(new ColourChoice(color));
+                    }
+                }
+                weight = weights.get(choicesColour.get(0).getColour());
+                propertyWeight.setText(weight.getValue());
+                break;
+
+            case CLUSTER:
+                System.out.println("TODO LoadElementDetails CLUSTER");
+                break;
+
+            case PLACE:
+
+                DataPlace place = (DataPlace) element;
+
+                Map<Colour, Token> tokens = place.getTokenMap();
+                Token token = null;
+                for (Colour color : colors) {
+                    if (tokens.get(color) != null) {
+                        choicesColour.add(new ColourChoice(color));
+                    }
+                }
+                token = tokens.get(choicesColour.get(0).getColour());
+                propertyToken.setText(Double.toString(token.getValueStart()));
+                propertyTokenMin.setText(Double.toString(token.getValueMin()));
+                propertyTokenMax.setText(Double.toString(token.getValueMax()));
+                break;
+
+            case TRANSITION:
+
+                DataTransition transition = (DataTransition) element;
+
+                transitionFunctionInput.setText(transition.getFunction().toString());
+                latestCaretPosition = transitionFunctionInput.getText().length();
+                LoadParameterChoices(transition);
+                ParseFunctionInputToImage(null);
+                break;
+        }
+
+        colorChoice.setItems(choicesColour);
+        colorChoice.getSelectionModel().select(0);
+    }
+
+    /**
+     * Creates MenuItem choices for inserting parameter from the parameters
+     * available for the given element.
+     */
+    private void LoadParameterChoices(IDataElement element) {
+
+        final String filter = "".toLowerCase();
+
+        final Menu menuPlaces = new Menu("Places");
+        final Menu menuTransitions = new Menu("Transitions");
+
+        dataService.getDataDao().getPlaces().stream()
+                .filter(place -> place.getId().toLowerCase().contains(filter) || place.getName().toLowerCase().contains(filter))
+                .forEach(place -> {
+
+                    final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
+                    if (place.getArcsIn().size() > 0) {
+
+                        IntegerProperty arcIndex = new SimpleIntegerProperty(0);
+                        place.getArcsIn().forEach(arc -> {
+
+                            arcIndex.set(arcIndex.get() + 1);
+                            String ident = "TokenFlow_" + arc.getTarget().getId() + arc.getSource().getId();
+                            String value = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + arcIndex.get() + "]";
+
+                            MenuItem itemArcFlow = new MenuItem("Actual | f(t)");
+                            itemArcFlow.setOnAction(e -> {
+                                CreateReferencingParameter(ident + "_current", "der(" + value + ")", arc);
+                            });
+
+                            MenuItem itemArcFlowDer = new MenuItem("Total | F(t)");
+                            itemArcFlowDer.setOnAction(e -> {
+                                CreateReferencingParameter(ident + "_total", value, arc);
+                            });
+
+                            Menu menuArc = new Menu("Token Flow from " + arc.getSource().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
+                            menuArc.getItems().add(itemArcFlowDer);
+                            menuArc.getItems().add(itemArcFlow);
+
+                            menuPlaceArcsIn.getItems().add(menuArc);
+                        });
+                    } else {
+                        menuPlaceArcsIn.setDisable(true);
+                    }
+
+                    final Menu menuPlaceArcsOut = new Menu("Outgoing Arcs");
+                    if (place.getArcsOut().size() > 0) {
+
+                        IntegerProperty arcIndex = new SimpleIntegerProperty(0);
+                        place.getArcsOut().forEach(arc -> {
+
+                            arcIndex.set(arcIndex.get() + 1);
+                            String ident = "TokenFlow_" + arc.getSource().getId() + arc.getTarget().getId();
+                            String value = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + arcIndex.get() + "]";
+
+                            MenuItem itemArcFlow = new MenuItem("Actual | F(t)");
+                            itemArcFlow.setOnAction(e -> {
+                                CreateReferencingParameter(ident + "_current", "der(" + value + ")", arc);
+                            });
+
+                            MenuItem itemArcFlowDer = new MenuItem("Total | f(t)");
+                            itemArcFlowDer.setOnAction(e -> {
+                                CreateReferencingParameter(ident + "_total", value, arc);
+                            });
+
+                            Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getTarget().getId() + "->" + arc.getSource().getId() + ")");
+                            menuArc.getItems().add(itemArcFlowDer);
+                            menuArc.getItems().add(itemArcFlow);
+
+                            menuPlaceArcsOut.getItems().add(menuArc);
+                        });
+                    } else {
+                        menuPlaceArcsOut.setDisable(true);
+                    }
+
+                    MenuItem itemPlaceToken = new MenuItem("Token");
+                    itemPlaceToken.setOnAction(e -> {
+                        CreateReferencingParameter("Token_" + place.getId(), "'" + place.getId() + "'.t", place);
+                    });
+
+                    Menu menuPlace = new Menu("(" + place.getId() + ") " + place.getName());
+                    menuPlace.getItems().add(itemPlaceToken);
+                    menuPlace.getItems().add(menuPlaceArcsIn);
+                    menuPlace.getItems().add(menuPlaceArcsOut);
+
+                    menuPlaces.getItems().add(menuPlace);
+                });
+
+        dataService.getDataDao().getTransitions().stream()
+                .filter(transition -> transition.getId().toLowerCase().contains(filter) || transition.getName().toLowerCase().contains(filter))
+                .forEach(transition -> {
+                    
+                    MenuItem itemTransitionSpeed = new MenuItem("Speed | v(t)");
+                    itemTransitionSpeed.setOnAction(e -> {
+                        CreateReferencingParameter("Speed_" + transition.getId(), "'" + transition.getId() + "'.actualSpeed", transition);
+                    });
+
+                    MenuItem itemTransitionFire = new MenuItem("Fire | 0 or 1");
+                    itemTransitionFire.setOnAction(e -> {
+                        CreateReferencingParameter("Fire_" + transition.getId(), "'" + transition.getId() + "'.fire", transition);
+                    });
+
+                    Menu menuTransition = new Menu("(" + transition.getId() + ") " + transition.getName());
+                    menuTransition.getItems().add(itemTransitionFire);
+                    menuTransition.getItems().add(itemTransitionSpeed);
+
+                    menuTransitions.getItems().add(menuTransition);
+                });
+//        placeReferenceChoices.sort(Comparator.comparing(PlaceReferenceChoice::toString));
+
+        buttonParameterInsert.getItems().clear();
+        buttonParameterInsert.getItems().add(menuPlaces);
+        buttonParameterInsert.getItems().add(menuTransitions);
+        buttonParameterInsert.getItems().add(new SeparatorMenuItem());
+
+        List<Parameter> params = parameterController.getParameter(element);
+        MenuItem item;
+
+        for (final Parameter param : params) {
+            item = new MenuItem(param.getId() + " = " + param.getValue());
+            item.setOnAction(e -> {
+                InsertIntoFunctionInput(param.getId());
+                ParseFunctionInputToImage(null);
+            });
+
+            buttonParameterInsert.getItems().add(item);
+        }
+    }
+
+    private void CreateReferencingParameter(String id, String value, IElement element) {
+        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE);
+        try {
+            parameterService.add(param);
+//        element.getParameters().put(param.getId(), param);
+        } catch (ParameterServiceException ex) {
+            setStatus("Cannot create reference parameter! [" + ex.getMessage() + "]", true);
+            return;
+        }
+        InsertIntoFunctionInput(param.getId());
+        ParseFunctionInputToImage(null);
+    }
+
+    /**
+     * Stores node properties. Stores the values from the textfields within the
+     * according entity, overwrites old values.
+     *
+     * @throws DataGraphServiceException
+     */
+    private void StoreElementProperties(IDataElement element) throws DataGraphServiceException {
+
+        // TODO store values according to the selected colour
+        ColourChoice colourChoice;
+        Colour colour;
+
+        switch (element.getElementType()) {
+
+            case ARC:
+
+                colourChoice = (ColourChoice) colorChoice.getSelectionModel().getSelectedItem();
+                colour = colourChoice.getColour();
+
+                DataArc arc = (DataArc) element;
+
+                ArcTypeChoice arcTypeChoice = (ArcTypeChoice) elementSubtype.getSelectionModel().getSelectedItem();
+                DataArc.Type arcType = arcTypeChoice.getType();
+
+                if (arc.getArcType() != arcType) {
+                    dataService.setArcTypeDefault(arcType);
+                    dataService.changeArcType(arc, arcType);
+                }
+
+                Weight weight = new Weight(colour);
+                if (!propertyWeight.getText().isEmpty()) {
+                    weight.setValue(propertyWeight.getText());
+                }
+                arc.setWeight(weight);
+
+                break;
+
+            case CLUSTER:
+                System.out.println("TODO StoreElementProperties CLUSTER");
+                break;
+
+            case PLACE:
+
+                colourChoice = (ColourChoice) colorChoice.getSelectionModel().getSelectedItem();
+                colour = colourChoice.getColour();
+
+                DataPlace place = (DataPlace) element;
+
+                PlaceTypeChoice placeTypeChoice = (PlaceTypeChoice) elementSubtype.getSelectionModel().getSelectedItem();
+                DataPlace.Type placeType = placeTypeChoice.getType();
+
+                if (place.getPlaceType() != placeType) {
+                    dataService.setPlaceTypeDefault(placeType);
+                    dataService.changePlaceType(place, placeType);
+                }
+
+                Token token = new Token(colour);
+                if (!propertyToken.getText().isEmpty()) {
+                    try {
+                        token.setValueStart(Double.parseDouble(propertyToken.getText()));
+                    } catch (NumberFormatException ex) {
+                        messengerService.addToLog("Value for 'Token' is not a number!");
+                    }
+                }
+                if (!propertyTokenMin.getText().isEmpty()) {
+                    try {
+                        token.setValueMin(Double.parseDouble(propertyTokenMin.getText()));
+                    } catch (NumberFormatException ex) {
+                        messengerService.addToLog("Value for 'Token (min.)' is not a number!");
+                    }
+                }
+                if (!propertyTokenMax.getText().isEmpty()) {
+                    try {
+                        token.setValueMax(Double.parseDouble(propertyTokenMax.getText()));
+                    } catch (NumberFormatException ex) {
+                        messengerService.addToLog("Value for 'Token (max.)' is not a number!");
+                    }
+                }
+                place.setToken(token);
+
+                break;
+
+            case TRANSITION:
+
+                DataTransition transition = (DataTransition) element;
+
+                TransitionTypeChoice transitionTypeChoice = (TransitionTypeChoice) elementSubtype.getSelectionModel().getSelectedItem();
+                DataTransition.Type transitionType = transitionTypeChoice.getType();
+
+                if (transition.getTransitionType() != transitionType) {
+                    dataService.setTransitionTypeDefault(transitionType);
+                    dataService.changeTransitionType(transition, transitionType);
+                }
+
+                ParseFunctionInputToImage(null);
+                try {
+                    if (!transitionFunctionInput.getText().isEmpty()) {
+                        transition.setFunction(functionBuilder.build(latestValidInput));
+                    } else {
+                        transition.setFunction(functionBuilder.build("1"));
+                    }
+                } catch (Exception ex) {
+                    messengerService.addToLog(ex.getMessage());
+                }
+
+                break;
+        }
+    }
+
+    /**
      * Stores info from the property textfields to the given element.
      *
      * @param element
      */
-    private void storeNodeInfo(IDataElement element) {
+    private void StoreElementInfo(IDataElement element) {
         if (!elementName.isDisabled()) {
             if (elementName.getText() != null) {
                 element.setName(elementName.getText());
@@ -475,16 +619,15 @@ public class ElementController implements Initializable
      *
      * @param param
      */
-    private void InsertParamToFunctionInput(Parameter param) {
-        System.out.println("Caret position: " + latestCaretPosition);
+    private void InsertIntoFunctionInput(String value) {
         String function;
         function = transitionFunctionInput.getText().substring(0, latestCaretPosition);
-        function += param.getId();
+        function += value;
         function += transitionFunctionInput.getText().substring(latestCaretPosition);
         transitionFunctionInput.setText(function);
     }
 
-    private void ParseFunctionInput(KeyEvent event) {
+    private void ParseFunctionInputToImage(KeyEvent event) {
 
         final DataTransition transition;
         final BufferedImage image;
@@ -507,17 +650,24 @@ public class ElementController implements Initializable
                 transitionFunctionImage.setContent(img);
             });
             latestValidInput = transitionFunctionInput.getText();
-            transitionFunctionStatus.setTextFill(Color.GREEN);
-            transitionFunctionStatus.setText("Valid!");
+            setStatus("Valid!", false);
         } catch (DetailedParseCancellationException ex) {
             if (event != null && event.getCode() != KeyCode.RIGHT && event.getCode() != KeyCode.LEFT) {
                 transitionFunctionInput.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
             }
-            transitionFunctionStatus.setTextFill(Color.RED);
-            transitionFunctionStatus.setText("Invalid input! [" + ex.getMessage() + "]");
+            setStatus("Invalid input! [" + ex.getMessage() + "]", true);
         } catch (Exception ex) {
+            setStatus("Invalid input! [" + ex.getMessage() + "]", true);
+        }
+    }
+
+    private void setStatus(String msg, boolean isError) {
+        if (isError) {
             transitionFunctionStatus.setTextFill(Color.RED);
-            transitionFunctionStatus.setText("Invalid input! [" + ex.getMessage() + "]");
+            transitionFunctionStatus.setText(msg);
+        } else {
+            transitionFunctionStatus.setTextFill(Color.GREEN);
+            transitionFunctionStatus.setText(msg);
         }
     }
 
@@ -530,11 +680,11 @@ public class ElementController implements Initializable
         });
         transitionFunctionInput.setOnKeyReleased(e -> {
             latestCaretPosition = transitionFunctionInput.getCaretPosition();
-            ParseFunctionInput(e);
+            ParseFunctionInputToImage(e);
         });
         buttonParameterShow.setOnAction(e -> {
             try {
-                StoreElementProperties();
+                StoreElementDetails();
             } catch (DataGraphServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             }

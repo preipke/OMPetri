@@ -34,7 +34,6 @@ public class SimulationController implements Initializable
     
     @FXML private Button buttonOpenResultsViewer;
     @FXML private Button buttonSimStart;
-    @FXML private Button buttonSimPause;
     @FXML private Button buttonSimStop;
     
     @FXML private TextField inputSimStartTime;
@@ -48,18 +47,6 @@ public class SimulationController implements Initializable
     @Value("${simulation.value.intervals}") private String simIntervals;
     @Value("${simulation.value.start}") private String simStartTime;
     @Value("${simulation.value.stop}") private String simStopTime;
-    
-    public String getSimulationAuthorName() {
-        return "Unknown";
-    }
-    
-    public String getSimulationName() {
-        return "Untitled";
-    }
-    
-    public String getSimulationDescription() {
-        return "Not available";
-    }
     
     public double getSimulationStopTime() throws NumberFormatException {
         return Double.parseDouble(inputSimStopTime.getText());
@@ -80,7 +67,6 @@ public class SimulationController implements Initializable
     public void StopSimulation() {
         
         buttonSimStop.setDisable(true);
-        buttonSimPause.setDisable(true);
         simProgress.setProgress(1);
 
         simulationService.StopSimulation();
@@ -89,10 +75,6 @@ public class SimulationController implements Initializable
         inputSimStopTime.setDisable(false);
         inputSimIntervals.setDisable(false);
         choicesSimIntegrator.setDisable(false);
-    }
-    
-    private void PauseResumeSimulation() {
-        
     }
     
     private void StartSimulation() {
@@ -108,7 +90,6 @@ public class SimulationController implements Initializable
         
         try {
             simulationService.StartSimulation();
-            buttonSimPause.setDisable(false);
             buttonSimStop.setDisable(false);
         } catch (SimulationServiceException ex) {
             messengerService.addToLog(ex);
@@ -122,8 +103,6 @@ public class SimulationController implements Initializable
         buttonOpenResultsViewer.setOnAction(e -> resultsController.ShowWindow());
         
         buttonSimStart.setOnAction(e -> StartSimulation());
-        buttonSimPause.setOnAction(e -> PauseResumeSimulation());
-        buttonSimPause.setDisable(true);
         buttonSimStop.setOnAction(e -> StopSimulation());
         buttonSimStop.setDisable(true);
         

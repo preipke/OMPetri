@@ -6,15 +6,15 @@
 package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationLineChartData;
+import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
-import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.util.XmlExporter;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import java.io.File;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -53,7 +53,6 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ResultsController implements Initializable
 {
-    @Autowired private SimulationService simulationService;
     @Autowired private ResultsService resultsService;
     @Autowired private XmlExporter xmlExporter;
 
@@ -70,29 +69,33 @@ public class ResultsController implements Initializable
     @FXML private Button buttonExportData;
     @FXML private Button buttonImportData;
 
-    @FXML private TableView<SimulationLineChartData> tableView;
-    @FXML private TableColumn<SimulationLineChartData, String> columnSimulation;
-    @FXML private TableColumn<SimulationLineChartData, String> columnElementId;
-    @FXML private TableColumn<SimulationLineChartData, String> columnElementName;
-    @FXML private TableColumn<SimulationLineChartData, String> columnValueName;
-    @FXML private TableColumn<SimulationLineChartData, String> columnValueStart;
-    @FXML private TableColumn<SimulationLineChartData, String> columnValueEnd;
-    @FXML private TableColumn<SimulationLineChartData, String> columnValueMin;
-    @FXML private TableColumn<SimulationLineChartData, String> columnValueMax;
-    @FXML private TableColumn<SimulationLineChartData, CheckBox> columnEnable;
-    @FXML private TableColumn<SimulationLineChartData, Button> columnDrop;
+    @FXML private TableView<SimulationData> tableView;
+    @FXML private TableColumn<SimulationData, String> columnSimulation;
+    @FXML private TableColumn<SimulationData, String> columnElementId;
+    @FXML private TableColumn<SimulationData, String> columnElementName;
+    @FXML private TableColumn<SimulationData, String> columnValueName;
+    @FXML private TableColumn<SimulationData, String> columnValueStart;
+    @FXML private TableColumn<SimulationData, String> columnValueEnd;
+    @FXML private TableColumn<SimulationData, String> columnValueMin;
+    @FXML private TableColumn<SimulationData, String> columnValueMax;
+    @FXML private TableColumn<SimulationData, CheckBox> columnEnable;
+    @FXML private TableColumn<SimulationData, Button> columnDrop;
     
     @FXML private LineChart lineChart;
     @FXML private TextField inputChartTitle;
     @FXML private TextField inputChartLabelX;
     @FXML private TextField inputChartLabelY;
 
+    @Value("${results.tableview.decimalplaces}") private Integer decimalPlaces;
     @Value("${results.linechart.default.title}") private String defaultTitle;
     @Value("${results.linechart.default.xlabel}") private String defaultXLabel;
     @Value("${results.linechart.default.ylabel}") private String defaultYLabel;
-    @Value("${simulation.datetime.format}") private String dateTimeFormat;
     
-    private DateTimeFormatter simulationDateTimeFormat;
+    @Value("${format.datetime}") private String formatDateTime;
+    @Value("${format.time}") private String formatTime;
+    
+    private DateTimeFormatter formatSimulationDateTime;
+    private DateTimeFormatter formatStatusTime;
     private Stage stage;
     
     public void setStage(Stage stage) {
@@ -110,7 +113,7 @@ public class ResultsController implements Initializable
         int index = simulationChoices.getSelectionModel().getSelectedIndex();
 
         ObservableList<Object> choices = FXCollections.observableArrayList();
-        for (Simulation simulation : simulationService.getSimulations()) {
+        for (Simulation simulation : resultsService.getSimulations()) {
             choices.add(new SimulationChoice(simulation));
         }
 
@@ -185,7 +188,7 @@ public class ResultsController implements Initializable
             return;
         }
         
-        SimulationLineChartData data = new SimulationLineChartData(simulationChoice.getSimulation(), elementChoice.getElement(), valueChoice.getValue());
+        SimulationData data = new SimulationData(simulationChoice.getSimulation(), elementChoice.getElement(), valueChoice.getValue());
 
         if (resultsService.add(lineChart, data)) {
             resultsService.UpdateSeries(data);
@@ -235,7 +238,7 @@ public class ResultsController implements Initializable
     }
     
     private void setStatus(String msg, boolean isError) {
-        statusMessageLabel.setText(msg);
+        statusMessageLabel.setText("[" + LocalDateTime.now().format(formatStatusTime) + "] " + msg);
         if (isError) {
             statusMessageLabel.setTextFill(Color.RED);
         } else {
@@ -251,7 +254,7 @@ public class ResultsController implements Initializable
         File file = fileChooser.showSaveDialog(stage);
         
         try {
-            xmlExporter.exportXml(file, resultsService.getSelectedData(lineChart));
+            xmlExporter.exportXml(file, resultsService.getChartData(lineChart));
             setStatus("Data successfully exported!", false);
         } catch (Exception ex) {
             setStatus("Export to XML file failed! [" + ex.getMessage() + "]", true);
@@ -263,53 +266,73 @@ public class ResultsController implements Initializable
     }
     
     private String getStartValueString(List<Data> data) {
-        return data.get(0).getYValue().toString();
+        return String.valueOf(
+                round(
+                parseDouble(
+                        data.get(0).getYValue()
+                )));
     }
     
     private String getEndValueString(List<Data> data) {
-        return data.get(data.size() - 1).getYValue().toString();
+        return String.valueOf(
+                round(
+                parseDouble(
+                        data.get(data.size() - 1).getYValue()
+                )));
     }
     
     private String getMinValueString(List<Data> data) {
-        if (data.get(0).getYValue() instanceof Double) {
-            Double min = (double) data.get(0).getYValue();
-            for (Data d : data) {
-                if (((double) d.getYValue()) < min) {
-                    min = (double) d.getYValue();
-                }
+        double value, min = parseDouble(data.get(0).getYValue());
+        for (Data d : data) {
+            value = parseDouble(d.getYValue());
+            if (value < min) {
+                min = value;
             }
-            return String.valueOf(min);
-        } else {
-            return "-";
         }
+        return String.valueOf(round(min));
     }
     
     private String getMaxValueString(List<Data> data) {
-        if (data.get(0).getYValue() instanceof Double) {
-            Double max = (double) data.get(0).getYValue();
-            for (Data d : data) {
-                if (((double) d.getYValue()) > max) {
-                    max = (double) d.getYValue();
-                }
+        double value, max = parseDouble(data.get(0).getYValue());
+        for (Data d : data) {
+            value = parseDouble(d.getYValue());
+            if (value > max) {
+                max = value;
             }
-            return String.valueOf(max);
-        } else {
-            return "-";
         }
+        return String.valueOf(round(max));
+    }
+    
+    private double parseDouble(Object o) {
+        return Double.parseDouble(o.toString());
+    }
+    
+    private double round(double value) {
+        for (int i = 0; i < decimalPlaces; i++) {
+            value = value * 10;
+        }
+        value = Math.floor(value);
+        for (int i = 0; i < decimalPlaces; i++) {
+            value = value / 10;
+        }
+        return value;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        
+        formatSimulationDateTime = DateTimeFormatter.ofPattern(formatDateTime);
+        formatStatusTime = DateTimeFormatter.ofPattern(formatTime);
 
         /**
          * Data selection and filtering.
          */
-        simulationDateTimeFormat = DateTimeFormatter.ofPattern(dateTimeFormat);
-        simulationService.getSimulations().addListener(new ListChangeListener()
+        resultsService.getSimulations().addListener(new ListChangeListener()
         {
             @Override
             public void onChanged(ListChangeListener.Change change) {
                 RefreshSimulationChoices();
+                setStatus("New simulation(s) added!", false);
             }
         });
         simulationFilterInput.setOnKeyReleased(e -> {
@@ -358,8 +381,8 @@ public class ResultsController implements Initializable
         /**
          * TableView.
          */
-        Callback<TableColumn<SimulationLineChartData, Button>, TableCell<SimulationLineChartData, Button>> columnDropCellFactory;
-        Callback<TableColumn<SimulationLineChartData, CheckBox>, TableCell<SimulationLineChartData, CheckBox>> columnEnableCellFactory;
+        Callback<TableColumn<SimulationData, Button>, TableCell<SimulationData, Button>> columnDropCellFactory;
+        Callback<TableColumn<SimulationData, CheckBox>, TableCell<SimulationData, CheckBox>> columnEnableCellFactory;
         
         tableView.setItems(FXCollections.observableArrayList());
         try {
@@ -368,9 +391,9 @@ public class ResultsController implements Initializable
             System.out.println(ex.getMessage());
         }
 
-        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getTime().format(simulationDateTimeFormat) + " " + cellData.getValue().getSimulation().getModelName()));
-        columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getId()));
-        columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getName()));
+        columnSimulation.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDateTime().format(formatSimulationDateTime) + " " + cellData.getValue().getSimulation().getModelName()));
+        columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementId()));
+        columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementName()));
         columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getVariable()));
         columnValueStart.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getStartValueString(cellData.getValue().getSeries().getData())));
         columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getEndValueString(cellData.getValue().getSeries().getData())));
@@ -379,17 +402,17 @@ public class ResultsController implements Initializable
         
         columnEnable.setCellValueFactory(cellData -> {
             CheckBox cb = new CheckBox();
-            cb.setSelected(true);
+            cb.setSelected(cellData.getValue().isShown());
             cb.selectedProperty().addListener(e -> {
                 // wait for animations to finish or LineChart breaks if data is added/removed too fast
                 if ((System.currentTimeMillis() - cellData.getValue().timeMilliSecondLastStatusChange()) < 1000) {
-                    if (resultsService.isShown(lineChart, cellData.getValue())) {
-                        if (!cb.selectedProperty().get()) {
-                            cb.selectedProperty().set(true);
+                    if (cellData.getValue().isShown()) {
+                        if (!cb.isSelected()) {
+                            cb.setSelected(true);
                         }
                     } else {
-                        if (cb.selectedProperty().get()) {
-                            cb.selectedProperty().set(false);
+                        if (cb.isSelected()) {
+                            cb.setSelected(false);
                         }
                     }
                     return;
@@ -480,7 +503,7 @@ public class ResultsController implements Initializable
 
         @Override
         public String toString() {
-            return simulation.getTime().format(simulationDateTimeFormat) + " " + simulation.getModelName();
+            return simulation.getDateTime().format(formatSimulationDateTime) + " " + simulation.getModelName();
         }
     }
 }

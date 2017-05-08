@@ -17,7 +17,6 @@
                         <HBox alignment="CENTER" spacing="10.0">
                             <children>
                                 <Button fx:id="buttonSimStart" mnemonicParsing="false" text="Start" />
-                                <Button fx:id="buttonSimPause" mnemonicParsing="false" text="Pause" />
                                 <Button fx:id="buttonSimStop" mnemonicParsing="false" text="Stop" />
                             </children>
                         </HBox>

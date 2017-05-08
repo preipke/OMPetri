@@ -5,9 +5,10 @@
  */
 package edu.unibi.agbi.gnius.util;
 
-import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationLineChartData;
+import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.function.Consumer;
@@ -27,26 +28,32 @@ import org.w3c.dom.*;
 @Component
 public class XmlExporter
 {
-    @Value("${simulation.datetime.format}") private String simulationDateTimeFormat;
-    @Value("${xml.results.data.dtd}") private String simulationDataDtd;
+    @Value("${format.datetime}") private String formatDateTime;
+    @Value("${xml.results.data.dtd}") private String resultsDataDtd;
     
-    private final String resultsRoot = "simulations";
-    private final String resultsSimulation = "simulation";
-    private final String resultsSimulationAttrDateTime = "datetime";
+    private final String resultsRoot = "Simulations";
+    private final String resultsSimulation = "Simulation";
+    private final String resultsSimulationAttrDateTime = "dateTime";
     private final String resultsSimulationAttrModelName = "model";
     private final String resultsSimulationAttrAuthor = "author";
-    private final String resultsSimulationElements = "elements";
-    private final String resultsElement = "element";
+    private final String resultsSimulationElements = "Elements";
+    private final String resultsElement = "Element";
     private final String resultsElementAttrId = "id";
     private final String resultsElementAttrName = "name";
-    private final String resultsElementData = "data";
-    private final String resultsVariable = "variable";
+    private final String resultsElementData = "Data";
+    private final String resultsVariable = "Variable";
     private final String resultsVariableAttrId = "id";
-    private final String resultsValue = "value";
-    private final String resultsValueAttrX = "x";
-    private final String resultsValueAttrY = "y";
+    private final String resultsValue = "Value";
+    private final String resultsValueAttrX = "time";
+    
+    public void importXml(File file) {
+        // ...
+        String dateTime = "...";
+        LocalDateTime simulationDateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern(formatDateTime));
+        // ...
+    }
 
-    public void exportXml(File file, List<SimulationLineChartData> simulationData) throws Exception {
+    public void exportXml(File file, List<SimulationData> simulationData) throws Exception {
 
         Document dom;
         NamedNodeMap attributes;
@@ -61,16 +68,16 @@ public class XmlExporter
         dom = db.newDocument(); // create instance of DOM
         simulations = dom.createElement(resultsRoot); // create the root element
 
-        for (SimulationLineChartData data : simulationData) {
+        for (SimulationData data : simulationData) {
             
             simulation = null;
             elements = null; 
             element = null;
             variables = null;
 
-            dateTime = data.getSimulation().getTime().format(DateTimeFormatter.ofPattern(simulationDateTimeFormat));
+            dateTime = data.getSimulation().getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
             model = data.getSimulation().getModelName();
-            author = data.getSimulation().getAuthor();
+            author = data.getSimulation().getAuthorName();
 
             /**
              * check if simulation element exists
@@ -103,8 +110,8 @@ public class XmlExporter
             /**
              * check if element element exists
              */
-            id = data.getElement().getId();
-            name = data.getElement().getName();
+            id = data.getElementId();
+            name = data.getElementName();
 
             for (int i = 0; i < elements.getChildNodes().getLength(); i++) {
                 attributes = elements.getChildNodes().item(i).getAttributes();
@@ -138,7 +145,7 @@ public class XmlExporter
                 public void accept(Data d) {
                     Element datapoint = dom.createElement(resultsValue);
                     datapoint.setAttribute(resultsValueAttrX, d.getXValue().toString());
-                    datapoint.setAttribute(resultsValueAttrY, d.getYValue().toString());
+                    datapoint.setTextContent(d.getYValue().toString());
                     variable.appendChild(datapoint);
                 }
             });
@@ -150,7 +157,7 @@ public class XmlExporter
         tr.setOutputProperty(OutputKeys.INDENT, "yes");
         tr.setOutputProperty(OutputKeys.METHOD, "xml");
         tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, simulationDataDtd);
+        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, resultsDataDtd);
         tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
         // send DOM to file

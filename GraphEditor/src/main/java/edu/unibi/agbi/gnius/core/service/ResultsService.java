@@ -5,9 +5,9 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.core.model.dao.SimulationResultsDao;
+import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationLineChartData;
+import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import java.util.List;
 import javafx.collections.ObservableList;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResultsService
 {
-    @Autowired private SimulationResultsDao simulationResultsDao;
+    @Autowired private ResultsDao resultsDao;
 
     /**
      * Adds the given line chart and related table item list to the storage.
@@ -32,11 +32,11 @@ public class ResultsService
      * @param list
      * @throws ResultsServiceException
      */
-    public synchronized void add(LineChart lineChart, ObservableList<SimulationLineChartData> list) throws ResultsServiceException {
-        if (simulationResultsDao.contains(lineChart)) {
+    public synchronized void add(LineChart lineChart, ObservableList<SimulationData> list) throws ResultsServiceException {
+        if (resultsDao.contains(lineChart)) {
             throw new ResultsServiceException("The given line chart has already been stored! Cannot overwrite existing observable list.");
         }
-        simulationResultsDao.add(lineChart, list);
+        resultsDao.add(lineChart, list);
     }
 
     /**
@@ -46,10 +46,10 @@ public class ResultsService
      * @param data
      * @return true if data has been added, false if not
      */
-    public synchronized boolean add(LineChart lineChart, SimulationLineChartData data) {
-        simulationResultsDao.add(data);
-        if (!simulationResultsDao.contains(lineChart, data)) {
-            simulationResultsDao.add(lineChart, data);
+    public synchronized boolean add(LineChart lineChart, SimulationData data) {
+        resultsDao.add(data);
+        if (!resultsDao.contains(lineChart, data)) {
+            resultsDao.add(lineChart, data);
             return true;
         }
         return false;
@@ -62,13 +62,17 @@ public class ResultsService
      * @param data      the data to be hidden and removed from the also given
      *                  chart
      */
-    public synchronized void drop(LineChart lineChart, SimulationLineChartData data) {
+    public synchronized void drop(LineChart lineChart, SimulationData data) {
         hide(lineChart, data);
-        simulationResultsDao.remove(lineChart, data);
+        resultsDao.remove(lineChart, data);
     }
     
-    public List<SimulationLineChartData> getSelectedData(LineChart lineChart) {
-        return simulationResultsDao.getResultsTableList(lineChart);
+    public List<SimulationData> getChartData(LineChart lineChart) {
+        return resultsDao.getResultsTableList(lineChart);
+    }
+    
+    public ObservableList<Simulation> getSimulations() {
+        return resultsDao.getSimulations();
     }
 
     /**
@@ -77,18 +81,9 @@ public class ResultsService
      * @param lineChart
      * @param data
      */
-    public synchronized void hide(LineChart lineChart, SimulationLineChartData data) {
+    public synchronized void hide(LineChart lineChart, SimulationData data) {
         lineChart.getData().remove(data.getSeries());
-    }
-
-    /**
-     *
-     * @param lineChart
-     * @param data
-     * @return
-     */
-    public synchronized boolean isShown(LineChart lineChart, SimulationLineChartData data) {
-        return lineChart.getData().contains(data.getSeries());
+        data.setShown(false);
     }
 
     /**
@@ -97,41 +92,58 @@ public class ResultsService
      * @param lineChart
      * @param data
      */
-    public synchronized void show(LineChart lineChart, SimulationLineChartData data) {
+    public synchronized void show(LineChart lineChart, SimulationData data) {
         if (!lineChart.getData().contains(data.getSeries())) {
             lineChart.getData().add(data.getSeries());
         }
+        data.setShown(true);
     }
 
     /**
      * Updates the series for the given data object. Loads data from the
-     * simulation and adds all additional entries to the series.
+     * simulation and adds all additional entries to the series. Updates 
+     * the related chart.
      *
      * @param data
      */
-    public synchronized void UpdateSeries(SimulationLineChartData data) {
+    public synchronized void UpdateSeries(SimulationData data) {
 
-        Simulation simulation = data.getSimulation();
-        XYChart.Series series = data.getSeries();
-        List<Object>[] results = simulation.getResults();
+        XYChart.Series seriesOld = data.getSeries();
+        List<Object>[] results = data.getSimulation().getResults();
         
-        if (results[0].size() > series.getData().size()) { // update only if additional values available
-            String[] variables = simulation.getVariables();
+        if (seriesOld == null || results[0].size() > seriesOld.getData().size()) { // update only if additional values available
+            
+            int variableIndex = 0;
+            String[] variables = data.getSimulation().getVariables();
             String variableTarget = data.getVariable();
-            int index = 0;
+            XYChart.Series seriesNew = new XYChart.Series();
+            
             for (String variable : variables) {
                 if (variable.matches(variableTarget)) {
                     break;
                 }
-                index++;
+                variableIndex++;
             }
-            for (int i = series.getData().size(); i < results[0].size(); i++) {
-                series.getData().add(new XYChart.Data(
+            
+            if (seriesOld != null) {
+                seriesNew.getData().addAll(seriesOld.getData());
+            }
+            
+            for (int i = seriesNew.getData().size(); i < results[0].size(); i++) {
+                seriesNew.getData().add(new XYChart.Data(
                         (Number) results[0].get(i),
-                        (Number) results[index].get(i)
+                        (Number) results[variableIndex].get(i)
                 ));
             }
-            series.setName("'" + data.getElement().getId() + " '");
+            seriesNew.setName("'" + data.getElementId() + "'");
+            
+            if (seriesOld != null) {
+                XYChart chart = data.getSeries().getChart();
+                chart.getData().remove(seriesOld);
+                chart.getData().remove(seriesNew);
+            }
+            
+            data.setSeries(seriesNew);
         }
     }
 }

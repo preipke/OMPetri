@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.menu;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
-import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
+import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,6 +27,7 @@ public class FileMenuController implements Initializable
 {
     @Autowired private DataGraphService dataService;
     @Autowired private MainController mainController;
+    @Autowired private OpenModelicaExporter omExporter;
     
     @FXML
     public void SaveFileAs() {
@@ -37,7 +38,7 @@ public class FileMenuController implements Initializable
         File file = fileChooser.showSaveDialog(mainController.getStage());
         
         try {
-            OpenModelicaExport.exportMO(dataService.getDataDao() , file);
+            omExporter.exportMO(dataService.getDataDao() , file);
         } catch (IOException ex) {
 
         }

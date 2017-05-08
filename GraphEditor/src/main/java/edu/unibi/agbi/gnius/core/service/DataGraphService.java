@@ -25,7 +25,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdgeArrow;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
@@ -34,7 +33,6 @@ import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javafx.geometry.Point2D;
 import javafx.scene.shape.Shape;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +48,7 @@ public class DataGraphService
 {
     @Autowired private Calculator calculator;
     @Autowired private MessengerService messengerService;
-
-    private final GraphDao graphDao;
-    private final DataDao dataDao;
+    @Autowired private ParameterService parameterService;
 
     @Value("${css.arc.default}") private String arcStyleClass;
     @Value("${css.cluster.default}") private String clusterStyleClass;
@@ -60,6 +56,9 @@ public class DataGraphService
     @Value("${css.place.default}") private String placeStyleClass;
     @Value("${css.transition.default}") private String transitionDefaultStyleClass;
     @Value("${css.transition.stochastic}") private String transitionStochasticStyleClass;
+
+    private final GraphDao graphDao;
+    private final DataDao dataDao;
 
     private DataArc.Type defaultArcType = DataArc.Type.READ;
     private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
@@ -82,19 +81,6 @@ public class DataGraphService
             throw new DataGraphServiceException("Conflict! Another colour has already been stored using the same ID!");
         }
         dataDao.add(colour);
-    }
-
-    /**
-     * Adds the given parameter.
-     *
-     * @param param
-     * @throws DataGraphServiceException
-     */
-    public void add(Parameter param) throws DataGraphServiceException {
-        if (dataDao.containsAndNotEqual(param)) {
-            throw new DataGraphServiceException("Conflict! Another parameter has already been stored using the same ID!");
-        }
-        dataDao.add(param);
     }
 
     /**
@@ -246,43 +232,6 @@ public class DataGraphService
     }
 
     /**
-     * Gets the parameter with the given id.
-     *
-     * @param id
-     * @return
-     */
-    public Parameter getParameter(String id) {
-        return dataDao.getParameters().get(id);
-    }
-
-    /**
-     * Gets the list of currently used parameter ids.
-     *
-     * @return
-     */
-    public Set<String> getParameterIds() {
-        return dataDao.getParameters().keySet();
-    }
-
-    /**
-     * Validates wether an element references a parameter or not.
-     *
-     * @param elem
-     * @param param
-     * @return
-     */
-    public boolean isElementReferencingParameter(IDataElement elem, Parameter param) {
-        switch (elem.getElementType()) {
-            case TRANSITION:
-                DataTransition transition = (DataTransition) elem;
-                if (transition.getFunction().getParameter().contains(param)) {
-                    return true;
-                }
-        }
-        return false;
-    }
-
-    /**
      * Removes the given graph arc from the scene.
      *
      * @param arc
@@ -327,19 +276,6 @@ public class DataGraphService
                 remove((IGraphNode) element);
             }
         }
-    }
-
-    /**
-     * Removes the given parameter.
-     *
-     * @param param
-     * @throws DataGraphServiceException
-     */
-    public void remove(Parameter param) throws DataGraphServiceException {
-        if (!param.getReferingNodes().isEmpty()) {
-            throw new DataGraphServiceException("Cannot delete parameter '" + param.getId() + "'! There is elements refering to it.");
-        }
-        dataDao.remove(param);
     }
 
     /**
@@ -434,7 +370,7 @@ public class DataGraphService
      */
     private IGraphNode add(IGraphNode node) throws DataGraphServiceException {
         if (node.getDataElement() != null) {
-            if (node.getDataElement().getElementType() != Element.Type.CLUSTERARC) {
+            if (node.getDataElement().getElementType() != Element.Type.CLUSTER) {
                 if (dataDao.containsAndNotEqual(node.getDataElement())) {
                     throw new DataGraphServiceException("Conflict! Another node has already been stored using the same ID!");
                 }
@@ -654,7 +590,7 @@ public class DataGraphService
     private void remove(IDataArc arc) throws DataGraphServiceException {
         for (Parameter param : arc.getParameters().values()) {
             if (param.getType() == Parameter.Type.LOCAL) {
-                remove(param);
+                parameterService.remove(param);
             } else {
                 param.getReferingNodes().remove(arc);
             }
@@ -671,8 +607,11 @@ public class DataGraphService
     private void remove(IDataNode node) throws DataGraphServiceException {
         for (Parameter param : node.getParameters().values()) {
             if (param.getType() == Parameter.Type.LOCAL) {
-                remove(param);
+                parameterService.remove(param);
             } else {
+                /**
+                 * 
+                 */
                 param.getReferingNodes().remove(node);
             }
         }

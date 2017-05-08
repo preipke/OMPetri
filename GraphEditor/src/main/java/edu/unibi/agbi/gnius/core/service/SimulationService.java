@@ -7,20 +7,18 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.ElementController;
 import edu.unibi.agbi.gnius.business.controller.SimulationController;
-import edu.unibi.agbi.gnius.core.model.dao.SimulationResultsDao;
+import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
-import edu.unibi.agbi.gnius.util.Utility;
 import edu.unibi.agbi.petrinet.model.References;
-import java.io.File;
+import java.io.BufferedReader;
+import java.io.IOException;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -30,38 +28,30 @@ import org.springframework.stereotype.Service;
 @Service
 public class SimulationService
 {
-    private final SimulationResultsDao simulationDao;
+    private final ResultsDao resultsDao;
 
-    @Value("${application.working.dir.property}") private String varWorkingDirProperty;
-    @Value("${application.working.dir.subfolder}") private String varWorkingDirSubfolder;
-    @Value("${openmodelica.home.env}") private String varOpenModelicaHomeDir;
-    
-    @Autowired private DataGraphService dataGraphService;
+    @Autowired private DataGraphService dataService;
     @Autowired private SimulationService simulationService;
     @Autowired private MessengerService messengerService;
-    
     @Autowired private SimulationController simulationControlsController;
-    @Autowired private ElementController elementDetailsController;
-    
-    @Autowired 
-    public SimulationService(SimulationResultsDao simulationDao) {
-        this.simulationDao = simulationDao;
+    @Autowired private ElementController elementController;
+    @Autowired private SimulationCompiler simulationCompiler;
+
+    @Autowired
+    public SimulationService(ResultsDao resultsDao) {
+        this.resultsDao = resultsDao;
     }
-    
-    public ObservableList<Simulation> getSimulations() {
-        return simulationDao.getSimulations();
-    }
-    
+
     public Simulation InitSimulation(String authorName, String modelName, String[] variables, References variableReferences) {
         Simulation simulation = new Simulation(authorName, modelName, variables, variableReferences);
-        simulationDao.add(simulation);
+        resultsDao.add(simulation);
         return simulation;
     }
-    
+
     public void StartSimulation() throws SimulationServiceException {
-        
+
         try {
-            elementDetailsController.StoreElementProperties();
+            elementController.StoreElementDetails();
         } catch (DataGraphServiceException ex) {
             throw new SimulationServiceException(ex);
         }
@@ -72,16 +62,17 @@ public class SimulationService
         messengerService.addToLog("Starting simulation...");
 
         Thread thread = new Thread(() -> {
+
             try {
                 /**
                  * Execute compiler.
                  */
-                SimulationCompiler simulationCompiler = new SimulationCompiler(this, dataGraphService.getDataDao());
+                References simulationReferences;
                 try {
                     Platform.runLater(() -> {
                         simulationControlsController.setSimulationProgress(-1);
                     });
-                    simulationCompiler.compile();
+                    simulationReferences = simulationCompiler.compile(dataService.getDataDao());
                 } catch (SimulationServiceException ex) {
                     throw new SimulationServiceException("Simulation failed during compilation! [" + ex.getMessage() + "]");
                 }
@@ -109,7 +100,8 @@ public class SimulationService
                 /**
                  * Start simulation.
                  */
-                SimulationExecuter simulationExecuter = new SimulationExecuter(simulationCompiler, simulationServer);
+                BufferedReader simulationExecuterOutputReader;
+                SimulationExecuter simulationExecuter = new SimulationExecuter(simulationReferences, simulationCompiler, simulationServer);
                 simulationExecuter.setSimulationStopTime(simulationControlsController.getSimulationStopTime());
                 simulationExecuter.setSimulationIntervals(simulationControlsController.getSimulationIntervals());
                 simulationExecuter.setSimulationIntegrator(simulationControlsController.getSimulationIntegrator());
@@ -122,6 +114,7 @@ public class SimulationService
                             throw new SimulationServiceException("Simulation failed while waiting for simulation process start! [" + ex.getMessage() + "]");
                         }
                     }
+                    simulationExecuterOutputReader = simulationExecuter.getSimulationOutputReader();
                 }
                 if (simulationExecuter.isFailed()) {
                     throw new SimulationServiceException("Simulation failed while starting the simulation process! [" + simulationExecuter.getErrorMessage() + "]");
@@ -148,11 +141,10 @@ public class SimulationService
                 }
 
                 Platform.runLater(() -> {
-                    Simulation simulation = simulationService.InitSimulation(
-                            dataGraphService.getDataDao().getAuthor(), 
-                            dataGraphService.getDataDao().getName(), 
-                            simulationServer.getSimulationVariables(), 
-                            simulationCompiler.getSimulationVariableReferences()
+                    Simulation simulation = simulationService.InitSimulation(dataService.getDataDao().getAuthor(),
+                            dataService.getDataDao().getName(),
+                            simulationServer.getSimulationVariables(),
+                            simulationReferences
                     );
                     simulationServer.setSimulation(simulation);
                     synchronized (simulationServer) {
@@ -172,8 +164,48 @@ public class SimulationService
                     simulationExecuter.join();
                     simulationServer.join();
                 } catch (InterruptedException ex) {
-                    
+
                 }
+
+                /**
+                 * Read simulation output. (?)
+                 */
+                Thread t3 = new Thread()
+                {
+                    public void run() {
+                        String line;
+                        if (simulationExecuterOutputReader != null) {
+//                            while (server.isRunning()) {
+//                                try {
+//                                    line = simulationExecuterOutputReader.readLine();
+//                                    if (line != null && line.length() > 0) {
+//                                        System.out.println(line);
+//                                    }
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                try {
+//                                    sleep(100);
+//                                } catch (InterruptedException e) {
+//                                    e.printStackTrace();
+//                                }
+//                            }
+                            try {
+                                System.out.println("--- Server output ---");
+                                while ((line = simulationExecuterOutputReader.readLine()) != null) {
+                                    if (line.length() > 0) {
+                                        System.out.println(line);
+                                    }
+                                }
+                                simulationExecuterOutputReader.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                };
+                t3.start();
+                
             } catch (SimulationServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             } finally {
@@ -183,112 +215,11 @@ public class SimulationService
                     simulationControlsController.StopSimulation();
                 });
             }
-
-//            /**
-//             * Read simulation output. (?)
-//             */
-//            Thread t3 = new Thread() {
-//                public void run() {
-//                    String line;
-//                    if (simulationOutput != null) {
-//                        while (server.isRunning()) {
-//                            try {
-//                                line = simulationOutput.readLine();
-//                                if (line != null && line.length() > 0) {
-//                                    System.out.println(line);
-//                                }
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//                            }
-//                            try {
-//                                sleep(100);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        try {
-//                            System.out.println("Server stopped");
-//                            while ((line = simulationOutput.readLine()) != null && line.length() > 0) {
-//                                System.out.println(line);
-//                            }
-//                            simulationOutput.close();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            };
-//            t3.start();
         });
         thread.start();
     }
-    
+
     public void StopSimulation() {
         // if !isSimulating -> return
-    }
-
-    /**
-     * Gets the path of the OMC compiler.
-     * @return
-     * @throws SimulationServiceException
-     */
-    public String getOpenModelicaCompilerPath() throws SimulationServiceException {
-
-        String pathOpenModelica, pathCompiler;
-        File dirOpenModelica;
-
-        pathOpenModelica = System.getenv(varOpenModelicaHomeDir);
-
-        if (pathOpenModelica == null) {
-            throw new SimulationServiceException("'" + varOpenModelicaHomeDir + "' environment variable is not set! Please install OpenModelica or set the variable correctly.");
-        }
-
-        dirOpenModelica = new File(pathOpenModelica);
-        if (dirOpenModelica.exists() && dirOpenModelica.isDirectory()) {
-
-            pathCompiler = pathOpenModelica + "bin" + File.separator + "omc";
-            if (Utility.isOsWindows()) {
-                pathCompiler = pathCompiler + ".exe";
-            } else if (Utility.isOsUnix()) {
-                // TODO : OS is Linux
-            } else if (Utility.isOsMac()) {
-                // TODO : OS is Mac
-            } else {
-                // TODO : OS not maybe supported
-            }
-            return pathCompiler;
-
-        } else {
-            throw new SimulationServiceException("'" + varOpenModelicaHomeDir + "' environment variable is not set correctly! Please set the variable correctly or reinstall OpenModelica.");
-        }
-    }
-
-    /**
-     * Gets the working directory. Used for storing and executing the compiled
-     * sources.
-     *
-     * @return
-     * @throws SimulationServiceException
-     */
-    public File getWorkingDirectory() throws SimulationServiceException {
-
-        File dir;
-        String[] subDir;
-
-        dir = new File(System.getProperty(varWorkingDirProperty));
-        if (!dir.exists() || !dir.isDirectory()) {
-            throw new SimulationServiceException("Application's working directory not accessible!");
-        }
-
-        subDir = varWorkingDirSubfolder.split("/");
-
-        for (String folder : subDir) {
-            dir = new File(dir + File.separator + folder);
-            if (!dir.exists() || !dir.isDirectory()) {
-                dir.mkdir();
-            }
-        }
-
-        return dir;
     }
 }

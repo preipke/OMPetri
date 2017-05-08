@@ -1,26 +1,26 @@
 <?xml encoding="UTF-8"?>
 
-<!ELEMENT simulations (simulation)+>
+<!ELEMENT Simulations (Simulation)+>
 
-<!ELEMENT simulation (elements)>
-<!ATTLIST simulation
+<!ELEMENT Simulation (Elements)>
+<!ATTLIST Simulation
   author NMTOKEN #REQUIRED
-  datetime CDATA #REQUIRED
+  dateTime CDATA #REQUIRED
   model NMTOKEN #REQUIRED>
 
-<!ELEMENT elements (element)+>
+<!ELEMENT Elements (Element)+>
 
-<!ELEMENT element (data)>
-<!ATTLIST element
+<!ELEMENT Element (Data)>
+<!ATTLIST Element
   id NMTOKEN #REQUIRED
   name NMTOKEN #REQUIRED>
 
-<!ELEMENT data (variable)+>
+<!ELEMENT Data (variable)+>
 
-<!ELEMENT variable (value)+>
-<!ATTLIST variable
+<!ELEMENT Variable (value)+>
+<!ATTLIST Variable
   id CDATA #REQUIRED>
 
-<!ELEMENT value (#PCDATA)>
-<!ATTLIST value
+<!ELEMENT Value (#PCDATA)>
+<!ATTLIST Value
   time CDATA #REQUIRED>

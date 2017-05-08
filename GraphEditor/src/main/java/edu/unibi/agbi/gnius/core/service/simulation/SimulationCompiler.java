@@ -5,70 +5,70 @@
  */
 package edu.unibi.agbi.gnius.core.service.simulation;
 
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
-import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.util.Utility;
 import edu.unibi.agbi.petrinet.model.References;
-import edu.unibi.agbi.petrinet.util.OpenModelicaExport;
+import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author PR
  */
-public class SimulationCompiler {
+@Component
+public final class SimulationCompiler
+{
+    @Autowired private OpenModelicaExporter openModelicaExporter;
 
-    private final SimulationService simulationService;
-    private final DataDao dataDao;
+    @Value("${directory.property}") private String directoryProperty;
+    @Value("${directory.storage.subfolder}") private String workingDirectory;
+    @Value("${openmodelica.home.env}") private String openModelicaHomeDir;
 
-    private File simWorkingDirectory;
     private String simCompilerPath;
-    private String simExecutablePath;
-    private References simVariableReferences;
+    private File simWorkingDirectory;
 
-    public SimulationCompiler(SimulationService simulationService, DataDao dataDao) {
-        this.simulationService = simulationService;
-        this.dataDao = dataDao;
-    }
-
-    public String getSimulationCompilerPath() {
+    public String getCompilerPath() {
         return simCompilerPath;
-    }
-
-    public String getSimulationExecutablePath() {
-        return simExecutablePath;
     }
 
     public File getSimulationWorkingDirectory() {
         return simWorkingDirectory;
     }
 
-    public References getSimulationVariableReferences() {
-        return simVariableReferences;
-    }
-
-    public void compile() throws SimulationServiceException {
+    /**
+     * Builds a new simulation using the OpenModelica compiler.
+     *
+     * @param dataDao
+     * @return String representing the path to the simulation executable
+     * @throws SimulationServiceException
+     */
+    public References compile(DataDao dataDao) throws SimulationServiceException {
 
         final Process process;
         ProcessBuilder pb;
 
         File dirStorage, fileMo, fileMos;
         String nameSimulation;
+        References simulationReferences;
 
         /**
          * Get the required directories.
          */
         try {
-//            System.out.println("Getting compiler path...");
-            simCompilerPath = simulationService.getOpenModelicaCompilerPath();
-//            System.out.println("Getting working directory...");
-            simWorkingDirectory = simulationService.getWorkingDirectory();
-//            System.out.println("Getting storage directory...");
+            if (simCompilerPath == null) {
+                simCompilerPath = getOpenModelicaCompilerPath();
+            }
+            if (simWorkingDirectory == null) {
+                simWorkingDirectory = getWorkingDirectory();
+            }
             dirStorage = createStorageDirectory(simWorkingDirectory);
         } catch (SimulationServiceException ex) {
             throw new SimulationServiceException("Failed to get the required directories! [" + ex.getMessage() + "]");
@@ -78,13 +78,12 @@ public class SimulationCompiler {
          * Exort data for OpenModelica.
          */
         try {
-//            System.out.println("Exporting data for OpenModelica compiler...");
             nameSimulation = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME).replace(":", "").substring(0, 6) + "-" + dataDao.getName();
 
             fileMo = new File(dirStorage + File.separator + nameSimulation + ".mo");
             fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
-            OpenModelicaExport.exportMO(dataDao, fileMo);
-            simVariableReferences = OpenModelicaExport.exportMOS(dataDao, fileMos, fileMo, simWorkingDirectory);
+            openModelicaExporter.exportMO(dataDao, fileMo);
+            simulationReferences = openModelicaExporter.exportMOS(dataDao, fileMos, fileMo, simWorkingDirectory);
         } catch (IOException ex) {
             throw new SimulationServiceException("Failed to export the data for OpenModelica! [" + ex.getMessage() + "]");
         }
@@ -95,7 +94,6 @@ public class SimulationCompiler {
         pb = new ProcessBuilder(simCompilerPath, fileMos.getPath());
         pb.directory(simWorkingDirectory);
         try {
-//            System.out.println("Building simulation...");
             process = pb.start();
         } catch (IOException ex) {
             throw new SimulationServiceException("Failed to starting the build process! [" + ex.getMessage() + "]");
@@ -114,26 +112,121 @@ public class SimulationCompiler {
          * Read the build process output and parse the path to the executable.
          */
         try {
-            simExecutablePath = parseSimulationExecutablePath(process.getInputStream());
+            String output = parseInput(process.getInputStream());
+            simulationReferences.setSimulationExecutablePath(
+                    parseSimulationExecutablePath(output));
         } catch (SimulationServiceException ex) {
             throw new SimulationServiceException(ex.getMessage());
         }
+
+        return simulationReferences;
     }
 
     /**
-     * Gets the directory for storing data files used for building the simulation.
+     * Gets the working directory. Used for storing and executing the compiled
+     * sources.
+     *
+     * @return
+     * @throws SimulationServiceException
+     */
+    private File getWorkingDirectory() throws SimulationServiceException {
+
+        File dir;
+        String[] subDir;
+
+        dir = new File(System.getProperty(directoryProperty));
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new SimulationServiceException("Application's working directory not accessible!");
+        }
+
+        subDir = workingDirectory.split("/");
+
+        for (String folder : subDir) {
+            dir = new File(dir + File.separator + folder);
+            if (!dir.exists() || !dir.isDirectory()) {
+                dir.mkdir();
+            }
+        }
+
+        return dir;
+    }
+
+    /**
+     * Gets the directory for storing data that is used for building the
+     * simulation.
+     *
      * @return
      */
     private File createStorageDirectory(File workingDirectory) throws SimulationServiceException {
 
         File dir;
 
-        dir = new File(workingDirectory + File.separator + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE));
+        dir = new File(workingDirectory + File.separator + "omc");
         if (!dir.exists() || !dir.isDirectory()) {
             dir.mkdir();
         }
 
         return dir;
+    }
+
+    /**
+     * Gets the path of the OMC compiler.
+     *
+     * @return
+     * @throws SimulationServiceException
+     */
+    private String getOpenModelicaCompilerPath() throws SimulationServiceException {
+
+        String pathOpenModelica, pathCompiler;
+        File dirOpenModelica;
+
+        pathOpenModelica = System.getenv(openModelicaHomeDir);
+
+        if (pathOpenModelica == null) {
+            throw new SimulationServiceException("'" + openModelicaHomeDir + "' environment variable is not set! Please install OpenModelica or set the variable correctly.");
+        }
+
+        dirOpenModelica = new File(pathOpenModelica);
+        if (dirOpenModelica.exists() && dirOpenModelica.isDirectory()) {
+
+            pathCompiler = pathOpenModelica + "bin" + File.separator + "omc";
+            if (Utility.isOsWindows()) {
+                pathCompiler = pathCompiler + ".exe";
+            } else if (Utility.isOsUnix()) {
+                // TODO : OS is Linux
+            } else if (Utility.isOsMac()) {
+                // TODO : OS is Mac
+            } else {
+                // TODO : OS not maybe supported
+            }
+            return pathCompiler;
+
+        } else {
+            throw new SimulationServiceException("'" + openModelicaHomeDir + "' environment variable is not set correctly! Please set the variable correctly or reinstall OpenModelica.");
+        }
+    }
+
+    /**
+     * Parses data generated from an input stream to a string.
+     *
+     * @param input
+     * @return
+     * @throws SimulationServiceException
+     */
+    private String parseInput(InputStream input) throws SimulationServiceException {
+
+        byte[] bytes;
+        String output;
+
+        try {
+            bytes = new byte[input.available()];
+            input.read(bytes);
+            output = new String(bytes);
+        } catch (IOException ex) {
+            throw new SimulationServiceException("Exception reading the build process output!");
+        }
+
+        return output;
     }
 
     /**
@@ -143,18 +236,7 @@ public class SimulationCompiler {
      * @param output
      * @return
      */
-    private String parseSimulationExecutablePath(InputStream os) throws SimulationServiceException {
-
-        byte[] bytes;
-        String output;
-
-        try {
-            bytes = new byte[os.available()];
-            os.read(bytes);
-            output = new String(bytes);
-        } catch (IOException ex) {
-            throw new SimulationServiceException("Exception reading the build process output!");
-        }
+    private String parseSimulationExecutablePath(String output) throws SimulationServiceException {
 
         try {
             output = output.substring(output.lastIndexOf("{"));

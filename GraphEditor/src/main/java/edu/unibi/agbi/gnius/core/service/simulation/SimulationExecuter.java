@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service.simulation;
 
+import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -15,64 +16,64 @@ import java.util.Map;
  *
  * @author PR
  */
-public class SimulationExecuter extends Thread {
-    
+public class SimulationExecuter extends Thread
+{
     private final String simCompilerPath;
     private final String simExecutablePath;
     private final File simWorkingDirectory;
     private final int simServerPort;
-    
+
     private boolean isFailed;
     private String errorMessage;
-    
+
     private double simStopTime;
     private int simIntervals;
     private String simIntegrator;
-    
+
     private BufferedReader simulationOutputReader;
-    
-    public SimulationExecuter(SimulationCompiler simulationCompiler, SimulationServer simulationServer) {
-        simCompilerPath = simulationCompiler.getSimulationCompilerPath();
-        simExecutablePath = simulationCompiler.getSimulationExecutablePath();
+
+    public SimulationExecuter(References simulationReferences, SimulationCompiler simulationCompiler, SimulationServer simulationServer) {
+        simExecutablePath = simulationReferences.getSimulationExectuablePath();
+        simCompilerPath = simulationCompiler.getCompilerPath();
         simWorkingDirectory = simulationCompiler.getSimulationWorkingDirectory();
         simServerPort = simulationServer.getSimulationServerPort();
     }
-    
+
     public boolean isFailed() {
         return isFailed;
     }
-    
+
     public String getErrorMessage() {
         return errorMessage;
     }
-    
+
     public void setSimulationStopTime(double simStopTime) {
         this.simStopTime = simStopTime;
     }
-    
+
     public void setSimulationIntervals(int simIntervals) {
         this.simIntervals = simIntervals;
     }
-    
+
     public void setSimulationIntegrator(String simIntegrator) {
         this.simIntegrator = simIntegrator;
     }
-    
+
     public BufferedReader getSimulationOutputReader() {
         return simulationOutputReader;
     }
-    
+
     @Override
     public void run() {
-        
+
         Process simulationProcess;
         ProcessBuilder pb;
 
         isFailed = false;
         simulationOutputReader = null;
-        
+
         String override = "-override=outputFormat=ia,stopTime=" + simStopTime + ",stepSize=" + simStopTime / simIntervals + ",tolerance=0.0001";
-        
+
 //                    if (flags.isParameterChanged()) {
 //
 //                        Iterator<Parameter> it = pw.getChangedParameters().keySet().iterator();
@@ -89,7 +90,6 @@ public class SimulationExecuter extends Thread {
 //                            }
 //                        }
 //                    }
-
 //                    if (flags.isInitialValueChanged()) {
 //                        Iterator<Place> it = pw.getChangedInitialValues().keySet().iterator();
 //                        Place p;
@@ -115,18 +115,17 @@ public class SimulationExecuter extends Thread {
 //                            }
 //                        }
 //                    }
-            
         pb = new ProcessBuilder();
-        pb.command(simExecutablePath, "-s=" + simIntegrator, override, "-port=" + simServerPort, "-noEventEmit", "-lv=LOG_STATS");
+        pb.command(simExecutablePath, "-s=" + simIntegrator, override, "-port=" + simServerPort, "-lv=LOG_STATS");
+//        pb.command(simExecutablePath, "-s=" + simIntegrator, override, "-port=" + simServerPort, "-noEventEmit", "-lv=LOG_STATS");
         pb.directory(simWorkingDirectory);
         pb.redirectOutput();
 
-        Map<String , String> env = pb.environment();
-        env.put("PATH" , env.get("PATH") + ";" + simCompilerPath.substring(0 , simCompilerPath.lastIndexOf(File.separator)));
+        Map<String, String> env = pb.environment();
+        env.put("PATH", env.get("PATH") + ";" + simCompilerPath.substring(0, simCompilerPath.lastIndexOf(File.separator)));
 
 //        System.out.println("Path: " + pb.environment().get("PATH"));
 //        System.out.println("Override: " + override);
-
         try {
 //            System.out.println("Starting simulation...");
             simulationProcess = pb.start();

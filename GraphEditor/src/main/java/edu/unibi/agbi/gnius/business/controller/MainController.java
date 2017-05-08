@@ -52,10 +52,6 @@ public class MainController implements Initializable {
         elementBox.getChildren().add(parameterContainer);
         parameterController.ShowParameterDetails(element);
     }
-    
-    public void StoreElementProperties() throws DataGraphServiceException {
-        elementController.StoreElementProperties();
-    }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
