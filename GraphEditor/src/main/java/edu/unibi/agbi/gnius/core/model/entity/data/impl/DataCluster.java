@@ -9,7 +9,6 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import java.util.ArrayList;
@@ -77,16 +76,6 @@ public class DataCluster extends Node implements IDataNode {
     @Override
     public List<IGraphElement> getGraphElements() {
         return shapes;
-    }
-
-    @Override
-    public List<IArc> getArcsOut() {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
-    }
-
-    @Override
-    public List<IArc> getArcsIn() {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 
     @Override

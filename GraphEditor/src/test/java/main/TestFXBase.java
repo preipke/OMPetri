@@ -34,9 +34,8 @@ import org.testfx.api.*;
  */
 public class TestFXBase extends ApplicationTest {
 
-    private final static boolean isHeadless = true;
-    
-    private final String EDITOR_PANE_ID = "#editorPane";
+    private final static boolean HEADLESS = true;
+    private final static String EDITOR_PANE_ID = "#editorPane";
     
     protected DataGraphService dataGraphService;
     protected SelectionService selectionService;
@@ -45,7 +44,7 @@ public class TestFXBase extends ApplicationTest {
 
     @BeforeClass
     public static void setupHeadlessMode() {
-        if (isHeadless) {
+        if (HEADLESS) {
             System.setProperty("java.awt.headless", "true");
             System.setProperty("testfx.robot", "glass");
             System.setProperty("testfx.headless", "true");
@@ -191,7 +190,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                cluster.add(dataGraphService.cluster(elements));
+                cluster.add(dataGraphService.group(elements));
             } catch (DataGraphServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -211,7 +210,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                dataGraphService.uncluster(clusters);
+                dataGraphService.ungroup(clusters);
             } catch (DataGraphServiceException ex) {
                 System.out.println(ex.toString());
             } finally {

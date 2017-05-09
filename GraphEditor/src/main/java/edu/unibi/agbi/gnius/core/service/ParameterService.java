@@ -15,6 +15,7 @@ import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -118,43 +119,37 @@ public class ParameterService
     }
 
     /**
-     * Gets all global parameters.
+     * Gets all global parameters. List is sorted by parameter ids (natural
+     * string order).
      *
      * @return
      */
     public List<Parameter> getGlobalParameters() {
-
         List<Parameter> parameters = new ArrayList();
-
         for (Parameter param : dataDao.getParameters().values()) {
             if (param.getType() == Parameter.Type.GLOBAL) {
                 parameters.add(param);
             }
         }
-
         parameters.sort(Comparator.comparing(Parameter::getId));
-
         return parameters;
     }
 
     /**
-     * Gets all parameters usable for an element.
+     * Gets all parameters usable for an element. List is sorted by parameter
+     * ids (natural string order).
      *
      * @param elem
      * @return
      */
     public List<Parameter> getLocalParameters(IDataElement elem) {
-
         List<Parameter> parameters = new ArrayList();
-
         for (Parameter param : elem.getParameters().values()) {
             if (param.getType() == Parameter.Type.LOCAL) {
                 parameters.add(param);
             }
         }
-
         parameters.sort(Comparator.comparing(Parameter::getId));
-
         return parameters;
     }
 
@@ -181,16 +176,11 @@ public class ParameterService
      * Attempts to remove a parameter.
      *
      * @param param
+     * @param element
      * @throws ParameterServiceException
      */
-    public void remove(Parameter param) throws ParameterServiceException {
-        if (!param.getReferingNodes().isEmpty()) {
-            messengerService.addToLog("Cannot delete parameter! Elements are using it:");
-            param.getReferingNodes().forEach(elem -> {
-                messengerService.addToLog("Parameter '" + param.getId() + "' is referenced by element '" + elem.toString() + "'.");
-            });
-            throw new ParameterServiceException("Cannot delete parameter '" + param.getId() + "'! " + param.getReferingNodes().size() + " element(s) referring.");
-        }
+    public void remove(Parameter param, IDataElement element) throws ParameterServiceException {
+        ValidateRemoval(param, element);
         dataDao.remove(param);
     }
 
@@ -221,6 +211,34 @@ public class ParameterService
                     throw new ParameterServiceException("Parameter '" + candidate + "' does not exist");
                 }
             }
+        }
+    }
+
+    /**
+     *
+     * @param param
+     * @param element
+     * @throws ParameterServiceException
+     */
+    private void ValidateRemoval(Parameter param, IDataElement element) throws ParameterServiceException {
+        if (Parameter.Type.LOCAL != param.getType()) {
+            if (!param.getReferingNodes().isEmpty()) {
+                if (param.getReferingNodes().size() != 1 || element != null && !param.getReferingNodes().contains(element)) {
+                    throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param params
+     * @param element
+     * @throws ParameterServiceException
+     */
+    public void ValidateRemoval(Collection<Parameter> params, IDataElement element) throws ParameterServiceException {
+        for (Parameter param : params) {
+            ValidateRemoval(param, element);
         }
     }
 }

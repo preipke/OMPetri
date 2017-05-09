@@ -218,8 +218,8 @@ public class ParameterController implements Initializable
      *                                   usually when there is elements
      *                                   referring to the parameter
      */
-    private void DeleteParameter(Parameter param) throws ParameterServiceException {
-        parameterService.remove(param);
+    private void DeleteParameter(Parameter param, IDataElement element) throws ParameterServiceException {
+        parameterService.remove(param, element);
         if (param.getType() == Parameter.Type.LOCAL) {
             parametersLocal.remove(param);
         } else {
@@ -286,7 +286,7 @@ public class ParameterController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 try {
-                    DeleteParameter(cellData.getValue());
+                    DeleteParameter(cellData.getValue(), transitionSelected);
                     setStatusLabel(statusParamLocal, "Deleted parameter '" + cellData.getValue().getId() + "'! [LOCAL]", false);
                 } catch (ParameterServiceException ex) {
                     setStatusLabel(statusParamLocal, ex.getMessage(), true);
@@ -342,7 +342,7 @@ public class ParameterController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 try {
-                    DeleteParameter(cellData.getValue());
+                    DeleteParameter(cellData.getValue(), null);
                     setStatusLabel(statusParamGlobal, "Deleted parameter '" + cellData.getValue().getId() + "'! [GLOBAL]", false);
                 } catch (ParameterServiceException ex) {
                     cb.setIndeterminate(true);

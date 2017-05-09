@@ -66,7 +66,6 @@ public class SimulationController implements Initializable
     
     public void StopSimulation() {
         buttonSimStop.setDisable(true);
-//        simProgress.setProgress(1);
         simulationService.StopSimulation();
     }
     
@@ -81,7 +80,6 @@ public class SimulationController implements Initializable
     
     private void StartSimulationAndLock() {
         progressSim.setProgress(0);
-//        progressSim.setVisible(true);
         buttonSimStart.setDisable(true);
         inputSimStopTime.setDisable(true);
         inputSimIntervals.setDisable(true);

@@ -10,6 +10,7 @@ import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
@@ -124,14 +125,14 @@ public class DataGraphService
     }
 
     /**
-     * Groups and hides all given elements in a cluster element. Removes any
-     * clusters within the selection before grouping inside a new cluster.
+     * Groups and hides elements in a cluster element. Removes any existing
+     * groups within the selection before creating the group.
      *
      * @param selected
      * @return
      * @throws DataGraphServiceException
      */
-    public GraphCluster cluster(List<IGraphElement> selected) throws DataGraphServiceException {
+    public GraphCluster group(List<IGraphElement> selected) throws DataGraphServiceException {
 
         if (selected.isEmpty()) {
             throw new DataGraphServiceException("Nothing was selected for clustering!");
@@ -240,8 +241,9 @@ public class DataGraphService
      * @throws DataGraphServiceException
      */
     public IGraphArc remove(IGraphArc arc) throws DataGraphServiceException {
-        arc = removeShape(arc);
-        validateData(arc.getDataElement());
+        validateRemoval(arc);
+        removeShape(arc);
+        removeData(arc.getDataElement());
         return arc;
     }
 
@@ -254,11 +256,18 @@ public class DataGraphService
      * @throws DataGraphServiceException
      */
     public IGraphNode remove(IGraphNode node) throws DataGraphServiceException {
-        while (!node.getConnections().isEmpty()) {
-            remove((IGraphArc) node.getConnections().get(0));
+        IGraphArc arc;
+        for (IGravisConnection connection : node.getConnections()) {
+            validateRemoval((IGraphArc) connection);
         }
-        node = removeShape(node);
-        validateData(node.getDataElement());
+        validateRemoval(node);
+        while (!node.getConnections().isEmpty()) {
+            arc = (IGraphArc) node.getConnections().get(0);
+            removeShape(arc);
+            removeData(arc.getDataElement());
+        }
+        removeShape(node);
+        removeData(node.getDataElement());
         return node;
     }
 
@@ -285,7 +294,7 @@ public class DataGraphService
      * @param selected
      * @throws DataGraphServiceException
      */
-    public void uncluster(List<IGraphElement> selected) throws DataGraphServiceException {
+    public void ungroup(List<IGraphElement> selected) throws DataGraphServiceException {
 
         if (selected.isEmpty()) {
             throw new DataGraphServiceException("Nothing was selected for unclustering!");
@@ -464,11 +473,18 @@ public class DataGraphService
         List<IGraphArc> clusteredArcs = cluster.getDataElement().getClusteredArcs();
         List<IGraphNode> clusteredNodes = cluster.getDataElement().getClusteredNodes();
 
+        Point2D oldNodesPosition = calculator.getCenter(clusteredNodes);
+        double translateX = cluster.getShape().getTranslateX() - oldNodesPosition.getX();
+        double translateY = cluster.getShape().getTranslateY() - oldNodesPosition.getY();
+
         for (IGraphNode node : clusteredNodes) {
             if (dataDao.getNodeIds().contains(node.getDataElement().getId())) {
+                node.translateXProperty().set(node.translateXProperty().get() + translateX);
+                node.translateYProperty().set(node.translateYProperty().get() + translateY);
                 graphDao.add(node);
             }
         }
+
         for (IGraphArc arc : clusteredArcs) {
             if (dataDao.getArcs().contains(arc.getDataElement())) {
                 graphDao.add(arc);
@@ -583,51 +599,21 @@ public class DataGraphService
     }
 
     /**
-     * Removes an arc. Also removes all related parameters.
+     * Removes an element. Also removes all related parameters.
      *
      * @param node
      * @return
      */
-    private void remove(IDataArc arc) throws ParameterServiceException {
-        for (Parameter param : arc.getParameters().values()) {
-            parameterService.remove(param);
-        }
-        dataDao.remove(arc);
-    }
-
-    /**
-     * Removes a place. Also removes all related parameters.
-     *
-     * @param place
-     * @return
-     */
-    private void remove(DataPlace place) throws ParameterServiceException {
-        for (Parameter param : place.getParameters().values()) {
-            parameterService.remove(param);
-        }
-        dataDao.remove(place);
-    }
-
-    /**
-     * Removes a transition. Also removes all related parameters.
-     *
-     * @param transition
-     * @return
-     */
-    private void remove(DataTransition transition) throws ParameterServiceException {
-        for (Parameter param : transition.getParameters().values()) {
-            if (Parameter.Type.REFERENCE == param.getType()) {
-                if (param.getReferingNodes().size() == 1) {
-                    if (transition.getFunction().getParameterIds().contains(param.getId())) {
-                        param.getReferingNodes().remove(transition);
-                    }
+    private IDataElement removeData(IDataElement element) throws DataGraphServiceException {
+        if (element != null) {
+            if (element.getGraphElements().isEmpty()) {
+                for (Parameter param : element.getParameters().values()) {
+                    dataDao.remove(param);
                 }
+                dataDao.remove(element);
             }
         }
-        for (Parameter param : transition.getParameters().values()) {
-            parameterService.remove(param);
-        }
-        dataDao.remove(transition);
+        return element;
     }
 
     /**
@@ -836,19 +822,18 @@ public class DataGraphService
     }
 
     /**
-     * Validates the given data node. Removes it from the data model when no
-     * remaining reference can be found within the scene.
+     * Validates the potential removal of a graph arc.
      *
      * @param arc
+     * @throws DataGraphServiceException thrown in case the graph arc can not be
+     *                                   deleted
      */
-    private void validateData(IDataArc arc) throws DataGraphServiceException {
-        if (arc == null) {
-            return;
-        }
-        if (arc.getElementType() == Element.Type.ARC) {
-            if (arc.getGraphElements().isEmpty()) {
+    private void validateRemoval(IGraphArc arc) throws DataGraphServiceException {
+        IDataArc data = arc.getDataElement();
+        if (data != null) {
+            if (data.getGraphElements().size() <= 1) {
                 try {
-                    remove(arc);
+                    parameterService.ValidateRemoval(data.getParameters().values(), data);
                 } catch (ParameterServiceException ex) {
                     throw new DataGraphServiceException(ex.getMessage());
                 }
@@ -857,24 +842,27 @@ public class DataGraphService
     }
 
     /**
-     * Validates the given data arc. Removes it from the data model when no
-     * remaining reference can be found within the scene.
+     * Validates the potential removal of a graph node.
      *
-     * @param arc
+     * @param node
+     * @throws DataGraphServiceException
      */
-    private void validateData(IDataNode node) throws DataGraphServiceException {
-        if (node == null) {
-            return;
-        }
-        if (node.getGraphElements().isEmpty()) {
+    private void validateRemoval(IGraphNode node) throws DataGraphServiceException {
+        IDataNode data = node.getDataElement();
+        if (data != null) {
             try {
-                if (Element.Type.PLACE == node.getElementType()) {
-                    remove((DataPlace) node);
-                } else if (Element.Type.TRANSITION == node.getElementType()) {
-                    remove((DataTransition) node);
+                for (IGravisConnection connection : node.getConnections()) {
+                    validateRemoval((IGraphArc) connection);
                 }
-            } catch (ParameterServiceException ex) {
-                throw new DataGraphServiceException(ex.getMessage());
+            } catch (DataGraphServiceException ex) {
+                throw new DataGraphServiceException("A related arc cannot be removed! [" + ex.getMessage() + "]");
+            }
+            if (data.getGraphElements().size() <= 1) {
+                try {
+                    parameterService.ValidateRemoval(data.getParameters().values(), data);
+                } catch (ParameterServiceException ex) {
+                    throw new DataGraphServiceException("Node cannot be removed! [" + ex.getMessage() + "]");
+                }
             }
         }
     }

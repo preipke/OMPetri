@@ -56,7 +56,7 @@ public class ToolsController implements Initializable
     
     private void CreateCluster() {
         try {
-            dataGraphService.cluster(selectionService.getSelectedElements());
+            dataGraphService.group(selectionService.getSelectedElements());
         } catch (DataGraphServiceException ex) {
             messengerService.addToLog(ex);
         }
@@ -64,7 +64,7 @@ public class ToolsController implements Initializable
     
     private void RemoveCluster() {
         try {
-            dataGraphService.uncluster(selectionService.getSelectedElements());
+            dataGraphService.ungroup(selectionService.getSelectedElements());
         } catch (DataGraphServiceException ex) {
             messengerService.addToLog(ex);
         }

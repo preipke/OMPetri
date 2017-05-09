@@ -17,6 +17,8 @@ import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
 import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.application.Platform;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,16 +31,19 @@ import org.springframework.stereotype.Service;
 public class SimulationService
 {
     private final ResultsDao resultsDao;
+    private final List<Thread> threads;
 
     @Autowired private DataGraphService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private SimulationController simulationControlsController;
     @Autowired private ElementController elementController;
     @Autowired private SimulationCompiler simulationCompiler;
+    
 
     @Autowired
     public SimulationService(ResultsDao resultsDao) {
         this.resultsDao = resultsDao;
+        this.threads = new ArrayList();
     }
 
     public Simulation InitSimulation(String authorName, String modelName, String[] variables, References variableReferences) {
@@ -54,12 +59,21 @@ public class SimulationService
         } catch (DataGraphServiceException ex) {
             throw new SimulationServiceException(ex);
         }
+        
+        /**
+         * Monitor previous threads. 
+         */
+        List<Thread> threadsFinished = new ArrayList();
+        for (Thread t : threads) {
+            if (!t.isAlive()) {
+                threadsFinished.add(t);
+            }
+        }
+        threadsFinished.forEach(t -> {
+            threads.remove(t);
+        });
 
-//        if (server.isRunning()) {
-//            throw new SimulationServiceException("Server is still running!");
-//        }
         messengerService.addToLog("Starting simulation...");
-
         Thread thread = new Thread(() -> {
 
             try {
@@ -167,43 +181,22 @@ public class SimulationService
                 }
 
                 /**
-                 * Read simulation output. (?)
+                 * Read simulation output.
                  */
-                Thread t3 = new Thread()
-                {
-                    public void run() {
+                if (simulationExecuterOutputReader != null) {
+                    try {
+                        System.out.println("--- Server output ---");
                         String line;
-                        if (simulationExecuterOutputReader != null) {
-//                            while (server.isRunning()) {
-//                                try {
-//                                    line = simulationExecuterOutputReader.readLine();
-//                                    if (line != null && line.length() > 0) {
-//                                        System.out.println(line);
-//                                    }
-//                                } catch (IOException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                try {
-//                                    sleep(100);
-//                                } catch (InterruptedException e) {
-//                                    e.printStackTrace();
-//                                }
-//                            }
-                            try {
-                                System.out.println("--- Server output ---");
-                                while ((line = simulationExecuterOutputReader.readLine()) != null) {
-                                    if (line.length() > 0) {
-                                        System.out.println(line);
-                                    }
-                                }
-                                simulationExecuterOutputReader.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                        while ((line = simulationExecuterOutputReader.readLine()) != null) {
+                            if (line.length() > 0) {
+                                System.out.println(line);
                             }
                         }
+                        simulationExecuterOutputReader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-                };
-                t3.start();
+                }
                 
             } catch (SimulationServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
@@ -216,9 +209,13 @@ public class SimulationService
             }
         });
         thread.start();
+        threads.add(thread);
     }
 
     public void StopSimulation() {
-        // if !isSimulating -> return
+        threads.stream().filter((t) -> (t.isAlive())).forEach(t -> {
+            System.out.println("Interrupting thread!");
+            t.interrupt();
+        });
     }
 }

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
@@ -96,7 +97,15 @@ public class PetriNet
         return !parameters.get(param.getId()).equals(param);
     }
     
-    public IArc remove(IArc arc) {
+    public IElement remove(IElement element) {
+        if (element instanceof IArc) {
+            return remove((IArc) element);
+        } else {
+            return remove((INode) element);
+        }
+    }
+    
+    private IArc remove(IArc arc) {
         arc.getParameters().values().forEach(param -> {
             parameters.remove(param.getId());
         });
@@ -105,7 +114,7 @@ public class PetriNet
         return arcs.remove(arc.getId());
     }
     
-    public INode remove(INode node) {
+    private INode remove(INode node) {
         if (!nodeIds.remove(node.getId())) {
             return null;
         } 
