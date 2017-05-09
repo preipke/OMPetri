@@ -65,7 +65,7 @@
                                         <TableColumn fx:id="paramDeleteLocal" prefWidth="25.0" />
                                     </columns>
                                 </TableView>
-                                <Label fx:id="statusParamDeleteLocal" alignment="CENTER" maxWidth="250.0" />
+                                <Label fx:id="statusParamLocal" alignment="CENTER" maxWidth="250.0" />
                             </children>
                         </VBox>
                     </children>
@@ -87,7 +87,7 @@
                                         <TableColumn fx:id="paramDeleteGlobal" prefWidth="25.0" />
                                     </columns>
                                 </TableView>
-                                <Label fx:id="statusParamDeleteGlobal" maxWidth="250.0" />
+                                <Label fx:id="statusParamGlobal" maxWidth="250.0" />
                             </children>
                         </VBox>
                     </children>

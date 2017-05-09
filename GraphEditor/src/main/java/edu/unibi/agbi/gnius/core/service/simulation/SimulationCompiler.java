@@ -56,7 +56,6 @@ public final class SimulationCompiler
         ProcessBuilder pb;
 
         File dirStorage, fileMo, fileMos;
-        String nameSimulation;
         References simulationReferences;
 
         /**
@@ -78,10 +77,8 @@ public final class SimulationCompiler
          * Exort data for OpenModelica.
          */
         try {
-            nameSimulation = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME).replace(":", "").substring(0, 6) + "-" + dataDao.getName();
-
-            fileMo = new File(dirStorage + File.separator + nameSimulation + ".mo");
-            fileMos = new File(dirStorage + File.separator + nameSimulation + ".mos");
+            fileMo = new File(dirStorage + File.separator + "model.mo");
+            fileMos = new File(dirStorage + File.separator + "model.mos");
             openModelicaExporter.exportMO(dataDao, fileMo);
             simulationReferences = openModelicaExporter.exportMOS(dataDao, fileMos, fileMo, simWorkingDirectory);
         } catch (IOException ex) {

@@ -42,7 +42,7 @@
                                 <RowConstraints />
                             </rowConstraints>
                         </GridPane>
-                        <ProgressBar fx:id="simProgress" progress="0.0" />
+                        <ProgressBar fx:id="progressSim" progress="0.0" />
                     </children>
                 </VBox>
             </children>

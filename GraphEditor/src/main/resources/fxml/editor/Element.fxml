@@ -17,15 +17,15 @@
                         <GridPane hgap="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
                                 <Label text="Type" />
-                                <TextField fx:id="elementType" disable="true" editable="false" GridPane.columnIndex="1" />
+                                <TextField fx:id="inputType" disable="true" editable="false" GridPane.columnIndex="1" />
                                 <Label text="Id" GridPane.rowIndex="1" />
-                                <TextField fx:id="elementId" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                <TextField fx:id="inputId" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <Label text="Name" GridPane.rowIndex="2" />
-                                <TextField fx:id="elementName" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                <TextField fx:id="inputName" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                 <Label text="Label" GridPane.rowIndex="3" />
-                                <TextField fx:id="elementLabel" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                <TextField fx:id="inputLabel" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                 <Label text="Description" GridPane.rowIndex="4" />
-                                <TextArea fx:id="elementDescription" prefHeight="80.0" promptText="Enter a short description here..." GridPane.columnIndex="1" GridPane.rowIndex="4">
+                                <TextArea fx:id="inputDescription" prefHeight="80.0" promptText="Enter a description here..." GridPane.columnIndex="1" GridPane.rowIndex="4">
                                     <GridPane.margin>
                                         <Insets top="3.0" />
                                     </GridPane.margin>
@@ -58,8 +58,8 @@
                             <children>
                                 <GridPane fx:id="propertiesSubtype" hgap="5.0">
                                     <children>
-                                        <ChoiceBox fx:id="elementSubtype" GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" />
                                         <Label text="Subtype" />
+                                        <ChoiceBox fx:id="choiceSubtype" GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" />
                                     </children>
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
@@ -74,8 +74,8 @@
                                         <Label text="Color" />
                                         <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1">
                                             <children>
-                                                <ChoiceBox fx:id="colorChoice" disable="true" HBox.hgrow="ALWAYS" />
-                                                <Button fx:id="colorCreate" disable="true" mnemonicParsing="false" text="Add" />
+                                                <ChoiceBox fx:id="choiceColour" disable="true" HBox.hgrow="ALWAYS" />
+                                                <Button fx:id="buttonColourCreate" disable="true" mnemonicParsing="false" text="Add" />
                                             </children>
                                         </HBox>
                                     </children>
@@ -93,7 +93,7 @@
                                 <GridPane fx:id="propertiesArc" hgap="5.0">
                                     <children>
                                         <Label text="Weight" />
-                                        <TextField fx:id="propertyWeight" GridPane.columnIndex="1" />
+                                        <TextField fx:id="inputArcWeight" GridPane.columnIndex="1" />
                                     </children>
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
@@ -108,9 +108,9 @@
                                         <Label text="Token" />
                                         <Label text="Token (min.)" GridPane.rowIndex="1" />
                                         <Label text="Token (max.)" GridPane.rowIndex="2" />
-                                        <TextField fx:id="propertyTokenMax" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                        <TextField fx:id="propertyTokenMin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="propertyToken" GridPane.columnIndex="1" />
+                                        <TextField fx:id="inputPlaceTokenMax" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextField fx:id="inputPlaceTokenMin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextField fx:id="inputPlaceToken" GridPane.columnIndex="1" />
                                     </children>
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
@@ -125,25 +125,34 @@
                                 <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
                                     <children>
                                         <Label text="Function" />
-                                        <ScrollPane fitToHeight="true" maxWidth="400.0">
+                                        <ScrollPane fitToHeight="true">
                                             <content>
                                                 <AnchorPane>
                                                     <children>
-                                                        <SwingNode fx:id="transitionFunctionImage" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                        <SwingNode fx:id="swingNodeTransitionFunctionImage" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                                     </children>
                                                 </AnchorPane>
                                             </content>
                                         </ScrollPane>
-                                        <TextField fx:id="transitionFunctionInput" />
+                                        <TextField fx:id="inputTransitionFunction" />
                                         <HBox alignment="TOP_CENTER" spacing="5.0">
                                             <children>
-                                                <Button fx:id="buttonParameterShow" mnemonicParsing="false" text="Parameter" />
-                                                <MenuButton fx:id="buttonParameterInsert" mnemonicParsing="false" text="Insert" />
+                                                <MenuButton mnemonicParsing="false" text="Insert">
+                                                    <items>
+                                                        <Menu fx:id="menuRefPlaces" mnemonicParsing="false" text="Places" />
+                                                        <Menu fx:id="menuRefTransitions" mnemonicParsing="false" text="Transitions" />
+                                                        <SeparatorMenuItem mnemonicParsing="false" />
+                                                        <Menu fx:id="menuParamLocal" mnemonicParsing="false" text="Local Parameter" />
+                                                        <Menu fx:id="menuParamGlobal" mnemonicParsing="false" text="Global Parameter" />
+                                                        <SeparatorMenuItem mnemonicParsing="false" />
+                                                        <MenuItem fx:id="menuItemParamEdit" mnemonicParsing="false" text="Edit Parameter" />
+                                                    </items>
+                                                </MenuButton>
                                             </children>
                                         </HBox>
                                         <HBox alignment="CENTER">
                                             <children>
-                                                <Label fx:id="transitionFunctionStatus" text="Label" />
+                                                <Label fx:id="statusTransitionFunction" />
                                             </children>
                                         </HBox>
                                     </children>

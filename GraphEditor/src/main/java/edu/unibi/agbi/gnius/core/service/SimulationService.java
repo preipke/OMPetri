@@ -31,7 +31,6 @@ public class SimulationService
     private final ResultsDao resultsDao;
 
     @Autowired private DataGraphService dataService;
-    @Autowired private SimulationService simulationService;
     @Autowired private MessengerService messengerService;
     @Autowired private SimulationController simulationControlsController;
     @Autowired private ElementController elementController;
@@ -141,7 +140,7 @@ public class SimulationService
                 }
 
                 Platform.runLater(() -> {
-                    Simulation simulation = simulationService.InitSimulation(dataService.getDataDao().getAuthor(),
+                    Simulation simulation = InitSimulation(dataService.getDataDao().getAuthor(),
                             dataService.getDataDao().getName(),
                             simulationServer.getSimulationVariables(),
                             simulationReferences
@@ -212,7 +211,7 @@ public class SimulationService
                 messengerService.addToLog("Finished simulating!");
                 Platform.runLater(() -> {
                     simulationControlsController.setSimulationProgress(1);
-                    simulationControlsController.StopSimulation();
+                    simulationControlsController.Unlock();
                 });
             }
         });

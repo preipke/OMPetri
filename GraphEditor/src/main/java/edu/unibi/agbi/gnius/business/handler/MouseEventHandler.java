@@ -201,11 +201,7 @@ public class MouseEventHandler {
 
     private void onMousePressed(MouseEvent event, GraphPane pane) {
 
-        try {
-            elementController.StoreElementDetails();
-        } catch (DataGraphServiceException ex) {
-            messengerService.addToLog(ex.getMessage());
-        }
+        mainController.HideElementBox();
 
         isPrimaryButtonDown = false;
         isSecondaryButtonDown = false;

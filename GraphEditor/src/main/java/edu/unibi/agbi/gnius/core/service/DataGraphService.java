@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
@@ -582,40 +583,51 @@ public class DataGraphService
     }
 
     /**
-     * Removes the given node. Also removes all related local parameters.
+     * Removes an arc. Also removes all related parameters.
      *
      * @param node
      * @return
      */
-    private void remove(IDataArc arc) throws DataGraphServiceException {
+    private void remove(IDataArc arc) throws ParameterServiceException {
         for (Parameter param : arc.getParameters().values()) {
-            if (param.getType() == Parameter.Type.LOCAL) {
-                parameterService.remove(param);
-            } else {
-                param.getReferingNodes().remove(arc);
-            }
+            parameterService.remove(param);
         }
         dataDao.remove(arc);
     }
 
     /**
-     * Removes the given node. Also removes all related local parameters.
+     * Removes a place. Also removes all related parameters.
      *
-     * @param node
+     * @param place
      * @return
      */
-    private void remove(IDataNode node) throws DataGraphServiceException {
-        for (Parameter param : node.getParameters().values()) {
-            if (param.getType() == Parameter.Type.LOCAL) {
-                parameterService.remove(param);
-            } else {
-                /**
-                 * 
-                 */
-                param.getReferingNodes().remove(node);
+    private void remove(DataPlace place) throws ParameterServiceException {
+        for (Parameter param : place.getParameters().values()) {
+            parameterService.remove(param);
+        }
+        dataDao.remove(place);
+    }
+
+    /**
+     * Removes a transition. Also removes all related parameters.
+     *
+     * @param transition
+     * @return
+     */
+    private void remove(DataTransition transition) throws ParameterServiceException {
+        for (Parameter param : transition.getParameters().values()) {
+            if (Parameter.Type.REFERENCE == param.getType()) {
+                if (param.getReferingNodes().size() == 1) {
+                    if (transition.getFunction().getParameterIds().contains(param.getId())) {
+                        param.getReferingNodes().remove(transition);
+                    }
+                }
             }
         }
-        dataDao.remove(node);
+        for (Parameter param : transition.getParameters().values()) {
+            parameterService.remove(param);
+        }
+        dataDao.remove(transition);
     }
 
     /**
@@ -835,7 +847,11 @@ public class DataGraphService
         }
         if (arc.getElementType() == Element.Type.ARC) {
             if (arc.getGraphElements().isEmpty()) {
-                remove(arc);
+                try {
+                    remove(arc);
+                } catch (ParameterServiceException ex) {
+                    throw new DataGraphServiceException(ex.getMessage());
+                }
             }
         }
     }
@@ -850,9 +866,15 @@ public class DataGraphService
         if (node == null) {
             return;
         }
-        if (node.getElementType() != Element.Type.CLUSTER) {
-            if (node.getGraphElements().isEmpty()) {
-                remove(node);
+        if (node.getGraphElements().isEmpty()) {
+            try {
+                if (Element.Type.PLACE == node.getElementType()) {
+                    remove((DataPlace) node);
+                } else if (Element.Type.TRANSITION == node.getElementType()) {
+                    remove((DataTransition) node);
+                }
+            } catch (ParameterServiceException ex) {
+                throw new DataGraphServiceException(ex.getMessage());
             }
         }
     }

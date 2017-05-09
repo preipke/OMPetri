@@ -5,19 +5,19 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
-import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Parameter;
+import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,83 +30,110 @@ import org.springframework.stereotype.Service;
 public class ParameterService
 {
     private final DataDao dataDao;
-    
-    @Value("${regex.function.number}")
-    private String regexFunctionNumber;
-    @Value("${regex.function.operator}")
-    private String regexFunctionOperator;
-    @Value("${regex.function.parameter}")
-    private String regexFunctionParameter;
-    
+
+    @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private MessengerService messengerService;
+
+    @Value("${regex.function.number}") private String regexFunctionNumber;
+    @Value("${regex.function.operator}") private String regexFunctionOperator;
+
     @Autowired
     public ParameterService(DataDao dataDao) {
         this.dataDao = dataDao;
     }
-    
-    public void add(Parameter param) throws ParameterServiceException {
-        switch (param.getType()) {
-            case REFERENCE:
-                addReference(param);
-                break;
-            default:
-                addParameter(param);
+
+    /**
+     * Attempts to add a parameter.
+     *
+     * @param element
+     * @param param
+     * @throws ParameterServiceException
+     */
+    public void addParameter(Parameter param, IElement element) throws ParameterServiceException {
+        if (Parameter.Type.GLOBAL == param.getType()) {
+            add(param);
+        } else {
+            if (element != null) {
+                add(param);
+                element.getParameters().put(param.getId(), param);
+            } else {
+                throw new ParameterServiceException("An additional element is required for storing non global parameters!");
+            }
         }
+    }
+
+    /**
+     * Attempts to add a parameter to the dao.
+     *
+     * @param param
+     * @throws ParameterServiceException
+     */
+    private void add(Parameter param) throws ParameterServiceException {
         if (dataDao.containsAndNotEqual(param)) {
             throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
         }
         dataDao.add(param);
     }
-    
-    private void addReference(Parameter param) {
-        
+
+    /**
+     * Sets the function of a transition.Replaces the existing function,
+     * ensuring the integrity of parameter references.
+     *
+     * @param transition
+     * @param functionString
+     * @throws edu.unibi.agbi.gnius.core.exception.ParameterServiceException
+     */
+    public void setTransitionFunction(DataTransition transition, String functionString) throws ParameterServiceException {
+        removeParameterReferences(transition);
+        try {
+            Function function = functionBuilder.build(functionString);
+            transition.setFunction(function);
+        } catch (IOException ex) {
+            throw new ParameterServiceException("");
+        }
+        addParameterReferences(transition);
     }
 
     /**
-     * Attempts to add the given parameter.
+     * Adds references to a transition for all parameters used in its function.
      *
-     * @param param
-     * @throws ParameterServiceException
+     * @param transition
      */
-    private void addParameter(Parameter param) throws ParameterServiceException {
-        if (param.getId().matches("") | !param.getId().matches(regexFunctionParameter)) {
-            throw new ParameterServiceException("Invalid parameter name!");
-        }
-        if (param.getValue().matches("")| !param.getValue().matches(regexFunctionNumber)) {
-            throw new ParameterServiceException("Invalid parameter value!");
-        }
-        switch (param.getType()) {
-            case LOCAL:
-                localParameters.add(param);
-                selectedElement.getParameters().put(param.getId(), param);
-                break;
-            case GLOBAL:
-                globalParameters.add(param);
-                break;
-        }
+    private void addParameterReferences(DataTransition transition) {
+        transition.getFunction().getParameterIds().forEach(id -> {
+            getParameter(id).getReferingNodes().add(transition);
+        });
     }
 
-    private Parameter createOrGet(String id, String value, Parameter.Type type) throws ParameterServiceException {
-        Parameter param = getParameter(id);
-        if (param != null) {
-            if (!param.getValue().matches(value)) {
-                
-            } else if (param.getType() != type) {
-                
-            }
-        } else {
-            param = new Parameter(id, "", value, Parameter.Type.REFERENCE);
-            add(param);
-        }
-        return param;
+    /**
+     * Removes references to a transition for all parameters used in its
+     * function.
+     *
+     * @param transition
+     */
+    private void removeParameterReferences(DataTransition transition) {
+        transition.getFunction().getParameterIds().forEach(id -> {
+            getParameter(id).getReferingNodes().remove(transition);
+        });
     }
-    
+
+    /**
+     * Gets all global parameters.
+     *
+     * @return
+     */
     public List<Parameter> getGlobalParameters() {
-        
+
         List<Parameter> parameters = new ArrayList();
-        
-        parameters.addAll(globalParameters);
-        parameters.sort(Comparator.comparing(Parameter::toString));
-        
+
+        for (Parameter param : dataDao.getParameters().values()) {
+            if (param.getType() == Parameter.Type.GLOBAL) {
+                parameters.add(param);
+            }
+        }
+
+        parameters.sort(Comparator.comparing(Parameter::getId));
+
         return parameters;
     }
 
@@ -121,10 +148,12 @@ public class ParameterService
         List<Parameter> parameters = new ArrayList();
 
         for (Parameter param : elem.getParameters().values()) {
-            if (param.getType()==Parameter.Type.LOCAL) {
+            if (param.getType() == Parameter.Type.LOCAL) {
                 parameters.add(param);
             }
         }
+
+        parameters.sort(Comparator.comparing(Parameter::getId));
 
         return parameters;
     }
@@ -149,84 +178,49 @@ public class ParameterService
     }
 
     /**
-     * Validates wether an element references a parameter or not.
-     *
-     * @param elem
-     * @param param
-     * @return
-     */
-    public boolean isElementReferencingParameter(IDataElement elem, Parameter param) {
-        switch (elem.getElementType()) {
-            case TRANSITION:
-                DataTransition transition = (DataTransition) elem;
-                if (transition.getFunction().getParameters().contains(param)) {
-                    return true;
-                }
-        }
-        return false;
-    }
-
-    /**
-     * Removes the given parameter.
+     * Attempts to remove a parameter.
      *
      * @param param
-     * @throws DataGraphServiceException
+     * @throws ParameterServiceException
      */
-    public void remove(Parameter param) throws DataGraphServiceException {
+    public void remove(Parameter param) throws ParameterServiceException {
         if (!param.getReferingNodes().isEmpty()) {
-            throw new DataGraphServiceException("Cannot delete parameter '" + param.getId() + "'! There is elements refering to it.");
+            messengerService.addToLog("Cannot delete parameter! Elements are using it:");
+            param.getReferingNodes().forEach(elem -> {
+                messengerService.addToLog("Parameter '" + param.getId() + "' is referenced by element '" + elem.toString() + "'.");
+            });
+            throw new ParameterServiceException("Cannot delete parameter '" + param.getId() + "'! " + param.getReferingNodes().size() + " element(s) referring.");
         }
         dataDao.remove(param);
     }
-    
-    /**
-     * Validates the function input for a transition.
-     *
-     * @param element
-     * @param functionInput
-     * @throws InputValidationException
-     */
-    public void ValidateFunctionInput(DataTransition element, String functionInput) throws InputValidationException {
 
-        String[] candidates = functionInput.split(regexFunctionOperator);
-        List<Parameter> currentParameter = new ArrayList();
+    /**
+     * Validates a function in relation to a given transition. Ensures that all
+     * used parameters exist and that their access is not restricted (i.e.
+     * access to LOCAL parameters of a different element).
+     *
+     * @param function
+     * @param element
+     * @throws ParameterServiceException
+     */
+    public void ValidateFunction(String function, DataTransition element) throws ParameterServiceException {
+
+        String[] candidates = function.split(regexFunctionOperator);
         Parameter param;
 
         for (String candidate : candidates) {
-            if (!candidate.matches(regexFunctionNumber)) {
-                if (getParameterIds().contains(candidate)) {
-                    param = getParameter(candidate);
+            if (!candidate.matches(regexFunctionNumber)) { // candidate is NaN
+                param = getParameter(candidate);
+                if (param != null) {
                     if (param.getType() == Parameter.Type.LOCAL) {
                         if (!element.getParameters().keySet().contains(candidate)) {
-                            throw new InputValidationException("'" + candidate + "' is a LOCAL parameter for a different element");
+                            throw new ParameterServiceException("'" + candidate + "' is a LOCAL parameter for a different element");
                         }
                     }
-                    param.addReferingNode(element);
-                    currentParameter.add(param);
                 } else {
-                    throw new InputValidationException("Parameter '" + candidate + "' does not exist");
+                    throw new ParameterServiceException("Parameter '" + candidate + "' does not exist");
                 }
             }
         }
-
-        element.getFunction().getParameters().clear();
-        currentParameter.forEach(parameter -> {
-            element.getFunction().getParameters().add(parameter);
-        });
-    }
-    
-    /**
-     * Refreshes the number of referring nodes for each global parameter.
-     */
-    private void RefreshGlobalParameterReferences() {
-        globalParameters.parallelStream().forEach(param -> {
-            IDataElement[] elements = new IDataElement[param.getReferingNodes().size()];
-            param.getReferingNodes().toArray(elements);
-            for (IDataElement element : elements) {
-                if (!isElementReferencingParameter(element, param)) {
-                    param.removeReferingNode(element);
-                }
-            }
-        });
     }
 }

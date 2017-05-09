@@ -41,7 +41,7 @@ public class SimulationController implements Initializable
     @FXML private TextField inputSimIntervals;
     @FXML private ChoiceBox choicesSimIntegrator;
     
-    @FXML private ProgressBar simProgress;
+    @FXML private ProgressBar progressSim;
     
     @Value("#{'${simulation.integrators}'.split(',')}") private List<String> simIntegratorsList;
     @Value("${simulation.value.intervals}") private String simIntervals;
@@ -61,33 +61,31 @@ public class SimulationController implements Initializable
     }
     
     public void setSimulationProgress(double progress) {
-        simProgress.setProgress(progress);
+        progressSim.setProgress(progress);
     }
     
     public void StopSimulation() {
-        
         buttonSimStop.setDisable(true);
-        simProgress.setProgress(1);
-
+//        simProgress.setProgress(1);
         simulationService.StopSimulation();
-        
+    }
+    
+    public void Unlock() {
+        progressSim.setProgress(1);
+        buttonSimStop.setDisable(true);
         buttonSimStart.setDisable(false);
         inputSimStopTime.setDisable(false);
         inputSimIntervals.setDisable(false);
         choicesSimIntegrator.setDisable(false);
     }
     
-    private void StartSimulation() {
-        
-        simProgress.setVisible(true);
-        simProgress.setProgress(0);
-        
+    private void StartSimulationAndLock() {
+        progressSim.setProgress(0);
+//        progressSim.setVisible(true);
         buttonSimStart.setDisable(true);
-        
         inputSimStopTime.setDisable(true);
         inputSimIntervals.setDisable(true);
         choicesSimIntegrator.setDisable(true);
-        
         try {
             simulationService.StartSimulation();
             buttonSimStop.setDisable(false);
@@ -102,7 +100,7 @@ public class SimulationController implements Initializable
         
         buttonOpenResultsViewer.setOnAction(e -> resultsController.ShowWindow());
         
-        buttonSimStart.setOnAction(e -> StartSimulation());
+        buttonSimStart.setOnAction(e -> StartSimulationAndLock());
         buttonSimStop.setOnAction(e -> StopSimulation());
         buttonSimStop.setDisable(true);
         
@@ -116,6 +114,6 @@ public class SimulationController implements Initializable
         }
         choicesSimIntegrator.getSelectionModel().select(0);
         
-        simProgress.setVisible(true);
+        progressSim.setVisible(true);
     }
 }

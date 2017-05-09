@@ -8,6 +8,7 @@ package edu.unibi.agbi.gnius.business.controller;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.service.MessengerService;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -24,18 +25,35 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class MainController implements Initializable {
     
+    @Autowired private MessengerService messengerService;
     @Autowired private ElementController elementController;
     @Autowired private ParameterController parameterController;
     
     @FXML private VBox elementBox;
     @FXML private VBox detailsContainer;
     @FXML private VBox parameterContainer;
+    
+    private boolean isShowingDetails = false;
+    private boolean isShowingParameters = false;
 
     public Stage getStage() {
         return (Stage) elementBox.getScene().getWindow();
     }
     
     public void HideElementBox() {
+        
+        if (isShowingDetails) {
+            try {
+                elementController.StoreElementDetails();
+            } catch (DataGraphServiceException ex) {
+                messengerService.addToLog(ex.getMessage());
+            }
+            isShowingDetails = false;
+        }
+        if (isShowingParameters) {
+            isShowingParameters = false;
+        }
+        
         elementBox.setVisible(false);
     }
     
@@ -44,13 +62,17 @@ public class MainController implements Initializable {
         elementBox.getChildren().clear();
         elementBox.getChildren().add(detailsContainer);
         elementController.ShowElementDetails(element);
+        isShowingDetails = true;
+        isShowingParameters = false;
     }
     
-    public void ShowParameter(IDataElement element) {
+    public void ShowParameters(IDataElement element) {
         elementBox.setVisible(true);
         elementBox.getChildren().clear();
         elementBox.getChildren().add(parameterContainer);
         parameterController.ShowParameterDetails(element);
+        isShowingParameters = true;
+        isShowingDetails = false;
     }
 
     @Override
