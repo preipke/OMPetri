@@ -6,7 +6,7 @@
 package edu.unibi.agbi.petrinet.model;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 /**
  * An implementation used to represent mathematical functions.
@@ -18,14 +18,14 @@ import java.util.TreeSet;
  */
 public class Function
 {
-    private final ArrayList<FunctionElement> elements;
-    private final HashSet<Parameter> parameter; // anpassen wegen parameter comparable - tree sinnvoll, ja nein? parameter referenzierung überarbeiten
+    private final ArrayList<FunctionElement> functionElements;
+    private final HashSet<String> parameterIds;
 
     private String unit = "";
 
     public Function() {
-        elements = new ArrayList();
-        parameter = new TreeSet();
+        functionElements = new ArrayList();
+        parameterIds = new HashSet();
     }
 
     public void setUnit(String unit) {
@@ -42,7 +42,7 @@ public class Function
      * @return 
      */
     public ArrayList<FunctionElement> getElements() {
-        return elements;
+        return functionElements;
     }
 
     /**
@@ -50,14 +50,14 @@ public class Function
      *
      * @return
      */
-    public TreeSet<Parameter> getParameters() {
-        return parameter;
+    public HashSet<String> getParameterIds() {
+        return parameterIds;
     }
 
     @Override
     public String toString() {
         String function = "";
-        for (FunctionElement elem : elements) {
+        for (FunctionElement elem : functionElements) {
             function = function + elem.get();
         }
         return function;

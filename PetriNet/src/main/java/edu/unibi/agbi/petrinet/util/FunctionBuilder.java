@@ -68,6 +68,7 @@ public class FunctionBuilder
                 
                 element = new FunctionElement(parameterMatcher.group(), Type.PARAMETER);
                 function.getElements().add(element);
+                function.getParameterIds().add(element.get());
                 
                 index = parameterMatcher.start() + parameterMatcher.group().length();
                 foundParameter = parameterMatcher.find();

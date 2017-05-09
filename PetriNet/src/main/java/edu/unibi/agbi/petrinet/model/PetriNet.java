@@ -97,6 +97,9 @@ public class PetriNet
     }
     
     public IArc remove(IArc arc) {
+        arc.getParameters().values().forEach(param -> {
+            parameters.remove(param.getId());
+        });
         arc.getSource().getArcsOut().remove(arc);
         arc.getTarget().getArcsIn().remove(arc);
         return arcs.remove(arc.getId());
@@ -113,19 +116,20 @@ public class PetriNet
             remove(node.getArcsOut().remove(0));
         }
         if (node instanceof Place) {
-            return places.remove(node.getId());
+            node = places.remove(node.getId());
         } else {
-            return remove((Transition) transitions.get(node.getId()));
+            node = remove((Transition) node);
         }
+        node.getParameters().values().forEach((param) -> {
+            parameters.remove(param.getId());
+        });
+        return node;
     }
     
     private INode remove(Transition transition) {
-        transition.getFunction().getParameters().stream().forEach(param -> {
-            param.removeReferingNode(transition);
+        transition.getFunction().getParameterIds().forEach(id -> {
+            parameters.get(id).getReferingNodes().remove(transition);
         });
-        for (Parameter param : transition.getParameters().values()) {
-            parameters.remove(param.getId());
-        }
         return transitions.remove(transition.getId());
     }
     

@@ -72,6 +72,11 @@ public abstract class Element implements IElement
     public boolean isEnabled() {
         return isEnabled;
     }
+    
+    @Override
+    public String toString() {
+        return "(" + id + ") " + name;
+    }
 
     public enum Type
     {

@@ -91,19 +91,10 @@ public class OpenModelicaExporter
         writer.println();
 
         /**
-         * Parameter.
-         */
-//        model.getParameters().values().stream().forEach(param -> {
-//            writer.append(INDENT + "parameter Real '" + param.getId() + "'(final unit=\"\") = " + param.getValue() + ";");
-//            writer.println();
-//        });
-        // handled when parsing the function, replacing inside the function
-
-        /**
          * Places.
          */
         boolean isFirst, isInnerFirst;
-        String tmp, tmp1, tmp2, tmp3, tokenType, functionType, functionString;
+        String tmp1, tmp2, tmp3, tokenType, functionType, functionString;
         Function function;
         Token token;
         Weight weight;

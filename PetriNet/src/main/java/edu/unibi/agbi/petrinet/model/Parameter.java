@@ -9,8 +9,6 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -18,7 +16,7 @@ import javafx.beans.property.StringProperty;
  *
  * @author PR
  */
-public class Parameter //implements Comparable
+public class Parameter
 {
     private final String id;
     private final StringProperty value;
@@ -26,7 +24,6 @@ public class Parameter //implements Comparable
     private final Type type;
 
     private final Set<IElement> referingNodes;
-    private final IntegerProperty referingNodesCount;
 
     public Parameter(String id, String note, String value, Type type) {
         this.id = id;
@@ -34,7 +31,6 @@ public class Parameter //implements Comparable
         this.value = new SimpleStringProperty(value);
         this.type = type;
         this.referingNodes = new HashSet();
-        this.referingNodesCount = new SimpleIntegerProperty(0);
     }
 
     /**
@@ -118,34 +114,6 @@ public class Parameter //implements Comparable
     public Set<IElement> getReferingNodes() {
         return referingNodes;
     }
-
-    public void addReferingNode(IElement elem) {
-        referingNodes.add(elem);
-        referingNodesCount.set(referingNodes.size());
-    }
-
-    public void removeReferingNode(IElement elem) {
-        referingNodes.remove(elem);
-        referingNodesCount.set(referingNodes.size());
-    }
-
-    /**
-     * Gets the count of nodes refering to this parameter.
-     *
-     * @return
-     */
-    public int getReferingNodesCount() {
-        return referingNodesCount.get();
-    }
-
-    /**
-     * Gets the property for the count of nodes refering to this parameter.
-     *
-     * @return
-     */
-    public IntegerProperty getReferingNodesCountProperty() {
-        return referingNodesCount;
-    }
     
     @Override
     public boolean equals(Object obj) {
@@ -170,33 +138,6 @@ public class Parameter //implements Comparable
         hash = 97 * hash + Objects.hashCode(this.type);
         return hash;
     }
-
-//    /**
-//     * Compares the name strings of two parameters lexicographically. Uses the
-//     * compareTo method for strings to compare the parameter's ids.
-//     *
-//     * @param o
-//     * @return
-//     */
-//    @Override
-//    public int compareTo(Object o) {
-//        Parameter param = (Parameter) o;
-//        if (this.getType() != param.getType()) {
-//            switch(getType()) {
-//                case LOCAL:
-//                    return -1;
-//                case GLOBAL:
-//                    if (param.getType() == Type.LOCAL) {
-//                        return 1;
-//                    } else {
-//                        return -1;
-//                    }
-//                default:
-//                    return 1;
-//            }
-//        }
-//        return this.getId().compareTo(param.getId());
-//    }
 
     public enum Type
     {
