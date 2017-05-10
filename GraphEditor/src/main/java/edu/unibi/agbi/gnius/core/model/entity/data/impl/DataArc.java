@@ -62,4 +62,9 @@ public class DataArc extends Arc implements IDataArc
     public void setLabelText(String text) {
         throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
+
+    @Override
+    public String toString() {
+        return "(" + id + ") " + name;
+    }
 }

@@ -459,22 +459,22 @@ public class OpenModelicaExporter
             place.getFilter().clear();
 
             tmp = "'" + place.getId() + "'.t";
-            filter += tmp + "|";
             references.addElementReference(place, tmp);
             references.addFilterReference(tmp, place);
+            filter += tmp + "|";
 
             index = 1;
             for (IArc arc : place.getArcsOut()) {
 
                 tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
-                filter += tmp + "|";
-                references.addElementReference(arc, tmp);
+                references.addElementReference(place, tmp);
                 references.addFilterReference(tmp, arc);
+                filter += tmp + "|";
 
                 tmp = "der(" + tmp + ")";
-                filter += tmp + "|";
-                references.addElementReference(arc, tmp);
+                references.addElementReference(place, tmp);
                 references.addFilterReference(tmp, arc);
+                filter += tmp + "|";
 
                 index++;
             }
@@ -483,14 +483,14 @@ public class OpenModelicaExporter
             for (IArc arc : place.getArcsIn()) {
 
                 tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
-                filter += tmp + "|";
-                references.addElementReference(arc, tmp);
+                references.addElementReference(place, tmp);
                 references.addFilterReference(tmp, arc);
+                filter += tmp + "|";
 
                 tmp = "der(" + tmp + ")";
-                filter += tmp + "|";
-                references.addElementReference(arc, tmp);
+                references.addElementReference(place, tmp);
                 references.addFilterReference(tmp, arc);
+                filter += tmp + "|";
 
                 index++;
             }
@@ -503,9 +503,9 @@ public class OpenModelicaExporter
             String[] vars = new String[]{"fire", "actualSpeed"};
             for (String var : vars) {
                 tmp = "'" + transition.getId() + "'." + var;
-                filter += tmp + "|";
                 references.addElementReference(transition, tmp);
                 references.addFilterReference(tmp, transition);
+                filter += tmp + "|";
             }
         }
 

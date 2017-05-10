@@ -92,7 +92,7 @@
                                 </GridPane>
                                 <GridPane fx:id="propertiesArc" hgap="5.0">
                                     <children>
-                                        <Label text="Weight" />
+                                        <Label text="Multiplier" />
                                         <TextField fx:id="inputArcWeight" GridPane.columnIndex="1" />
                                     </children>
                                     <columnConstraints>

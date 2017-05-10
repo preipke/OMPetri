@@ -119,7 +119,7 @@ public class ResultsService
             XYChart.Series seriesNew = new XYChart.Series();
             
             for (String variable : variables) {
-                if (variable.matches(variableTarget)) {
+                if (variableTarget.contentEquals(variable)) {
                     break;
                 }
                 variableIndex++;
@@ -129,7 +129,7 @@ public class ResultsService
                 seriesNew.getData().addAll(seriesOld.getData());
             }
             
-            for (int i = seriesNew.getData().size(); i < results[0].size(); i++) {
+            for (int i = seriesNew.getData().size(); i < results[variableIndex].size(); i++) {
                 seriesNew.getData().add(new XYChart.Data(
                         (Number) results[0].get(i),
                         (Number) results[variableIndex].get(i)
