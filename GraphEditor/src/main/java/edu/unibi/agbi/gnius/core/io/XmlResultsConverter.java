@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.util;
+package edu.unibi.agbi.gnius.core.io;
 
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import java.io.File;
@@ -26,10 +26,10 @@ import org.w3c.dom.*;
  * @author PR
  */
 @Component
-public class XmlExporter
+public class XmlResultsConverter
 {
     @Value("${format.datetime}") private String formatDateTime;
-    @Value("${xml.results.data.dtd}") private String resultsDataDtd;
+    @Value("${xml.results.data.dtd}") private String dtdResultsData;
     
     private final String resultsRoot = "Simulations";
     private final String resultsSimulation = "Simulation";
@@ -157,7 +157,7 @@ public class XmlExporter
         tr.setOutputProperty(OutputKeys.INDENT, "yes");
         tr.setOutputProperty(OutputKeys.METHOD, "xml");
         tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, resultsDataDtd);
+        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, dtdResultsData);
         tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
         // send DOM to file
