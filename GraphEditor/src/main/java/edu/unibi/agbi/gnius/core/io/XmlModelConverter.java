@@ -11,13 +11,16 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -36,7 +39,7 @@ public class XmlModelConverter
     @Value("${format.datetime}") private String formatDateTime;
     @Value("${xml.results.data.dtd}") private String dtdModelData;
     
-    private final String tagAttrAuthor = "max";
+    private final String tagAttrAuthor = "author";
     private final String tagAttrColour = "colour";
     private final String tagAttrDateTime = "dateTime";
     private final String tagAttrDescription = "description";
@@ -73,11 +76,11 @@ public class XmlModelConverter
     private final String tagTransiton = "Transition";
     private final String tagFunction = "Function";
     
-    private final String tagModelVis = "Visualisation";
-    private final String tagModelVisConnections = "Connections";
-    private final String tagModelVisConnectionsElem = "Connection";
-    private final String tagModelVisNodes = "Nodes";
-    private final String tagModelVisNodesElem = "Node";
+    private final String tagGraph = "Graph";
+    private final String tagConnections = "Connections";
+    private final String tagConnection = "Connection";
+    private final String tagNodes = "Nodes";
+    private final String tagNode = "Node";
     
     public void importXml(File file) {
         // ...
@@ -86,7 +89,7 @@ public class XmlModelConverter
         // ...
     }
     
-    public void exportXml(File file, GraphDao graphDao, DataDao dataDao) throws Exception {
+    public void exportXml(File file, GraphDao graphDao, DataDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
         
         dataDao.getArcs();
         dataDao.getPlaces();

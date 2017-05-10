@@ -15,22 +15,34 @@ import org.springframework.stereotype.Service;
  * @author PR
  */
 @Service
-public class MessengerService implements Initializable {
-    
+public class MessengerService implements Initializable
+{
+
     public void addToLog(String msg) {
         System.out.println(msg);
     }
-    
+
     public void addToLog(Throwable thr) {
         System.out.println(thr.getMessage());
     }
-    
+
     public void setLeftStatus(String msg) {
-        
+
     }
-    
+
     public void setRightStatus(String msg) {
-        
+
+    }
+
+    /**
+     * Prints a message in the top status label.
+     *
+     * @param msg the message to print
+     * @param thr indicates wether this status is related to an error. set null
+     *            if not
+     */
+    public void setTopStatus(String msg, Throwable thr) {
+
     }
 
     @Override

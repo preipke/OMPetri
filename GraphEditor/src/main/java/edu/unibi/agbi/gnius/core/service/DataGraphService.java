@@ -871,6 +871,10 @@ public class DataGraphService
         return dataDao;
     }
 
+    public GraphDao getGraphDao() {
+        return graphDao;
+    }
+
     public void setArcTypeDefault(DataArc.Type type) {
         defaultArcType = type;
     }
