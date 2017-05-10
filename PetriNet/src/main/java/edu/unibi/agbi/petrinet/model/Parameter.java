@@ -121,10 +121,10 @@ public class Parameter
             return false;
         }
         Parameter param = (Parameter) obj;
-        if (!param.getId().matches(id)) {
+        if (!param.getId().contentEquals(id)) {
             return false;
         }
-        if (!param.getValue().matches(getValue())) {
+        if (!param.getValue().contentEquals(getValue())) {
             return false;
         }
         return param.getType() == type;

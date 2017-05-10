@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
 /**
@@ -95,6 +96,15 @@ public class Simulation
     }
 
     /**
+     * Gets the element references.
+     *
+     * @return
+     */
+    public Map<String,IElement> getFilterElementReferences() {
+        return variableReferences.getFilterElementReferences();
+    }
+
+    /**
      * Gets the results. The lists at each index represents the data for a
      * variable name at the exact same index position in the variables list.
      *
@@ -120,11 +130,11 @@ public class Simulation
             return false;
         }
 
-        if (!modelName.matches(simulation.getModelName())) {
+        if (!modelName.contentEquals(simulation.getModelName())) {
             return false;
         }
 
-        return authorName.matches(simulation.getAuthorName());
+        return authorName.contentEquals(simulation.getAuthorName());
     }
 
     @Override
@@ -134,5 +144,10 @@ public class Simulation
         hash = 59 * hash + Objects.hashCode(this.authorName);
         hash = 59 * hash + Objects.hashCode(this.modelName);
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        return dateTime.format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + " " + getModelName();
     }
 }

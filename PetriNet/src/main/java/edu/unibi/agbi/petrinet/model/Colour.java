@@ -35,7 +35,7 @@ public class Colour
     public boolean equals(Object object) {
         if (object != null) {
             if (object instanceof Colour) {
-                if (this.id.matches(((Colour) object).getId())) {
+                if (id.contentEquals(((Colour) object).getId())) {
                     return true;
                 }
             }

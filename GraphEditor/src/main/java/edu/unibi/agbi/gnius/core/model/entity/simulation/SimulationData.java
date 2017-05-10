@@ -85,10 +85,10 @@ public class SimulationData
         if (!data.getSimulation().equals(simulation)) {
             return false;
         }
-        if (!data.getElementId().matches(elementId)) {
+        if (!data.getElementId().contentEquals(elementId)) {
             return false;
         }
-        return data.getVariable().matches(variable);
+        return data.getVariable().contentEquals(variable);
     }
 
     @Override
