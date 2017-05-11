@@ -12,9 +12,11 @@ import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
  *
  * @author PR
  */
-public interface IGraphArc extends IGraphElement , IGravisConnection
+public interface IGraphArc extends IGraphElement, IGravisConnection
 {
     @Override public IDataArc getDataElement();
+
     @Override public IGraphNode getSource();
+
     @Override public IGraphNode getTarget();
 }

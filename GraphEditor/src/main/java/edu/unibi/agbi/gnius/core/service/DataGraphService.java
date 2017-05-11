@@ -496,22 +496,6 @@ public class DataGraphService
     }
 
     /**
-     * Gets the converted shape for a given arc. Converts straight to curved or
-     * curved to straight, respectively.
-     *
-     * @param shape
-     * @return
-     * @throws DataGraphServiceException
-     */
-    private IGraphArc getConvertedArcShape(IGraphArc shape) throws DataGraphServiceException {
-        if (shape instanceof GraphEdgeArrow) {
-            return new GraphCurveArrow(shape.getSource(), shape.getTarget(), shape.getDataElement());
-        } else {
-            return new GraphEdgeArrow(shape.getSource(), shape.getTarget(), shape.getDataElement());
-        }
-    }
-
-    /**
      * Clones the given node. Results in a node of the same type that references
      * the data object of the given node.
      *
@@ -596,6 +580,22 @@ public class DataGraphService
 
         // Adding shape.
         return shapeSourceToTarget;
+    }
+
+    /**
+     * Gets the converted shape for a given arc. Converts straight to curved or
+     * curved to straight, respectively.
+     *
+     * @param shape
+     * @return
+     * @throws DataGraphServiceException
+     */
+    private IGraphArc getConvertedArcShape(IGraphArc shape) throws DataGraphServiceException {
+        if (shape instanceof GraphEdgeArrow) {
+            return new GraphCurveArrow(shape.getSource(), shape.getTarget(), shape.getDataElement());
+        } else {
+            return new GraphEdgeArrow(shape.getSource(), shape.getTarget(), shape.getDataElement());
+        }
     }
 
     /**

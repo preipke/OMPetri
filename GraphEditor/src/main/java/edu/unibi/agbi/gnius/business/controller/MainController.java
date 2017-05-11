@@ -41,7 +41,6 @@ public class MainController implements Initializable {
     }
     
     public void HideElementBox() {
-        
         if (isShowingDetails) {
             try {
                 elementController.StoreElementDetails();
@@ -53,7 +52,6 @@ public class MainController implements Initializable {
         if (isShowingParameters) {
             isShowingParameters = false;
         }
-        
         elementBox.setVisible(false);
     }
     

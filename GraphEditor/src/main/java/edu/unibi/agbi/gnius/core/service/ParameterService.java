@@ -33,7 +33,6 @@ public class ParameterService
     private final DataDao dataDao;
 
     @Autowired private FunctionBuilder functionBuilder;
-    @Autowired private MessengerService messengerService;
 
     @Value("${regex.function.number}") private String regexFunctionNumber;
     @Value("${regex.function.operator}") private String regexFunctionOperator;

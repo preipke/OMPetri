@@ -31,20 +31,19 @@ public class XmlResultsConverter
     @Value("${format.datetime}") private String formatDateTime;
     @Value("${xml.results.data.dtd}") private String dtdResultsData;
     
-    private final String resultsRoot = "Simulations";
-    private final String resultsSimulation = "Simulation";
-    private final String resultsSimulationAttrDateTime = "dateTime";
-    private final String resultsSimulationAttrModelName = "model";
-    private final String resultsSimulationAttrAuthor = "author";
-    private final String resultsSimulationElements = "Elements";
-    private final String resultsElement = "Element";
-    private final String resultsElementAttrId = "id";
-    private final String resultsElementAttrName = "name";
-    private final String resultsElementData = "Data";
-    private final String resultsVariable = "Variable";
-    private final String resultsVariableAttrId = "id";
-    private final String resultsValue = "Value";
-    private final String resultsValueAttrX = "time";
+    private final String attrAuthor = "author";
+    private final String attrDateTime = "dateTime";
+    private final String attrId = "id";
+    private final String attrModel = "model";
+    private final String attrName = "name";
+    private final String attrTime = "time";
+    private final String tagData = "Data";
+    private final String tagElement = "Element";
+    private final String tagElements = "Elements";
+    private final String tagSimulations = "Simulations";
+    private final String tagSimulation = "Simulation";
+    private final String tagResults = "Variable";
+    private final String tagValue = "Value";
     
     public void importXml(File file) {
         // ...
@@ -57,16 +56,14 @@ public class XmlResultsConverter
 
         Document dom;
         NamedNodeMap attributes;
-        Element simulations, simulation;
-        Element elements, element;
-        Element variables;
+        Element simulations, simulation, elements, element, variables;
 
         String dateTime, model, author, id, name;
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); // instance of a DocumentBuilderFactory
         DocumentBuilder db = dbf.newDocumentBuilder(); // use factory to get an instance of document builder
         dom = db.newDocument(); // create instance of DOM
-        simulations = dom.createElement(resultsRoot); // create the root element
+        simulations = dom.createElement(tagSimulations); // create the root element
 
         for (SimulationData data : simulationData) {
             
@@ -84,11 +81,11 @@ public class XmlResultsConverter
              */
             for (int i = 0; i < simulations.getChildNodes().getLength(); i++) {
                 attributes = simulations.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(resultsSimulationAttrDateTime).getNodeValue().matches(dateTime)) {
-                    if (attributes.getNamedItem(resultsSimulationAttrModelName).getNodeValue().matches(model)) {
-                        if (attributes.getNamedItem(resultsSimulationAttrAuthor).getNodeValue().matches(author)) {
+                if (attributes.getNamedItem(attrDateTime).getNodeValue().matches(dateTime)) {
+                    if (attributes.getNamedItem(attrModel).getNodeValue().matches(model)) {
+                        if (attributes.getNamedItem(attrAuthor).getNodeValue().matches(author)) {
                             simulation = (Element) simulations.getChildNodes().item(i);
-                            elements = (Element) simulation.getElementsByTagName(resultsSimulationElements).item(0);
+                            elements = (Element) simulation.getElementsByTagName(tagElements).item(0);
                             break;
                         }
                     }
@@ -96,14 +93,14 @@ public class XmlResultsConverter
             }
 
             if (simulation == null) {
-                simulation = dom.createElement(resultsSimulation);
-                simulation.setAttribute(resultsSimulationAttrDateTime, dateTime);
-                simulation.setAttribute(resultsSimulationAttrModelName, model);
-                simulation.setAttribute(resultsSimulationAttrAuthor, author);
+                simulation = dom.createElement(tagSimulation);
+                simulation.setAttribute(attrDateTime, dateTime);
+                simulation.setAttribute(attrModel, model);
+                simulation.setAttribute(attrAuthor, author);
                 simulations.appendChild(simulation);
             }
             if (elements == null) {
-                elements = dom.createElement(resultsSimulationElements);
+                elements = dom.createElement(tagElements);
                 simulation.appendChild(elements);
             }
 
@@ -115,36 +112,36 @@ public class XmlResultsConverter
 
             for (int i = 0; i < elements.getChildNodes().getLength(); i++) {
                 attributes = elements.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(resultsElementAttrId).getNodeValue().matches(id)) {
+                if (attributes.getNamedItem(attrId).getNodeValue().matches(id)) {
                     element = (Element) elements.getChildNodes().item(i);
-                    variables = (Element) element.getElementsByTagName(resultsElementData).item(0);
+                    variables = (Element) element.getElementsByTagName(tagData).item(0);
                     break;
                 }
             }
 
             if (element == null) {
-                element = dom.createElement(resultsElement);
-                element.setAttribute(resultsElementAttrId, id);
-                element.setAttribute(resultsElementAttrName, name);
+                element = dom.createElement(tagElement);
+                element.setAttribute(attrId, id);
+                element.setAttribute(attrName, name);
                 elements.appendChild(element);
             }
             if (variables == null) {
-                variables = dom.createElement(resultsElementData);
+                variables = dom.createElement(tagData);
                 element.appendChild(variables);
             }
 
             /**
              * parse data
              */
-            final Element variable = dom.createElement(resultsVariable);
-            variable.setAttribute(resultsVariableAttrId, data.getVariable());
+            final Element variable = dom.createElement(tagResults);
+            variable.setAttribute(attrId, data.getVariable());
             variables.appendChild(variable);
 
             data.getSeries().getData().forEach(new Consumer<Data>() {
                 @Override
                 public void accept(Data d) {
-                    Element datapoint = dom.createElement(resultsValue);
-                    datapoint.setAttribute(resultsValueAttrX, d.getXValue().toString());
+                    Element datapoint = dom.createElement(tagValue);
+                    datapoint.setAttribute(attrTime, d.getXValue().toString());
                     datapoint.setTextContent(d.getYValue().toString());
                     variable.appendChild(datapoint);
                 }
