@@ -14,6 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
 import edu.unibi.agbi.petrinet.entity.IElement;
@@ -103,18 +104,21 @@ public class ElementController implements Initializable
     // Transition
     @FXML private TextField inputTransitionFunction;
     @FXML private SwingNode swingNodeTransitionFunctionImage;
-    @FXML private Label statusTransitionFunction;
-    
+
     @FXML private Menu menuRefPlaces;
     @FXML private Menu menuRefTransitions;
     @FXML private Menu menuParamLocal;
     @FXML private Menu menuParamGlobal;
     @FXML private MenuItem menuItemParamEdit;
 
+    @FXML private Label statusMessage;
+
     @Value("${param.name.reference.fire}") private String referenceFireName;
     @Value("${param.name.reference.speed}") private String referenceSpeedName;
     @Value("${param.name.reference.token}") private String referenceTokenName;
     @Value("${param.name.reference.tokenflow}") private String referenceTokenflowName;
+
+    @Value("${regex.function.number}") private String regexNumber;
 
     private IDataElement elementSelected;
     private String inputLatestValid;
@@ -343,7 +347,7 @@ public class ElementController implements Initializable
     private void LoadParameterChoices(IDataElement element) {
 
         final String filter = "".toLowerCase();
-        
+
         menuRefPlaces.getItems().clear();
         menuRefTransitions.getItems().clear();
         menuParamLocal.getItems().clear();
@@ -352,7 +356,7 @@ public class ElementController implements Initializable
         dataService.getDataDao().getPlaces().stream()
                 .filter(place -> place.getId().toLowerCase().contains(filter) || place.getName().toLowerCase().contains(filter))
                 .forEach(place -> {
-                    
+
                     final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
                     if (place.getArcsIn().size() > 0) {
 
@@ -429,7 +433,7 @@ public class ElementController implements Initializable
         dataService.getDataDao().getTransitions().stream()
                 .filter(transition -> transition.getId().toLowerCase().contains(filter) || transition.getName().toLowerCase().contains(filter))
                 .forEach(transition -> {
-                    
+
                     MenuItem itemTransitionSpeed = new MenuItem("Speed | v(t)");
                     itemTransitionSpeed.setOnAction(e -> {
                         CreateReferencingParameter(referenceSpeedName + transition.getId(), "'" + transition.getId() + "'.actualSpeed", transition);
@@ -448,7 +452,6 @@ public class ElementController implements Initializable
                     menuRefTransitions.getItems().add(menuTransition);
                 });
 
-        
         List<Parameter> paramsLocal = parameterService.getLocalParameters(element);
         if (!paramsLocal.isEmpty()) {
             paramsLocal.stream()
@@ -465,7 +468,7 @@ public class ElementController implements Initializable
         } else {
             menuParamLocal.setDisable(true);
         }
-        
+
         List<Parameter> paramsGlobal = parameterService.getGlobalParameters();
         if (!paramsGlobal.isEmpty()) {
             paramsGlobal.stream()
@@ -491,7 +494,7 @@ public class ElementController implements Initializable
      * @throws DataGraphServiceException
      */
     private void StoreElementProperties(IDataElement element) throws DataGraphServiceException {
-        
+
         // TODO store values according to the selected colour
         Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
 
@@ -611,20 +614,20 @@ public class ElementController implements Initializable
 
     /**
      * Creates a parameter that references an element.
+     *
      * @param id
      * @param value
-     * @param element 
+     * @param element
      */
     private void CreateReferencingParameter(String id, String value, IElement element) {
         Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE);
         try {
             parameterService.addParameter(param, element);
+            InsertToFunctionInput(id);
+            ParseFunctionInputToImage(null, true);
         } catch (ParameterServiceException ex) {
-            setStatus("Cannot create reference parameter! [" + ex.getMessage() + "]", true);
-            return;
+            setStatus(null, "Cannot insert reference!", ex);
         }
-        InsertToFunctionInput(id);
-        ParseFunctionInputToImage(null, true);
     }
 
     /**
@@ -668,40 +671,64 @@ public class ElementController implements Initializable
                 });
             }
             inputLatestValid = input;
-            setStatus("Valid!", false);
+            setStatus(inputTransitionFunction, "Valid!", null);
         } catch (DetailedParseCancellationException ex) {
             if (event != null && event.getCode() != KeyCode.RIGHT && event.getCode() != KeyCode.LEFT) {
                 inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
             }
-            setStatus("Invalid input! [" + ex.getMessage() + "]", true);
+            setStatus(inputTransitionFunction, "Invalid input!", ex);
         } catch (Exception ex) {
-            setStatus("Invalid input! [" + ex.getMessage() + "]", true);
+            setStatus(inputTransitionFunction, "Invalid input!", ex);
         }
     }
 
-    private void setStatus(String msg, boolean isError) {
-        if (isError) {
-            statusTransitionFunction.setTextFill(Color.RED);
-            statusTransitionFunction.setText(msg);
-        } else {
-            statusTransitionFunction.setTextFill(Color.GREEN);
-            statusTransitionFunction.setText(msg);
+    private void ValidateNumberInput(TextField input) {
+        try {
+            String value = input.getText().replace(",", ".");
+            if (!value.matches(regexNumber)) {
+                throw new InputValidationException("'" + value + "' is not a number");
+            }
+            setStatus(input, "", null);
+        } catch (InputValidationException ex) {
+            setStatus(input, "Invalid input!", ex);
         }
+    }
+
+    private void setStatus(TextField input, String msg, Throwable thr) {
+        if (thr != null) {
+            if (input != null) {
+                input.setStyle("-fx-border-color: red");
+            }
+            statusMessage.setTextFill(Color.RED);
+            messengerService.addToLog(msg + " [" + thr.getMessage() + "]");
+        } else {
+            if (input != null) {
+                input.setStyle("");
+            }
+            statusMessage.setTextFill(Color.GREEN);
+        }
+        statusMessage.setText(msg);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
         identifierPane.setVisible(false);
         propertiesPane.setVisible(false);
-        inputTransitionFunction.textProperty().addListener(e -> {
-            ParseFunctionInputToImage(null, true);
-        });
+
+        inputArcWeight.textProperty().addListener(cl -> ValidateNumberInput(inputArcWeight));
+        inputPlaceToken.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceToken));
+        inputPlaceTokenMin.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceTokenMin));
+        inputPlaceTokenMax.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceTokenMax));
+
+        inputTransitionFunction.textProperty().addListener(e -> ParseFunctionInputToImage(null, true));
         inputTransitionFunction.setOnMouseClicked(e -> {
             inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
         });
         inputTransitionFunction.setOnKeyReleased(e -> {
             inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
         });
+
         menuItemParamEdit.setOnAction(e -> {
             try {
                 StoreElementDetails();

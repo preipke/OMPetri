@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller;
 
+import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
@@ -147,7 +148,8 @@ public class ResultsController implements Initializable
             }
             choices.sort(Comparator.comparing(IElement::toString));
 
-            elementChoices.setItems(choices);
+            elementChoices.getItems().clear();
+            elementChoices.getItems().addAll(choices);
             if (oldSize == choices.size()) {
                 elementChoices.getSelectionModel().select(index);
             }
@@ -172,7 +174,7 @@ public class ResultsController implements Initializable
             for (String value : values) {
                 name = getValueName(value, simulationChoice);
                 if (name == null) {
-                    messengerService.addToLog("Cannot find choice for undefined value! ['" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "']");
+                    messengerService.addToLog("Cannot find data for undefined value! ['" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "']");
                     continue;
                 }
                 choice = new ValueChoice(name, value);
@@ -180,7 +182,8 @@ public class ResultsController implements Initializable
             }
             choices.sort(Comparator.comparing(ValueChoice::toString));
 
-            valueChoices.setItems(choices);
+            valueChoices.getItems().clear();
+            valueChoices.getItems().addAll(choices);
             if (oldSize == choices.size()) {
                 valueChoices.getSelectionModel().select(index);
             }
@@ -208,9 +211,14 @@ public class ResultsController implements Initializable
         SimulationData data = new SimulationData(simulationChoice, elementChoice, valueChoice.getValue());
 
         if (resultsService.add(lineChart, data)) {
-            resultsService.UpdateSeries(data);
-            resultsService.show(lineChart, data);
-            setStatus("The selected data has been added!", false);
+            try {
+                resultsService.UpdateSeries(data);
+                resultsService.show(lineChart, data);
+                setStatus("The selected data has been added!", false);
+            } catch (ResultsServiceException ex) {
+                setStatus("Adding data has failed!", true);
+                messengerService.addToLog("Adding data has failed! [" + ex.getMessage() +"]");
+            }
         } else {
             setStatus("The selected data has already been added! Please check the table below.", true);
         }
@@ -465,7 +473,11 @@ public class ResultsController implements Initializable
                 }
                 cellData.getValue().updateMilliSecondLastStatusChange();
                 if (cb.selectedProperty().getValue()) {
-                    resultsService.UpdateSeries(cellData.getValue());
+                    try {
+                        resultsService.UpdateSeries(cellData.getValue());
+                    } catch (ResultsServiceException ex) {
+                        messengerService.addToLog("Updating data failed! [" +ex.getMessage()+ "]");
+                    }
                     resultsService.show(lineChart, cellData.getValue());
                 } else {
                     resultsService.hide(lineChart, cellData.getValue());

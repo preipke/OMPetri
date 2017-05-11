@@ -66,11 +66,11 @@ public class ResultsService
         hide(lineChart, data);
         resultsDao.remove(lineChart, data);
     }
-    
+
     public List<SimulationData> getChartData(LineChart lineChart) {
         return resultsDao.getResultsTableList(lineChart);
     }
-    
+
     public ObservableList<Simulation> getSimulations() {
         return resultsDao.getSimulations();
     }
@@ -100,35 +100,40 @@ public class ResultsService
     }
 
     /**
-     * Updates the series for the given data object. Loads data from the
-     * simulation and adds all additional entries to the series. Updates 
-     * the related chart.
+     * Updates the series for the given data object.Loads data from the
+     * simulation and adds all additional entries to the series. Updates the
+     * related chart.
      *
      * @param data
+     * @throws edu.unibi.agbi.gnius.core.exception.ResultsServiceException
      */
-    public synchronized void UpdateSeries(SimulationData data) {
+    public synchronized void UpdateSeries(SimulationData data) throws ResultsServiceException {
 
         XYChart.Series seriesOld = data.getSeries();
         List<Object>[] results = data.getSimulation().getResults();
-        
+
         if (seriesOld == null || results[0].size() > seriesOld.getData().size()) { // update only if additional values available
-            
+
             int variableIndex = 0;
             String[] variables = data.getSimulation().getVariables();
             String variableTarget = data.getVariable();
             XYChart.Series seriesNew = new XYChart.Series();
-            
+
             for (String variable : variables) {
                 if (variableTarget.contentEquals(variable)) {
                     break;
                 }
                 variableIndex++;
             }
-            
+
+            if (variableIndex > variables.length) {
+                throw new ResultsServiceException("Variable '" + variableTarget + "' cannot be found in the references!");
+            }
+
             if (seriesOld != null) {
                 seriesNew.getData().addAll(seriesOld.getData());
             }
-            
+
             for (int i = seriesNew.getData().size(); i < results[variableIndex].size(); i++) {
                 seriesNew.getData().add(new XYChart.Data(
                         (Number) results[0].get(i),
@@ -136,13 +141,13 @@ public class ResultsService
                 ));
             }
             seriesNew.setName("'" + data.getElementId() + "'");
-            
+
             if (seriesOld != null) {
                 XYChart chart = data.getSeries().getChart();
                 chart.getData().remove(seriesOld);
                 chart.getData().remove(seriesNew);
             }
-            
+
             data.setSeries(seriesNew);
         }
     }

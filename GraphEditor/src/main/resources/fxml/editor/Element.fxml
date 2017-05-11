@@ -54,112 +54,112 @@
             <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>
-                        <VBox fx:id="propertiesBox" alignment="TOP_CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <GridPane fx:id="propertiesSubtype" hgap="5.0">
+                                <VBox fx:id="propertiesBox" alignment="TOP_CENTER">
                                     <children>
-                                        <Label text="Subtype" />
-                                        <ChoiceBox fx:id="choiceSubtype" GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" />
-                                    </children>
-                                    <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                </GridPane>
-                                <GridPane fx:id="propertiesColor" hgap="5.0">
-                                    <children>
-                                        <Label text="Color" />
-                                        <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1">
+                                        <GridPane fx:id="propertiesSubtype" hgap="5.0">
                                             <children>
-                                                <ChoiceBox fx:id="choiceColour" disable="true" HBox.hgrow="ALWAYS" />
-                                                <Button fx:id="buttonColourCreate" disable="true" mnemonicParsing="false" text="Add" />
+                                                <Label text="Subtype" />
+                                                <ChoiceBox fx:id="choiceSubtype" GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" />
                                             </children>
-                                        </HBox>
-                                    </children>
-                                    <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                    <VBox.margin>
-                                        <Insets />
-                                    </VBox.margin>
-                                </GridPane>
-                                <GridPane fx:id="propertiesArc" hgap="5.0">
-                                    <children>
-                                        <Label text="Multiplier" />
-                                        <TextField fx:id="inputArcWeight" GridPane.columnIndex="1" />
-                                    </children>
-                                    <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                </GridPane>
-                                <GridPane fx:id="propertiesPlace" hgap="5.0">
-                                    <children>
-                                        <Label text="Token" />
-                                        <Label text="Token (min.)" GridPane.rowIndex="1" />
-                                        <Label text="Token (max.)" GridPane.rowIndex="2" />
-                                        <TextField fx:id="inputPlaceTokenMax" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                        <TextField fx:id="inputPlaceTokenMin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="inputPlaceToken" GridPane.columnIndex="1" />
-                                    </children>
-                                    <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                </GridPane>
-                                <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
-                                    <children>
-                                        <Label text="Function" />
-                                        <ScrollPane fitToHeight="true">
-                                            <content>
-                                                <AnchorPane>
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                        </GridPane>
+                                        <GridPane fx:id="propertiesColor" hgap="5.0">
+                                            <children>
+                                                <Label text="Color" />
+                                                <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1">
                                                     <children>
-                                                        <SwingNode fx:id="swingNodeTransitionFunctionImage" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                        <ChoiceBox fx:id="choiceColour" disable="true" HBox.hgrow="ALWAYS" />
+                                                        <Button fx:id="buttonColourCreate" disable="true" mnemonicParsing="false" text="Add" />
                                                     </children>
-                                                </AnchorPane>
-                                            </content>
-                                        </ScrollPane>
-                                        <TextField fx:id="inputTransitionFunction" />
-                                        <HBox alignment="TOP_CENTER" spacing="5.0">
-                                            <children>
-                                                <MenuButton mnemonicParsing="false" text="Insert">
-                                                    <items>
-                                                        <Menu fx:id="menuRefPlaces" mnemonicParsing="false" text="Places" />
-                                                        <Menu fx:id="menuRefTransitions" mnemonicParsing="false" text="Transitions" />
-                                                        <SeparatorMenuItem mnemonicParsing="false" />
-                                                        <Menu fx:id="menuParamLocal" mnemonicParsing="false" text="Local Parameter" />
-                                                        <Menu fx:id="menuParamGlobal" mnemonicParsing="false" text="Global Parameter" />
-                                                        <SeparatorMenuItem mnemonicParsing="false" />
-                                                        <MenuItem fx:id="menuItemParamEdit" mnemonicParsing="false" text="Edit Parameter" />
-                                                    </items>
-                                                </MenuButton>
+                                                </HBox>
                                             </children>
-                                        </HBox>
-                                        <HBox alignment="CENTER">
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                            <VBox.margin>
+                                                <Insets />
+                                            </VBox.margin>
+                                        </GridPane>
+                                        <GridPane fx:id="propertiesArc" hgap="5.0">
                                             <children>
-                                                <Label fx:id="statusTransitionFunction" />
+                                                <Label text="Multiplier" />
+                                                <TextField fx:id="inputArcWeight" GridPane.columnIndex="1" />
                                             </children>
-                                        </HBox>
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                        </GridPane>
+                                        <GridPane fx:id="propertiesPlace" hgap="5.0">
+                                            <children>
+                                                <Label text="Token" />
+                                                <Label text="Token (min.)" GridPane.rowIndex="1" />
+                                                <Label text="Token (max.)" GridPane.rowIndex="2" />
+                                                <TextField fx:id="inputPlaceTokenMax" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="inputPlaceTokenMin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="inputPlaceToken" GridPane.columnIndex="1" />
+                                            </children>
+                                            <columnConstraints>
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                                                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                                            </columnConstraints>
+                                            <rowConstraints>
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                            </rowConstraints>
+                                        </GridPane>
+                                        <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
+                                            <children>
+                                                <Label text="Function" />
+                                                <ScrollPane fitToHeight="true">
+                                                    <content>
+                                                        <AnchorPane>
+                                                            <children>
+                                                                <SwingNode fx:id="swingNodeTransitionFunctionImage" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                                            </children>
+                                                        </AnchorPane>
+                                                    </content>
+                                                </ScrollPane>
+                                                <TextField fx:id="inputTransitionFunction" />
+                                                <HBox alignment="TOP_CENTER" spacing="5.0">
+                                                    <children>
+                                                        <MenuButton mnemonicParsing="false" text="Insert">
+                                                            <items>
+                                                                <Menu fx:id="menuRefPlaces" mnemonicParsing="false" text="Places" />
+                                                                <Menu fx:id="menuRefTransitions" mnemonicParsing="false" text="Transitions" />
+                                                                <SeparatorMenuItem mnemonicParsing="false" />
+                                                                <Menu fx:id="menuParamLocal" mnemonicParsing="false" text="Local Parameter" />
+                                                                <Menu fx:id="menuParamGlobal" mnemonicParsing="false" text="Global Parameter" />
+                                                                <SeparatorMenuItem mnemonicParsing="false" />
+                                                                <MenuItem fx:id="menuItemParamEdit" mnemonicParsing="false" text="Edit Parameter" />
+                                                            </items>
+                                                        </MenuButton>
+                                                    </children>
+                                                </HBox>
+                                            </children>
+                                            <padding>
+                                                <Insets top="5.0" />
+                                            </padding>
+                                        </VBox>
                                     </children>
-                                    <padding>
-                                        <Insets top="5.0" />
-                                    </padding>
                                 </VBox>
+                                <Label fx:id="statusMessage" maxWidth="200.0" />
                             </children>
                         </VBox>
                     </children>
