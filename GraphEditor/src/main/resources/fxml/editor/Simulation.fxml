@@ -23,7 +23,7 @@
                         <GridPane alignment="TOP_CENTER" hgap="10.0" vgap="5.0">
                             <children>
                                 <Label text="Start Time" />
-                                <TextField fx:id="inputSimStartTime" GridPane.columnIndex="1" />
+                                <TextField fx:id="inputSimStartTime" GridPane.columnIndex="1" disable="true" />
                                 <Label prefWidth="75.0" text="Stop Time" GridPane.rowIndex="1" />
                                 <TextField fx:id="inputSimStopTime" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <Label text="Intervals" GridPane.rowIndex="2" />
