@@ -25,30 +25,30 @@ import javafx.scene.shape.Shape;
 public class GravisCurveArrow extends Path implements IGravisConnection
 {
     private final List<ElementHandle> elementHandles = new ArrayList();
-    
+
     private final GravisArrow arrow;
-    
+
     private final IGravisNode source;
     private final IGravisNode target;
-    
+
     public GravisCurveArrow(IGravisNode source, IGravisNode target) {
-        
+
         super();
-        
+
         arrow = new GravisArrow(this);
-        
+
         elementHandles.add(new ElementHandle(this));
         elementHandles.add(arrow.getElementHandles().get(0));
-        
+
         this.source = source;
         this.target = target;
 
         MoveTo mv = new MoveTo();
         mv.xProperty().bind(source.translateXProperty().add(source.getOffsetX()));
         mv.yProperty().bind(source.translateYProperty().add(source.getOffsetY()));
-        
+
         QuadCurveTo qct = new QuadCurveTo();
-        
+
         /**
          * Control point X coordinate.
          */
@@ -56,12 +56,13 @@ public class GravisCurveArrow extends Path implements IGravisConnection
         {
             {
                 super.bind(
-                        source.translateXProperty(), 
-                        source.translateYProperty(), 
-                        target.translateXProperty(), 
+                        source.translateXProperty(),
+                        source.translateYProperty(),
+                        target.translateXProperty(),
                         target.translateYProperty()
                 );
             }
+
             @Override
             protected double computeValue() {
 
@@ -70,14 +71,14 @@ public class GravisCurveArrow extends Path implements IGravisConnection
 
                 double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
-                
+
                 double x3, y3;
-                x3 = (x1 + x2) / 2 ;
-                y3 = (y1 + y2) / 2 ;
-                
+                x3 = (x1 + x2) / 2;
+                y3 = (y1 + y2) / 2;
+
                 double deltaX = (x1 - x2);
                 double deltaY = (y2 - y1);
-                
+
                 if (deltaX < 1 && deltaX > -1) {
                     if (deltaX >= 0) {
                         deltaX = 1;
@@ -85,7 +86,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         deltaX = -1;
                     }
                 }
-                
+
                 if (deltaY < 1 && deltaY > -1) {
                     if (deltaY >= 0) {
                         deltaY = 1;
@@ -93,23 +94,23 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         deltaY = -1;
                     }
                 }
-                    
+
                 double m = deltaX / deltaY;
                 double b = y3 - m * x3;
                 double r = GravisProperties.ARC_GAP / 2;
-                
+
                 double p = 2 * (m * b - m * y3 - x3) / (1 + m * m);
-                double q = (x3 * x3 + b * b + y3 * y3 - 2* b * y3 - r * r) / (1 + m * m);
-                
+                double q = (x3 * x3 + b * b + y3 * y3 - 2 * b * y3 - r * r) / (1 + m * m);
+
                 if (y2 >= y1) {
-                    return - p / 2 + Math.sqrt(p * p / 4 - q);
+                    return -p / 2 + Math.sqrt(p * p / 4 - q);
                 } else {
-                    return - p / 2 - Math.sqrt(p * p / 4 - q);
+                    return -p / 2 - Math.sqrt(p * p / 4 - q);
                 }
             }
         };
         qct.controlXProperty().bind(bindingCurveControlX);
-        
+
         /**
          * Control point Y coordinate.
          */
@@ -118,6 +119,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
             {
                 super.bind(bindingCurveControlX);
             }
+
             @Override
             protected double computeValue() {
 
@@ -126,10 +128,10 @@ public class GravisCurveArrow extends Path implements IGravisConnection
 
                 double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
-                
+
                 double x = (x1 - x2);
                 double y = (y2 - y1);
-                
+
                 if (x < 1 && x > -1) {
                     if (x >= 0) {
                         x = 1;
@@ -137,7 +139,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         x = -1;
                     }
                 }
-                
+
                 if (y < 1 && y > -1) {
                     if (y >= 0) {
                         y = 1;
@@ -145,13 +147,12 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         y = -1;
                     }
                 }
-                
+
                 return x / y * bindingCurveControlX.get() + ((y1 + y2) - x / y * (x1 + x2)) / 2;
             }
         };
         qct.controlYProperty().bind(bindingCurveControlY);
-        
-        
+
         /**
          * Line's end X coordinate. Changes it's value on any coordinate changes
          * for the source or target.
@@ -165,22 +166,23 @@ public class GravisCurveArrow extends Path implements IGravisConnection
             }
 
             /**
-             * Computes the X coordinate. Computes the intersection point of
-             * the line with a circle through the target coordinates.
-             * @return 
+             * Computes the X coordinate. Computes the intersection point of the
+             * line with a circle through the target coordinates.
+             *
+             * @return
              */
             @Override
             protected double computeValue() {
-                
+
                 double x1 = source.translateXProperty().get() + source.getOffsetX();
                 double y1 = source.translateYProperty().get() + source.getOffsetY();
-                
+
                 double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
-                
+
                 double x = (x2 - x1);
                 double y = (y2 - y1);
-                
+
                 if (x < 1 && x > -1) {
                     if (x >= 0) {
                         x = 1;
@@ -188,7 +190,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         x = -1;
                     }
                 }
-                
+
                 if (y < 1 && y > -1) {
                     if (y >= 0) {
                         y = 1;
@@ -196,7 +198,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         y = -1;
                     }
                 }
-                
+
                 double b = y1 - y / x * x1;
                 double p = 2 * (y / x * b - y / x * y2 - x2) / (1 + y / x * y / x);
                 double q = (x2 * x2 + b * b + y2 * y2 - 2 * b * y2 - GravisProperties.ARROW_TARGET_DISTANCE * GravisProperties.ARROW_TARGET_DISTANCE) / (1 + y / x * y / x);
@@ -222,9 +224,10 @@ public class GravisCurveArrow extends Path implements IGravisConnection
             }
 
             /**
-             * Uses the previously computed X value to determine the Y value. 
+             * Uses the previously computed X value to determine the Y value.
              * Uses line function.
-             * @return 
+             *
+             * @return
              */
             @Override
             protected double computeValue() {
@@ -234,10 +237,10 @@ public class GravisCurveArrow extends Path implements IGravisConnection
 
                 double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
-                
+
                 double x = (x2 - x1);
                 double y = (y2 - y1);
-                
+
                 if (x < 1 && x > -1) {
                     if (x >= 0) {
                         x = 1;
@@ -245,7 +248,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         x = -1;
                     }
                 }
-                
+
                 if (y < 1 && y > -1) {
                     if (y >= 0) {
                         y = 1;
@@ -259,25 +262,25 @@ public class GravisCurveArrow extends Path implements IGravisConnection
         };
         qct.yProperty().bind(bindingCurveEndY);
         arrow.translateYProperty().bind(bindingCurveEndY.subtract(GravisProperties.ARROW_HEIGHT / 2));
-        
+
         DoubleBinding arrowAngle = new DoubleBinding()
         {
             {
                 super.bind(bindingCurveEndY);
             }
-            
+
             @Override
             protected double computeValue() {
-                
+
                 double x1 = bindingCurveControlX.get();
                 double y1 = bindingCurveControlY.get();
-                
+
                 double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
-                
+
                 double x = (x2 - x1);
                 double y = (y2 - y1);
-                
+
                 if (x < 1 && x > -1) {
                     if (x >= 0) {
                         x = 1;
@@ -285,7 +288,7 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         x = -1;
                     }
                 }
-                
+
                 if (y < 1 && y > -1) {
                     if (y >= 0) {
                         y = 1;
@@ -293,28 +296,25 @@ public class GravisCurveArrow extends Path implements IGravisConnection
                         y = -1;
                     }
                 }
-                
+
                 /**
-                 * Winkelverlauf im Uhrzeigersinn:
-                 * Oben links: 0 bis 90     +180
-                 * Oben rechts: -90 bis 0
-                 * Unten rechts: 0 bis 90
-                 * Unten links: -90 bis 0   +180
+                 * Winkelverlauf im Uhrzeigersinn: Oben links: 0 bis 90 +180
+                 * Oben rechts: -90 bis 0 Unten rechts: 0 bis 90 Unten links:
+                 * -90 bis 0 +180
                  */
-                
                 if (x2 < x1) {
-                    return  Math.toDegrees(Math.atan(y / x)) + 180;
+                    return Math.toDegrees(Math.atan(y / x)) + 180;
                 } else {
-                    return  Math.toDegrees(Math.atan(y / x));
+                    return Math.toDegrees(Math.atan(y / x));
                 }
             }
         };
         arrow.rotateProperty().bind(arrowAngle);
-        
+
         getElements().add(mv);
         getElements().add(qct);
     }
-    
+
     @Override
     public Object getBean() {
         return GravisCurveArrow.this;
@@ -324,12 +324,12 @@ public class GravisCurveArrow extends Path implements IGravisConnection
     public List<ElementHandle> getElementHandles() {
         return elementHandles;
     }
-    
+
     @Override
     public Shape getShape() {
         return this;
     }
-    
+
     @Override
     public List<Shape> getShapes() {
         List<Shape> shapes = new ArrayList();
@@ -337,12 +337,12 @@ public class GravisCurveArrow extends Path implements IGravisConnection
         shapes.add(arrow);
         return shapes;
     }
-    
+
     @Override
     public IGravisNode getSource() {
         return source;
     }
-    
+
     @Override
     public IGravisNode getTarget() {
         return target;

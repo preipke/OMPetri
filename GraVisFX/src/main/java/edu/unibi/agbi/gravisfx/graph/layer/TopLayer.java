@@ -9,34 +9,36 @@ import javafx.scene.Group;
 import javafx.scene.transform.Scale;
 
 /**
+ * Stores the label, node, connection.
  *
  * @author PR
  */
 public class TopLayer extends Group
 {
     private final Scale scale;
-    
+
     private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
     private final ConnectionLayer connectionLayer;
-    
+
     public TopLayer() {
         scale = new Scale(1.0d, 1.0d);
         getTransforms().add(scale);
-        
+
         connectionLayer = new ConnectionLayer();
         nodeLayer = new NodeLayer();
         labelLayer = new LabelLayer();
-        
+
         // order matters!
         getChildren().add(connectionLayer);
         getChildren().add(nodeLayer);
         getChildren().add(labelLayer);
     }
-    
+
     /**
      * Get the scale applied to the layer.
-     * @return 
+     *
+     * @return
      */
     public Scale getScale() {
         return scale;

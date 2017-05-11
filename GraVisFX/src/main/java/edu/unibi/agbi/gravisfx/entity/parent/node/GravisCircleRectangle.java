@@ -16,8 +16,8 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
  *
  * @author PR
  */
-public class GravisCircleRectangle extends GravisCircle {
-
+public class GravisCircleRectangle extends GravisCircle
+{
     private final GravisSubRectangle innerRect;
 
     public GravisCircleRectangle() {
@@ -26,17 +26,17 @@ public class GravisCircleRectangle extends GravisCircle {
 
         double x1 = translateXProperty().get();
         double y1 = translateYProperty().get();
-        
+
         double b = y1 + x1;
         double r = getRadius();
         double p = 2 * (y1 - x1 - b) / 2;
         double q = (x1 * x1 + b * b + y1 * y1 - 2 * b * y1 - r * r) / 2;
-        
+
         double x2 = -p / 2 + Math.sqrt(p * p / 4 - q);
-        double y2 = - x2 + b;
-        
-        double offsetX = Math.abs(x1-x2);
-        double offsetY = Math.abs(y1-y2);
+        double y2 = -x2 + b;
+
+        double offsetX = Math.abs(x1 - x2);
+        double offsetY = Math.abs(y1 - y2);
 
         innerRect = new GravisSubRectangle(this);
         innerRect.translateXProperty().bind(translateXProperty().subtract(offsetX));

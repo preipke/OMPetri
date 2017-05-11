@@ -17,17 +17,17 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
  *
  * @author PR
  */
-public class GravisLabel extends Text implements IGravisChildElement {
-    
+public class GravisLabel extends Text implements IGravisChildElement
+{
     private final List<ElementHandle> elementHandles;
     private final IGravisNode parentElement;
-    
+
     public GravisLabel(IGravisNode parentElement) {
-        
+
         super();
-        
+
         this.parentElement = parentElement;
-        
+
         elementHandles = new ArrayList();
         elementHandles.add(new ElementHandle(this));
     }

@@ -16,36 +16,36 @@ import java.util.List;
 
 /**
  * The Graph model. Serves as an access object to the stored scene objects.
- * 
+ *
  * @author PR
  */
 public class Graph
 {
     private final TopLayer topLayer;
-    
+
     private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
     private final ConnectionLayer connectionLayer;
-    
+
     private final List<IGravisNode> nodes;
     private final List<IGravisConnection> connections;
-    
+
     public Graph() {
-        
+
         topLayer = new TopLayer();
-        
+
         labelLayer = topLayer.getLabelLayer();
         nodeLayer = topLayer.getNodeLayer();
         connectionLayer = topLayer.getConnectionLayer();
-        
+
         nodes = new ArrayList();
         connections = new ArrayList();
     }
-    
+
     public TopLayer getTopLayer() {
         return topLayer;
     }
-    
+
     public void add(IGravisNode node) {
         if (!nodes.contains(node)) {
             nodes.add(node);
@@ -53,7 +53,7 @@ public class Graph
             labelLayer.getChildren().add(node.getLabel());
         }
     }
-    
+
     public void add(IGravisConnection connection) {
         if (!connections.contains(connection)) {
             connections.add(connection);
@@ -66,15 +66,15 @@ public class Graph
             }
         }
     }
-    
+
     public boolean contains(IGravisNode node) {
         return nodes.contains(node);
     }
-    
+
     public boolean contains(IGravisConnection connection) {
         return connections.contains(connection);
     }
-    
+
     public IGravisNode remove(IGravisNode node) {
         while (!node.getConnections().isEmpty()) {
             remove(node.getConnections().get(0)); // while to prevent concurrent modification
@@ -84,7 +84,7 @@ public class Graph
         nodes.remove(node);
         return node;
     }
-    
+
     public IGravisConnection remove(IGravisConnection connection) {
         connectionLayer.getChildren().removeAll(connection.getShapes());
         connections.remove(connection);
@@ -96,7 +96,7 @@ public class Graph
         }
         return connection;
     }
-    
+
     public List<IGravisNode> getNodes() {
         List<IGravisNode> listCopy = new ArrayList();
         for (IGravisNode node : nodes) {
@@ -104,7 +104,7 @@ public class Graph
         }
         return listCopy;
     }
-    
+
     public List<IGravisConnection> getConnections() {
         List<IGravisConnection> listCopy = new ArrayList();
         for (IGravisConnection connection : connections) {

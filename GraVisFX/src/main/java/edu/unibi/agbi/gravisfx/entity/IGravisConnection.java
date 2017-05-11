@@ -6,13 +6,15 @@
 package edu.unibi.agbi.gravisfx.entity;
 
 /**
- * Interface for interactive connections within the graph. Used by the parent
- * component of a connection only, i.e. GravisCurve, GravisCurveArrow, 
+ * Interface for interactive connections within the graph. Used by parent
+ * components of a connection only, i.e. GravisCurve, GravisCurveArrow,
  * GravisEdge, GravisEdgeArrow.
+ *
  * @author PR
  */
 public interface IGravisConnection extends IGravisElement
 {
     public IGravisNode getSource();
+
     public IGravisNode getTarget();
 }

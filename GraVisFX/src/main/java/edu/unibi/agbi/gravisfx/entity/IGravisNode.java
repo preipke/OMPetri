@@ -9,22 +9,32 @@ import edu.unibi.agbi.gravisfx.entity.child.GravisLabel;
 import java.util.List;
 
 /**
- * Interface for interactive nodes within the graph. Used by the parent component
+ * Interface for interactive nodes within the graph. Used by parent components
  * of a node only, i.e. Circle, Rectangle, DoubleCircle, DoubleRectanle.
+ *
  * @author PR
  */
 public interface IGravisNode extends IGravisElement
 {
     public double getOffsetX();
+
     public double getOffsetY();
-    
+
     public List<IGravisNode> getParents();
+
     public List<IGravisNode> getChildren();
+
     public List<IGravisConnection> getConnections();
-    
-    public boolean isChildShapesEnabled();
-    public void setChildShapesEnabled(boolean value);
+
+    public boolean isChildElementsEnabled();
+
+    public void setChildElementsEnabled(boolean value);
+
     public List<IGravisChildElement> getChildElements();
-    
+
     public GravisLabel getLabel();
+    
+    public int getExportId();
+    
+    public void setExportId(int id);
 }

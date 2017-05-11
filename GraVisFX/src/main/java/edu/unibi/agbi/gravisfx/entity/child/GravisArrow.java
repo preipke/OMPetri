@@ -25,23 +25,23 @@ public class GravisArrow extends Path implements IGravisChildElement
 {
     private final List<ElementHandle> elementHandles;
     private final IGravisConnection parentElement;
-    
+
     public GravisArrow(IGravisConnection parentElement) {
-        
+
         super();
-        
+
         this.parentElement = parentElement;
-        
+
         elementHandles = new ArrayList();
         elementHandles.add(new ElementHandle(this));
-        
-        getElements().add(new MoveTo(GravisProperties.ARROW_WIDTH / 3d , GravisProperties.ARROW_HEIGHT / 2d));
-        getElements().add(new LineTo(0 , 0));
-        getElements().add(new LineTo(GravisProperties.ARROW_WIDTH , GravisProperties.ARROW_HEIGHT / 2d));
-        getElements().add(new LineTo(0 , GravisProperties.ARROW_HEIGHT));
-        getElements().add(new LineTo(GravisProperties.ARROW_WIDTH / 3d , GravisProperties.ARROW_HEIGHT / 2d));
+
+        getElements().add(new MoveTo(GravisProperties.ARROW_WIDTH / 3d, GravisProperties.ARROW_HEIGHT / 2d));
+        getElements().add(new LineTo(0, 0));
+        getElements().add(new LineTo(GravisProperties.ARROW_WIDTH, GravisProperties.ARROW_HEIGHT / 2d));
+        getElements().add(new LineTo(0, GravisProperties.ARROW_HEIGHT));
+        getElements().add(new LineTo(GravisProperties.ARROW_WIDTH / 3d, GravisProperties.ARROW_HEIGHT / 2d));
     }
-    
+
     @Override
     public IGravisElement getParentElement() {
         return parentElement;

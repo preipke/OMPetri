@@ -23,38 +23,39 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 public class GravisCircle extends Circle implements IGravisNode
 {
     private final List<ElementHandle> elementHandles = new ArrayList();
-    
+
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<IGravisConnection> connections = new ArrayList();
-    
+
     private final GravisLabel label;
-    
+
     private boolean isChildShapesEnabled = true;
-    
+    private int exportId = 0;
+
     public GravisCircle() {
-        
+
         super();
-        
+
         elementHandles.add(new ElementHandle(this));
-        
+
         setRadius(GravisProperties.CIRCLE_RADIUS);
-        
+
         label = new GravisLabel(this);
         label.xProperty().bind(translateXProperty().add(GravisProperties.LABEL_OFFSET_X));
         label.yProperty().bind(translateYProperty().add(GravisProperties.LABEL_OFFSET_Y));
     }
-    
+
     @Override
     public Object getBean() {
         return GravisCircle.this;
     }
-    
+
     @Override
     public Shape getShape() {
         return this;
     }
-    
+
     @Override
     public List<Shape> getShapes() {
         List<Shape> shapes = new ArrayList();
@@ -76,39 +77,49 @@ public class GravisCircle extends Circle implements IGravisNode
     public final double getOffsetY() {
         return 0; // position is fixed to shape center
     }
-    
+
     @Override
     public final List<IGravisNode> getParents() {
         return parents;
     }
-    
+
     @Override
     public final List<IGravisNode> getChildren() {
         return children;
     }
-    
+
     @Override
     public final List<IGravisConnection> getConnections() {
         return connections;
     }
-    
+
     @Override
-    public final boolean isChildShapesEnabled() {
+    public final boolean isChildElementsEnabled() {
         return isChildShapesEnabled;
     }
-    
+
     @Override
-    public final void setChildShapesEnabled(boolean value) {
+    public final void setChildElementsEnabled(boolean value) {
         isChildShapesEnabled = value;
     }
-    
+
     @Override
     public List<IGravisChildElement> getChildElements() {
         return new ArrayList();
     }
-    
+
     @Override
     public final GravisLabel getLabel() {
         return label;
+    }
+    
+    @Override
+    public int getExportId() {
+        return exportId;
+    }
+    
+    @Override
+    public void setExportId(int id) {
+        this.exportId = id;
     }
 }

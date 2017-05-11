@@ -8,10 +8,11 @@ package edu.unibi.agbi.gravisfx.graph.layer;
 import javafx.scene.Group;
 
 /**
- * Stores objects highlighting the 'selection' of objects in the NodeLayer.
+ * Stores labels for visual nodes in the graph.
+ *
  * @author PR
  */
 public class LabelLayer extends Group
 {
-    
+
 }

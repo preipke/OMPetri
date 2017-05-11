@@ -15,16 +15,16 @@ import javafx.scene.layout.Pane;
 public final class GraphPane extends Pane
 {
     private final TopLayer topLayer;
-    
+
     public GraphPane(TopLayer topLayer) {
-        
+
         super();
-        
+
         this.topLayer = topLayer;
-        
+
         getChildren().add(topLayer);
     }
-    
+
     public TopLayer getTopLayer() {
         return topLayer;
     }

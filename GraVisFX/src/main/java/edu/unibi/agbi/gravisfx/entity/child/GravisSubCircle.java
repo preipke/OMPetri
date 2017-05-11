@@ -19,23 +19,23 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
  *
  * @author PR
  */
-public class GravisSubCircle extends Circle implements IGravisChildElement 
+public class GravisSubCircle extends Circle implements IGravisChildElement
 {
     private final List<ElementHandle> elementHandles;
     private final IGravisNode parentElement;
-    
+
     public GravisSubCircle(IGravisNode parentElement) {
-        
+
         super();
-        
+
         this.parentElement = parentElement;
-        
+
         elementHandles = new ArrayList();
         elementHandles.add(new ElementHandle(this));
-        
+
         setRadius(GravisProperties.CIRCLE_RADIUS - GravisProperties.BASE_INNER_DISTANCE);
     }
-    
+
     @Override
     public IGravisElement getParentElement() {
         return parentElement;

@@ -6,7 +6,8 @@
 package edu.unibi.agbi.gravisfx.entity;
 
 /**
- * Interface for all elements within a graph related to a parent element. 
+ * Interface for all elements that are related to a parent element.
+ *
  * @author PR
  */
 public interface IGravisChildElement extends IGravisElement

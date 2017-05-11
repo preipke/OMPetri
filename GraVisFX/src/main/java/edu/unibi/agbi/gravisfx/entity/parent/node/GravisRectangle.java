@@ -19,47 +19,48 @@ import javafx.scene.shape.Shape;
 import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 
 /**
- * 
+ *
  * @author PR
  */
 public class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<ElementHandle> elementHandles = new ArrayList();
-    
+
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<IGravisConnection> edges = new ArrayList();
-    
+
     private final GravisLabel label;
-    
+
     private boolean isChildShapesEnabled = true;
-    
+    private int exportId = 0;
+
     public GravisRectangle() {
-        
+
         super();
-        
+
         elementHandles.add(new ElementHandle(this));
-        
+
         setWidth(GravisProperties.RECTANGLE_WIDTH);
         setHeight(GravisProperties.RECTANGLE_HEIGHT);
         setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH);
         setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
-        
+
         label = new GravisLabel(this);
         label.xProperty().bind(translateXProperty().add(getOffsetX() + GravisProperties.LABEL_OFFSET_X));
         label.yProperty().bind(translateYProperty().add(getOffsetY() + GravisProperties.LABEL_OFFSET_Y));
     }
-    
+
     @Override
     public Object getBean() {
         return GravisRectangle.this;
     }
-    
+
     @Override
     public Shape getShape() {
         return this;
     }
-    
+
     @Override
     public List<Shape> getShapes() {
         List<Shape> shapes = new ArrayList();
@@ -81,39 +82,49 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     public final double getOffsetY() {
         return getHeight() / 2;
     }
-    
+
     @Override
     public final List<IGravisNode> getParents() {
         return parents;
     }
-    
+
     @Override
     public final List<IGravisNode> getChildren() {
         return children;
     }
-    
+
     @Override
     public final List<IGravisConnection> getConnections() {
         return edges;
     }
-    
+
     @Override
-    public final boolean isChildShapesEnabled() {
+    public final boolean isChildElementsEnabled() {
         return isChildShapesEnabled;
     }
-    
+
     @Override
-    public final void setChildShapesEnabled(boolean value) {
+    public final void setChildElementsEnabled(boolean value) {
         isChildShapesEnabled = value;
     }
-    
+
     @Override
     public List<IGravisChildElement> getChildElements() {
         return new ArrayList();
     }
-    
+
     @Override
     public final GravisLabel getLabel() {
         return label;
+    }
+    
+    @Override
+    public int getExportId() {
+        return exportId;
+    }
+    
+    @Override
+    public void setExportId(int id) {
+        this.exportId = id;
     }
 }

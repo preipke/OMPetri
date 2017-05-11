@@ -15,18 +15,27 @@ import javafx.scene.shape.Shape;
 
 /**
  * Basic interface for all elements visible within the graph. This includes
- * i.e. nodes, edges, subelements and labels.
+ * nodes, edges, subelements, labels and so on.
+ *
  * @author PR
  */
 public interface IGravisElement
 {
     public Parent getParent();
+
     public Object getBean();
+
     public Shape getShape();
+
     public List<Shape> getShapes();
+
     public List<ElementHandle> getElementHandles();
+
     public void pseudoClassStateChanged(PseudoClass pseudoClass, boolean active);
+
     public ObservableList<String> getStyleClass();
+
     public DoubleProperty translateXProperty();
+
     public DoubleProperty translateYProperty();
 }

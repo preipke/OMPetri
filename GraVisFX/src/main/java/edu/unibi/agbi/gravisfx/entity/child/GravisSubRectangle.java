@@ -23,22 +23,22 @@ public class GravisSubRectangle extends Rectangle implements IGravisChildElement
 {
     private final List<ElementHandle> elementHandles;
     private final IGravisNode parentElement;
-    
+
     public GravisSubRectangle(IGravisNode parentNode) {
-        
+
         super();
-        
+
         this.parentElement = parentNode;
-        
+
         elementHandles = new ArrayList();
         elementHandles.add(new ElementHandle(this));
-        
+
         setWidth(GravisProperties.RECTANGLE_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
         setHeight(GravisProperties.RECTANGLE_HEIGHT - GravisProperties.BASE_INNER_DISTANCE * 2);
         setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
         setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT - GravisProperties.BASE_INNER_DISTANCE * 2);
     }
-    
+
     @Override
     public IGravisElement getParentElement() {
         return parentElement;

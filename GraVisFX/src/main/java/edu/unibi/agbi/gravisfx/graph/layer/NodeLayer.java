@@ -8,10 +8,11 @@ package edu.unibi.agbi.gravisfx.graph.layer;
 import javafx.scene.Group;
 
 /**
- * Stores all visual nodes in the graph.
+ * Stores visual nodes in the graph.
+ *
  * @author PR
  */
 public class NodeLayer extends Group
 {
-    
+
 }
