@@ -14,6 +14,39 @@
 .arc:highlighted {
 }
 
+.arc-test {
+    -fx-fill: null;
+    -fx-stroke: orange;
+    -fx-stroke-dash-array: 2px 6px;
+    -fx-stroke-width: 2px;
+}
+.arc-test:hovered {
+    -fx-stroke: purple;
+    -fx-stroke-width: 3px;
+}
+.arc-test:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
+}
+.arc-test:highlighted {
+}
+
+.arc-inhibitory {
+    -fx-fill: white;
+    -fx-stroke: grey;
+    -fx-stroke-width: 2px;
+}
+.arc-inhibitory:hovered {
+    -fx-stroke: orange;
+    -fx-stroke-width: 3px;
+}
+.arc-inhibitory:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
+}
+.arc-inhibitory:highlighted {
+}
+
 
 
 .cluster {

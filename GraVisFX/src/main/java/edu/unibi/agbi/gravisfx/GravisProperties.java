@@ -22,6 +22,7 @@ public class GravisProperties
     public static final double ARROW_WIDTH = ARROW_BASE * 4.0d;
 
     public static final double CIRCLE_RADIUS = BASE_SIZE * 2.5d;
+    public static final double CIRCLE_SMALL_RADIUS = BASE_SIZE * 0.5d;
 
     public static final double LABEL_OFFSET_X = -BASE_SIZE * 3.5d;
     public static final double LABEL_OFFSET_Y = -BASE_SIZE * 3.5d;

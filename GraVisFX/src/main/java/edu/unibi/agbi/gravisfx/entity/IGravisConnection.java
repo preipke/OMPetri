@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.gravisfx.entity;
 
+import javafx.beans.property.DoubleProperty;
+
 /**
  * Interface for interactive connections within the graph. Used by parent
  * components of a connection only, i.e. GravisCurve, GravisCurveArrow,
@@ -14,7 +16,15 @@ package edu.unibi.agbi.gravisfx.entity;
  */
 public interface IGravisConnection extends IGravisElement
 {
+    public DoubleProperty endXProperty();
+    
+    public DoubleProperty endYProperty();
+    
     public IGravisNode getSource();
 
     public IGravisNode getTarget();
+    
+    public void setArrowVisible(boolean value);
+    
+    public void setCircleVisible(boolean value);
 }

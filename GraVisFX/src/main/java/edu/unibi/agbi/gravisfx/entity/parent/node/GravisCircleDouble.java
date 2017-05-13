@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.entity.parent.node;
 
+import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.child.GravisSubCircle;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,8 @@ public class GravisCircleDouble extends GravisCircle
         super();
 
         innerCircle = new GravisSubCircle(this);
+
+        innerCircle.setRadius(GravisProperties.CIRCLE_RADIUS - GravisProperties.BASE_INNER_DISTANCE);
         innerCircle.translateXProperty().bind(translateXProperty());
         innerCircle.translateYProperty().bind(translateYProperty());
 

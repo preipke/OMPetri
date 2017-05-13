@@ -267,6 +267,9 @@ public class MouseEventHandler {
                                     selectionService.unselectAll();
                                     selectionService.highlight(node);
                                     arcTemp = dataService.createTemporaryArc(node);
+                                    arcTemp.endXProperty().set(node.translateXProperty().add(node.getOffsetX()).get());
+                                    arcTemp.endYProperty().set(node.translateYProperty().add(node.getOffsetY()).get());
+
                                 } catch (Exception ex) {
                                     messengerService.addToLog(ex.getMessage());
                                 }

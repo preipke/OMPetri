@@ -5,9 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,18 +20,16 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 public class GravisSubCircle extends Circle implements IGravisChildElement
 {
     private final List<ElementHandle> elementHandles;
-    private final IGravisNode parentElement;
+    private final IGravisElement parentElement;
 
-    public GravisSubCircle(IGravisNode parentElement) {
+    public GravisSubCircle(IGravisElement parentElement) {
 
         super();
 
         this.parentElement = parentElement;
 
-        elementHandles = new ArrayList();
-        elementHandles.add(new ElementHandle(this));
-
-        setRadius(GravisProperties.CIRCLE_RADIUS - GravisProperties.BASE_INNER_DISTANCE);
+        this.elementHandles = new ArrayList();
+        this.elementHandles.add(new ElementHandle(this));
     }
 
     @Override

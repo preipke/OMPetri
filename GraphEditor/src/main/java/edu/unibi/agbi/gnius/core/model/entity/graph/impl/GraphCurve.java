@@ -6,20 +6,19 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisEdgeArrow;
+import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisCurve;
 
 /**
  *
  * @author PR
  */
-public class GraphEdgeArrow extends GravisEdgeArrow implements IGraphArc
+public class GraphCurve extends GravisCurve implements IGraphArc
 {
     private final IDataArc dataArc;
-    
-    public GraphEdgeArrow(IGraphNode source, IGraphNode target, IDataArc dataArc) {
+
+    public GraphCurve(IGraphNode source , IGraphNode target , IDataArc dataArc) {
         super(source , target);
         this.dataArc = dataArc;
     }
