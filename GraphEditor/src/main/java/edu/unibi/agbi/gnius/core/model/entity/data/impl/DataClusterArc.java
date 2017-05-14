@@ -51,7 +51,7 @@ public final class DataClusterArc extends DataArc {
     }
 
     @Override
-    public List<IGraphElement> getGraphElements() {
+    public List<IGraphElement> getShapes() {
         return shapes;
     }
 }

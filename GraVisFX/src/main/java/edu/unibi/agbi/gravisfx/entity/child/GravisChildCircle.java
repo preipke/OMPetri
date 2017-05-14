@@ -5,45 +5,45 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
-import javafx.scene.text.Text;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
  * @author PR
  */
-public class GravisLabel extends Text implements IGravisChildElement
+public class GravisChildCircle extends Circle implements IGravisChild
 {
-    private final List<ElementHandle> elementHandles;
-    private final IGravisNode parentElement;
+    private final List<GravisShapeHandle> elementHandles;
+    private final IGravisElement parentElement;
 
-    public GravisLabel(IGravisNode parentElement) {
+    public GravisChildCircle(IGravisElement parentElement) {
 
         super();
 
         this.parentElement = parentElement;
 
-        elementHandles = new ArrayList();
-        elementHandles.add(new ElementHandle(this));
+        this.elementHandles = new ArrayList();
+        this.elementHandles.add(new GravisShapeHandle(this));
     }
 
     @Override
-    public IGravisNode getParentElement() {
+    public IGravisElement getParentShape() {
         return parentElement;
     }
 
     @Override
     public Object getBean() {
-        return this;
+        return GravisChildCircle.this;
     }
 
     @Override
-    public List<ElementHandle> getElementHandles() {
+    public List<GravisShapeHandle> getElementHandles() {
         return elementHandles;
     }
 

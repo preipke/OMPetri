@@ -74,7 +74,7 @@ public class DataCluster extends Node implements IDataNode {
     }
 
     @Override
-    public List<IGraphElement> getGraphElements() {
+    public List<IGraphElement> getShapes() {
         return shapes;
     }
 

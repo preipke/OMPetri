@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.entity;
 
-import edu.unibi.agbi.gravisfx.entity.child.GravisLabel;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import java.util.List;
 
 /**
@@ -26,13 +26,11 @@ public interface IGravisNode extends IGravisElement
 
     public List<IGravisConnection> getConnections();
 
-    public boolean isChildElementsEnabled();
-
-    public void setChildElementsEnabled(boolean value);
-
-    public List<IGravisChildElement> getChildElements();
-
-    public GravisLabel getLabel();
+    public GravisChildLabel getLabel();
+    
+    public void setInnerCircleVisible(boolean value);
+    
+    public void setInnerRectangleVisible(boolean value);
     
     public int getExportId();
     

@@ -8,9 +8,10 @@ package edu.unibi.agbi.gravisfx.entity.parent.connection;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.child.GravisArrow;
-import edu.unibi.agbi.gravisfx.entity.child.GravisSubCircle;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.Observable;
@@ -25,7 +26,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisEdge extends Path implements IGravisConnection
+public class GravisEdge extends Path implements IGravisConnection, IGravisParent
 {
     private final DoubleProperty endXProperty;
     private final DoubleProperty endYProperty;
@@ -33,10 +34,10 @@ public class GravisEdge extends Path implements IGravisConnection
     private final IGravisNode source;
     private final IGravisNode target;
 
-    private final GravisArrow arrow;
-    private final GravisSubCircle circle;
+    private final GravisChildArrow arrow;
+    private final GravisChildCircle circle;
 
-    private final List<ElementHandle> elementHandles = new ArrayList();
+    private final List<GravisShapeHandle> elementHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
 
     /**
@@ -58,12 +59,12 @@ public class GravisEdge extends Path implements IGravisConnection
         this.endXProperty = lt.xProperty();
         this.endYProperty = lt.yProperty();
 
-        this.arrow = new GravisArrow(this);
+        this.arrow = new GravisChildArrow(this);
         this.arrow.rotateProperty().bind(this.getArrowAngleBinding(endYProperty, endXProperty, endYProperty));
         this.arrow.translateXProperty().bind(this.endXProperty.subtract(GravisProperties.ARROW_HEIGHT / 2));
         this.arrow.translateYProperty().bind(this.endYProperty.subtract(GravisProperties.ARROW_WIDTH / 2));
 
-        this.circle = new GravisSubCircle(this);
+        this.circle = new GravisChildCircle(this);
         this.circle.centerXProperty().bind(this.endXProperty);
         this.circle.centerYProperty().bind(this.endYProperty);
         this.circle.setRadius(GravisProperties.CIRCLE_SMALL_RADIUS);
@@ -71,7 +72,7 @@ public class GravisEdge extends Path implements IGravisConnection
         this.getElements().add(mv);
         this.getElements().add(lt);
 
-        this.elementHandles.add(new ElementHandle(this));
+        this.elementHandles.add(new GravisShapeHandle(this));
         this.elementHandles.addAll(arrow.getElementHandles());
         this.elementHandles.addAll(circle.getElementHandles());
         
@@ -211,12 +212,12 @@ public class GravisEdge extends Path implements IGravisConnection
         this.endXProperty.bind(bindingLineEndX);
         this.endYProperty.bind(bindingLineEndY);
 
-        this.arrow = new GravisArrow(this);
+        this.arrow = new GravisChildArrow(this);
         this.arrow.rotateProperty().bind(this.getArrowAngleBinding(bindingLineEndY, endXProperty, endYProperty));
         this.arrow.translateXProperty().bind(this.endXProperty.subtract(GravisProperties.ARROW_HEIGHT / 2));
         this.arrow.translateYProperty().bind(this.endYProperty.subtract(GravisProperties.ARROW_WIDTH / 2));
 
-        this.circle = new GravisSubCircle(this);
+        this.circle = new GravisChildCircle(this);
         this.circle.centerXProperty().bind(this.endXProperty);
         this.circle.centerYProperty().bind(this.endYProperty);
         this.circle.setRadius(GravisProperties.CIRCLE_SMALL_RADIUS);
@@ -224,7 +225,7 @@ public class GravisEdge extends Path implements IGravisConnection
         this.getElements().add(mv);
         this.getElements().add(lt);
         
-        this.elementHandles.add(new ElementHandle(this));
+        this.elementHandles.add(new GravisShapeHandle(this));
         this.elementHandles.addAll(arrow.getElementHandles());
         this.elementHandles.addAll(circle.getElementHandles());
         
@@ -291,7 +292,7 @@ public class GravisEdge extends Path implements IGravisConnection
     }
 
     @Override
-    public List<ElementHandle> getElementHandles() {
+    public List<GravisShapeHandle> getElementHandles() {
         return elementHandles;
     }
 
@@ -302,10 +303,6 @@ public class GravisEdge extends Path implements IGravisConnection
 
     @Override
     public List<Shape> getShapes() {
-//        List<Shape> shapes = new ArrayList();
-//        shapes.add(this);
-//        shapes.add(arrow);
-//        shapes.add(circle);
         return shapes;
     }
 
@@ -335,12 +332,27 @@ public class GravisEdge extends Path implements IGravisConnection
     }
 
     @Override
-    public void setArrowVisible(boolean value) {
+    public void setArrowHeadVisible(boolean value) {
         this.arrow.setVisible(value);
     }
 
     @Override
-    public void setCircleVisible(boolean value) {
+    public void setCircleHeadVisible(boolean value) {
         this.circle.setVisible(value);
+    }
+
+    @Override
+    public List<GravisShapeHandle> getParentElementHandles() {
+        List<GravisShapeHandle> handles = new ArrayList();
+        handles.add(elementHandles.get(0));
+        return handles;
+    }
+
+    @Override
+    public List<GravisShapeHandle> getChildElementHandles() {
+        List<GravisShapeHandle> handles = new ArrayList();
+        handles.addAll(arrow.getElementHandles());
+        handles.addAll(circle.getElementHandles());
+        return handles;
     }
 }

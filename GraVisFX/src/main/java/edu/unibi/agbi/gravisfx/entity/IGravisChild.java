@@ -10,7 +10,7 @@ package edu.unibi.agbi.gravisfx.entity;
  *
  * @author PR
  */
-public interface IGravisChildElement extends IGravisElement
+public interface IGravisChild extends IGravisElement
 {
-    public IGravisElement getParentElement();
+    public IGravisElement getParentShape();
 }

@@ -8,30 +8,30 @@ package edu.unibi.agbi.gravisfx.entity.child;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
  * @author PR
  */
-public class GravisSubRectangle extends Rectangle implements IGravisChildElement
+public class GravisChildRectangle extends Rectangle implements IGravisChild
 {
-    private final List<ElementHandle> elementHandles;
+    private final List<GravisShapeHandle> elementHandles;
     private final IGravisNode parentElement;
 
-    public GravisSubRectangle(IGravisNode parentNode) {
+    public GravisChildRectangle(IGravisNode parentNode) {
 
         super();
 
         this.parentElement = parentNode;
 
         elementHandles = new ArrayList();
-        elementHandles.add(new ElementHandle(this));
+        elementHandles.add(new GravisShapeHandle(this));
 
         setWidth(GravisProperties.RECTANGLE_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
         setHeight(GravisProperties.RECTANGLE_HEIGHT - GravisProperties.BASE_INNER_DISTANCE * 2);
@@ -40,17 +40,17 @@ public class GravisSubRectangle extends Rectangle implements IGravisChildElement
     }
 
     @Override
-    public IGravisElement getParentElement() {
+    public IGravisElement getParentShape() {
         return parentElement;
     }
 
     @Override
     public Object getBean() {
-        return GravisSubRectangle.this;
+        return GravisChildRectangle.this;
     }
 
     @Override
-    public List<ElementHandle> getElementHandles() {
+    public List<GravisShapeHandle> getElementHandles() {
         return elementHandles;
     }
 

@@ -1,18 +1,55 @@
-.arc {
+/*            */
+/* Arc styles */
+/*            */
+.arc-norm {
     -fx-fill: null;
     -fx-stroke: orange;
     -fx-stroke-width: 2px;
 }
-.arc:hovered {
+.arc-norm:hovered {
     -fx-stroke: orange;
     -fx-stroke-width: 3px;
 }
-.arc:selected {
+.arc-norm:selected {
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
-.arc:highlighted {
+.arc-norm:highlighted {
 }
+
+.arc-norm-head {
+    -fx-fill: null;
+    -fx-stroke: orange;
+    -fx-stroke-width: 2px;
+}
+.arc-norm-head:hovered {
+    -fx-stroke: orange;
+    -fx-stroke-width: 3px;
+}
+.arc-norm-head:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
+}
+.arc-norm-head:highlighted {
+}
+
+
+.arc-inhi {
+    -fx-fill: white;
+    -fx-stroke: grey;
+    -fx-stroke-width: 2px;
+}
+.arc-inhi:hovered {
+    -fx-stroke: orange;
+    -fx-stroke-width: 3px;
+}
+.arc-inhi:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
+}
+.arc-inhi:highlighted {
+}
+
 
 .arc-test {
     -fx-fill: null;
@@ -31,24 +68,9 @@
 .arc-test:highlighted {
 }
 
-.arc-inhibitory {
-    -fx-fill: white;
-    -fx-stroke: grey;
-    -fx-stroke-width: 2px;
-}
-.arc-inhibitory:hovered {
-    -fx-stroke: orange;
-    -fx-stroke-width: 3px;
-}
-.arc-inhibitory:selected {
-    -fx-stroke: red;
-    -fx-stroke-width: 3px;
-}
-.arc-inhibitory:highlighted {
-}
-
-
-
+/*               */
+/* Cluster style */
+/*               */
 .cluster {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
@@ -69,8 +91,9 @@
     -fx-stroke-dash-array: 1px 8px;
 }
 
-
-
+/*              */
+/* Place styles */
+/*              */
 .place {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
@@ -91,8 +114,9 @@
     -fx-stroke-dash-array: 1px 8px;
 }
 
-
-
+/*                   */
+/* Transition styles */
+/*                   */
 .transition {
     -fx-fill: lightblue;
     -fx-stroke: blue;

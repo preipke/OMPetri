@@ -13,12 +13,11 @@ import javafx.scene.Group;
 
 /**
  * Helper class for handling element styling. The defined pseudo classes can be
- * used as identifiers within stylesheets.
+ * used as identifiers within css.
  *
  * @author PR
  */
-public class ElementHandle
-{
+public class GravisShapeHandle {
     private static final String PSEUDO_CLASS_SELECTED_IDENT = "selected";
     private static final String PSEUDO_CLASS_HIGHLIGHT_IDENT = "highlighted";
     private static final String PSEUDO_CLASS_HOVER_IDENT = "hovered";
@@ -31,7 +30,7 @@ public class ElementHandle
 
     private String activeStyleClass;
 
-    public ElementHandle(IGravisElement element) {
+    public GravisShapeHandle(IGravisElement element) {
         this.element = element;
     }
 
@@ -39,8 +38,7 @@ public class ElementHandle
         return element;
     }
 
-    private final BooleanProperty isSelected = new BooleanPropertyBase(false)
-    {
+    private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
         @Override
         protected void invalidated() {
             element.pseudoClassStateChanged(PSEUDO_CLASS_SELECTED, get());
@@ -57,8 +55,7 @@ public class ElementHandle
         }
     };
 
-    private final BooleanProperty isHighlighted = new BooleanPropertyBase(false)
-    {
+    private final BooleanProperty isHighlighted = new BooleanPropertyBase(false) {
         @Override
         protected void invalidated() {
             element.pseudoClassStateChanged(PSEUDO_CLASS_HIGHLIGHT, get());
@@ -75,8 +72,7 @@ public class ElementHandle
         }
     };
 
-    private final BooleanProperty isHovered = new BooleanPropertyBase(false)
-    {
+    private final BooleanProperty isHovered = new BooleanPropertyBase(false) {
         @Override
         protected void invalidated() {
             element.pseudoClassStateChanged(PSEUDO_CLASS_HOVER, get());
@@ -130,10 +126,10 @@ public class ElementHandle
     }
 
     public void putOnTop() {
-
-        Group layer = (Group) element.getParent();
-
-        layer.getChildren().remove(element.getShape());
-        layer.getChildren().add(element.getShape());
+        if (element.getParent() != null) {
+            Group layer = (Group) element.getParent();
+            layer.getChildren().remove(element.getShape());
+            layer.getChildren().add(element.getShape());
+        }
     }
 }

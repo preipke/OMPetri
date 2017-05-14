@@ -8,47 +8,60 @@ package edu.unibi.agbi.gravisfx.entity.parent.node;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.child.GravisLabel;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
 
 /**
  *
  * @author PR
  */
-public class GravisRectangle extends Rectangle implements IGravisNode
+public class GravisRectangle extends Rectangle implements IGravisNode, IGravisParent
 {
-    private final List<ElementHandle> elementHandles = new ArrayList();
+    private final List<GravisShapeHandle> shapeHandles = new ArrayList();
+    private final List<Shape> shapes = new ArrayList();
 
     private final List<IGravisNode> children = new ArrayList();
     private final List<IGravisNode> parents = new ArrayList();
     private final List<IGravisConnection> edges = new ArrayList();
 
-    private final GravisLabel label;
+    private final GravisChildLabel label;
+    
+    private final GravisChildRectangle rectangle;
 
-    private boolean isChildShapesEnabled = true;
     private int exportId = 0;
 
     public GravisRectangle() {
 
         super();
 
-        elementHandles.add(new ElementHandle(this));
-
         setWidth(GravisProperties.RECTANGLE_WIDTH);
         setHeight(GravisProperties.RECTANGLE_HEIGHT);
         setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH);
         setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
 
-        label = new GravisLabel(this);
+        label = new GravisChildLabel(this);
         label.xProperty().bind(translateXProperty().add(getOffsetX() + GravisProperties.LABEL_OFFSET_X));
         label.yProperty().bind(translateYProperty().add(getOffsetY() + GravisProperties.LABEL_OFFSET_Y));
+        
+        rectangle = new GravisChildRectangle(this);
+        rectangle.setWidth(GravisProperties.RECTANGLE_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
+        rectangle.setHeight(GravisProperties.RECTANGLE_HEIGHT - GravisProperties.BASE_INNER_DISTANCE * 2);
+        rectangle.translateXProperty().bind(translateXProperty().add(GravisProperties.BASE_INNER_DISTANCE));
+        rectangle.translateYProperty().bind(translateYProperty().add(GravisProperties.BASE_INNER_DISTANCE));
+        
+        shapes.add(this);
+        shapes.add(rectangle);
+
+        shapeHandles.add(new GravisShapeHandle(this));
+        shapeHandles.addAll(rectangle.getElementHandles());
     }
 
     @Override
@@ -63,14 +76,12 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 
     @Override
     public List<Shape> getShapes() {
-        List<Shape> shapes = new ArrayList();
-        shapes.add(this);
         return shapes;
     }
 
     @Override
-    public final List<ElementHandle> getElementHandles() {
-        return elementHandles;
+    public final List<GravisShapeHandle> getElementHandles() {
+        return shapeHandles;
     }
 
     @Override
@@ -99,23 +110,18 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
 
     @Override
-    public final boolean isChildElementsEnabled() {
-        return isChildShapesEnabled;
-    }
-
-    @Override
-    public final void setChildElementsEnabled(boolean value) {
-        isChildShapesEnabled = value;
-    }
-
-    @Override
-    public List<IGravisChildElement> getChildElements() {
-        return new ArrayList();
-    }
-
-    @Override
-    public final GravisLabel getLabel() {
+    public final GravisChildLabel getLabel() {
         return label;
+    }
+
+    @Override
+    public void setInnerCircleVisible(boolean value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setInnerRectangleVisible(boolean value) {
+        this.rectangle.setVisible(value);
     }
     
     @Override
@@ -126,5 +132,17 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     @Override
     public void setExportId(int id) {
         this.exportId = id;
+    }
+
+    @Override
+    public List<GravisShapeHandle> getParentElementHandles() {
+        List<GravisShapeHandle> handles = new ArrayList();
+        handles.add(shapeHandles.get(0));
+        return handles;
+    }
+
+    @Override
+    public List<GravisShapeHandle> getChildElementHandles() {
+        return rectangle.getElementHandles();
     }
 }

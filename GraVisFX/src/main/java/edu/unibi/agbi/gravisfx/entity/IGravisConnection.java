@@ -24,7 +24,7 @@ public interface IGravisConnection extends IGravisElement
 
     public IGravisNode getTarget();
     
-    public void setArrowVisible(boolean value);
+    public void setArrowHeadVisible(boolean value);
     
-    public void setCircleVisible(boolean value);
+    public void setCircleHeadVisible(boolean value);
 }

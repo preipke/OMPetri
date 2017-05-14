@@ -177,7 +177,7 @@ public class XmlModelConverter
                 arcElement.appendChild(weights);
 
                 Element visualsElement = dom.createElement(tagVisualisation);
-                data.getGraphElements().forEach(c -> {
+                data.getShapes().forEach(c -> {
                     IGraphArc connection = (IGraphArc) c;
                     Element connectionElement = dom.createElement(tagConnection);
                     connectionElement.setAttribute(attrSource, String.valueOf(getExportId(connection.getSource())));
@@ -218,7 +218,7 @@ public class XmlModelConverter
                 placeElement.appendChild(tokens);
 
                 Element visualsElement = dom.createElement(tagVisualisation);
-                data.getGraphElements().forEach(e -> {
+                data.getShapes().forEach(e -> {
 
                     IGraphNode node = (IGraphNode) e;
 
@@ -265,7 +265,7 @@ public class XmlModelConverter
                 transitionElement.appendChild(functionElement);
 
                 Element visualsElement = dom.createElement(tagVisualisation);
-                data.getGraphElements().forEach(e -> {
+                data.getShapes().forEach(e -> {
 
                     IGraphNode node = (IGraphNode) e;
 

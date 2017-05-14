@@ -7,13 +7,13 @@ package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangleDouble;
+import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangle;
 
 /**
  *
  * @author PR
  */
-public class GraphTransition extends GravisRectangleDouble implements IGraphNode {
+public class GraphTransition extends GravisRectangle implements IGraphNode {
     
     private final DataTransition dataTransition;
     

@@ -31,7 +31,7 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
@@ -172,8 +172,8 @@ public class MouseEventHandler {
 
                 Object eventTarget = event.getTarget();
 
-                if (eventTarget instanceof IGravisChildElement) {
-                    eventTarget = ((IGravisChildElement) eventTarget).getParentElement();
+                if (eventTarget instanceof IGravisChild) {
+                    eventTarget = ((IGravisChild) eventTarget).getParentShape();
                 }
 
                 if (eventTarget instanceof IGraphNode) {
@@ -227,8 +227,8 @@ public class MouseEventHandler {
                 IGravisElement element;
                 final IGraphNode node;
 
-                if (event.getTarget() instanceof IGravisChildElement) {
-                    element = ((IGravisChildElement) event.getTarget()).getParentElement();
+                if (event.getTarget() instanceof IGravisChild) {
+                    element = ((IGravisChild) event.getTarget()).getParentShape();
                     if (element instanceof IGraphNode) {
                         node = (IGraphNode) element;
                     } else {
@@ -357,8 +357,8 @@ public class MouseEventHandler {
              */
             Object eventTarget = event.getPickResult().getIntersectedNode();
 
-            if (eventTarget instanceof IGravisChildElement) {
-                eventTarget = ((IGravisChildElement) eventTarget).getParentElement();
+            if (eventTarget instanceof IGravisChild) {
+                eventTarget = ((IGravisChild) eventTarget).getParentShape();
             }
             if (eventTarget instanceof IGraphNode) {
                 try {
@@ -387,8 +387,8 @@ public class MouseEventHandler {
                 Object eventTarget = event.getTarget();
                 IGraphElement node;
 
-                if (eventTarget instanceof IGravisChildElement) {
-                    eventTarget = ((IGravisChildElement) event.getTarget()).getParentElement();
+                if (eventTarget instanceof IGravisChild) {
+                    eventTarget = ((IGravisChild) event.getTarget()).getParentShape();
                 }
 
                 if (eventTarget instanceof IGravisElement) {

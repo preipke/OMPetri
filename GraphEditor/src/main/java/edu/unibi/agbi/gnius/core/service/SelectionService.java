@@ -12,12 +12,12 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
@@ -31,7 +31,7 @@ public class SelectionService
     private final SelectionDao selectionDao;
     
     private List<IGraphNode> selectedNodesCopy;
-    private List<ElementHandle> highlightedElementsHandles;
+    private List<GravisShapeHandle> highlightedElementsHandles;
     
     @Autowired
     public SelectionService(SelectionDao selectionDao) {
@@ -61,7 +61,7 @@ public class SelectionService
 
         if (highlightedElementsHandles != null) {
             
-            for (ElementHandle handle : highlightedElementsHandles) {
+            for (GravisShapeHandle handle : highlightedElementsHandles) {
                 handle.setHovered(false);
             }
             highlightedElementsHandles = null;
@@ -72,10 +72,10 @@ public class SelectionService
             if (element instanceof IGraphNode || element instanceof IGraphArc) {
                 highlightedElementsHandles = element.getElementHandles();
             } else { // not a node, so must be subelement
-                highlightedElementsHandles = ((IGravisChildElement) element).getParentElement().getElementHandles();
+                highlightedElementsHandles = ((IGravisChild) element).getParentShape().getElementHandles();
             }
 
-            for (ElementHandle handle : highlightedElementsHandles) {
+            for (GravisShapeHandle handle : highlightedElementsHandles) {
                 if (!handle.isSelected()) {
                     handle.setHovered(true);
                 }
@@ -103,7 +103,7 @@ public class SelectionService
         if (dataElement == null) {
             return;
         }
-        for (IGraphElement shape : dataElement.getGraphElements()) {
+        for (IGraphElement shape : dataElement.getShapes()) {
             if (!shape.getElementHandles().get(0).isSelected()) {
                 if (!shape.getElementHandles().get(0).isHighlighted()) {
                     highlight(shape);
@@ -133,14 +133,14 @@ public class SelectionService
         IDataElement dataElement = element.getDataElement();
         
         boolean isStillSelected = false;
-        for (IGraphElement relatedShape : dataElement.getGraphElements()) {
+        for (IGraphElement relatedShape : dataElement.getShapes()) {
             if (relatedShape.getElementHandles().get(0).isSelected()) {
                 isStillSelected = true;
                 break;
             }
         }
         if (!isStillSelected) {
-            for (IGraphElement relatedShape : dataElement.getGraphElements()) {
+            for (IGraphElement relatedShape : dataElement.getShapes()) {
                 unhighlight(relatedShape);
             }
         }
@@ -177,7 +177,7 @@ public class SelectionService
      */
     public void selectAll(IGraphElement element) {
         IDataElement dataElement = element.getDataElement();
-        for (IGraphElement relatedElement : dataElement.getGraphElements()) {
+        for (IGraphElement relatedElement : dataElement.getShapes()) {
             select(relatedElement);
         }
     }

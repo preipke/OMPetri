@@ -23,5 +23,5 @@ public interface IDataElement extends IElement
 
     public void setLabelText(String text);
 
-    public List<IGraphElement> getGraphElements();
+    public List<IGraphElement> getShapes();
 }

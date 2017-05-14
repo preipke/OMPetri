@@ -8,12 +8,12 @@ package edu.unibi.agbi.gravisfx.entity.parent.connection;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.child.GravisArrow;
-import edu.unibi.agbi.gravisfx.entity.child.GravisSubCircle;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.beans.Observable;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.shape.MoveTo;
@@ -25,19 +25,19 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisCurve extends Path implements IGravisConnection
+public class GravisCurve extends Path implements IGravisConnection, IGravisParent
 {
     private final DoubleProperty endXProperty;
     private final DoubleProperty endYProperty;
     
-    private final List<ElementHandle> elementHandles = new ArrayList();
+    private final List<GravisShapeHandle> elementHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
 
     private final IGravisNode source;
     private final IGravisNode target;
     
-    private final GravisArrow arrow;
-    private final GravisSubCircle circle;
+    private final GravisChildArrow arrow;
+    private final GravisChildCircle circle;
 
     public GravisCurve(IGravisNode source, IGravisNode target) {
 
@@ -254,51 +254,17 @@ public class GravisCurve extends Path implements IGravisConnection
             }
         };
         
-        MoveTo mv = new MoveTo();
-        mv.xProperty().bind(source.translateXProperty().add(source.getOffsetX()));
-        mv.yProperty().bind(source.translateYProperty().add(source.getOffsetY()));
-
-        QuadCurveTo qct = new QuadCurveTo();
-        qct.controlXProperty().bind(bindingCurveControlX);
-        qct.controlYProperty().bind(bindingCurveControlY);
-        qct.xProperty().bind(bindingCurveEndX);
-        qct.yProperty().bind(bindingCurveEndY);
-        
-        this.endXProperty = qct.xProperty();
-        this.endYProperty = qct.yProperty();
-        
-        this.arrow = new GravisArrow(this);
-        this.arrow.rotateProperty().bind(this.getArrowAngleBinding(bindingCurveEndY, qct.controlXProperty(), qct.controlYProperty()));
-        this.arrow.translateYProperty().bind(this.endXProperty.subtract(GravisProperties.ARROW_HEIGHT / 2));
-        this.arrow.translateXProperty().bind(this.endYProperty.subtract(GravisProperties.ARROW_WIDTH / 2));
-        
-        this.circle = new GravisSubCircle(this);
-        this.circle.centerXProperty().bind(this.endXProperty);
-        this.circle.centerYProperty().bind(this.endYProperty);
-        
-        this.elementHandles.add(new ElementHandle(this));
-        this.elementHandles.addAll(circle.getElementHandles());
-        this.elementHandles.addAll(arrow.getElementHandles());
-    }
-    
-    /**
-     * 
-     * @param trigger
-     * @return 
-     */
-    private DoubleBinding getArrowAngleBinding(Observable trigger, DoubleProperty endX, DoubleProperty endY) {
-
         DoubleBinding arrowAngle = new DoubleBinding()
         {
             {
-                super.bind(trigger);
+                super.bind(bindingCurveEndY);
             }
 
             @Override
             protected double computeValue() {
 
-                double x1 = endX.get(); // sourceX-controlX ?
-                double y1 = endY.get(); // sourceY-controlY ?
+                double x1 = bindingCurveControlX.get();
+                double y1 = bindingCurveControlY.get();
 
                 double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
@@ -335,7 +301,38 @@ public class GravisCurve extends Path implements IGravisConnection
             }
         };
         
-        return arrowAngle;
+        MoveTo mv = new MoveTo();
+        mv.xProperty().bind(source.translateXProperty().add(source.getOffsetX()));
+        mv.yProperty().bind(source.translateYProperty().add(source.getOffsetY()));
+
+        QuadCurveTo qct = new QuadCurveTo();
+        qct.controlXProperty().bind(bindingCurveControlX);
+        qct.controlYProperty().bind(bindingCurveControlY);
+        qct.xProperty().bind(bindingCurveEndX);
+        qct.yProperty().bind(bindingCurveEndY);
+        
+        this.endXProperty = qct.xProperty();
+        this.endYProperty = qct.yProperty();
+        
+        this.arrow = new GravisChildArrow(this);
+        this.arrow.rotateProperty().bind(arrowAngle);
+        this.arrow.translateXProperty().bind(this.endXProperty.subtract(GravisProperties.ARROW_HEIGHT / 2));
+        this.arrow.translateYProperty().bind(this.endYProperty.subtract(GravisProperties.ARROW_WIDTH / 2));
+        
+        this.circle = new GravisChildCircle(this);
+        this.circle.centerXProperty().bind(this.endXProperty);
+        this.circle.centerYProperty().bind(this.endYProperty);
+
+        this.getElements().add(mv);
+        this.getElements().add(qct);
+        
+        this.elementHandles.add(new GravisShapeHandle(this));
+        this.elementHandles.addAll(this.circle.getElementHandles());
+        this.elementHandles.addAll(this.arrow.getElementHandles());
+        
+        this.shapes.add(this);
+        this.shapes.add(this.arrow);
+        this.shapes.add(this.circle);
     }
 
     @Override
@@ -344,7 +341,7 @@ public class GravisCurve extends Path implements IGravisConnection
     }
 
     @Override
-    public List<ElementHandle> getElementHandles() {
+    public List<GravisShapeHandle> getElementHandles() {
         return elementHandles;
     }
 
@@ -355,10 +352,6 @@ public class GravisCurve extends Path implements IGravisConnection
 
     @Override
     public List<Shape> getShapes() {
-//        List<Shape> shapes = new ArrayList();
-//        shapes.add(this);
-//        shapes.add(arrow);
-//        shapes.add(circle);
         return shapes;
     }
 
@@ -383,12 +376,27 @@ public class GravisCurve extends Path implements IGravisConnection
     }
 
     @Override
-    public void setArrowVisible(boolean value) {
+    public void setArrowHeadVisible(boolean value) {
         this.arrow.setVisible(value);
     }
 
     @Override
-    public void setCircleVisible(boolean value) {
+    public void setCircleHeadVisible(boolean value) {
         this.circle.setVisible(value);
+    }
+
+    @Override
+    public List<GravisShapeHandle> getParentElementHandles() {
+        List<GravisShapeHandle> handles = new ArrayList();
+        handles.add(elementHandles.get(0));
+        return handles;
+    }
+
+    @Override
+    public List<GravisShapeHandle> getChildElementHandles() {
+        List<GravisShapeHandle> handles = new ArrayList();
+        handles.addAll(arrow.getElementHandles());
+        handles.addAll(circle.getElementHandles());
+        return handles;
     }
 }

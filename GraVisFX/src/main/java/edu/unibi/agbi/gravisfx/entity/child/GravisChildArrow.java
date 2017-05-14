@@ -8,32 +8,32 @@ package edu.unibi.agbi.gravisfx.entity.child;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.entity.util.ElementHandle;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
  * @author PR
  */
-public class GravisArrow extends Path implements IGravisChildElement
+public class GravisChildArrow extends Path implements IGravisChild
 {
-    private final List<ElementHandle> elementHandles;
+    private final List<GravisShapeHandle> elementHandles;
     private final IGravisConnection parentElement;
 
-    public GravisArrow(IGravisConnection parentElement) {
+    public GravisChildArrow(IGravisConnection parentElement) {
 
         super();
 
         this.parentElement = parentElement;
 
         elementHandles = new ArrayList();
-        elementHandles.add(new ElementHandle(this));
+        elementHandles.add(new GravisShapeHandle(this));
 
         getElements().add(new MoveTo(GravisProperties.ARROW_WIDTH / 3d, GravisProperties.ARROW_HEIGHT / 2d));
         getElements().add(new LineTo(0, 0));
@@ -43,17 +43,17 @@ public class GravisArrow extends Path implements IGravisChildElement
     }
 
     @Override
-    public IGravisElement getParentElement() {
+    public IGravisElement getParentShape() {
         return parentElement;
     }
 
     @Override
     public Object getBean() {
-        return GravisArrow.this;
+        return GravisChildArrow.this;
     }
 
     @Override
-    public List<ElementHandle> getElementHandles() {
+    public List<GravisShapeHandle> getElementHandles() {
         return elementHandles;
     }
 

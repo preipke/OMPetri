@@ -29,7 +29,7 @@ public final class DataTransition extends Transition implements IDataNode
     }
 
     @Override
-    public List<IGraphElement> getGraphElements() {
+    public List<IGraphElement> getShapes() {
         return shapes;
     }
 

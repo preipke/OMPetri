@@ -27,7 +27,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.entity.IGravisChildElement;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -35,7 +34,6 @@ import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Shape;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -50,14 +48,22 @@ public class DataGraphService {
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
 
-    @Value("${css.arc.normal}") private String arcNormStyleClass;
-    @Value("${css.arc.inhibitory}") private String arcInhibStyleClass;
-    @Value("${css.arc.test}") private String arcTestStyleClass;
+    @Value("${css.arc.norm.parent}") private String styleArcNormParent; // styleArcNormChild
+    @Value("${css.arc.norm.child}") private String styleArcNormChild; // styleArcNormChild
+    
+    @Value("${css.arc.inhi.parent}") private String styleArcInhiParent;
+    @Value("${css.arc.inhi.child}") private String styleArcInhiChild;
+    
+    @Value("${css.arc.test.parent}") private String styleArcTestParent;
+    @Value("${css.arc.test.child}") private String styleArcTestChild;
+    
     @Value("${css.cluster.default}") private String clusterStyleClass;
     @Value("${css.clusterarc.default}") private String clusterArcStyleClass;
-    @Value("${css.place.default}") private String placeStyleClass;
-    @Value("${css.transition.default}") private String transitionDefaultStyleClass;
-    @Value("${css.transition.stochastic}") private String transitionStochasticStyleClass;
+    
+    @Value("${css.place.default}") private String stylePlace;
+    
+    @Value("${css.transition.default}") private String styleTransitionNorm;
+    @Value("${css.transition.stochastic}") private String styleTransitionStoch;
 
     private final GraphDao graphDao;
     private final DataDao dataDao;
@@ -94,6 +100,10 @@ public class DataGraphService {
      * @throws DataGraphServiceException
      */
     public void changeArcType(DataArc arc, DataArc.Type type) throws DataGraphServiceException {
+        /**
+         * VALIDATE
+         * -> exception, set back to previous arc type
+         */
         arc.setArcType(type);
         setArcStyle(arc);
     }
@@ -107,6 +117,10 @@ public class DataGraphService {
      * @throws DataGraphServiceException
      */
     public void changePlaceType(DataPlace place, DataPlace.Type type) throws DataGraphServiceException {
+        /**
+         * VALIDATE
+         * -> exception, set back to previous arc type
+         */
         place.setPlaceType(type);
         setPlaceStyle(place);
     }
@@ -120,6 +134,10 @@ public class DataGraphService {
      * @throws DataGraphServiceException
      */
     public void changeTransitionType(DataTransition transition, DataTransition.Type type) throws DataGraphServiceException {
+        /**
+         * VALIDATE
+         * -> exception, set back to previous arc type
+         */
         transition.setTransitionType(type);
         setTransitionStyle(transition);
     }
@@ -134,9 +152,8 @@ public class DataGraphService {
      * @throws DataGraphServiceException
      */
     public IGraphArc connect(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
-        IGraphArc arc = createConnection(source, target, null);
-        validateConnection(arc);
-        return add(arc);
+        validateConnection(source, target);
+        return add(createConnection(source, target, null));
     }
 
     /**
@@ -178,9 +195,14 @@ public class DataGraphService {
 
         GraphEdge edge;
         edge = new GraphEdge(source, null);
-        edge.getElementHandles().forEach(ele -> {
-            ele.setActiveStyleClass(arcNormStyleClass);
+        edge.getParentElementHandles().forEach(ele -> {
+            ele.setActiveStyleClass(styleArcNormParent);
         });
+        edge.getChildElementHandles().forEach(ele -> {
+            ele.setActiveStyleClass(styleArcNormChild);
+        });
+        edge.setArrowHeadVisible(true);
+        edge.setCircleHeadVisible(false);
         graphDao.add(edge);
 
         return edge;
@@ -366,7 +388,7 @@ public class DataGraphService {
                 }
                 dataDao.add(arc.getDataElement());
             }
-            arc.getDataElement().getGraphElements().add(arc);
+            arc.getDataElement().getShapes().add(arc);
         }
         graphDao.add(arc);
         styleElement(arc);
@@ -387,7 +409,7 @@ public class DataGraphService {
                 }
                 dataDao.add(node.getDataElement());
             }
-            node.getDataElement().getGraphElements().add(node);
+            node.getDataElement().getShapes().add(node);
         }
         graphDao.add(node);
         styleElement(node);
@@ -464,7 +486,7 @@ public class DataGraphService {
     }
 
     /**
-     * Removes the given cluster and ungroups all elements stored inside.
+     * Removes the given cluster and un-groups all elements stored inside.
      *
      * @param cluster
      * @return
@@ -612,7 +634,7 @@ public class DataGraphService {
      */
     private IDataElement removeData(IDataElement element) throws DataGraphServiceException {
         if (element != null) {
-            if (element.getGraphElements().isEmpty()) {
+            if (element.getShapes().isEmpty()) {
                 for (Parameter param : element.getParameters().values()) {
                     dataDao.remove(param);
                 }
@@ -634,7 +656,7 @@ public class DataGraphService {
 
         graphDao.remove(arc);
         if (arc.getDataElement() != null) {
-            arc.getDataElement().getGraphElements().remove(arc);
+            arc.getDataElement().getShapes().remove(arc);
         }
 
         // Check null for temporary arcs
@@ -669,7 +691,7 @@ public class DataGraphService {
     private IGraphNode removeShape(IGraphNode node) throws DataGraphServiceException {
         graphDao.remove(node);
         if (node.getDataElement() != null) {
-            node.getDataElement().getGraphElements().remove(node);
+            node.getDataElement().getShapes().remove(node);
         }
         return node;
     }
@@ -687,10 +709,10 @@ public class DataGraphService {
                 setArcStyle((DataArc) element.getDataElement());
                 break;
             case CLUSTER:
-                styleNode((DataCluster) element.getDataElement(), clusterStyleClass, true);
+                styleElement((DataCluster) element.getDataElement(), clusterStyleClass, clusterStyleClass);
                 break;
             case CLUSTERARC:
-                styleArc((DataArc) element.getDataElement(), clusterArcStyleClass);
+                styleElement((DataArc) element.getDataElement(), clusterArcStyleClass, clusterArcStyleClass);
                 break;
             case PLACE:
                 setPlaceStyle((DataPlace) element.getDataElement());
@@ -705,36 +727,18 @@ public class DataGraphService {
 
     /**
      * Sets the given style to all elements in the scene that are related to the
-     * given data element.
-     *
-     * @param dataElement
-     * @param styleClass
-     * @param childrenEnabled wether scene element's children are to be shown
-     */
-    private void styleNode(IDataNode dataElement, String styleClass, boolean childrenEnabled) {
-        for (IGraphElement shapeElement : dataElement.getGraphElements()) {
-            shapeElement.getElementHandles().forEach(ele -> {
-                ele.setActiveStyleClass(styleClass);
-            });
-            for (IGravisChildElement childShapes : ((IGraphNode) shapeElement).getChildElements()) {
-                for (Shape shape : childShapes.getShapes()) {
-                    shape.setVisible(childrenEnabled);
-                }
-            }
-        }
-    }
-
-    /**
-     * Sets the given style to all elements in the scene that are related to the
      * given data arc.
      *
      * @param element
-     * @param styleClass
+     * @param styleParent
      */
-    private void styleArc(IDataArc element, String styleClass) {
-        for (IGraphElement elem : element.getGraphElements()) {
-            elem.getElementHandles().forEach(ele -> {
-                ele.setActiveStyleClass(styleClass);
+    private void styleElement(IDataElement element, String styleParent, String styleChildren) {
+        for (IGraphElement elem : element.getShapes()) {
+            elem.getParentElementHandles().forEach(s -> {
+                s.setActiveStyleClass(styleParent);
+            });
+            elem.getChildElementHandles().forEach(s -> {
+                s.setActiveStyleClass(styleChildren);
             });
         }
     }
@@ -743,16 +747,36 @@ public class DataGraphService {
         if (arc.getArcType() != null) {
             switch (arc.getArcType()) {
                 case INHIBITORY:
-                    styleArc(arc, arcInhibStyleClass);
+                    arc.getShapes().forEach(s -> {
+                        IGraphArc a = (IGraphArc) s;
+                        a.setArrowHeadVisible(false);
+                        a.setCircleHeadVisible(true);
+                    });
+                    styleElement(arc, styleArcInhiParent, styleArcInhiChild);
                     break;
                 case NORMAL:
-                    styleArc(arc, arcNormStyleClass);
+                    arc.getShapes().forEach(s -> {
+                        IGraphArc a = (IGraphArc) s;
+                        a.setArrowHeadVisible(true);
+                        a.setCircleHeadVisible(false);
+                    });
+                    styleElement(arc, styleArcNormParent, styleArcNormChild);
                     break;
                 case READ:
-                    styleArc(arc, arcNormStyleClass);
+                    arc.getShapes().forEach(s -> {
+                        IGraphArc a = (IGraphArc) s;
+                        a.setArrowHeadVisible(true);
+                        a.setCircleHeadVisible(false);
+                    });
+                    styleElement(arc, styleArcNormParent, styleArcNormChild);
                     break;
                 case TEST:
-                    styleArc(arc, arcTestStyleClass);
+                    arc.getShapes().forEach(s -> {
+                        IGraphArc a = (IGraphArc) s;
+                        a.setArrowHeadVisible(false);
+                        a.setCircleHeadVisible(true);
+                    });
+                    styleElement(arc, styleArcTestParent, styleArcTestChild);
                     break;
                 default:
                     throw new DataGraphServiceException("Cannot create shape for an undefined arc type!");
@@ -760,54 +784,21 @@ public class DataGraphService {
         }
     }
 
-//    private void ReshapeArc(final DataArc arc) throws DataGraphServiceException {
-//
-//        final List<IGraphElement> arcsNew = new ArrayList();
-//        IGraphArc arcShape, arcShapeNew;
-//
-//        for (IGraphElement elem : arc.getGraphElements()) {
-//
-//            arcShape = (IGraphArc) elem;
-//
-//            switch (arc.getArcType()) {
-//                case NORMAL:
-//                    arcShapeNew = new GraphEdgeArrow(arcShape.getSource(), arcShape.getTarget(), arc);
-//                    break;
-//                case INHIBITORY:
-//                    arcShapeNew = new GraphEdgeCircle(arcShape.getSource(), arcShape.getTarget(), arc);
-//                    break;
-//                case READ:
-//                    arcShapeNew = new GraphEdgeCircle(arcShape.getSource(), arcShape.getTarget(), arc);
-//                    break;
-//                case TEST:
-//                    arcShapeNew = new GraphEdgeArrow(arcShape.getSource(), arcShape.getTarget(), arc);
-//                    break;
-//                default:
-//                    throw new DataGraphServiceException("Cannot create shape for an undefined arc type!");
-//            }
-//            arcsNew.add(arcShapeNew);
-//        }
-//
-//        while (!arc.getGraphElements().isEmpty()) {
-//            removeShape((IGraphArc) arc.getGraphElements().get(0));
-//        }
-//
-//        for (IGraphElement elem : arcsNew) {
-//            arcShape = (IGraphArc) elem;
-//            arc.getGraphElements().add(arcShape);
-//            graphDao.add(arcShape);
-//        }
-//
-//        setArcStyle(arc);
-//    }
-
     private void setPlaceStyle(DataPlace place) throws DataGraphServiceException {
         switch (place.getPlaceType()) {
             case CONTINUOUS:
-                styleNode(place, placeStyleClass, true);
+                place.getShapes().forEach(s -> {
+                    IGraphNode n = (IGraphNode) s;
+                    n.setInnerCircleVisible(true);
+                });
+                styleElement(place, stylePlace, stylePlace);
                 break;
             case DISCRETE:
-                styleNode(place, placeStyleClass, false);
+                place.getShapes().forEach(s -> {
+                    IGraphNode n = (IGraphNode) s;
+                    n.setInnerCircleVisible(false);
+                });
+                styleElement(place, stylePlace, stylePlace);
                 break;
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined place type!");
@@ -817,13 +808,25 @@ public class DataGraphService {
     private void setTransitionStyle(DataTransition transition) throws DataGraphServiceException {
         switch (transition.getTransitionType()) {
             case CONTINUOUS:
-                styleNode(transition, transitionDefaultStyleClass, true);
+                transition.getShapes().forEach(s -> {
+                    IGraphNode n = (IGraphNode) s;
+                    n.setInnerRectangleVisible(true);
+                });
+                styleElement(transition, styleTransitionNorm, styleTransitionNorm);
                 break;
             case DISCRETE:
-                styleNode(transition, transitionDefaultStyleClass, false);
+                transition.getShapes().forEach(s -> {
+                    IGraphNode n = (IGraphNode) s;
+                    n.setInnerRectangleVisible(false);
+                });
+                styleElement(transition, styleTransitionNorm, styleTransitionNorm);
                 break;
             case STOCHASTIC:
-                styleNode(transition, transitionStochasticStyleClass, false);
+                transition.getShapes().forEach(s -> {
+                    IGraphNode n = (IGraphNode) s;
+                    n.setInnerRectangleVisible(false);
+                });
+                styleElement(transition, styleTransitionStoch, styleTransitionStoch);
                 break;
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined transition type!");
@@ -838,10 +841,7 @@ public class DataGraphService {
      * @throws DataGraphServiceException thrown in case the connection is not
      * valid
      */
-    private void validateConnection(IGraphArc arc) throws DataGraphServiceException {
-        
-        IGraphNode source = arc.getSource();
-        IGraphNode target = arc.getTarget();
+    private void validateConnection(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
 
         IDataNode dataSource = source.getDataElement();
         IDataNode dataTarget = target.getDataElement();
@@ -861,7 +861,7 @@ public class DataGraphService {
         if (source.getChildren().contains(target) || target.getParents().contains(source)) {
             throw new DataGraphServiceException("Nodes are already connected!");
         }
-        for (IGraphElement relatedSourceElement : dataSource.getGraphElements()) {
+        for (IGraphElement relatedSourceElement : dataSource.getShapes()) {
 
             relatedSourceShape = (IGraphNode) relatedSourceElement;
             for (int i = 0; i < relatedSourceShape.getChildren().size(); i++) {
@@ -884,7 +884,7 @@ public class DataGraphService {
     private void validateRemoval(IGraphArc arc) throws DataGraphServiceException {
         IDataArc data = arc.getDataElement();
         if (data != null) {
-            if (data.getGraphElements().size() <= 1) {
+            if (data.getShapes().size() <= 1) {
                 try {
                     parameterService.ValidateRemoval(data.getParameters().values(), data);
                 } catch (ParameterServiceException ex) {
@@ -910,7 +910,7 @@ public class DataGraphService {
             } catch (DataGraphServiceException ex) {
                 throw new DataGraphServiceException("A related arc cannot be removed! [" + ex.getMessage() + "]");
             }
-            if (data.getGraphElements().size() <= 1) {
+            if (data.getShapes().size() <= 1) {
                 try {
                     parameterService.ValidateRemoval(data.getParameters().values(), data);
                 } catch (ParameterServiceException ex) {
