@@ -41,6 +41,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -160,6 +161,8 @@ public class ElementController implements Initializable
 
         StoreElementInfo(elementSelected);
         StoreElementProperties(elementSelected);
+        
+        elementSelected = null;
     }
 
     /**
@@ -171,7 +174,7 @@ public class ElementController implements Initializable
 
         identifierPane.setVisible(true);
         inputLabel.setDisable(false);
-
+        
         switch (element.getElementType()) {
 
             case CLUSTER:
@@ -181,6 +184,7 @@ public class ElementController implements Initializable
 
             default:
                 propertiesPane.setVisible(true);
+                choiceSubtype.setStyle("");
                 propertiesBox.getChildren().clear();
                 propertiesBox.getChildren().add(propertiesSubtype);
                 propertiesBox.getChildren().add(propertiesColor);
@@ -191,6 +195,7 @@ public class ElementController implements Initializable
             case ARC:
                 inputLabel.setDisable(true);
                 inputLabel.setText("");
+                inputArcWeight.setStyle("");
                 propertiesBox.getChildren().add(propertiesArc);
                 break;
 
@@ -486,6 +491,46 @@ public class ElementController implements Initializable
             menuParamGlobal.setDisable(true);
         }
     }
+    
+    private void StoreElementType(IDataElement element) throws DataGraphServiceException {
+        
+        Object itemSelected = choiceSubtype.getSelectionModel().getSelectedItem();
+        if (itemSelected == null) {
+            return;
+        }
+
+        switch (element.getElementType()) {
+
+            case ARC:
+
+                DataArc arc = (DataArc) element;
+                DataArc.Type arcType = (DataArc.Type) itemSelected;
+                if (arc.getArcType() != arcType) {
+                    dataService.changeArcType(arc, arcType);
+                }
+                break;
+
+            case PLACE:
+
+                DataPlace place = (DataPlace) element;
+                DataPlace.Type placeType = (DataPlace.Type) itemSelected;
+                if (place.getPlaceType() != placeType) {
+                    dataService.setPlaceTypeDefault(placeType);
+                    dataService.changePlaceType(place, placeType);
+                }
+                break;
+
+            case TRANSITION:
+
+                DataTransition transition = (DataTransition) element;
+                DataTransition.Type transitionType = (DataTransition.Type) itemSelected;
+                if (transition.getTransitionType() != transitionType) {
+                    dataService.setTransitionTypeDefault(transitionType);
+                    dataService.changeTransitionType(transition, transitionType);
+                }
+                break;
+        }
+    }
 
     /**
      * Stores node properties. Stores the values from the textfields within the
@@ -503,18 +548,16 @@ public class ElementController implements Initializable
             case ARC:
 
                 DataArc arc = (DataArc) element;
-                DataArc.Type arcType = (DataArc.Type) choiceSubtype.getSelectionModel().getSelectedItem();
 
-                if (arc.getArcType() != arcType) {
-                    dataService.setArcTypeDefault(arcType);
-                    dataService.changeArcType(arc, arcType);
+                try {
+                    Weight weight = new Weight(colour);
+                    if (!inputArcWeight.getText().isEmpty()) {
+                        weight.setValue(String.valueOf(Double.parseDouble(inputArcWeight.getText().replace(",", "."))));
+                    }
+                    arc.setWeight(weight);
+                } catch (NumberFormatException ex) {
+                    messengerService.addToLog("Given weight is not a number!");
                 }
-
-                Weight weight = new Weight(colour);
-                if (!inputArcWeight.getText().isEmpty()) {
-                    weight.setValue(inputArcWeight.getText());
-                }
-                arc.setWeight(weight);
 
                 break;
 
@@ -525,31 +568,25 @@ public class ElementController implements Initializable
             case PLACE:
 
                 DataPlace place = (DataPlace) element;
-                DataPlace.Type placeType = (DataPlace.Type) choiceSubtype.getSelectionModel().getSelectedItem();
-
-                if (place.getPlaceType() != placeType) {
-                    dataService.setPlaceTypeDefault(placeType);
-                    dataService.changePlaceType(place, placeType);
-                }
 
                 Token token = new Token(colour);
                 if (!inputPlaceToken.getText().isEmpty()) {
                     try {
-                        token.setValueStart(Double.parseDouble(inputPlaceToken.getText()));
+                        token.setValueStart(Double.parseDouble(inputPlaceToken.getText().replace(",", ".")));
                     } catch (NumberFormatException ex) {
                         messengerService.addToLog("Value for 'Token' is not a number!");
                     }
                 }
                 if (!inputPlaceTokenMin.getText().isEmpty()) {
                     try {
-                        token.setValueMin(Double.parseDouble(inputPlaceTokenMin.getText()));
+                        token.setValueMin(Double.parseDouble(inputPlaceTokenMin.getText().replace(",", ".")));
                     } catch (NumberFormatException ex) {
                         messengerService.addToLog("Value for 'Token (min.)' is not a number!");
                     }
                 }
                 if (!inputPlaceTokenMax.getText().isEmpty()) {
                     try {
-                        token.setValueMax(Double.parseDouble(inputPlaceTokenMax.getText()));
+                        token.setValueMax(Double.parseDouble(inputPlaceTokenMax.getText().replace(",", ".")));
                     } catch (NumberFormatException ex) {
                         messengerService.addToLog("Value for 'Token (max.)' is not a number!");
                     }
@@ -561,12 +598,6 @@ public class ElementController implements Initializable
             case TRANSITION:
 
                 DataTransition transition = (DataTransition) element;
-                DataTransition.Type transitionType = (DataTransition.Type) choiceSubtype.getSelectionModel().getSelectedItem();
-
-                if (transition.getTransitionType() != transitionType) {
-                    dataService.setTransitionTypeDefault(transitionType);
-                    dataService.changeTransitionType(transition, transitionType);
-                }
 
                 try {
                     if (inputTransitionFunction.getText().isEmpty()) {
@@ -694,7 +725,7 @@ public class ElementController implements Initializable
         }
     }
 
-    private void setStatus(TextField input, String msg, Throwable thr) {
+    private void setStatus(Control input, String msg, Throwable thr) {
         if (thr != null) {
             if (input != null) {
                 input.setStyle("-fx-border-color: red");
@@ -715,6 +746,17 @@ public class ElementController implements Initializable
 
         identifierPane.setVisible(false);
         propertiesPane.setVisible(false);
+        
+        choiceSubtype.valueProperty().addListener(cl -> {
+            if (elementSelected != null) {
+                try {
+                    StoreElementType(elementSelected);
+                    setStatus(choiceSubtype, "", null);
+                } catch (DataGraphServiceException ex) {
+                    setStatus(choiceSubtype, ex.getMessage(), ex);
+                }
+            }
+        });
 
         inputArcWeight.textProperty().addListener(cl -> ValidateNumberInput(inputArcWeight));
         inputPlaceToken.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceToken));
@@ -730,12 +772,13 @@ public class ElementController implements Initializable
         });
 
         menuItemParamEdit.setOnAction(e -> {
+            IDataElement elem = elementSelected;
             try {
                 StoreElementDetails();
             } catch (DataGraphServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             }
-            mainController.ShowParameters(elementSelected);
+            mainController.ShowParameters(elem);
         });
     }
 }

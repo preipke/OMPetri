@@ -63,10 +63,12 @@ public class Arc extends Element implements IArc
         return weights;
     }
 
+    @Override
     public void setArcType(Type arcType) {
         this.arcType = arcType;
     }
 
+    @Override
     public Type getArcType() {
         return arcType;
     }

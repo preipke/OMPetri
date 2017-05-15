@@ -1,76 +1,86 @@
-/*            */
-/* Arc styles */
-/*            */
-.arc-norm {
+/* Default Arc Style */
+.arc {
     -fx-fill: null;
     -fx-stroke: orange;
     -fx-stroke-width: 2px;
 }
-.arc-norm:hovered {
+.arc:hovered {
     -fx-stroke: orange;
     -fx-stroke-width: 3px;
 }
-.arc-norm:selected {
+.arc:selected {
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
-.arc-norm:highlighted {
-}
-
-.arc-norm-head {
-    -fx-fill: null;
+.arc-head {
+    -fx-fill: orange;
     -fx-stroke: orange;
     -fx-stroke-width: 2px;
 }
-.arc-norm-head:hovered {
-    -fx-stroke: orange;
+.arc-head:hovered {
     -fx-stroke-width: 3px;
 }
-.arc-norm-head:selected {
+.arc-head:selected {
+    -fx-fill: red;
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
-.arc-norm-head:highlighted {
-}
+/*.arc:highlighted {}*/
 
-
+/* Inhibitory Arc Style */
 .arc-inhi {
     -fx-fill: white;
-    -fx-stroke: grey;
+    -fx-stroke: orange;
     -fx-stroke-width: 2px;
 }
 .arc-inhi:hovered {
-    -fx-stroke: orange;
     -fx-stroke-width: 3px;
 }
 .arc-inhi:selected {
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
-.arc-inhi:highlighted {
+.arc-inhi-head {
+    -fx-fill: white;
+    -fx-stroke: orange;
+    -fx-stroke-width: 2px;
+}
+.arc-inhi-head:hovered {
+    -fx-stroke-width: 3px;
+}
+.arc-inhi-head:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
 }
 
-
+/* Test Arc Style */
 .arc-test {
     -fx-fill: null;
     -fx-stroke: orange;
-    -fx-stroke-dash-array: 2px 6px;
+    -fx-stroke-dash-array: 2px 4px;
     -fx-stroke-width: 2px;
 }
 .arc-test:hovered {
-    -fx-stroke: purple;
     -fx-stroke-width: 3px;
 }
 .arc-test:selected {
     -fx-stroke: red;
     -fx-stroke-width: 3px;
 }
-.arc-test:highlighted {
+.arc-test-head {
+    -fx-fill: orange;
+    -fx-stroke: orange;
+    -fx-stroke-width: 2px;
+}
+.arc-test-head:hovered {
+    -fx-stroke-width: 3px;
+}
+.arc-test-head:selected {
+    -fx-stroke: red;
+    -fx-stroke-width: 3px;
 }
 
-/*               */
-/* Cluster style */
-/*               */
+/* Default Cluster Style */
 .cluster {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
@@ -91,9 +101,7 @@
     -fx-stroke-dash-array: 1px 8px;
 }
 
-/*              */
-/* Place styles */
-/*              */
+/* Default Place Style */
 .place {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
@@ -114,9 +122,7 @@
     -fx-stroke-dash-array: 1px 8px;
 }
 
-/*                   */
-/* Transition styles */
-/*                   */
+/* Transition Style */
 .transition {
     -fx-fill: lightblue;
     -fx-stroke: blue;
@@ -136,8 +142,6 @@
     -fx-stroke-width: 2px;
     -fx-stroke-dash-array: 1px 4px;
 }
-
-
 
 .transitionStochastic {
     -fx-fill: blue;

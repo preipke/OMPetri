@@ -28,7 +28,10 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
@@ -43,26 +46,25 @@ import org.springframework.stereotype.Service;
  * @author PR
  */
 @Service
-public class DataGraphService {
+public class DataGraphService
+{
     @Autowired private Calculator calculator;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
 
-    @Value("${css.arc.norm.parent}") private String styleArcNormParent; // styleArcNormChild
-    @Value("${css.arc.norm.child}") private String styleArcNormChild; // styleArcNormChild
-    
-    @Value("${css.arc.inhi.parent}") private String styleArcInhiParent;
-    @Value("${css.arc.inhi.child}") private String styleArcInhiChild;
-    
-    @Value("${css.arc.test.parent}") private String styleArcTestParent;
-    @Value("${css.arc.test.child}") private String styleArcTestChild;
-    
-    @Value("${css.cluster.default}") private String clusterStyleClass;
-    @Value("${css.clusterarc.default}") private String clusterArcStyleClass;
-    
+    @Value("${css.arc.default}") private String styleArcDefault;
+    @Value("${css.arc.default.child}") private String styleArcDefaultHead;
+    @Value("${css.arc.inhi}") private String styleArcInhi;
+    @Value("${css.arc.inhi.child}") private String styleArcInhiHead;
+    @Value("${css.arc.test}") private String styleArcTest;
+    @Value("${css.arc.test.child}") private String styleArcTestHead;
+
+    @Value("${css.cluster.default}") private String stylceCluster;
+    @Value("${css.clusterarc.default}") private String styleClusterArc;
+
     @Value("${css.place.default}") private String stylePlace;
-    
-    @Value("${css.transition.default}") private String styleTransitionNorm;
+
+    @Value("${css.transition.default}") private String styleTransitionDefault;
     @Value("${css.transition.stochastic}") private String styleTransitionStoch;
 
     private final GraphDao graphDao;
@@ -79,7 +81,7 @@ public class DataGraphService {
     }
 
     /**
-     * Adds the given colour.
+     * Adds a colour.
      *
      * @param colour
      * @throws DataGraphServiceException
@@ -92,54 +94,69 @@ public class DataGraphService {
     }
 
     /**
-     * Changes the subtype for the given arc to the given type. Styles all
-     * related shapes in the scene accordingly.
+     * Changes the subtype of an arc. Styles all related shapes in the scene
+     * accordingly.
      *
      * @param arc
      * @param type
      * @throws DataGraphServiceException
      */
     public void changeArcType(DataArc arc, DataArc.Type type) throws DataGraphServiceException {
-        /**
-         * VALIDATE
-         * -> exception, set back to previous arc type
-         */
+        validateArcType(arc, type);
         arc.setArcType(type);
-        setArcStyle(arc);
+        styleArc(arc);
     }
 
     /**
-     * Changes the subtype for the given place to the given type. Styles all
-     * related shapes in the scene accordingly.
+     * Changes the subtype of a place. Styles all related shapes in the scene
+     * accordingly.
      *
      * @param place
      * @param type
      * @throws DataGraphServiceException
      */
     public void changePlaceType(DataPlace place, DataPlace.Type type) throws DataGraphServiceException {
-        /**
-         * VALIDATE
-         * -> exception, set back to previous arc type
-         */
+        DataPlace.Type typeOld = place.getPlaceType();
         place.setPlaceType(type);
-        setPlaceStyle(place);
+        try {
+            for (IArc arc : place.getArcsIn()) {
+                validateArcType(arc, arc.getArcType());
+            }
+            for (IArc arc : place.getArcsOut()) {
+                validateArcType(arc, arc.getArcType());
+            }
+            stylePlace(place);
+        } catch (DataGraphServiceException ex) {
+            place.setPlaceType(typeOld);
+            messengerService.addToLog("Cannot change place type to '" + type + "'! [" + ex.getMessage() + "]");
+            throw new DataGraphServiceException("Cannot change place type to '" + type + "'!");
+        }
     }
 
     /**
-     * Changes the subtype for the given transition to the given type. Styles
-     * all related shapes in the scene accordingly.
+     * Changes the subtype of a transition. Styles all related shapes in the
+     * scene accordingly.
      *
      * @param transition
      * @param type
      * @throws DataGraphServiceException
      */
     public void changeTransitionType(DataTransition transition, DataTransition.Type type) throws DataGraphServiceException {
-        /**
-         * VALIDATE
-         * -> exception, set back to previous arc type
-         */
+        DataTransition.Type typeOld = transition.getTransitionType();
         transition.setTransitionType(type);
-        setTransitionStyle(transition);
+        try {
+            for (IArc arc : transition.getArcsIn()) {
+                validateArcType(arc, defaultArcType);
+            }
+            for (IArc arc : transition.getArcsOut()) {
+                validateArcType(arc, defaultArcType);
+            }
+            styleTransition(transition);
+        } catch (DataGraphServiceException ex) {
+            transition.setTransitionType(typeOld);
+            messengerService.addToLog("Cannot change place type to '" + type + "'! [" + ex.getMessage() + "]");
+            throw new DataGraphServiceException("Cannot change place type to '" + type + "'!");
+        }
     }
 
     /**
@@ -152,8 +169,11 @@ public class DataGraphService {
      * @throws DataGraphServiceException
      */
     public IGraphArc connect(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
+        IGraphArc arc;
         validateConnection(source, target);
-        return add(createConnection(source, target, null));
+        arc = createConnection(source, target, null);
+        validateArcType(arc.getDataElement(), defaultArcType);
+        return add(arc);
     }
 
     /**
@@ -196,10 +216,10 @@ public class DataGraphService {
         GraphEdge edge;
         edge = new GraphEdge(source, null);
         edge.getParentElementHandles().forEach(ele -> {
-            ele.setActiveStyleClass(styleArcNormParent);
+            ele.setActiveStyleClass(styleArcDefault);
         });
         edge.getChildElementHandles().forEach(ele -> {
-            ele.setActiveStyleClass(styleArcNormChild);
+            ele.setActiveStyleClass(styleArcDefaultHead);
         });
         edge.setArrowHeadVisible(true);
         edge.setCircleHeadVisible(false);
@@ -579,12 +599,12 @@ public class DataGraphService {
          * Creating shape.
          */
         if (target == null) {
-            
+
             // Arc not bound to any target
             shapeSourceToTarget = new GraphEdge(source, dataArc);
-            
+
         } else if (!source.getParents().contains(target) && !target.getChildren().contains(source)) {
-            
+
             // Create connection for source and target
             shapeSourceToTarget = new GraphEdge(source, target, dataArc);
 
@@ -637,6 +657,11 @@ public class DataGraphService {
             if (element.getShapes().isEmpty()) {
                 for (Parameter param : element.getParameters().values()) {
                     dataDao.remove(param);
+                }
+                if (element instanceof DataArc) {
+                    dataDao.remove((DataArc) element);
+                } else {
+                    dataDao.remove((IDataNode) element);
                 }
                 dataDao.remove(element);
             }
@@ -697,42 +722,13 @@ public class DataGraphService {
     }
 
     /**
-     * Styles the graph element in the scene according to the type assigned to
-     * its data element.
-     *
-     * @param element
-     * @throws DataGraphServiceException
-     */
-    private void styleElement(IGraphElement element) throws DataGraphServiceException {
-        switch (element.getDataElement().getElementType()) {
-            case ARC:
-                setArcStyle((DataArc) element.getDataElement());
-                break;
-            case CLUSTER:
-                styleElement((DataCluster) element.getDataElement(), clusterStyleClass, clusterStyleClass);
-                break;
-            case CLUSTERARC:
-                styleElement((DataArc) element.getDataElement(), clusterArcStyleClass, clusterArcStyleClass);
-                break;
-            case PLACE:
-                setPlaceStyle((DataPlace) element.getDataElement());
-                break;
-            case TRANSITION:
-                setTransitionStyle((DataTransition) element.getDataElement());
-                break;
-            default:
-                throw new DataGraphServiceException("Cannot style element of undefined type!");
-        }
-    }
-
-    /**
      * Sets the given style to all elements in the scene that are related to the
      * given data arc.
      *
      * @param element
      * @param styleParent
      */
-    private void styleElement(IDataElement element, String styleParent, String styleChildren) {
+    private void setElementStyle(IDataElement element, String styleParent, String styleChildren) {
         for (IGraphElement elem : element.getShapes()) {
             elem.getParentElementHandles().forEach(s -> {
                 s.setActiveStyleClass(styleParent);
@@ -743,7 +739,36 @@ public class DataGraphService {
         }
     }
 
-    private void setArcStyle(DataArc arc) throws DataGraphServiceException {
+    /**
+     * Styles the graph element in the scene according to the type assigned to
+     * its data element.
+     *
+     * @param element
+     * @throws DataGraphServiceException
+     */
+    private void styleElement(IGraphElement element) throws DataGraphServiceException {
+        switch (element.getDataElement().getElementType()) {
+            case ARC:
+                styleArc((DataArc) element.getDataElement());
+                break;
+            case CLUSTER:
+                setElementStyle(element.getDataElement(), stylceCluster, stylceCluster);
+                break;
+            case CLUSTERARC:
+                setElementStyle(element.getDataElement(), styleClusterArc, styleClusterArc);
+                break;
+            case PLACE:
+                stylePlace((DataPlace) element.getDataElement());
+                break;
+            case TRANSITION:
+                styleTransition((DataTransition) element.getDataElement());
+                break;
+            default:
+                throw new DataGraphServiceException("Cannot style element of undefined type!");
+        }
+    }
+
+    private void styleArc(DataArc arc) throws DataGraphServiceException {
         if (arc.getArcType() != null) {
             switch (arc.getArcType()) {
                 case INHIBITORY:
@@ -752,7 +777,7 @@ public class DataGraphService {
                         a.setArrowHeadVisible(false);
                         a.setCircleHeadVisible(true);
                     });
-                    styleElement(arc, styleArcInhiParent, styleArcInhiChild);
+                    setElementStyle(arc, styleArcInhi, styleArcInhiHead);
                     break;
                 case NORMAL:
                     arc.getShapes().forEach(s -> {
@@ -760,23 +785,23 @@ public class DataGraphService {
                         a.setArrowHeadVisible(true);
                         a.setCircleHeadVisible(false);
                     });
-                    styleElement(arc, styleArcNormParent, styleArcNormChild);
+                    setElementStyle(arc, styleArcDefault, styleArcDefaultHead);
                     break;
                 case READ:
-                    arc.getShapes().forEach(s -> {
-                        IGraphArc a = (IGraphArc) s;
-                        a.setArrowHeadVisible(true);
-                        a.setCircleHeadVisible(false);
-                    });
-                    styleElement(arc, styleArcNormParent, styleArcNormChild);
-                    break;
-                case TEST:
                     arc.getShapes().forEach(s -> {
                         IGraphArc a = (IGraphArc) s;
                         a.setArrowHeadVisible(false);
                         a.setCircleHeadVisible(true);
                     });
-                    styleElement(arc, styleArcTestParent, styleArcTestChild);
+                    setElementStyle(arc, styleArcDefault, styleArcDefaultHead);
+                    break;
+                case TEST:
+                    arc.getShapes().forEach(s -> {
+                        IGraphArc a = (IGraphArc) s;
+                        a.setArrowHeadVisible(true);
+                        a.setCircleHeadVisible(false);
+                    });
+                    setElementStyle(arc, styleArcTest, styleArcTestHead);
                     break;
                 default:
                     throw new DataGraphServiceException("Cannot create shape for an undefined arc type!");
@@ -784,52 +809,109 @@ public class DataGraphService {
         }
     }
 
-    private void setPlaceStyle(DataPlace place) throws DataGraphServiceException {
+    private void stylePlace(DataPlace place) throws DataGraphServiceException {
         switch (place.getPlaceType()) {
             case CONTINUOUS:
                 place.getShapes().forEach(s -> {
                     IGraphNode n = (IGraphNode) s;
                     n.setInnerCircleVisible(true);
                 });
-                styleElement(place, stylePlace, stylePlace);
+                setElementStyle(place, stylePlace, stylePlace);
                 break;
             case DISCRETE:
                 place.getShapes().forEach(s -> {
                     IGraphNode n = (IGraphNode) s;
                     n.setInnerCircleVisible(false);
                 });
-                styleElement(place, stylePlace, stylePlace);
+                setElementStyle(place, stylePlace, stylePlace);
                 break;
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined place type!");
         }
     }
 
-    private void setTransitionStyle(DataTransition transition) throws DataGraphServiceException {
+    private void styleTransition(DataTransition transition) throws DataGraphServiceException {
         switch (transition.getTransitionType()) {
             case CONTINUOUS:
                 transition.getShapes().forEach(s -> {
                     IGraphNode n = (IGraphNode) s;
                     n.setInnerRectangleVisible(true);
                 });
-                styleElement(transition, styleTransitionNorm, styleTransitionNorm);
+                setElementStyle(transition, styleTransitionDefault, styleTransitionDefault);
                 break;
             case DISCRETE:
                 transition.getShapes().forEach(s -> {
                     IGraphNode n = (IGraphNode) s;
                     n.setInnerRectangleVisible(false);
                 });
-                styleElement(transition, styleTransitionNorm, styleTransitionNorm);
+                setElementStyle(transition, styleTransitionDefault, styleTransitionDefault);
                 break;
             case STOCHASTIC:
                 transition.getShapes().forEach(s -> {
                     IGraphNode n = (IGraphNode) s;
                     n.setInnerRectangleVisible(false);
                 });
-                styleElement(transition, styleTransitionStoch, styleTransitionStoch);
+                setElementStyle(transition, styleTransitionStoch, styleTransitionStoch);
                 break;
             default:
                 throw new DataGraphServiceException("Cannot create shape for an undefined transition type!");
+        }
+    }
+
+    /**
+     * 
+     * @param arc
+     * @param typeArc
+     * @throws DataGraphServiceException
+     */
+    private void validateArcType(IArc arc, DataArc.Type typeArc) throws DataGraphServiceException {
+        
+        INode source = arc.getSource();
+//        INode target = arc.getTarget();
+        
+        if (Element.Type.PLACE == source.getElementType()) {
+            
+//            DataPlace.Type typeSourcePlace = ((DataPlace) source).getPlaceType();
+//            DataTransition.Type typeTargetTransition = ((DataTransition) target).getTransitionType();
+
+            switch (typeArc) {
+                case NORMAL:
+                    break;
+
+                case INHIBITORY:
+                    break;
+
+                case TEST:
+                    break;
+
+                case READ:
+                    break;
+
+                default:
+                    throw new DataGraphServiceException("Validation for arc type '" + typeArc + "' is undefined!");
+            }
+
+        } else {
+            
+//            DataTransition.Type typeSourceTransiton = ((DataTransition) source).getTransitionType();
+//            DataPlace.Type typeTargetPlace = ((DataPlace) target).getPlaceType();
+
+            switch (typeArc) {
+                case NORMAL:
+                    break;
+
+                case INHIBITORY:
+                    throw new DataGraphServiceException("A transition cannot inhibit a place!");
+
+                case TEST:
+                    break;
+
+                case READ:
+                    break;
+
+                default:
+                    throw new DataGraphServiceException("Validation for arc type '" + typeArc + "' is undefined!");
+            }
         }
     }
 
@@ -839,7 +921,7 @@ public class DataGraphService {
      * @param source
      * @param target
      * @throws DataGraphServiceException thrown in case the connection is not
-     * valid
+     *                                   valid
      */
     private void validateConnection(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
 
@@ -879,7 +961,7 @@ public class DataGraphService {
      *
      * @param arc
      * @throws DataGraphServiceException thrown in case the graph arc can not be
-     * deleted
+     *                                   deleted
      */
     private void validateRemoval(IGraphArc arc) throws DataGraphServiceException {
         IDataArc data = arc.getDataElement();
@@ -928,9 +1010,9 @@ public class DataGraphService {
         return graphDao;
     }
 
-    public void setArcTypeDefault(DataArc.Type type) {
-        defaultArcType = type;
-    }
+//    public void setArcTypeDefault(DataArc.Type type) {
+//        defaultArcType = type; // specifying a different arc type for default might cause problems, i.e.
+//    }
 
     public void setPlaceTypeDefault(DataPlace.Type type) {
         defaultPlaceType = type;

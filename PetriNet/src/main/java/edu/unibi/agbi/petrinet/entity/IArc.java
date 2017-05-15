@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.entity;
 
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Weight;
 import java.util.Map;
@@ -22,4 +23,8 @@ public interface IArc extends IElement
     public Weight getWeight(Colour colour);
 
     public Map<Colour, Weight> getWeightMap();
+
+    public void setArcType(Arc.Type arcType);
+
+    public Arc.Type getArcType();
 }
