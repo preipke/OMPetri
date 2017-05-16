@@ -1,16 +1,17 @@
 package service;
 
 import main.TestFXBase;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.entity.INode;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.Collection;
 import java.util.List;
 import org.junit.Assert;
@@ -145,8 +146,8 @@ public class DaoTests extends TestFXBase {
                 Assert.assertNotEquals(node, connection.getSource());
                 Assert.assertNotEquals(node, connection.getTarget());
             }
-            Collection<IArc> arcs = dataDao.getArcs();
-            for (IArc arc : arcs) {
+            Collection<Arc> arcs = dataDao.getArcs();
+            for (Arc arc : arcs) {
                 Assert.assertNotEquals(nodeData, arc.getSource());
                 Assert.assertNotEquals(nodeData, arc.getTarget());
             }
@@ -162,7 +163,7 @@ public class DaoTests extends TestFXBase {
         ConnectNodes(places, transitions);
         
         IGraphArc arc;
-        IDataArc arcData;
+        DataArc arcData;
         
         while (!graphDao.getConnections().isEmpty()) {
             
@@ -187,9 +188,9 @@ public class DaoTests extends TestFXBase {
         List<IGravisNode> nodesAfterClustering, nodesBeforeClustering;
         List<IGravisConnection> connectionsAfterCluster, connectionsBeforeCluster;
         
-        Collection<IArc> arcsAfterClustering, arcsBeforeClustering;
-        Collection<INode> placesAfterClustering, placesBeforeClustering;
-        Collection<INode> transitionsAfterClustering, transitionsBeforeClustering ;
+        Collection<Arc> arcsAfterClustering, arcsBeforeClustering;
+        Collection<Place> placesAfterClustering, placesBeforeClustering;
+        Collection<Transition> transitionsAfterClustering, transitionsBeforeClustering ;
         
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);

@@ -29,9 +29,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
-import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.ArrayList;
@@ -48,6 +46,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataGraphService
 {
+    private static final String ID_PREFIX_PLACE = "P";
+    private static final String ID_PREFIX_TRANSITION = "T";
+    
     @Autowired private Calculator calculator;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
@@ -190,10 +191,16 @@ public class DataGraphService
         IGraphNode shape;
         switch (type) {
             case PLACE:
-                shape = new GraphPlace(new DataPlace(defaultPlaceType));
+                shape = new GraphPlace(
+                            new DataPlace(
+                                ID_PREFIX_PLACE + dataDao.getNextPlaceId(),
+                                defaultPlaceType));
                 break;
             case TRANSITION:
-                shape = new GraphTransition(new DataTransition(defaultTransitionType));
+                shape = new GraphTransition(
+                            new DataTransition(
+                                ID_PREFIX_TRANSITION + dataDao.getNextTransitionId(),
+                                defaultTransitionType));
                 break;
             default:
                 throw new DataGraphServiceException("Cannot create element of undefined type!");
@@ -570,9 +577,15 @@ public class DataGraphService
         IDataNode node = target.getDataElement();
         switch (node.getElementType()) {
             case PLACE:
-                return new GraphPlace(new DataPlace(((DataPlace) node).getPlaceType()));
+                return new GraphPlace(
+                            new DataPlace(
+                                ID_PREFIX_PLACE + dataDao.getNextPlaceId(), 
+                                ((DataPlace) node).getPlaceType()));
             case TRANSITION:
-                return new GraphTransition(new DataTransition(((DataTransition) node).getTransitionType()));
+                return new GraphTransition(
+                            new DataTransition(
+                                ID_PREFIX_TRANSITION + dataDao.getNextTransitionId(), 
+                                ((DataTransition) node).getTransitionType()));
             default:
                 throw new DataGraphServiceException("Cannot copy the given type of element! [" + node.getElementType() + "]");
         }
@@ -587,7 +600,7 @@ public class DataGraphService
      * @return
      * @throws DataGraphServiceException
      */
-    private IGraphArc createConnection(IGraphNode source, IGraphNode target, IDataArc dataArc) throws DataGraphServiceException {
+    private IGraphArc createConnection(IGraphNode source, IGraphNode target, DataArc dataArc) throws DataGraphServiceException {
 
         if (dataArc == null) {
             dataArc = new DataArc(source.getDataElement(), target.getDataElement(), defaultArcType);
@@ -859,56 +872,22 @@ public class DataGraphService
     }
 
     /**
-     * 
+     * Validates the subtype of an arc.
      * @param arc
      * @param typeArc
      * @throws DataGraphServiceException
      */
     private void validateArcType(IArc arc, DataArc.Type typeArc) throws DataGraphServiceException {
-        
-        INode source = arc.getSource();
-//        INode target = arc.getTarget();
-        
-        if (Element.Type.PLACE == source.getElementType()) {
-            
-//            DataPlace.Type typeSourcePlace = ((DataPlace) source).getPlaceType();
-//            DataTransition.Type typeTargetTransition = ((DataTransition) target).getTransitionType();
-
+        if (Element.Type.PLACE == arc.getTarget().getElementType()) {
             switch (typeArc) {
                 case NORMAL:
                     break;
-
-                case INHIBITORY:
-                    break;
-
-                case TEST:
-                    break;
-
-                case READ:
-                    break;
-
-                default:
-                    throw new DataGraphServiceException("Validation for arc type '" + typeArc + "' is undefined!");
-            }
-
-        } else {
-            
-//            DataTransition.Type typeSourceTransiton = ((DataTransition) source).getTransitionType();
-//            DataPlace.Type typeTargetPlace = ((DataPlace) target).getPlaceType();
-
-            switch (typeArc) {
-                case NORMAL:
-                    break;
-
                 case INHIBITORY:
                     throw new DataGraphServiceException("A transition cannot inhibit a place!");
-
                 case TEST:
-                    break;
-
+                    throw new DataGraphServiceException("A transition cannot test a place!");
                 case READ:
-                    break;
-
+                    throw new DataGraphServiceException("A transition cannot read a place!");
                 default:
                     throw new DataGraphServiceException("Validation for arc type '" + typeArc + "' is undefined!");
             }

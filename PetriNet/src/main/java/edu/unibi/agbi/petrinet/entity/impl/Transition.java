@@ -16,20 +16,15 @@ import edu.unibi.agbi.petrinet.model.FunctionElement;
  */
 public class Transition extends Node
 {
-    private static final String IDENT = "T";
-    private static int COUNT = 0;
-
     private Function function;
 
     private Type transitionType;
 
-    public Transition() {
-
-        super(IDENT + ++COUNT);
-        type = Element.Type.TRANSITION;
-
-        function = new Function();
-        function.getElements().add(new FunctionElement("1", FunctionElement.Type.NUMBER));
+    public Transition(String id) {
+        super(id);
+        this.type = Element.Type.TRANSITION;
+        this.function = new Function();
+        this.function.getElements().add(new FunctionElement("1", FunctionElement.Type.NUMBER));
     }
 
     public final void setFunction(Function function) {

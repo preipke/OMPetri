@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.petrinet.model;
 
+import java.util.Objects;
+
 /**
  *
  * @author PR
@@ -45,7 +47,9 @@ public class Colour
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        int hash = 3;
+        hash = 73 * hash + Objects.hashCode(this.id);
+        return hash;
     }
     
     @Override

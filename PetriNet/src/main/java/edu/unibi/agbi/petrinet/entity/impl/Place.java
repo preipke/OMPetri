@@ -8,7 +8,6 @@ package edu.unibi.agbi.petrinet.entity.impl;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Token;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,20 +19,15 @@ import java.util.Map;
  */
 public class Place extends Node
 {
-    private static final String IDENT = "P";
-    private static int COUNT = 0;
-
     private Type placeType;
 
     private final Map<Colour, Token> token;
 
-    public Place() {
-
-        super(IDENT + ++COUNT);
-        type = Element.Type.PLACE;
-
-        token = new HashMap();
-        token.put(PetriNet.DEFAULT_COLOUR, new Token(PetriNet.DEFAULT_COLOUR));
+    public Place(String id) {
+        super(id);
+        this.type = Element.Type.PLACE;
+        this.token = new HashMap();
+        this.token.put(new Colour("DEFAULT", "Default colour"), new Token(new Colour("DEFAULT", "Default colour")));
     }
 
     public final void setToken(Token token) {

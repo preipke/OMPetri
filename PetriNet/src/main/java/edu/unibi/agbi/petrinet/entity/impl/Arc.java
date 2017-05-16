@@ -6,7 +6,6 @@
 package edu.unibi.agbi.petrinet.entity.impl;
 
 import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.Weight;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,16 +26,17 @@ public class Arc extends Element implements IArc
 
     private final Map<Colour, Weight> weights;
 
-    public Arc(INode source, INode target) {
-
-        id = source.getId() + "_" + target.getId();
-        type = Element.Type.ARC;
-
+    public Arc(INode source, INode target, Type arcType) {
         this.source = source;
         this.target = target;
-
-        weights = new HashMap();
-        weights.put(PetriNet.DEFAULT_COLOUR, new Weight(PetriNet.DEFAULT_COLOUR));
+        this.arcType = arcType;
+        this.type = Element.Type.ARC;
+        this.id = source.getId() + "_" + target.getId();
+        this.weights = new HashMap();
+        this.weights.put(
+                new Colour("DEFAULT", "Default colour"), 
+                new Weight(new Colour("DEFAULT", "Default colour"))
+        );
     }
 
     @Override

@@ -6,17 +6,15 @@
 package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.petrinet.model.PetriNet;
-import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author PR
  */
-@Repository
 public final class DataDao extends PetriNet
 {
-    public DataDao() {
-        super();
+    public DataDao(int nextPlaceId, int nextTransitionId) {
+        super(nextPlaceId, nextTransitionId);
         this.setName("Untitled");
         this.setAuthor(System.getProperty("user.name"));
         this.setDescription("New data model.");

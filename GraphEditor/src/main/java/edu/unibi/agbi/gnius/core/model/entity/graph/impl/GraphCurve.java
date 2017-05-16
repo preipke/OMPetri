@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisCurve;
@@ -16,15 +16,15 @@ import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisCurve;
  */
 public class GraphCurve extends GravisCurve implements IGraphArc
 {
-    private final IDataArc dataArc;
+    private final DataArc dataArc;
 
-    public GraphCurve(IGraphNode source , IGraphNode target , IDataArc dataArc) {
+    public GraphCurve(IGraphNode source , IGraphNode target , DataArc dataArc) {
         super(source , target);
         this.dataArc = dataArc;
     }
     
     @Override
-    public IDataArc getDataElement() {
+    public DataArc getDataElement() {
         return dataArc;
     }
 

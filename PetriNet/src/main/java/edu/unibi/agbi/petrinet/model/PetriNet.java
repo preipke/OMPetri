@@ -13,6 +13,7 @@ import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,30 +24,31 @@ import java.util.Set;
  */
 public class PetriNet
 {
-    public final static Colour DEFAULT_COLOUR = new Colour("DEFAULT", "Default colour");
-    
     private String author;
     private String name;
     private String description;
+    
+    private int nextPlaceId;
+    private int nextTransitionId;
     
     private final Set<Colour> colors;
     private final Map<String,Parameter> parameters;
     
     private final Set<String> nodeIds;
-    private final Map<String,IArc> arcs;
-    private final Map<String,INode> places;
-    private final Map<String,INode> transitions;
+    private final Map<String,Arc> arcs;
+    private final Map<String,Place> places;
+    private final Map<String,Transition> transitions;
     
-    public PetriNet() {
-        
-        colors = new HashSet();
-        colors.add(DEFAULT_COLOUR);
-        parameters = new HashMap();
-        
-        nodeIds = new HashSet();
-        arcs = new HashMap();
-        places = new HashMap();
-        transitions = new HashMap();
+    public PetriNet(int nextPlaceId, int nextTransitionId) {
+        this.nextPlaceId = nextPlaceId;
+        this.nextTransitionId = nextTransitionId;
+        this.colors = new HashSet();
+        this.colors.add(new Colour("DEFAULT", "Default colour"));
+        this.parameters = new HashMap();
+        this.nodeIds = new HashSet();
+        this.arcs = new HashMap();
+        this.places = new HashMap();
+        this.transitions = new HashMap();
     }
     
     public void add(Colour color) {
@@ -57,7 +59,7 @@ public class PetriNet
         parameters.put(param.getId(), param);
     }
     
-    public void add(IArc arc) {
+    public void add(Arc arc) {
         arcs.put(arc.getId(), arc);
         arc.getSource().getArcsOut().add(arc);
         arc.getTarget().getArcsIn().add(arc);
@@ -66,13 +68,13 @@ public class PetriNet
     public void add(INode node) {
         nodeIds.add(node.getId());
         if (node instanceof Place) {
-            places.put(node.getId(), node);
+            places.put(node.getId(), (Place) node);
         } else {
-            transitions.put(node.getId(), node);
+            transitions.put(node.getId(), (Transition) node);
         }
     }
     
-    public boolean containsAndNotEqual(IArc arc) {
+    public boolean containsAndNotEqual(Arc arc) {
         if (!arcs.containsKey(arc.getId())) {
             return false;
         }
@@ -98,14 +100,14 @@ public class PetriNet
     }
     
     public IElement remove(IElement element) {
-        if (element instanceof IArc) {
-            return remove((IArc) element);
+        if (element instanceof Arc) {
+            return remove((Arc) element);
         } else {
             return remove((INode) element);
         }
     }
     
-    private IArc remove(IArc arc) {
+    private IArc remove(Arc arc) {
         arc.getParameters().values().forEach(param -> {
             parameters.remove(param.getId());
         });
@@ -146,12 +148,30 @@ public class PetriNet
         return parameters.remove(param.getId());
     }
     
-    public Collection<IArc> getArcs() {
+    public Collection<Arc> getArcs() {
         return arcs.values();
     }
     
     public Set<Colour> getColours() {
         return colors;
+    }
+    
+    public int getNextPlaceId() {
+        return nextPlaceId++;
+    }
+    
+    public int getNextTransitionId() {
+        return nextTransitionId++;
+    }
+    
+    public INode getNode(String id) {
+        if (places.containsKey(id)) {
+            return places.get(id);
+        } else if (transitions.containsKey(id)) {
+            return transitions.get(id);
+        } else {
+            return null;
+        }
     }
     
     public Set<String> getNodeIds() {
@@ -162,11 +182,11 @@ public class PetriNet
         return parameters;
     }
     
-    public Collection<INode> getPlaces() {
+    public Collection<Place> getPlaces() {
         return places.values();
     }
     
-    public Collection<INode> getTransitions() {
+    public Collection<Transition> getTransitions() {
         return transitions.values();
     }
 

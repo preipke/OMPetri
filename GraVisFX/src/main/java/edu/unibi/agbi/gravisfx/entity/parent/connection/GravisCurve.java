@@ -322,13 +322,14 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
         this.circle = new GravisChildCircle(this);
         this.circle.centerXProperty().bind(this.endXProperty);
         this.circle.centerYProperty().bind(this.endYProperty);
+        this.circle.setRadius(GravisProperties.CIRCLE_SMALL_RADIUS);
 
         this.getElements().add(mv);
         this.getElements().add(qct);
         
         this.elementHandles.add(new GravisShapeHandle(this));
-        this.elementHandles.addAll(this.circle.getElementHandles());
         this.elementHandles.addAll(this.arrow.getElementHandles());
+        this.elementHandles.addAll(this.circle.getElementHandles());
         
         this.shapes.add(this);
         this.shapes.add(this.arrow);

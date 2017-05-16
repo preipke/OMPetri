@@ -5,10 +5,15 @@
  */
 package edu.unibi.agbi.petrinet.util;
 
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.entity.INode;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
+import edu.unibi.agbi.petrinet.model.FunctionElement;
 import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -20,10 +25,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
-import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.entity.INode;
-import edu.unibi.agbi.petrinet.model.FunctionElement;
 import java.util.Properties;
 
 /**
@@ -52,10 +53,10 @@ public class OpenModelicaExporter
 
         PrintWriter writer = new PrintWriter(file);
 
-        Collection<IArc> arcs = model.getArcs();
+        Collection<Arc> arcs = model.getArcs();
         Collection<Colour> colors = model.getColours();
-        Collection<INode> places = model.getPlaces();
-        Collection<INode> transitions = model.getTransitions();
+        Collection<Place> places = model.getPlaces();
+        Collection<Transition> transitions = model.getTransitions();
 
         boolean isColoredPn = colors.size() != 1;
 
@@ -98,15 +99,10 @@ public class OpenModelicaExporter
         Function function;
         Token token;
         Weight weight;
-        INode arcSource;
-        INode arcTarget;
-        Place place;
-        Transition transition;
+        INode arcSource, arcTarget;
         int index;
 
-        for (INode nPlace : places) {
-
-            place = (Place) nPlace;
+        for (Place place : places) {
 
             tmp1 = "";
             tmp2 = "";
@@ -211,9 +207,7 @@ public class OpenModelicaExporter
         /**
          * Transitions.
          */
-        for (INode nTransition : transitions) {
-
-            transition = (Transition) nTransition;
+        for (Transition transition : transitions) {
 
             writer.append(INDENT);
             switch (transition.getTransitionType()) {

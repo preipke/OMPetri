@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.util;
 
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.IOException;
@@ -32,5 +33,10 @@ public class SpringAppConfig {
     @Bean
     public OpenModelicaExporter openModelicaExporter() throws IOException {
         return new OpenModelicaExporter();
+    }
+    
+    @Bean
+    public DataDao dataDao() {
+        return new DataDao(1, 1);
     }
 }

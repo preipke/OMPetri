@@ -22,9 +22,8 @@ public class DataArc extends Arc implements IDataArc
     
     private String description = "";
     
-    public DataArc(IDataNode source, IDataNode target, Arc.Type type) {
-        super(source, target);
-        super.setArcType(type);
+    public DataArc(IDataNode source, IDataNode target, Arc.Type arctype) {
+        super(source, target, arctype);
         this.shapes = new ArrayList();
     }
 

@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.menu;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
@@ -76,6 +77,7 @@ public class FileMenuController implements Initializable
         /**
          * File import here...
          */
+        DataDao dataDao = xmlModelConverter.importXml(file);
         
         if (latestFiles.contains(file)) {
             menuOpenRecent.getItems().remove(latestFiles.indexOf(file));

@@ -19,13 +19,14 @@ import java.util.List;
 public final class DataPlace extends Place implements IDataNode
 {
     private final List<IGraphElement> shapes;
-    
+
     private String description = "";
-    
-    public DataPlace(Place.Type type) {
+
+    public DataPlace(String id, Place.Type type) {
+        super(id);
         setPlaceType(type);
-        name = id;
-        shapes = new ArrayList();
+        this.name = this.id;
+        this.shapes = new ArrayList();
     }
 
     @Override
@@ -44,19 +45,23 @@ public final class DataPlace extends Place implements IDataNode
     }
 
     /**
-     * Sets the label text for this data node and all related shapes in the scene.
-     * @param text 
+     * Sets the label text for all related shapes in the scene.
+     *
+     * @param text
      */
     @Override
     public void setLabelText(String text) {
         for (IGraphElement shape : shapes) {
-            ((IGraphNode)shape).getLabel().setText(text);
+            ((IGraphNode) shape).getLabel().setText(text);
         }
     }
 
     @Override
     public String getLabelText() {
-        return ((IGraphNode)shapes.get(0)).getLabel().getText();
+        if (shapes.isEmpty()) {
+            return null;
+        }
+        return ((IGraphNode) shapes.get(0)).getLabel().getText();
     }
 
     @Override

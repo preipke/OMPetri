@@ -73,12 +73,12 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
         this.getElements().add(lt);
 
         this.elementHandles.add(new GravisShapeHandle(this));
-        this.elementHandles.addAll(arrow.getElementHandles());
-        this.elementHandles.addAll(circle.getElementHandles());
+        this.elementHandles.addAll(this.arrow.getElementHandles());
+        this.elementHandles.addAll(this.circle.getElementHandles());
         
         this.shapes.add(this);
-        this.shapes.add(arrow);
-        this.shapes.add(circle);
+        this.shapes.add(this.arrow);
+        this.shapes.add(this.circle);
     }
 
     /**
