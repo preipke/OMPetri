@@ -85,7 +85,7 @@ public class SimulationService
                     Platform.runLater(() -> {
                         simulationControlsController.setSimulationProgress(-1);
                     });
-                    simulationReferences = simulationCompiler.compile(dataService.getDataDao());
+                    simulationReferences = simulationCompiler.compile(dataService.getActiveModel());
                 } catch (SimulationServiceException ex) {
                     throw new SimulationServiceException("Simulation failed during compilation! [" + ex.getMessage() + "]");
                 }
@@ -154,8 +154,8 @@ public class SimulationService
                 }
 
                 Platform.runLater(() -> {
-                    Simulation simulation = InitSimulation(dataService.getDataDao().getAuthor(),
-                            dataService.getDataDao().getName(),
+                    Simulation simulation = InitSimulation(dataService.getActiveModel().getAuthor(),
+                            dataService.getActiveModel().getName(),
                             simulationServer.getSimulationVariables(),
                             simulationReferences
                     );

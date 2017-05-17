@@ -7,8 +7,7 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
-import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataaaDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
@@ -28,12 +27,16 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
+import edu.unibi.agbi.petrinet.model.PetriNet;
 import java.util.ArrayList;
 import java.util.List;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,8 +49,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataGraphService
 {
-    private static final String ID_PREFIX_PLACE = "P";
-    private static final String ID_PREFIX_TRANSITION = "T";
+    private static final String PREFIX_ID_GRAPHNODE = "N";
+    private static final String PREFIX_ID_PLACE = "P";
+    private static final String PREFIX_ID_TRANSITION = "T";
     
     @Autowired private Calculator calculator;
     @Autowired private MessengerService messengerService;
@@ -67,18 +71,16 @@ public class DataGraphService
 
     @Value("${css.transition.default}") private String styleTransitionDefault;
     @Value("${css.transition.stochastic}") private String styleTransitionStoch;
-
-    private final GraphDao graphDao;
-    private final DataDao dataDao;
+    
+    private final ObservableList<DataaaDao> dataDaoList;
+    private DataaaDao dataDaoActive;
 
     private DataArc.Type defaultArcType = DataArc.Type.NORMAL;
     private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
     private DataTransition.Type defaultTransitionType = DataTransition.Type.CONTINUOUS;
 
-    @Autowired
-    public DataGraphService(GraphDao graphDao, DataDao dataDao) {
-        this.graphDao = graphDao;
-        this.dataDao = dataDao;
+    public DataGraphService() {
+        this.dataDaoList = FXCollections.observableArrayList();
     }
 
     /**
@@ -88,10 +90,10 @@ public class DataGraphService
      * @throws DataGraphServiceException
      */
     public void add(Colour colour) throws DataGraphServiceException {
-        if (dataDao.getColours().contains(colour)) {
+        if (dataDaoActive.getModel().getColours().contains(colour)) {
             throw new DataGraphServiceException("Conflict! Another colour has already been stored using the same ID!");
         }
-        dataDao.add(colour);
+        dataDaoActive.getModel().add(colour);
     }
 
     /**
@@ -189,23 +191,24 @@ public class DataGraphService
     public IGraphNode create(Element.Type type, double posX, double posY) throws DataGraphServiceException {
 
         IGraphNode shape;
+        IDataNode node;
+        
         switch (type) {
             case PLACE:
-                shape = new GraphPlace(
-                            new DataPlace(
-                                ID_PREFIX_PLACE + dataDao.getNextPlaceId(),
-                                defaultPlaceType));
+                DataPlace place;
+                place = new DataPlace(PREFIX_ID_PLACE + dataDaoActive.getModel().getNextPlaceId(), defaultPlaceType);
+                shape = new GraphPlace(PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextGraphNodeId(), place);
                 break;
             case TRANSITION:
-                shape = new GraphTransition(
-                            new DataTransition(
-                                ID_PREFIX_TRANSITION + dataDao.getNextTransitionId(),
-                                defaultTransitionType));
+                DataTransition transition;
+                transition = new DataTransition(PREFIX_ID_TRANSITION + dataDaoActive.getModel().getNextTransitionId(), defaultTransitionType);
+                shape = new GraphTransition(PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextGraphNodeId(), transition);
                 break;
+                
             default:
                 throw new DataGraphServiceException("Cannot create element of undefined type!");
         }
-        Point2D pos = calculator.getCorrectedMousePosition(posX, posY);
+        Point2D pos = calculator.getCorrectedMousePosition(dataDaoActive.getGraph(), posX, posY);
         shape.translateXProperty().set(pos.getX());
         shape.translateYProperty().set(pos.getY());
 
@@ -230,7 +233,7 @@ public class DataGraphService
         });
         edge.setArrowHeadVisible(true);
         edge.setCircleHeadVisible(false);
-        graphDao.add(edge);
+        dataDaoActive.getGraph().add(edge);
 
         return edge;
     }
@@ -350,7 +353,7 @@ public class DataGraphService
     public List<IGraphNode> paste(List<IGraphNode> nodes, boolean clone) throws DataGraphServiceException {
 
         Point2D center = calculator.getCenter(nodes);
-        Point2D position = calculator.getCorrectedMousePositionLatest();
+        Point2D position = calculator.getCorrectedMousePositionLatest(dataDaoActive.getGraph());
 
         List<IGraphNode> shapes = new ArrayList();
         IGraphNode shape;
@@ -410,14 +413,14 @@ public class DataGraphService
     private IGraphArc add(IGraphArc arc) throws DataGraphServiceException {
         if (arc.getDataElement() != null) {
             if (arc.getDataElement().getElementType() == Element.Type.ARC) {
-                if (dataDao.containsAndNotEqual(arc.getDataElement())) {
+                if (dataDaoActive.getModel().containsAndNotEqual(arc.getDataElement())) {
                     throw new DataGraphServiceException("Conflict! Another arc has already been stored using the same ID!");
                 }
-                dataDao.add(arc.getDataElement());
+                dataDaoActive.getModel().add(arc.getDataElement());
             }
             arc.getDataElement().getShapes().add(arc);
         }
-        graphDao.add(arc);
+        dataDaoActive.getGraph().add(arc);
         styleElement(arc);
         return arc;
     }
@@ -431,14 +434,14 @@ public class DataGraphService
     private IGraphNode add(IGraphNode node) throws DataGraphServiceException {
         if (node.getDataElement() != null) {
             if (node.getDataElement().getElementType() != Element.Type.CLUSTER) {
-                if (dataDao.containsAndNotEqual(node.getDataElement())) {
+                if (dataDaoActive.getModel().containsAndNotEqual(node.getDataElement())) {
                     throw new DataGraphServiceException("Conflict! Another node has already been stored using the same ID!");
                 }
-                dataDao.add(node.getDataElement());
+                dataDaoActive.getModel().add(node.getDataElement());
             }
             node.getDataElement().getShapes().add(node);
         }
-        graphDao.add(node);
+        dataDaoActive.getGraph().add(node);
         styleElement(node);
         return node;
     }
@@ -482,7 +485,7 @@ public class DataGraphService
         // Create cluster object
         clusterData = new DataCluster(nodes, arcs);
         clusterDataArc = new DataClusterArc(clusterData);
-        clusterShape = new GraphCluster(clusterData);
+        clusterShape = new GraphCluster(PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextGraphNodeId(), clusterData);
         add(clusterShape);
 
         Point2D pos = calculator.getCenter(nodes);
@@ -503,10 +506,10 @@ public class DataGraphService
         }
 
         for (IGraphArc arc : arcs) {
-            graphDao.remove(arc);
+            dataDaoActive.getGraph().remove(arc);
         }
         for (IGraphNode node : nodes) {
-            graphDao.remove(node);
+            dataDaoActive.getGraph().remove(node);
         }
 
         return clusterShape;
@@ -528,16 +531,16 @@ public class DataGraphService
         double translateY = cluster.getShape().getTranslateY() - oldNodesPosition.getY();
 
         for (IGraphNode node : clusteredNodes) {
-            if (dataDao.getNodeIds().contains(node.getDataElement().getId())) {
+            if (dataDaoActive.getModel().getNodeIds().contains(node.getDataElement().getId())) {
                 node.translateXProperty().set(node.translateXProperty().get() + translateX);
                 node.translateYProperty().set(node.translateYProperty().get() + translateY);
-                graphDao.add(node);
+                dataDaoActive.getGraph().add(node);
             }
         }
 
         for (IGraphArc arc : clusteredArcs) {
-            if (dataDao.getArcs().contains(arc.getDataElement())) {
-                graphDao.add(arc);
+            if (dataDaoActive.getModel().getArcs().contains(arc.getDataElement())) {
+                dataDaoActive.getGraph().add(arc);
             }
         }
         remove(cluster);
@@ -557,9 +560,9 @@ public class DataGraphService
         IDataNode node = target.getDataElement();
         switch (node.getElementType()) {
             case PLACE:
-                return new GraphPlace((DataPlace) node);
+                return new GraphPlace(PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextGraphNodeId(), (DataPlace) node);
             case TRANSITION:
-                return new GraphTransition((DataTransition) node);
+                return new GraphTransition(PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextGraphNodeId(), (DataTransition) node);
             default:
                 throw new DataGraphServiceException("Cannot clone the given type of element! [" + node.getElementType() + "]");
         }
@@ -578,13 +581,15 @@ public class DataGraphService
         switch (node.getElementType()) {
             case PLACE:
                 return new GraphPlace(
-                            new DataPlace(
-                                ID_PREFIX_PLACE + dataDao.getNextPlaceId(), 
+                        PREFIX_ID_PLACE + dataDaoActive.getGraph().getNextGraphNodeId(),
+                        new DataPlace(
+                                PREFIX_ID_PLACE + dataDaoActive.getModel().getNextPlaceId(),
                                 ((DataPlace) node).getPlaceType()));
             case TRANSITION:
                 return new GraphTransition(
-                            new DataTransition(
-                                ID_PREFIX_TRANSITION + dataDao.getNextTransitionId(), 
+                        PREFIX_ID_PLACE + dataDaoActive.getGraph().getNextGraphNodeId(),
+                        new DataTransition(
+                                PREFIX_ID_TRANSITION + dataDaoActive.getModel().getNextTransitionId(),
                                 ((DataTransition) node).getTransitionType()));
             default:
                 throw new DataGraphServiceException("Cannot copy the given type of element! [" + node.getElementType() + "]");
@@ -669,14 +674,14 @@ public class DataGraphService
         if (element != null) {
             if (element.getShapes().isEmpty()) {
                 for (Parameter param : element.getParameters().values()) {
-                    dataDao.remove(param);
+                    dataDaoActive.getModel().remove(param);
                 }
                 if (element instanceof DataArc) {
-                    dataDao.remove((DataArc) element);
+                    dataDaoActive.getModel().remove((DataArc) element);
                 } else {
-                    dataDao.remove((IDataNode) element);
+                    dataDaoActive.getModel().remove((IDataNode) element);
                 }
-                dataDao.remove(element);
+                dataDaoActive.getModel().remove(element);
             }
         }
         return element;
@@ -692,7 +697,7 @@ public class DataGraphService
      */
     private IGraphArc removeShape(IGraphArc arc) throws DataGraphServiceException {
 
-        graphDao.remove(arc);
+        dataDaoActive.getGraph().remove(arc);
         if (arc.getDataElement() != null) {
             arc.getDataElement().getShapes().remove(arc);
         }
@@ -727,7 +732,7 @@ public class DataGraphService
      * @throws DataGraphServiceException
      */
     private IGraphNode removeShape(IGraphNode node) throws DataGraphServiceException {
-        graphDao.remove(node);
+        dataDaoActive.getGraph().remove(node);
         if (node.getDataElement() != null) {
             node.getDataElement().getShapes().remove(node);
         }
@@ -980,13 +985,17 @@ public class DataGraphService
             }
         }
     }
-
-    public DataDao getDataDao() {
-        return dataDao;
+    
+    public DataaaDao getActiveDao() {
+        return dataDaoActive;
     }
 
-    public GraphDao getGraphDao() {
-        return graphDao;
+    public Graph getActiveGraph() {
+        return dataDaoActive.getGraph();
+    }
+
+    public PetriNet getActiveModel() {
+        return dataDaoActive.getModel();
     }
 
 //    public void setArcTypeDefault(DataArc.Type type) {

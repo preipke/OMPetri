@@ -65,7 +65,7 @@ public class TestFXBase extends ApplicationTest {
         dataGraphService = (DataGraphService) graphScene.getObjects().get(0);
         selectionService = (SelectionService) graphScene.getObjects().get(1);
         
-        dataDao = dataGraphService.getDataDao();
+        dataDao = dataGraphService.getActiveModel();
         graphDao = (GraphDao) graphScene.getGraph();
     }
 

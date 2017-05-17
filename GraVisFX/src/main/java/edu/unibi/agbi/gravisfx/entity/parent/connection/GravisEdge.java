@@ -47,6 +47,8 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     public GravisEdge(IGravisNode source) {
 
         super();
+        
+        setId(source.getId() + "_null");
 
         this.source = source;
         this.target = null;

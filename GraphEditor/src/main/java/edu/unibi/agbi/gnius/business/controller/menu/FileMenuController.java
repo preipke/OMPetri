@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.menu;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataaaDao;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
@@ -77,7 +77,7 @@ public class FileMenuController implements Initializable
         /**
          * File import here...
          */
-        DataDao dataDao = xmlModelConverter.importXml(file);
+        DataaaDao dataDao = xmlModelConverter.importXml(file);
         
         if (latestFiles.contains(file)) {
             menuOpenRecent.getItems().remove(latestFiles.indexOf(file));
@@ -96,7 +96,7 @@ public class FileMenuController implements Initializable
         }
         if (typeXml == filter) {
             try {
-                xmlModelConverter.exportXml(file, dataService.getGraphDao(), dataService.getDataDao());
+                xmlModelConverter.exportXml(file, dataService.getActiveDao());
                 messengerService.setTopStatus("XML export complete!", null);
             } catch (FileNotFoundException | ParserConfigurationException | TransformerException ex) {
                 messengerService.setTopStatus("XML export failed!", ex);
@@ -106,7 +106,7 @@ public class FileMenuController implements Initializable
             SaveAs();
         } else if (typeOm == filter) {
             try {
-                omExporter.exportMO(dataService.getDataDao(), file);
+                omExporter.exportMO(dataService.getActiveModel(), file);
                 messengerService.setTopStatus("OpenModelica export complete!", null);
             } catch (IOException ex) {
                 messengerService.setTopStatus("OpenModelica export failed!", ex);

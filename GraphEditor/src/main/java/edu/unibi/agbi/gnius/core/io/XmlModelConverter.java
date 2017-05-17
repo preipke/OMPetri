@@ -5,8 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.io;
 
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
-import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataaaDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
@@ -68,7 +67,8 @@ public class XmlModelConverter
     private final String attrMin = "min";
     private final String attrName = "name";
     private final String attrNextPlaceId = "nextPlaceId";
-    private final String attrNextTransitionId = "nextTransitionId";
+    private final String attrNextTransitionId = "nextTransitionId"; 
+    private final String attrNextGraphNodeId = "nextTransitionId"; 
     private final String attrNote = "note";
     private final String attrPosX = "posX";
     private final String attrPosY = "posY";
@@ -110,9 +110,9 @@ public class XmlModelConverter
 
     private final SimpleIntegerProperty exportId = new SimpleIntegerProperty(1);
 
-    public DataDao importXml(File file) {
+    public DataaaDao importXml(File file) {
 
-        DataDao dataDao;
+        DataaaDao dataDao;
 //        GraphDao graphDao;
 //        String dateTime = "...";
 //        LocalDateTime simulationDateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern(formatDateTime));
@@ -137,7 +137,7 @@ public class XmlModelConverter
             if (nodes.getLength() == 1) {
                 if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
                     root = (Element) nodes.item(0);
-                    dataDao = getModel(root);
+                    dataDao = getDataDao(root);
                 } else {
                     System.out.println("Invalid 'Model' element!");
                     return null;
@@ -159,7 +159,7 @@ public class XmlModelConverter
 
                     for (int i = 0; i < nodes.getLength(); i++) {
                         if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                            dataDao.add(getColour((Element) nodes.item(i)));
+                            dataDao.getModel().add(getColour((Element) nodes.item(i)));
                         } else {
                             System.out.println("Invalid 'Colour' element!");
                         }
@@ -183,7 +183,7 @@ public class XmlModelConverter
 
                     for (int i = 0; i < nodes.getLength(); i++) {
                         if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                            dataDao.add(getParameter((Element) nodes.item(0)));
+                            dataDao.getModel().add(getParameter((Element) nodes.item(0)));
                         } else {
                             System.out.println("Invalid 'Parameter' element!");
                         }
@@ -208,7 +208,7 @@ public class XmlModelConverter
                     // Each place
                     for (int i = 0; i < nodes.getLength(); i++) {
                         if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                            dataDao.add(getDataPlace((Element) nodes.item(i)));
+                            dataDao.getModel().add(getDataPlace((Element) nodes.item(i)));
                         } else {
                             System.out.println("Invalid 'Place' element!");
                         }
@@ -233,7 +233,7 @@ public class XmlModelConverter
                     // Each transition
                     for (int i = 0; i < nodes.getLength(); i++) {
                         if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                            dataDao.add(getDataTransition((Element) nodes.item(i)));
+                            dataDao.getModel().add(getDataTransition((Element) nodes.item(i)));
                         } else {
                             System.out.println("Invalid 'Transition' element!");
                         }
@@ -267,10 +267,10 @@ public class XmlModelConverter
                             
                             DataArc arc = getDataArc(
                                     (Element) nodes.item(i),
-                                    (IDataNode) dataDao.getNode(elem.getAttribute(attrSource)),
-                                    (IDataNode) dataDao.getNode(elem.getAttribute(attrTarget))
+                                    (IDataNode) dataDao.getModel().getNode(elem.getAttribute(attrSource)),
+                                    (IDataNode) dataDao.getModel().getNode(elem.getAttribute(attrTarget))
                             );
-                            dataDao.add(arc);
+                            dataDao.getModel().add(arc);
                         } else {
                             System.out.println("Invalid 'Arc' element!");
                         }
@@ -386,7 +386,7 @@ public class XmlModelConverter
                 for (int i = 0; i < nodes.getLength(); i++) {
                     if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
 
-                        shape = new GraphPlace(place);
+                        shape = new GraphPlace(null, place);
                         shape = (GraphPlace) getNodeShape((Element) nodes.item(i), shape);
 
                         place.getShapes().add(shape);
@@ -421,7 +421,7 @@ public class XmlModelConverter
                 for (int i = 0; i < nodes.getLength(); i++) {
                     if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
 
-                        shape = new GraphTransition(transition);
+                        shape = new GraphTransition(null, transition);
                         shape = (GraphTransition) getNodeShape((Element) nodes.item(i), shape);
 
                         transition.getShapes().add(shape);
@@ -451,20 +451,21 @@ public class XmlModelConverter
         return functionBuilder.build("1");
     }
 
-    private DataDao getModel(Element elem) {
-        DataDao dataDao = new DataDao(
+    private DataaaDao getDataDao(Element elem) {
+        DataaaDao dataDao = new DataaaDao(
                 Integer.parseInt(elem.getAttribute(attrNextPlaceId)),
-                Integer.parseInt(elem.getAttribute(attrNextTransitionId))
+                Integer.parseInt(elem.getAttribute(attrNextTransitionId)),
+                Integer.parseInt(elem.getAttribute(attrNextGraphNodeId))
         );
-        dataDao.setAuthor(elem.getAttribute(attrAuthor));
-        dataDao.setDescription(elem.getAttribute(attrDescription));
-//        dataDao.setDate(elem.getAttribute(attrDateTime));
-        dataDao.setName(elem.getAttribute(attrName));
+        dataDao.getModel().setAuthor(elem.getAttribute(attrAuthor));
+        dataDao.getModel().setDescription(elem.getAttribute(attrDescription));
+//        dataDao.getModel().setDate(elem.getAttribute(attrDateTime));
+        dataDao.getModel().setName(elem.getAttribute(attrName));
         return dataDao;
     }
 
     private IGraphNode getNodeShape(Element elem, IGraphNode node) {
-        node.setExportId(Integer.parseInt(elem.getAttribute(attrId)));
+        node.setId(elem.getAttribute(attrId));
         node.translateXProperty().set(Double.parseDouble(elem.getAttribute(attrPosX)));
         node.translateYProperty().set(Double.parseDouble(elem.getAttribute(attrPosY)));
         if (elem.getElementsByTagName(tagLabel).getLength() == 1) {
@@ -502,15 +503,7 @@ public class XmlModelConverter
         return weight;
     }
 
-    private synchronized int getExportId(IGraphNode node) {
-        if (node.getExportId() == 0) {
-            node.setExportId(exportId.get());
-            exportId.set(exportId.get() + 1);
-        }
-        return node.getExportId();
-    }
-
-    public void exportXml(File file, GraphDao graphDao, DataDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
+    public void exportXml(File file, DataaaDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
 
         Document dom;
         Element model, arcElements, placeElements, transitionElements, colourElements, parameterElements;
@@ -523,7 +516,7 @@ public class XmlModelConverter
             exportId.set(0);
 
             parameterElements = dom.createElement(tagParameters);
-            dataDao.getParameters().values().forEach(param -> {
+            dataDao.getModel().getParameters().values().forEach(param -> {
                 Element parameterElement = dom.createElement(tagParameter);
                 parameterElement.setAttribute(attrId, param.getId());
                 if (param.getNote() != null && !param.getNote().isEmpty()) {
@@ -536,7 +529,7 @@ public class XmlModelConverter
             });
 
             colourElements = dom.createElement(tagColours);
-            dataDao.getColours().forEach(colour -> {
+            dataDao.getModel().getColours().forEach(colour -> {
                 Element colourElement = dom.createElement(tagColour);
                 colourElement.setAttribute(attrId, colour.getId());
                 if (colour.getDescription() != null && !colour.getDescription().isEmpty()) {
@@ -547,7 +540,7 @@ public class XmlModelConverter
             });
 
             arcElements = dom.createElement(tagArcs);
-            dataDao.getArcs().forEach(a -> {
+            dataDao.getModel().getArcs().forEach(a -> {
                 DataArc data = (DataArc) a;
 
                 Element arcElement = dom.createElement(tagArc);
@@ -587,8 +580,8 @@ public class XmlModelConverter
                 data.getShapes().forEach(c -> {
                     IGraphArc connection = (IGraphArc) c;
                     Element connectionElement = dom.createElement(tagConnection);
-                    connectionElement.setAttribute(attrSource, String.valueOf(getExportId(connection.getSource())));
-                    connectionElement.setAttribute(attrTarget, String.valueOf(getExportId(connection.getTarget())));
+                    connectionElement.setAttribute(attrSource, String.valueOf(connection.getSource().getId()));
+                    connectionElement.setAttribute(attrTarget, String.valueOf(connection.getTarget().getId()));
                     visualsElement.appendChild(connectionElement);
                 });
                 arcElement.appendChild(visualsElement);
@@ -597,7 +590,7 @@ public class XmlModelConverter
             });
 
             placeElements = dom.createElement(tagPlaces);
-            dataDao.getPlaces().forEach(p -> {
+            dataDao.getModel().getPlaces().forEach(p -> {
                 DataPlace data = (DataPlace) p;
 
                 Element placeElement = dom.createElement(tagPlace);
@@ -632,7 +625,7 @@ public class XmlModelConverter
                     Element nodeElement = dom.createElement(tagNode);
                     nodeElement.setAttribute(attrPosX, String.valueOf(node.getShape().getTranslateX()));
                     nodeElement.setAttribute(attrPosY, String.valueOf(node.getShape().getTranslateY()));
-                    nodeElement.setAttribute(attrId, String.valueOf(getExportId(node)));
+                    nodeElement.setAttribute(attrId, String.valueOf(node.getId()));
 
                     Element labelElement = dom.createElement(tagLabel);
                     labelElement.setAttribute(attrPosX, String.valueOf(node.getLabel().getTranslateX()));
@@ -648,7 +641,7 @@ public class XmlModelConverter
             });
 
             transitionElements = dom.createElement(tagTransitons);
-            dataDao.getTransitions().forEach(t -> {
+            dataDao.getModel().getTransitions().forEach(t -> {
                 DataTransition data = (DataTransition) t;
 
                 Element transitionElement = dom.createElement(tagTransiton);
@@ -677,7 +670,7 @@ public class XmlModelConverter
                     IGraphNode node = (IGraphNode) e;
 
                     Element nodeElement = dom.createElement(tagNode);
-                    nodeElement.setAttribute(attrId, String.valueOf(getExportId(node)));
+                    nodeElement.setAttribute(attrId, String.valueOf(node.getId()));
                     nodeElement.setAttribute(attrPosX, String.valueOf(node.getShape().getTranslateX()));
                     nodeElement.setAttribute(attrPosY, String.valueOf(node.getShape().getTranslateY()));
 
@@ -695,12 +688,13 @@ public class XmlModelConverter
 
             model = dom.createElement(tagModel); // create the root element
             
-            model.setAttribute(attrName, dataDao.getName());
-            model.setAttribute(attrAuthor, dataDao.getAuthor());
-            model.setAttribute(attrDescription, dataDao.getDescription());
+            model.setAttribute(attrName, dataDao.getModel().getName());
+            model.setAttribute(attrAuthor, dataDao.getModel().getAuthor());
+            model.setAttribute(attrDescription, dataDao.getModel().getDescription());
             model.setAttribute(attrDateTime, LocalDateTime.now().format(DateTimeFormatter.ofPattern(formatDateTime)));
-            model.setAttribute(attrNextPlaceId, String.valueOf(dataDao.getNextPlaceId()));
-            model.setAttribute(attrNextTransitionId, String.valueOf(dataDao.getNextTransitionId()));
+            model.setAttribute(attrNextPlaceId, String.valueOf(dataDao.getModel().getNextPlaceId()));
+            model.setAttribute(attrNextTransitionId, String.valueOf(dataDao.getModel().getNextTransitionId()));
+            model.setAttribute(attrNextGraphNodeId, String.valueOf(dataDao.getGraph().getNextGraphNodeId()));
             
             model.appendChild(arcElements);
             model.appendChild(placeElements);

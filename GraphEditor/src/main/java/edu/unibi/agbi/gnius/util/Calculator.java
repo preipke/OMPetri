@@ -5,11 +5,10 @@
  */
 package edu.unibi.agbi.gnius.util;
 
-import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.Graph;
 import java.util.List;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +23,6 @@ public class Calculator
 {
     @Autowired 
     private MouseEventHandler mouseEventHandler;
-    
-    private final TopLayer topLayer;
-    
-    @Autowired 
-    public Calculator(GraphDao graphDao) {
-        topLayer = graphDao.getTopLayer();
-    }
     
     /**
      * Computes center of weight.
@@ -48,15 +40,16 @@ public class Calculator
         return new Point2D(x , y);
     }
     
-    public Point2D getCorrectedMousePosition(double posX, double posY) {
+    public Point2D getCorrectedMousePosition(Graph graph, double posX, double posY) {
         double x, y;
-        x = (posX - topLayer.translateXProperty().get()) / topLayer.getScale().getX();
-        y = (posY - topLayer.translateYProperty().get()) / topLayer.getScale().getY();
+        x = (posX - graph.getTopLayer().translateXProperty().get()) / graph.getTopLayer().getScale().getX();
+        y = (posY - graph.getTopLayer().translateYProperty().get()) / graph.getTopLayer().getScale().getY();
         return new Point2D(x, y);
     }
     
-    public Point2D getCorrectedMousePositionLatest() {
+    public Point2D getCorrectedMousePositionLatest(Graph graph) {
         return getCorrectedMousePosition(
+                graph, 
                 mouseEventHandler.getMouseMovedEventLatest().getX(), 
                 mouseEventHandler.getMouseMovedEventLatest().getY()
         );

@@ -17,8 +17,8 @@ public class GraphTransition extends GravisRectangle implements IGraphNode {
     
     private final DataTransition dataTransition;
     
-    public GraphTransition(DataTransition dataTransition) {
-        super();
+    public GraphTransition(String id, DataTransition dataTransition) {
+        super(id);
         this.dataTransition = dataTransition;
     }
     

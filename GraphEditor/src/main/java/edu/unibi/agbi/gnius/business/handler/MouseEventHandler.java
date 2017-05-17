@@ -45,7 +45,6 @@ public class MouseEventHandler {
     @Autowired private MessengerService messengerService;
 
     @Autowired private MainController mainController;
-    @Autowired private ElementController elementController;
     @Autowired private ToolsController editorToolsController;
 
     @Autowired private Calculator calculator;
@@ -128,8 +127,16 @@ public class MouseEventHandler {
                 /**
                  * Selection Frame Mode. Resizes the selection rectangle.
                  */
-                Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventPressed.getX(), mouseEventPressed.getY());
-                Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest.getX(), mouseEventMovedLatest.getY());
+                Point2D pos_t0
+                        = calculator.getCorrectedMousePosition(
+                                dataService.getActiveGraph(),
+                                mouseEventPressed.getX(),
+                                mouseEventPressed.getY());
+                Point2D pos_t1
+                        = calculator.getCorrectedMousePosition(
+                                dataService.getActiveGraph(),
+                                mouseEventMovedLatest.getX(),
+                                mouseEventMovedLatest.getY());
 
                 double offsetX = pos_t1.getX() - pos_t0.getX();
                 double offsetY = pos_t1.getY() - pos_t0.getY();
@@ -153,7 +160,11 @@ public class MouseEventHandler {
                 /**
                  * Arc Creation Mode. Binds arc end (target) to mouse pointer.
                  */
-                Point2D correctedMousePos = calculator.getCorrectedMousePosition(event.getX(), event.getY());
+                Point2D correctedMousePos
+                        = calculator.getCorrectedMousePosition(
+                                dataService.getActiveGraph(),
+                                event.getX(),
+                                event.getY());
 
                 arcTemp.endXProperty().set(correctedMousePos.getX());
                 arcTemp.endYProperty().set(correctedMousePos.getY());
@@ -178,8 +189,16 @@ public class MouseEventHandler {
 
                 if (eventTarget instanceof IGraphNode) {
 
-                    Point2D pos_t0 = calculator.getCorrectedMousePosition(mouseEventMovedPrevious.getX(), mouseEventMovedPrevious.getY());
-                    Point2D pos_t1 = calculator.getCorrectedMousePosition(mouseEventMovedLatest.getX(), mouseEventMovedLatest.getY());
+                    Point2D pos_t0
+                            = calculator.getCorrectedMousePosition(
+                                    dataService.getActiveGraph(),
+                                    mouseEventMovedPrevious.getX(), 
+                                    mouseEventMovedPrevious.getY());
+                    Point2D pos_t1
+                            = calculator.getCorrectedMousePosition(
+                                    dataService.getActiveGraph(),
+                                    mouseEventMovedLatest.getX(),
+                                    mouseEventMovedLatest.getY());
 
                     for (IGraphElement element : selectionService.getSelectedElements()) {
                         element.translateXProperty().set(element.translateXProperty().get() + pos_t1.getX() - pos_t0.getX());
@@ -304,7 +323,10 @@ public class MouseEventHandler {
                         messengerService.addToLog(ex.getMessage());
                     }
 
-                    Point2D pos = calculator.getCorrectedMousePosition(mouseEventPressed.getX(), mouseEventPressed.getY());
+                    Point2D pos = calculator.getCorrectedMousePosition(
+                            dataService.getActiveGraph(),
+                            mouseEventPressed.getX(), 
+                            mouseEventPressed.getY());
                     selectionFrame.setX(pos.getX());
                     selectionFrame.setY(pos.getY());
                     selectionFrame.setWidth(0);

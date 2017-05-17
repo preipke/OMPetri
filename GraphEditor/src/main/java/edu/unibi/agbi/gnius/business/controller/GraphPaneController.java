@@ -5,9 +5,9 @@
  */
 package edu.unibi.agbi.gnius.business.controller;
 
-import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.service.DataGraphService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import java.net.URL;
@@ -26,8 +26,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class GraphPaneController implements Initializable
 {
-    @Autowired private GraphDao graph;
-
     @Autowired private DataGraphService dataGraphService;
     @Autowired private SelectionService selectionService;
 
@@ -44,7 +42,7 @@ public class GraphPaneController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        graphScene = new GraphScene(graph);
+        graphScene = new GraphScene(new Graph());
         graphScene.widthProperty().bind(editorPane.widthProperty());
         graphScene.heightProperty().bind(editorPane.heightProperty());
         graphScene.getGraphPane().getStyleClass().add(paneStyleClass);

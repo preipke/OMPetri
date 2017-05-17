@@ -16,14 +16,13 @@ import java.util.List;
 
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
 
 /**
  *
  * @author PR
  */
-public class GravisRectangle extends Rectangle implements IGravisNode, IGravisParent
+public class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<GravisShapeHandle> shapeHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
@@ -36,12 +35,11 @@ public class GravisRectangle extends Rectangle implements IGravisNode, IGravisPa
     
     private final GravisChildRectangle rectangle;
 
-    private int exportId = 0;
-
-    public GravisRectangle() {
+    public GravisRectangle(String id) {
 
         super();
-
+        
+        setId(id);
         setWidth(GravisProperties.RECTANGLE_WIDTH);
         setHeight(GravisProperties.RECTANGLE_HEIGHT);
         setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH);
@@ -122,16 +120,6 @@ public class GravisRectangle extends Rectangle implements IGravisNode, IGravisPa
     @Override
     public void setInnerRectangleVisible(boolean value) {
         this.rectangle.setVisible(value);
-    }
-    
-    @Override
-    public int getExportId() {
-        return exportId;
-    }
-    
-    @Override
-    public void setExportId(int id) {
-        this.exportId = id;
     }
 
     @Override

@@ -42,6 +42,8 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
     public GravisCurve(IGravisNode source, IGravisNode target) {
 
         super();
+        
+        setId(source.getId() + "_" + target.getId());
 
         this.source = source;
         this.target = target;

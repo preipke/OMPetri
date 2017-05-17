@@ -6,7 +6,6 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.petrinet.entity.IElement;
@@ -30,17 +29,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParameterService
 {
-    private final DataDao dataDao;
-
+    @Autowired private DataGraphService dataService;
     @Autowired private FunctionBuilder functionBuilder;
 
     @Value("${regex.function.number}") private String regexFunctionNumber;
     @Value("${regex.function.operator}") private String regexFunctionOperator;
-
-    @Autowired
-    public ParameterService(DataDao dataDao) {
-        this.dataDao = dataDao;
-    }
 
     /**
      * Attempts to add a parameter.
@@ -69,10 +62,10 @@ public class ParameterService
      * @throws ParameterServiceException
      */
     private void add(Parameter param) throws ParameterServiceException {
-        if (dataDao.containsAndNotEqual(param)) {
+        if (dataService.getActiveModel().containsAndNotEqual(param)) {
             throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
         }
-        dataDao.add(param);
+        dataService.getActiveModel().add(param);
     }
 
     /**
@@ -125,7 +118,7 @@ public class ParameterService
      */
     public List<Parameter> getGlobalParameters() {
         List<Parameter> parameters = new ArrayList();
-        for (Parameter param : dataDao.getParameters().values()) {
+        for (Parameter param : dataService.getActiveModel().getParameters().values()) {
             if (param.getType() == Parameter.Type.GLOBAL) {
                 parameters.add(param);
             }
@@ -159,7 +152,7 @@ public class ParameterService
      * @return
      */
     public Parameter getParameter(String id) {
-        return dataDao.getParameters().get(id);
+        return dataService.getActiveModel().getParameters().get(id);
     }
 
     /**
@@ -168,7 +161,7 @@ public class ParameterService
      * @return
      */
     public Set<String> getParameterIds() {
-        return dataDao.getParameters().keySet();
+        return dataService.getActiveModel().getParameters().keySet();
     }
 
     /**
@@ -180,7 +173,7 @@ public class ParameterService
      */
     public void remove(Parameter param, IDataElement element) throws ParameterServiceException {
         ValidateRemoval(param, element);
-        dataDao.remove(param);
+        dataService.getActiveModel().remove(param);
     }
 
     /**

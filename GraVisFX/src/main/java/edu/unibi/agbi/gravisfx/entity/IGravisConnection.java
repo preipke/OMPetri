@@ -14,17 +14,17 @@ import javafx.beans.property.DoubleProperty;
  *
  * @author PR
  */
-public interface IGravisConnection extends IGravisElement
+public interface IGravisConnection extends IGravisElement, IGravisParent
 {
     public DoubleProperty endXProperty();
-    
+
     public DoubleProperty endYProperty();
-    
+
     public IGravisNode getSource();
 
     public IGravisNode getTarget();
-    
+
     public void setArrowHeadVisible(boolean value);
-    
+
     public void setCircleHeadVisible(boolean value);
 }

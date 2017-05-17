@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
 
@@ -22,7 +21,7 @@ import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
  *
  * @author PR
  */
-public class GravisCircle extends Circle implements IGravisNode, IGravisParent
+public class GravisCircle extends Circle implements IGravisNode
 {
     private final List<GravisShapeHandle> shapeHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
@@ -36,12 +35,11 @@ public class GravisCircle extends Circle implements IGravisNode, IGravisParent
     private final GravisChildCircle circle;
     private final GravisChildRectangle rectangle;
 
-    private int exportId = 0;
-
-    public GravisCircle() {
+    public GravisCircle(String id) {
 
         super();
-
+        
+        setId(id);
         setRadius(GravisProperties.CIRCLE_RADIUS);
 
         label = new GravisChildLabel(this);
@@ -132,16 +130,6 @@ public class GravisCircle extends Circle implements IGravisNode, IGravisParent
     @Override
     public final GravisChildLabel getLabel() {
         return label;
-    }
-    
-    @Override
-    public int getExportId() {
-        return exportId;
-    }
-    
-    @Override
-    public void setExportId(int id) {
-        this.exportId = id;
     }
 
     @Override

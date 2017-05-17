@@ -6,15 +6,13 @@
 package edu.unibi.agbi.gnius.core.service.simulation;
 
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.util.Utility;
+import edu.unibi.agbi.petrinet.model.PetriNet;
 import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -46,11 +44,11 @@ public final class SimulationCompiler
     /**
      * Builds a new simulation using the OpenModelica compiler.
      *
-     * @param dataDao
+     * @param model
      * @return String representing the path to the simulation executable
      * @throws SimulationServiceException
      */
-    public References compile(DataDao dataDao) throws SimulationServiceException {
+    public References compile(PetriNet model) throws SimulationServiceException {
 
         final Process process;
         ProcessBuilder pb;
@@ -79,8 +77,8 @@ public final class SimulationCompiler
         try {
             fileMo = new File(dirStorage + File.separator + "model.mo");
             fileMos = new File(dirStorage + File.separator + "model.mos");
-            openModelicaExporter.exportMO(dataDao, fileMo);
-            simulationReferences = openModelicaExporter.exportMOS(dataDao, fileMos, fileMo, simWorkingDirectory);
+            openModelicaExporter.exportMO(model, fileMo);
+            simulationReferences = openModelicaExporter.exportMOS(model, fileMos, fileMo, simWorkingDirectory);
         } catch (IOException ex) {
             throw new SimulationServiceException("Failed to export the data for OpenModelica! [" + ex.getMessage() + "]");
         }

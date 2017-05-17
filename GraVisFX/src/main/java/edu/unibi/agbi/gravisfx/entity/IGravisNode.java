@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author PR
  */
-public interface IGravisNode extends IGravisElement
+public interface IGravisNode extends IGravisElement, IGravisParent
 {
     public double getOffsetX();
 
@@ -27,12 +27,8 @@ public interface IGravisNode extends IGravisElement
     public List<IGravisConnection> getConnections();
 
     public GravisChildLabel getLabel();
-    
+
     public void setInnerCircleVisible(boolean value);
-    
+
     public void setInnerRectangleVisible(boolean value);
-    
-    public int getExportId();
-    
-    public void setExportId(int id);
 }

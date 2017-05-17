@@ -289,7 +289,7 @@ public class ElementController implements Initializable
     private void LoadElementProperties(IDataElement element) {
 
         ObservableList<Colour> choicesColour = FXCollections.observableArrayList();
-        Collection<Colour> colors = dataService.getDataDao().getColours();
+        Collection<Colour> colors = dataService.getActiveModel().getColours();
 
         switch (element.getElementType()) {
 
@@ -358,7 +358,7 @@ public class ElementController implements Initializable
         menuParamLocal.getItems().clear();
         menuParamGlobal.getItems().clear();
 
-        dataService.getDataDao().getPlaces().stream()
+        dataService.getActiveModel().getPlaces().stream()
                 .filter(place -> place.getId().toLowerCase().contains(filter) || place.getName().toLowerCase().contains(filter))
                 .forEach(place -> {
 
@@ -435,7 +435,7 @@ public class ElementController implements Initializable
                     menuRefPlaces.getItems().add(menuPlace);
                 });
 
-        dataService.getDataDao().getTransitions().stream()
+        dataService.getActiveModel().getTransitions().stream()
                 .filter(transition -> transition.getId().toLowerCase().contains(filter) || transition.getName().toLowerCase().contains(filter))
                 .forEach(transition -> {
 

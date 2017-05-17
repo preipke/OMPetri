@@ -17,8 +17,8 @@ public class GraphCluster extends GravisCircle implements IGraphCluster {
     
     private final DataCluster dataCluster;
     
-    public GraphCluster(DataCluster dataCluster) {
-        super();
+    public GraphCluster(String id, DataCluster dataCluster) {
+        super(id);
         this.dataCluster = dataCluster;
         this.setInnerCircleVisible(false);
     }

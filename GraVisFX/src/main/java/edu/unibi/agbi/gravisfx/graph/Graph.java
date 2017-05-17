@@ -12,7 +12,9 @@ import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Graph model. Serves as an access object to the stored scene objects.
@@ -27,19 +29,23 @@ public class Graph
     private final NodeLayer nodeLayer;
     private final ConnectionLayer connectionLayer;
 
-    private final List<IGravisNode> nodes;
-    private final List<IGravisConnection> connections;
+    private final Map<String,IGravisNode> nodes;
+    private final Map<String,IGravisConnection> connections;
+    
+    private int nextGraphNodeId;
 
-    public Graph() {
+    public Graph(int nextGraphNodeId) {
+        
+        this.nextGraphNodeId = nextGraphNodeId;
 
-        topLayer = new TopLayer();
+        this.topLayer = new TopLayer();
 
-        labelLayer = topLayer.getLabelLayer();
-        nodeLayer = topLayer.getNodeLayer();
-        connectionLayer = topLayer.getConnectionLayer();
+        this.labelLayer = topLayer.getLabelLayer();
+        this.nodeLayer = topLayer.getNodeLayer();
+        this.connectionLayer = topLayer.getConnectionLayer();
 
-        nodes = new ArrayList();
-        connections = new ArrayList();
+        this.nodes = new HashMap();
+        this.connections = new HashMap();
     }
 
     public TopLayer getTopLayer() {
@@ -47,16 +53,16 @@ public class Graph
     }
 
     public void add(IGravisNode node) {
-        if (!nodes.contains(node)) {
-            nodes.add(node);
+        if (!nodes.containsKey(node.getId())) {
+            nodes.put(node.getId(), node);
             nodeLayer.getChildren().addAll(node.getShapes());
             labelLayer.getChildren().add(node.getLabel());
         }
     }
 
     public void add(IGravisConnection connection) {
-        if (!connections.contains(connection)) {
-            connections.add(connection);
+        if (!connections.containsKey(connection.getId())) {
+            connections.put(connection.getId(), connection);
             connectionLayer.getChildren().addAll(connection.getShapes());
             if (connection.getSource() != null && connection.getTarget() != null) {
                 connection.getSource().getChildren().add(connection.getTarget());
@@ -68,11 +74,11 @@ public class Graph
     }
 
     public boolean contains(IGravisNode node) {
-        return nodes.contains(node);
+        return nodes.containsKey(node.getId());
     }
 
     public boolean contains(IGravisConnection connection) {
-        return connections.contains(connection);
+        return connections.containsKey(connection.getId());
     }
 
     public IGravisNode remove(IGravisNode node) {
@@ -81,13 +87,13 @@ public class Graph
         }
         labelLayer.getChildren().remove(node.getLabel());
         nodeLayer.getChildren().removeAll(node.getShapes());
-        nodes.remove(node);
+        nodes.remove(node.getId());
         return node;
     }
 
     public IGravisConnection remove(IGravisConnection connection) {
         connectionLayer.getChildren().removeAll(connection.getShapes());
-        connections.remove(connection);
+        connections.remove(connection.getId());
         if (connection.getSource() != null && connection.getTarget() != null) {
             connection.getSource().getChildren().remove(connection.getTarget());
             connection.getTarget().getParents().remove(connection.getSource());
@@ -99,7 +105,7 @@ public class Graph
 
     public List<IGravisNode> getNodes() {
         List<IGravisNode> listCopy = new ArrayList();
-        for (IGravisNode node : nodes) {
+        for (IGravisNode node : nodes.values()) {
             listCopy.add(node);
         }
         return listCopy;
@@ -107,9 +113,19 @@ public class Graph
 
     public List<IGravisConnection> getConnections() {
         List<IGravisConnection> listCopy = new ArrayList();
-        for (IGravisConnection connection : connections) {
+        for (IGravisConnection connection : connections.values()) {
             listCopy.add(connection);
         }
         return listCopy;
+    }
+    
+    /**
+     * Get the next available id for nodes and increments the counter.
+     * This makes sure that no number will be available more than once.
+     * 
+     * @return 
+     */
+    public int getNextGraphNodeId() {
+        return nextGraphNodeId++;
     }
 }

@@ -17,4 +17,8 @@ public interface IGravisParent {
     public List<GravisShapeHandle> getParentElementHandles();
     
     public List<GravisShapeHandle> getChildElementHandles();
+    
+    public void setId(String id);
+    
+    public String getId();
 }

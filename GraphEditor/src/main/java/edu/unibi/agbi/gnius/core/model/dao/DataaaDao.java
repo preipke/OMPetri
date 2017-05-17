@@ -17,12 +17,12 @@ public class DataaaDao
     private final PetriNet model;
     private final Graph graph;
     
-    public DataaaDao(int nextPlaceId, int nextTransitionId) {
+    public DataaaDao(int nextPlaceId, int nextTransitionId, int nextGraphNodeId) {
         model = new PetriNet(nextPlaceId, nextTransitionId);
         model.setName("Untitled");
         model.setAuthor(System.getProperty("user.name"));
         model.setDescription("New model.");
-        graph = new Graph();
+        graph = new Graph(nextGraphNodeId);
     }
     
     public PetriNet getModel() {
