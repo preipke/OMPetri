@@ -91,6 +91,8 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     public GravisEdge(IGravisNode source, IGravisNode target) {
 
         super();
+        
+        setId(source.getId() + "_" + target.getId());
 
         /**
          * Line's end X coordinate. Changes it's value on any coordinate changes

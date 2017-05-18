@@ -7,7 +7,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
@@ -37,7 +37,7 @@ public class TestFXBase extends ApplicationTest {
     private final static boolean HEADLESS = true;
     private final static String EDITOR_PANE_ID = "#editorPane";
     
-    protected DataGraphService dataGraphService;
+    protected DataService dataGraphService;
     protected SelectionService selectionService;
     protected GraphDao graphDao;
     protected DataDao dataDao;
@@ -62,7 +62,7 @@ public class TestFXBase extends ApplicationTest {
         BorderPane editorPane = find(EDITOR_PANE_ID);
         GraphScene graphScene = (GraphScene) editorPane.getCenter();
         
-        dataGraphService = (DataGraphService) graphScene.getObjects().get(0);
+        dataGraphService = (DataService) graphScene.getObjects().get(0);
         selectionService = (SelectionService) graphScene.getObjects().get(1);
         
         dataDao = dataGraphService.getActiveModel();

@@ -8,9 +8,11 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefWidth="1000.0" prefHeight="850.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.MainController">
+<VBox prefWidth="1000.0" prefHeight="600.0" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.MainController" >
     <children>
-        <MenuBar id="menuBar" VBox.vgrow="NEVER">
+        <MenuBar id="menuBar">
             <menus>
                 <fx:include fx:id="fileMenu" source="menu/FileMenu.fxml" />
                 <fx:include fx:id="editMenu" source="menu/EditMenu.fxml" />
@@ -18,37 +20,23 @@
                 <fx:include fx:id="helpMenu" source="menu/HelpMenu.fxml" />
             </menus>
         </MenuBar>
-        <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
-            <tabs>
-                <Tab text="PN 1">
-                    <content>
-                        <StackPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
-                            <children>
-                                <fx:include source="editor/GraphPane.fxml" StackPane.alignment="CENTER" />
-                                <VBox alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" HBox.hgrow="NEVER" StackPane.alignment="TOP_LEFT">
-                                    <children>
-                                        <fx:include source="editor/Tools.fxml" />
-                                        <fx:include source="editor/Simulation.fxml" />
-                                    </children>
-                                </VBox>
-                                <VBox alignment="TOP_RIGHT" fx:id="elementBox" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" HBox.hgrow="NEVER" StackPane.alignment="TOP_RIGHT">
-                                    <children>
-                                        <fx:include source="editor/Element.fxml" fx:id="detailsContainer" />
-                                        <fx:include source="editor/Parameter.fxml" fx:id="parameterContainer" />
-                                    </children>
-                                </VBox>
-                            </children>
-                        </StackPane>
-                    </content>
-                </Tab>
-                <Tab text="PN ...">
-                    <content>
-                        <ListView />
-                    </content>
-                </Tab>
-            </tabs>
-        </TabPane>
-        <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+        <StackPane VBox.vgrow="ALWAYS">
+            <children>
+                <fx:include StackPane.alignment="CENTER" source="editor/EditorTabs.fxml" fx:id="editorTabPane" />
+                <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" >
+                    <children>
+                        <fx:include source="editor/Tools.fxml" />
+                        <fx:include source="editor/Simulation.fxml" />
+                    </children>
+                    <StackPane.margin>
+                        <Insets top="30.0" />
+                    </StackPane.margin>
+                </VBox>
+                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/Element.fxml" fx:id="elementFrame" />
+                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/Parameter.fxml" fx:id="parameterFrame" />
+            </children>
+        </StackPane>
+        <HBox alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="ALWAYS">
             <children>
                 <Label maxWidth="-1.0" text="Left status" HBox.hgrow="NEVER">
                     <font>
@@ -57,16 +45,10 @@
                     <textFill>
                         <Color blue="0.625" green="0.625" red="0.625" fx:id="x4" />
                     </textFill>
-                    <HBox.margin>
-                        <Insets />
-                    </HBox.margin>
                 </Label>
                 <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
                 <Label font="$x3" maxWidth="-1.0" text="Right status" textFill="$x4" HBox.hgrow="NEVER" />
             </children>
-            <VBox.margin>
-                <Insets />
-            </VBox.margin>
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
             </padding>

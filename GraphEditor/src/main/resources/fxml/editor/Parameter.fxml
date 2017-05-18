@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.embed.swing.*?>
-<?import javafx.geometry.*?>
 <?import java.lang.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ParameterController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:id="parameterFrame" fx:controller="edu.unibi.agbi.gnius.business.controller.ParameterController">
     <children>
-        <TitledPane animated="false" text="Create Parameter">
+        <TitledPane animated="false" text="Create Parameter" HBox.hgrow="ALWAYS">
             <content>
                 <AnchorPane>
                     <children>
@@ -51,7 +52,7 @@
                 </AnchorPane>
             </content>
         </TitledPane>
-        <TitledPane animated="false" text="Local Parameter">
+        <TitledPane animated="false" text="Local Parameter" HBox.hgrow="ALWAYS">
             <content>
                 <AnchorPane>
                     <children>
@@ -72,7 +73,7 @@
                 </AnchorPane>
             </content>
         </TitledPane>
-        <TitledPane animated="false" text="Global Parameter">
+        <TitledPane animated="false" text="Global Parameter" VBox.vgrow="ALWAYS">
             <content>
                 <AnchorPane>
                     <children>
@@ -95,4 +96,7 @@
             </content>
         </TitledPane>
     </children>
+    <StackPane.margin>
+        <Insets top="30.0" />
+    </StackPane.margin>
 </VBox>

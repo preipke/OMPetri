@@ -29,52 +29,40 @@ public class MainController implements Initializable {
     @Autowired private ElementController elementController;
     @Autowired private ParameterController parameterController;
     
-    @FXML private VBox elementBox;
-    @FXML private VBox detailsContainer;
-    @FXML private VBox parameterContainer;
-    
-    private boolean isShowingDetails = false;
-    private boolean isShowingParameters = false;
+    @FXML private VBox elementFrame;
+    @FXML private VBox parameterFrame;
 
     public Stage getStage() {
-        return (Stage) elementBox.getScene().getWindow();
+        return (Stage) elementFrame.getScene().getWindow();
     }
     
-    public void HideElementBox() {
-        if (isShowingDetails) {
+    public void HideSidePanel() {
+        if (elementFrame.isVisible()) {
             try {
                 elementController.StoreElementDetails();
             } catch (DataGraphServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             }
-            isShowingDetails = false;
+            elementFrame.setVisible(false);
         }
-        if (isShowingParameters) {
-            isShowingParameters = false;
-        }
-        elementBox.setVisible(false);
+        parameterFrame.setVisible(false);
     }
     
     public void ShowDetails(IGraphElement element) {
-        elementBox.setVisible(true);
-        elementBox.getChildren().clear();
-        elementBox.getChildren().add(detailsContainer);
+        elementFrame.setVisible(true);
+        parameterFrame.setVisible(false);
         elementController.ShowElementDetails(element);
-        isShowingDetails = true;
-        isShowingParameters = false;
     }
     
     public void ShowParameters(IDataElement element) {
-        elementBox.setVisible(true);
-        elementBox.getChildren().clear();
-        elementBox.getChildren().add(parameterContainer);
+        elementFrame.setVisible(false);
+        parameterFrame.setVisible(true);
         parameterController.ShowParameterDetails(element);
-        isShowingParameters = true;
-        isShowingDetails = false;
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        HideElementBox();
+        elementFrame.setVisible(false);
+        parameterFrame.setVisible(false);
     }
 }

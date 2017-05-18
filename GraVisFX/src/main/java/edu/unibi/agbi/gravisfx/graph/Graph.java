@@ -73,12 +73,20 @@ public class Graph
         }
     }
 
+    public boolean contains(IGravisConnection connection) {
+        return connections.containsKey(connection.getId());
+    }
+
     public boolean contains(IGravisNode node) {
         return nodes.containsKey(node.getId());
     }
-
-    public boolean contains(IGravisConnection connection) {
-        return connections.containsKey(connection.getId());
+    
+    public IGravisConnection getConnection(String id) {
+        return connections.get(id);
+    }
+    
+    public IGravisNode getNode(String id) {
+        return nodes.get(id);
     }
 
     public IGravisNode remove(IGravisNode node) {

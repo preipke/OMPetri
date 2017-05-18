@@ -33,7 +33,7 @@ public class SimulationService
     private final ResultsDao resultsDao;
     private final List<Thread> threads;
 
-    @Autowired private DataGraphService dataService;
+    @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private SimulationController simulationControlsController;
     @Autowired private ElementController elementController;

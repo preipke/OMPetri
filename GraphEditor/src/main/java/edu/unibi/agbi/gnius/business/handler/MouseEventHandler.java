@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
-import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
@@ -41,7 +41,7 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 public class MouseEventHandler {
 
     @Autowired private SelectionService selectionService;
-    @Autowired private DataGraphService dataService;
+    @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
 
     @Autowired private MainController mainController;
@@ -176,7 +176,7 @@ public class MouseEventHandler {
                  */
                 try {
                     setEditorMode(isInDraggingMode);
-                    mainController.HideElementBox();
+                    mainController.HideSidePanel();
                 } catch (Exception ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
@@ -220,7 +220,7 @@ public class MouseEventHandler {
 
     private void onMousePressed(MouseEvent event, GraphPane pane) {
 
-        mainController.HideElementBox();
+        mainController.HideSidePanel();
 
         isPrimaryButtonDown = false;
         isSecondaryButtonDown = false;
@@ -307,7 +307,7 @@ public class MouseEventHandler {
                 if (!event.isControlDown()) {
                     selectionService.unselectAll(); // Clearing current selection.
                 } else {
-                    mainController.HideElementBox();
+                    mainController.HideSidePanel();
                 }
 
                 if (event.isShiftDown()) {
@@ -425,7 +425,7 @@ public class MouseEventHandler {
                             selectionService.select(node);
                             selectionService.highlightRelated(node);
                         }
-                        mainController.HideElementBox();
+                        mainController.HideSidePanel();
                     } else {
                         selectionService.unselectAll();
                         selectionService.select(node);

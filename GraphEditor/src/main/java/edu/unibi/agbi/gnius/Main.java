@@ -1,11 +1,7 @@
 package edu.unibi.agbi.gnius;
 
-import edu.unibi.agbi.gnius.business.controller.GraphPaneController;
 import edu.unibi.agbi.gnius.business.controller.ResultsController;
 import edu.unibi.agbi.gnius.business.handler.KeyEventHandler;
-import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -83,15 +79,7 @@ public class Main extends Application {
         mainStage.show();
         
         KeyEventHandler keyEventHandler = (KeyEventHandler) springContext.getBean(KeyEventHandler.class);
-        MouseEventHandler mouseEventHandler = (MouseEventHandler) springContext.getBean(MouseEventHandler.class);
-        ScrollEventHandler scrollEventHandler = (ScrollEventHandler) springContext.getBean(ScrollEventHandler.class);
-        
-        GraphPaneController graphPaneController = (GraphPaneController) springContext.getBean(GraphPaneController.class);
-        GraphPane graphPane = graphPaneController.getGraphPane();
-        
         keyEventHandler.registerTo(mainStage.getScene());
-        mouseEventHandler.registerTo(graphPane);
-        scrollEventHandler.registerTo(graphPane);
     }
     
     /**

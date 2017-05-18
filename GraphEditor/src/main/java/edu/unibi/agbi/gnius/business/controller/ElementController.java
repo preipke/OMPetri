@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
 import edu.unibi.agbi.gnius.core.exception.InputValidationException;
@@ -67,13 +67,13 @@ public class ElementController implements Initializable
 {
     @Autowired private MainController mainController;
     @Autowired private ParameterService parameterService;
-    @Autowired private DataGraphService dataService;
+    @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
 
     // Top Container
+    @FXML private VBox elementFrame;
     @FXML private TitledPane identifierPane;
     @FXML private TitledPane propertiesPane;
-    @FXML private VBox propertiesBox;
 
     // Identifier
     @FXML private TextField inputType;
@@ -124,14 +124,6 @@ public class ElementController implements Initializable
     private IDataElement elementSelected;
     private String inputLatestValid;
     private int inputLatestCaretPosition;
-
-    /**
-     * Hides the element details container.
-     */
-    public void HideElementDetails() {
-        identifierPane.setVisible(false);
-        propertiesPane.setVisible(false);
-    }
 
     /**
      * Shows the details for the given graph element. The values are loaded from
@@ -185,9 +177,9 @@ public class ElementController implements Initializable
             default:
                 propertiesPane.setVisible(true);
                 choiceSubtype.setStyle("");
-                propertiesBox.getChildren().clear();
-                propertiesBox.getChildren().add(propertiesSubtype);
-                propertiesBox.getChildren().add(propertiesColor);
+                elementFrame.getChildren().clear();
+                elementFrame.getChildren().add(propertiesSubtype);
+                elementFrame.getChildren().add(propertiesColor);
         }
 
         switch (element.getElementType()) {
@@ -196,15 +188,15 @@ public class ElementController implements Initializable
                 inputLabel.setDisable(true);
                 inputLabel.setText("");
                 inputArcWeight.setStyle("");
-                propertiesBox.getChildren().add(propertiesArc);
+                elementFrame.getChildren().add(propertiesArc);
                 break;
 
             case PLACE:
-                propertiesBox.getChildren().add(propertiesPlace);
+                elementFrame.getChildren().add(propertiesPlace);
                 break;
 
             case TRANSITION:
-                propertiesBox.getChildren().add(propertiesTransition);
+                elementFrame.getChildren().add(propertiesTransition);
                 break;
         }
     }
@@ -743,9 +735,6 @@ public class ElementController implements Initializable
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        identifierPane.setVisible(false);
-        propertiesPane.setVisible(false);
         
         choiceSubtype.valueProperty().addListener(cl -> {
             if (elementSelected != null) {

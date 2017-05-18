@@ -6,14 +6,16 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<TitledPane animated="false" text="Simulation" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.SimulationController">
+<TitledPane animated="false" text="Simulation" 
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="edu.unibi.agbi.gnius.business.controller.SimulationController">
     <content>
         <AnchorPane minHeight="0.0" minWidth="0.0">
             <children>
                 <VBox alignment="TOP_CENTER" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <children>
-                  <Button fx:id="buttonOpenResultsViewer" mnemonicParsing="false" text="Open Results Viewer" />
-                  <Separator prefWidth="200.0" />
+                        <Button fx:id="buttonOpenResultsViewer" mnemonicParsing="false" text="Open Results Viewer" />
+                        <Separator prefWidth="200.0" />
                         <HBox alignment="CENTER" spacing="10.0">
                             <children>
                                 <Button fx:id="buttonSimStart" mnemonicParsing="false" text="Start" />
@@ -24,7 +26,7 @@
                             <children>
                                 <Label text="Start Time" />
                                 <TextField fx:id="inputSimStartTime" GridPane.columnIndex="1" disable="true" />
-                                <Label prefWidth="75.0" text="Stop Time" GridPane.rowIndex="1" />
+                                <Label text="Stop Time" GridPane.rowIndex="1" />
                                 <TextField fx:id="inputSimStopTime" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                 <Label text="Intervals" GridPane.rowIndex="2" />
                                 <TextField fx:id="inputSimIntervals" GridPane.columnIndex="1" GridPane.rowIndex="2" />

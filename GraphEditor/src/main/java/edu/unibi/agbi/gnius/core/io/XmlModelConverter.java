@@ -5,12 +5,13 @@
  */
 package edu.unibi.agbi.gnius.core.io;
 
-import edu.unibi.agbi.gnius.core.model.dao.DataaaDao;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
@@ -55,7 +56,7 @@ public class XmlModelConverter
     @Autowired private FunctionBuilder functionBuilder;
 
     @Value("${format.datetime}") private String formatDateTime;
-    @Value("${xml.results.data.dtd}") private String dtdModelData;
+    @Value("${xml.model.data.dtd}") private String dtdModelData;
 
     private final String attrAuthor = "author";
     private final String attrColour = "colour";
@@ -79,43 +80,32 @@ public class XmlModelConverter
     private final String attrUnit = "unit";
     private final String attrValue = "value";
 
-    private final String tagModel = "Model";
-
-    private final String tagColours = "Colours";
-    private final String tagColour = "Colour";
-
-    private final String tagParameters = "Parameters";
-    private final String tagParameter = "Parameter";
-
     private final String tagArcs = "Arcs";
     private final String tagArc = "Arc";
-    private final String tagWeights = "Weights";
-    private final String tagWeight = "Weight";
-//    private final String tagSource = "Source";
-//    private final String tagTarget = "Target";
-
+    private final String tagColours = "Colours";
+    private final String tagColour = "Colour";
+    private final String tagConnection = "Connection";
+    private final String tagFunction = "Function";
+    private final String tagLabel = "Label";
+    private final String tagModel = "Model";
+    private final String tagNode = "Node";
+    private final String tagParameters = "Parameters";
+    private final String tagParameter = "Parameter";
     private final String tagPlaces = "Places";
     private final String tagPlace = "Place";
     private final String tagTokens = "Tokens";
     private final String tagToken = "Token";
-
     private final String tagTransitons = "Transitions";
     private final String tagTransiton = "Transition";
-    private final String tagFunction = "Function";
-
-    private final String tagConnection = "Connection";
-    private final String tagLabel = "Label";
-    private final String tagNode = "Node";
     private final String tagVisualisation = "Visualisation";
+    private final String tagWeights = "Weights";
+    private final String tagWeight = "Weight";
 
     private final SimpleIntegerProperty exportId = new SimpleIntegerProperty(1);
 
-    public DataaaDao importXml(File file) {
+    public DataDao importXml(File file) {
 
-        DataaaDao dataDao;
-//        GraphDao graphDao;
-//        String dateTime = "...";
-//        LocalDateTime simulationDateTime = LocalDateTime.parse(dateTime, DateTimeFormatter.ofPattern(formatDateTime));
+        DataDao dataDao;
 
         try {
 
@@ -208,7 +198,11 @@ public class XmlModelConverter
                     // Each place
                     for (int i = 0; i < nodes.getLength(); i++) {
                         if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                            dataDao.getModel().add(getDataPlace((Element) nodes.item(i)));
+                            DataPlace place = getDataPlace((Element) nodes.item(i));
+                            dataDao.getModel().add(place);
+                            for (IGraphElement shape : place.getShapes()) {
+                                dataDao.getGraph().add((IGraphNode) shape);
+                            }
                         } else {
                             System.out.println("Invalid 'Place' element!");
                         }
@@ -233,7 +227,11 @@ public class XmlModelConverter
                     // Each transition
                     for (int i = 0; i < nodes.getLength(); i++) {
                         if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                            dataDao.getModel().add(getDataTransition((Element) nodes.item(i)));
+                            DataTransition transition = getDataTransition((Element) nodes.item(i));
+                            dataDao.getModel().add(transition);
+                            for (IGraphElement shape : transition.getShapes()) {
+                                dataDao.getGraph().add((IGraphNode) shape);
+                            }
                         } else {
                             System.out.println("Invalid 'Transition' element!");
                         }
@@ -268,9 +266,13 @@ public class XmlModelConverter
                             DataArc arc = getDataArc(
                                     (Element) nodes.item(i),
                                     (IDataNode) dataDao.getModel().getNode(elem.getAttribute(attrSource)),
-                                    (IDataNode) dataDao.getModel().getNode(elem.getAttribute(attrTarget))
+                                    (IDataNode) dataDao.getModel().getNode(elem.getAttribute(attrTarget)),
+                                    dataDao
                             );
                             dataDao.getModel().add(arc);
+                            for (IGraphElement shape : arc.getShapes()) {
+                                dataDao.getGraph().add((IGraphArc) shape);
+                            }
                         } else {
                             System.out.println("Invalid 'Arc' element!");
                         }
@@ -291,7 +293,7 @@ public class XmlModelConverter
         return null;
     }
 
-    private DataArc getDataArc(Element elem, IDataNode source, IDataNode target) {
+    private DataArc getDataArc(Element elem, IDataNode source, IDataNode target, DataDao dataDao) {
 
         NodeList nodes;
 
@@ -333,10 +335,14 @@ public class XmlModelConverter
                 for (int i = 0; i < nodes.getLength(); i++) {
                     if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
 
-//                        shape = new GraphEdge(arc);
-//                        shape = (GraphEdge) getArcShape((Element) nodes.item(i), shape);
-//
-//                        arc.getShapes().add(shape);
+                        elem = (Element) nodes.item(i);
+
+                        shape = new GraphEdge(
+                                (IGraphNode) dataDao.getGraph().getNode(elem.getAttribute(attrSource)),
+                                (IGraphNode) dataDao.getGraph().getNode(elem.getAttribute(attrTarget)),
+                                arc);
+                        
+                        arc.getShapes().add(shape);
                     }
                 }
             }
@@ -451,8 +457,8 @@ public class XmlModelConverter
         return functionBuilder.build("1");
     }
 
-    private DataaaDao getDataDao(Element elem) {
-        DataaaDao dataDao = new DataaaDao(
+    private DataDao getDataDao(Element elem) {
+        DataDao dataDao = new DataDao(
                 Integer.parseInt(elem.getAttribute(attrNextPlaceId)),
                 Integer.parseInt(elem.getAttribute(attrNextTransitionId)),
                 Integer.parseInt(elem.getAttribute(attrNextGraphNodeId))
@@ -503,7 +509,7 @@ public class XmlModelConverter
         return weight;
     }
 
-    public void exportXml(File file, DataaaDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
+    public void exportXml(File file, DataDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
 
         Document dom;
         Element model, arcElements, placeElements, transitionElements, colourElements, parameterElements;

@@ -5,10 +5,11 @@
  */
 package edu.unibi.agbi.gnius.business.controller.menu;
 
+import edu.unibi.agbi.gnius.business.controller.EditorTabsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
-import edu.unibi.agbi.gnius.core.model.dao.DataaaDao;
-import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
@@ -38,8 +39,10 @@ import org.springframework.stereotype.Controller;
 public class FileMenuController implements Initializable
 {
     @Autowired private MessengerService messengerService;
-    @Autowired private DataGraphService dataService;
+    @Autowired private DataService dataService;
+    
     @Autowired private MainController mainController;
+    @Autowired private EditorTabsController editorTabsController;
 
     @Autowired private XmlModelConverter xmlModelConverter;
     @Autowired private OpenModelicaExporter omExporter;
@@ -74,10 +77,8 @@ public class FileMenuController implements Initializable
 
     private void Open(File file) {
 
-        /**
-         * File import here...
-         */
-        DataaaDao dataDao = xmlModelConverter.importXml(file);
+        DataDao dataDao = xmlModelConverter.importXml(file);
+        editorTabsController.CreateModelTab(dataDao);
         
         if (latestFiles.contains(file)) {
             menuOpenRecent.getItems().remove(latestFiles.indexOf(file));

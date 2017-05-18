@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 public class KeyEventHandler
 {
     @Autowired private SelectionService selectionService;
-    @Autowired private DataGraphService dataService;
+    @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private MouseEventHandler mouseEventHandler;
     

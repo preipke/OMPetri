@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
-<?import javafx.scene.effect.*?>
-<?import javafx.embed.swing.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.geometry.*?>
 <?import java.lang.*?>
+<?import javafx.embed.swing.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox fx:id="elementDetailsBox" alignment="TOP_CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ElementController">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:id="elementFrame" fx:controller="edu.unibi.agbi.gnius.business.controller.ElementController">
     <children>
         <TitledPane fx:id="identifierPane" animated="false" text="Identifier">
             <content>
@@ -167,4 +169,7 @@
             </content>
         </TitledPane>
     </children>
+    <StackPane.margin>
+        <Insets top="30.0" />
+    </StackPane.margin>
 </VBox>

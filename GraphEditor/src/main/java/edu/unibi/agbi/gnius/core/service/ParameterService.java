@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParameterService
 {
-    @Autowired private DataGraphService dataService;
+    @Autowired private DataService dataService;
     @Autowired private FunctionBuilder functionBuilder;
 
     @Value("${regex.function.number}") private String regexFunctionNumber;

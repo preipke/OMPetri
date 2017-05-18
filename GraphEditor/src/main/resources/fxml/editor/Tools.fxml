@@ -7,11 +7,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.*?>
 
-<TitledPane animated="false" text="Tools" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.ToolsController">
+<TitledPane animated="false" text="Tools" 
+            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="edu.unibi.agbi.gnius.business.controller.ToolsController">
     <content>
         <AnchorPane>
             <children>
-                <GridPane alignment="CENTER" hgap="10.0" vgap="10.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+                <GridPane alignment="TOP_CENTER" hgap="10.0" vgap="10.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
                     <children>
                         <MenuButton fx:id="buttonCreate" mnemonicParsing="false" text="Create" GridPane.halignment="RIGHT">
                             <items>

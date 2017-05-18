@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.core.service.DataGraphService;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public class ToolsController implements Initializable
 {
     @Autowired private MouseEventHandler mouseEventHandler;
-    @Autowired private DataGraphService dataGraphService;
+    @Autowired private DataService dataGraphService;
     @Autowired private SelectionService selectionService;
     @Autowired private MessengerService messengerService;
     

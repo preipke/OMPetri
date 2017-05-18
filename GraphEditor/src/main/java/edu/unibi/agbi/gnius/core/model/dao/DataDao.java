@@ -12,12 +12,12 @@ import edu.unibi.agbi.petrinet.model.PetriNet;
  *
  * @author PR
  */
-public class DataaaDao
+public class DataDao
 {
     private final PetriNet model;
     private final Graph graph;
     
-    public DataaaDao(int nextPlaceId, int nextTransitionId, int nextGraphNodeId) {
+    public DataDao(int nextPlaceId, int nextTransitionId, int nextGraphNodeId) {
         model = new PetriNet(nextPlaceId, nextTransitionId);
         model.setName("Untitled");
         model.setAuthor(System.getProperty("user.name"));
