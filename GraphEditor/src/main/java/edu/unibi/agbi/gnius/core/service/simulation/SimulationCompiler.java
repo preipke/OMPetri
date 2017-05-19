@@ -184,7 +184,7 @@ public final class SimulationCompiler
         dirOpenModelica = new File(pathOpenModelica);
         if (dirOpenModelica.exists() && dirOpenModelica.isDirectory()) {
 
-            pathCompiler = pathOpenModelica + "bin" + File.separator + "omc";
+            pathCompiler = pathOpenModelica + File.separator + "bin" + File.separator + "omc";
             if (Utility.isOsWindows()) {
                 pathCompiler = pathCompiler + ".exe";
             } else if (Utility.isOsUnix()) {
