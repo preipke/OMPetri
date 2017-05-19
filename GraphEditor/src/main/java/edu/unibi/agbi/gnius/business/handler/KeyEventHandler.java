@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.business.handler;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -46,7 +46,7 @@ public class KeyEventHandler
             Platform.runLater(() -> {
                 try {
                     dataService.remove(selectionService.getSelectedElements());
-                } catch (DataGraphServiceException ex) {
+                } catch (DataServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
                 selectionService.unselectAll();
@@ -68,7 +68,7 @@ public class KeyEventHandler
                 selectionService.unselectAll();
                 try {
                     selectionService.selectAll(dataService.paste(selectionService.getCopiedNodes(), isCloning));
-                } catch (DataGraphServiceException ex) {
+                } catch (DataServiceException ex) {
                     messengerService.addToLog(ex);
                 }
             }

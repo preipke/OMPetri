@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<TitledPane animated="false" text="Model" 
+            xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8"
+            fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.ModelController">
+  <content>
+    <AnchorPane minHeight="0.0" minWidth="0.0">
+         <children>
+            <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <GridPane hgap="5.0" vgap="5.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="75.0" />
+                      <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="125.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Name" />
+                        <TextField fx:id="inputName" GridPane.columnIndex="1" />
+                        <Label text="Author" GridPane.rowIndex="1" />
+                        <TextField fx:id="inputAuthor" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label text="Description" GridPane.rowIndex="2" />
+                        <TextArea fx:id="inputDescription" prefHeight="75.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                     </children>
+                  </GridPane>
+                  <!--<HBox spacing="10.0">
+                     <children>
+                        <Label text="Saved Last:" />
+                        <Label fx:id="statusLastSaved" text="-" />
+                     </children>
+                  </HBox>
+                  <HBox spacing="10.0">
+                     <children>
+                        <Label text="Applied Changes:" />
+                        <Label fx:id="statusAppliedChanges" text="-" />
+                     </children>
+                  </HBox>-->
+               </children>
+            </VBox>
+         </children></AnchorPane>
+  </content>
+</TitledPane>

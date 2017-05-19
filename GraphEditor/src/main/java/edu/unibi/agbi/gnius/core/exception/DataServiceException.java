@@ -9,9 +9,9 @@ package edu.unibi.agbi.gnius.core.exception;
  *
  * @author PR
  */
-public class DataGraphServiceException extends Exception 
+public class DataServiceException extends Exception 
 {
-    public DataGraphServiceException(String msg) {
+    public DataServiceException(String msg) {
         super(msg);
     }
 }

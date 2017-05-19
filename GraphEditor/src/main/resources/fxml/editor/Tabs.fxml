@@ -10,8 +10,11 @@
 
 <TabPane tabClosingPolicy="ALL_TABS" 
          xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-         fx:id="editorTabPane" fx:controller="edu.unibi.agbi.gnius.business.controller.EditorTabsController">
+         fx:id="editorTabPane" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.TabsController">
     <tabs>
+        <Tab closable="true">
+            <content />
+        </Tab>
         <Tab closable="false" disable="true">
             <content />
             <graphic>

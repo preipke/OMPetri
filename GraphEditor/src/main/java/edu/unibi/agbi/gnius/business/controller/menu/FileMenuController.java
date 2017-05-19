@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.menu;
 
-import edu.unibi.agbi.gnius.business.controller.EditorTabsController;
+import edu.unibi.agbi.gnius.business.controller.editor.TabsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
@@ -42,7 +42,7 @@ public class FileMenuController implements Initializable
     @Autowired private DataService dataService;
     
     @Autowired private MainController mainController;
-    @Autowired private EditorTabsController editorTabsController;
+    @Autowired private TabsController editorTabsController;
 
     @Autowired private XmlModelConverter xmlModelConverter;
     @Autowired private OpenModelicaExporter omExporter;
@@ -75,7 +75,7 @@ public class FileMenuController implements Initializable
         latestFiles = FXCollections.observableArrayList();
     }
 
-    private void Open(File file) {
+    private void Open(File file) throws Exception {
 
         DataDao dataDao = xmlModelConverter.importXml(file);
         editorTabsController.CreateModelTab(dataDao);
@@ -114,6 +114,11 @@ public class FileMenuController implements Initializable
             }
         }
     }
+    
+    @FXML
+    public void New() {
+        editorTabsController.CreateModelTab(null);
+    }
 
     @FXML
     public void Open() {
@@ -124,7 +129,11 @@ public class FileMenuController implements Initializable
         fileChooser.setTitle("Open model data");
         File file = fileChooser.showOpenDialog(mainController.getStage());
         if (file != null) {
-            Open(file);
+            try {
+                Open(file);
+            } catch (Exception ex) {
+                messengerService.setTopStatus("File import failed!", ex);
+            }
         }
     }
 
@@ -156,7 +165,13 @@ public class FileMenuController implements Initializable
                     change.getAddedSubList().forEach(f -> {
                         File file = (File) f;
                         MenuItem item = new MenuItem(file.getName() + " (" + file.getAbsolutePath() + ")");
-                        item.setOnAction(e -> Open(file));
+                        item.setOnAction(e -> {
+                            try {
+                                Open(file);
+                            } catch (Exception ex) {
+                                messengerService.setTopStatus("File import failed!", ex);
+                            }
+                        });
                         menuOpenRecent.getItems().add(0, item);
                     });
                 }

@@ -12,6 +12,7 @@ import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import java.util.Collection;
 
 /**
  *
@@ -33,10 +34,6 @@ public class Arc extends Element implements IArc
         this.type = Element.Type.ARC;
         this.id = source.getId() + "_" + target.getId();
         this.weights = new HashMap();
-        this.weights.put(
-                new Colour("DEFAULT", "Default colour"), 
-                new Weight(new Colour("DEFAULT", "Default colour"))
-        );
     }
 
     @Override
@@ -52,6 +49,11 @@ public class Arc extends Element implements IArc
     public void setWeight(Weight weight) {
         weights.put(weight.getColour(), weight);
     }
+    
+    @Override
+    public void addWeight(Weight weight) {
+        weights.put(weight.getColour(), weight);
+    }
 
     @Override
     public Weight getWeight(Colour colour) {
@@ -59,8 +61,8 @@ public class Arc extends Element implements IArc
     }
 
     @Override
-    public Map<Colour, Weight> getWeightMap() {
-        return weights;
+    public Collection<Weight> getWeights() {
+        return weights.values();
     }
 
     @Override

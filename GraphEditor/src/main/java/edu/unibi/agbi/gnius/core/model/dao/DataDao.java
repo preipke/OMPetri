@@ -17,12 +17,9 @@ public class DataDao
     private final PetriNet model;
     private final Graph graph;
     
-    public DataDao(int nextPlaceId, int nextTransitionId, int nextGraphNodeId) {
-        model = new PetriNet(nextPlaceId, nextTransitionId);
-        model.setName("Untitled");
-        model.setAuthor(System.getProperty("user.name"));
-        model.setDescription("New model.");
-        graph = new Graph(nextGraphNodeId);
+    public DataDao() {
+        model = new PetriNet();
+        graph = new Graph();
     }
     
     public PetriNet getModel() {

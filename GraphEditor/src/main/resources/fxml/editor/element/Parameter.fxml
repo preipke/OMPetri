@@ -5,9 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" 
-      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:id="parameterFrame" fx:controller="edu.unibi.agbi.gnius.business.controller.ParameterController">
+<VBox fx:id="parameterFrame" maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.element.ParameterController">
     <children>
         <TitledPane animated="false" text="Create Parameter" HBox.hgrow="ALWAYS">
             <content>
@@ -52,13 +50,13 @@
                 </AnchorPane>
             </content>
         </TitledPane>
-        <TitledPane animated="false" text="Local Parameter" HBox.hgrow="ALWAYS">
+        <TitledPane fx:id="paneParamLocal" animated="false" text="Local Parameter" HBox.hgrow="ALWAYS">
             <content>
                 <AnchorPane>
                     <children>
-                        <VBox alignment="TOP_CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox alignment="TOP_CENTER" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <TableView fx:id="paramTableLocal" prefHeight="120.0">
+                                <TableView fx:id="tableParamLocal" prefHeight="120.0">
                                     <columns>
                                         <TableColumn fx:id="paramNameLocal" prefWidth="75.0" text="Name" />
                                         <TableColumn fx:id="paramValueLocal" prefWidth="75.0" text="Value" />
@@ -77,9 +75,9 @@
             <content>
                 <AnchorPane>
                     <children>
-                        <VBox alignment="TOP_CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox alignment="TOP_CENTER" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <TableView fx:id="paramTableGlobal" prefHeight="180.0">
+                                <TableView fx:id="tableParamGlobal" prefHeight="180.0">
                                     <columns>
                                         <TableColumn fx:id="paramNameGlobal" prefWidth="75.0" text="Name" />
                                         <TableColumn fx:id="paramValueGlobal" prefWidth="75.0" text="Value" />
@@ -88,7 +86,7 @@
                                         <TableColumn fx:id="paramDeleteGlobal" prefWidth="25.0" />
                                     </columns>
                                 </TableView>
-                                <Label fx:id="statusParamGlobal" maxWidth="250.0" />
+                                <Label fx:id="statusParamGlobal" alignment="CENTER" maxWidth="250.0" />
                             </children>
                         </VBox>
                     </children>

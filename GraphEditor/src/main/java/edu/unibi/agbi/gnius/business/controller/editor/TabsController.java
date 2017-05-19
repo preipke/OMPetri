@@ -3,21 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller;
+package edu.unibi.agbi.gnius.business.controller.editor;
 
+import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.beans.Observable;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -34,10 +35,12 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class EditorTabsController implements Initializable
+public class TabsController implements Initializable
 {
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
+    
+    @Autowired private MainController mainController;
     
     @Autowired private MouseEventHandler mouseEventHandler;
     @Autowired private ScrollEventHandler scrollEventHandler;
@@ -57,20 +60,20 @@ public class EditorTabsController implements Initializable
         
         final DataDao dao;
         if (dataDao == null) {
-            dao = new DataDao(1, 1, 1);
+            dao = dataService.createDao();
         } else {
             dao = dataDao;
             dao.getGraph().getNodes().forEach(node -> {
                 try {
                     dataService.styleElement((IGraphNode) node);
-                } catch (DataGraphServiceException ex) {
+                } catch (DataServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
             });
             dao.getGraph().getConnections().forEach(connection -> {
                 try {
-                    dataService.styleElement((IGraphNode) connection);
-                } catch (DataGraphServiceException ex) {
+                    dataService.styleElement((IGraphArc) connection);
+                } catch (DataServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
             });
@@ -90,18 +93,71 @@ public class EditorTabsController implements Initializable
         
         Tab tab = new Tab("Model");
         tab.setContent(pane);
+        tab.setText(getTabName(tab, dao.getModel().getName()));
+        dao.getModel().getNameProperty().addListener(cl -> {
+            tab.setText(getTabName(tab, dao.getModel().getName()));
+        });
         tab.selectedProperty().addListener(cl -> {
             if (tab.isSelected()) {
                 dataService.setActiveDataDao(dao);
+                mainController.HideElementPanel();
+                mainController.ShowModel(dao);
             }
+        });
+        tab.onCloseRequestProperty().addListener(cl -> {
+            System.out.println("Fire close request!");
+        });
+        tab.onClosedProperty().addListener(cl -> {
+            System.out.println("Fire closed!");
         });
         
         editorTabPane.getTabs().add(0, tab);
         editorTabPane.getSelectionModel().select(0);
     }
+    
+    private String getTabName(Tab tab, String modelName) {
+
+        String prefix = null;
+        for (Tab t : editorTabPane.getTabs()) {
+
+            if (t.equals(tab)) {
+                continue;
+            }
+
+            // models with similar name
+            if (t.getText() != null && t.getText().contains(modelName)) {
+
+                int indexStart = t.getText().indexOf(modelName);
+                prefix = t.getText().substring(indexStart);
+
+                // models have exact same name
+                if (prefix.contentEquals(modelName)) {
+                    prefix = t.getText().substring(0, indexStart).trim();
+
+                    // generate prefix
+                    if (prefix.matches("\\([0-9]+\\)")) {
+                        prefix = prefix.replace("(", "").replace(")", "");
+                        prefix = "(" + (Integer.parseInt(prefix) + 1) + ") ";
+                        break;
+                    } else if (prefix.isEmpty()) {
+                        prefix = "(1) ";
+                        break;
+                    }
+                }
+            }
+            prefix = "";
+        }
+        return prefix + modelName;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         buttonCreateTab.setOnAction(el -> CreateModelTab(null));
+        editorTabPane.getTabs().remove(0);
+        editorTabPane.getTabs().addListener((Observable ll) -> {
+            if (editorTabPane.getTabs().size() == 1) {
+                mainController.HideModelPanel();
+            }
+        });
     }
 }

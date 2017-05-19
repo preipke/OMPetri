@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller;
+package edu.unibi.agbi.gnius.business.controller.editor.model;
 
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -57,7 +57,7 @@ public class ToolsController implements Initializable
     private void CreateCluster() {
         try {
             dataGraphService.group(selectionService.getSelectedElements());
-        } catch (DataGraphServiceException ex) {
+        } catch (DataServiceException ex) {
             messengerService.addToLog(ex);
         }
     }
@@ -65,7 +65,7 @@ public class ToolsController implements Initializable
     private void RemoveCluster() {
         try {
             dataGraphService.ungroup(selectionService.getSelectedElements());
-        } catch (DataGraphServiceException ex) {
+        } catch (DataServiceException ex) {
             messengerService.addToLog(ex);
         }
     }
@@ -73,7 +73,7 @@ public class ToolsController implements Initializable
     private void RemoveSelected() {
         try {
             dataGraphService.remove(selectionService.getSelectedElements());
-        } catch (DataGraphServiceException ex) {
+        } catch (DataServiceException ex) {
             messengerService.addToLog(ex);
         }
     }

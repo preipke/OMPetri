@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller;
+package edu.unibi.agbi.gnius.business.controller.editor.model;
 
+import edu.unibi.agbi.gnius.business.controller.ResultsController;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;

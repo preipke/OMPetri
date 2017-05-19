@@ -14,7 +14,6 @@ import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +47,7 @@ public class ParameterService
         } else {
             if (element != null) {
                 add(param);
-                element.getParameters().put(param.getId(), param);
+                element.getRelatedParameterIds().add(param.getId());
             } else {
                 throw new ParameterServiceException("An additional element is required for storing non global parameters!");
             }
@@ -69,8 +68,8 @@ public class ParameterService
     }
 
     /**
-     * Sets the function of a transition.Replaces the existing function,
-     * ensuring the integrity of parameter references.
+     * Sets the function of a transition. Replaces the existing function.
+     * Ensures the integrity of parameter references.
      *
      * @param transition
      * @param functionString
@@ -85,6 +84,7 @@ public class ParameterService
             throw new ParameterServiceException("");
         }
         addParameterReferences(transition);
+        removeUnusedReferencingParameter();
     }
 
     /**
@@ -94,7 +94,9 @@ public class ParameterService
      */
     private void addParameterReferences(DataTransition transition) {
         transition.getFunction().getParameterIds().forEach(id -> {
-            getParameter(id).getReferingNodes().add(transition);
+            getParameter(id)
+                    .getUsingElements()
+                    .add(transition);
         });
     }
 
@@ -106,8 +108,28 @@ public class ParameterService
      */
     private void removeParameterReferences(DataTransition transition) {
         transition.getFunction().getParameterIds().forEach(id -> {
-            getParameter(id).getReferingNodes().remove(transition);
+            getParameter(id)
+                    .getUsingElements()
+                    .remove(transition);
         });
+    }
+    
+    /**
+     * Removes any unused parameter that is a reference to an element.
+     */
+    private void removeUnusedReferencingParameter() {
+        List<Parameter> paramsUnused = new ArrayList();
+        dataService.getActiveModel().getParameters().forEach(param -> {
+            if (param.getType() == Parameter.Type.REFERENCE) {
+                if (param.getUsingElements().isEmpty()) {
+                    dataService.getActiveModel()
+                            .getElement(param.getRelatedElementId()).getRelatedParameterIds()
+                            .remove(param.getId());
+                    paramsUnused.add(param);
+                }
+            }
+        });
+        paramsUnused.forEach(param -> dataService.getActiveModel().remove(param));
     }
 
     /**
@@ -118,7 +140,7 @@ public class ParameterService
      */
     public List<Parameter> getGlobalParameters() {
         List<Parameter> parameters = new ArrayList();
-        for (Parameter param : dataService.getActiveModel().getParameters().values()) {
+        for (Parameter param : dataService.getActiveModel().getParameters()) {
             if (param.getType() == Parameter.Type.GLOBAL) {
                 parameters.add(param);
             }
@@ -136,7 +158,9 @@ public class ParameterService
      */
     public List<Parameter> getLocalParameters(IDataElement elem) {
         List<Parameter> parameters = new ArrayList();
-        for (Parameter param : elem.getParameters().values()) {
+        Parameter param;
+        for (String id : elem.getRelatedParameterIds()) {
+            param = getParameter(id);
             if (param.getType() == Parameter.Type.LOCAL) {
                 parameters.add(param);
             }
@@ -152,7 +176,7 @@ public class ParameterService
      * @return
      */
     public Parameter getParameter(String id) {
-        return dataService.getActiveModel().getParameters().get(id);
+        return dataService.getActiveModel().getParameter(id);
     }
 
     /**
@@ -161,18 +185,17 @@ public class ParameterService
      * @return
      */
     public Set<String> getParameterIds() {
-        return dataService.getActiveModel().getParameters().keySet();
+        return dataService.getActiveModel().getParameterIds();
     }
 
     /**
      * Attempts to remove a parameter.
      *
      * @param param
-     * @param element
      * @throws ParameterServiceException
      */
-    public void remove(Parameter param, IDataElement element) throws ParameterServiceException {
-        ValidateRemoval(param, element);
+    public void remove(Parameter param) throws ParameterServiceException {
+        ValidateRemoval(param);
         dataService.getActiveModel().remove(param);
     }
 
@@ -195,7 +218,7 @@ public class ParameterService
                 param = getParameter(candidate);
                 if (param != null) {
                     if (param.getType() == Parameter.Type.LOCAL) {
-                        if (!element.getParameters().keySet().contains(candidate)) {
+                        if (!element.getRelatedParameterIds().contains(candidate)) {
                             throw new ParameterServiceException("'" + candidate + "' is a LOCAL parameter for a different element");
                         }
                     }
@@ -207,30 +230,54 @@ public class ParameterService
     }
 
     /**
+     * Validates the removal of a parameter. Removal is valid if the parameter
+     * is not referenced by any other elements.
+     *
+     * @param param
+     * @throws ParameterServiceException
+     */
+    public void ValidateRemoval(Parameter param) throws ParameterServiceException {
+        if (!param.getUsingElements().isEmpty()) {
+            throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
+        }
+    }
+
+    /**
+     * Validates the removal of a data element. Removal is valid if the element
+     * is not related to any parameters that are referenced by other elements.
+     *
+     * @param element
+     * @throws ParameterServiceException
+     */
+    public void ValidateRemoval(IDataElement element) throws ParameterServiceException {
+        Parameter param;
+        for (String id : element.getRelatedParameterIds()) {
+            param = getParameter(id);
+            ValidateRemoval(param, element);
+        }
+    }
+
+    /**
+     * Validates the removal of a parameter in relation to a data element.
+     * Removal of the parameter is valid if no element except for the given
+     * element is refering to the parameter.
      *
      * @param param
      * @param element
      * @throws ParameterServiceException
      */
     private void ValidateRemoval(Parameter param, IDataElement element) throws ParameterServiceException {
-        if (Parameter.Type.LOCAL != param.getType()) {
-            if (!param.getReferingNodes().isEmpty()) {
-                if (param.getReferingNodes().size() != 1 || element != null && !param.getReferingNodes().contains(element)) {
-                    throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
-                }
+        if (param.getUsingElements().contains(element)) {
+            param.getUsingElements().remove(element);
+            if (!param.getUsingElements().isEmpty()) {
+                param.getUsingElements().add(element);
+                throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
             }
-        }
-    }
-
-    /**
-     *
-     * @param params
-     * @param element
-     * @throws ParameterServiceException
-     */
-    public void ValidateRemoval(Collection<Parameter> params, IDataElement element) throws ParameterServiceException {
-        for (Parameter param : params) {
-            ValidateRemoval(param, element);
+            param.getUsingElements().add(element);
+        } else {
+            if (!param.getUsingElements().isEmpty()) {
+                throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
+            }
         }
     }
 }

@@ -8,32 +8,33 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefWidth="1000.0" prefHeight="600.0" 
+<VBox prefWidth="1000.0" prefHeight="750.0" 
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
       fx:controller="edu.unibi.agbi.gnius.business.controller.MainController" >
     <children>
         <MenuBar id="menuBar">
             <menus>
                 <fx:include fx:id="fileMenu" source="menu/FileMenu.fxml" />
-                <fx:include fx:id="editMenu" source="menu/EditMenu.fxml" />
-                <fx:include fx:id="simulationMenu" source="menu/SimulationMenu.fxml" />
+                <!--<fx:include fx:id="editMenu" source="menu/EditMenu.fxml" />
+                <fx:include fx:id="simulationMenu" source="menu/SimulationMenu.fxml" />-->
                 <fx:include fx:id="helpMenu" source="menu/HelpMenu.fxml" />
             </menus>
         </MenuBar>
         <StackPane VBox.vgrow="ALWAYS">
             <children>
-                <fx:include StackPane.alignment="CENTER" source="editor/EditorTabs.fxml" fx:id="editorTabPane" />
-                <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" >
+                <fx:include StackPane.alignment="CENTER" source="editor/Tabs.fxml" fx:id="editorTabPane" />
+                <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="modelFrame" >
                     <children>
-                        <fx:include source="editor/Tools.fxml" />
-                        <fx:include source="editor/Simulation.fxml" />
+                        <fx:include source="editor/model/Model.fxml" />
+                        <fx:include source="editor/model/Tools.fxml" />
+                        <fx:include source="editor/model/Simulation.fxml" />
                     </children>
                     <StackPane.margin>
                         <Insets top="30.0" />
                     </StackPane.margin>
                 </VBox>
-                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/Element.fxml" fx:id="elementFrame" />
-                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/Parameter.fxml" fx:id="parameterFrame" />
+                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/element/Element.fxml" fx:id="elementFrame" />
+                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/element/Parameter.fxml" fx:id="parameterFrame" />
             </children>
         </StackPane>
         <HBox alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="ALWAYS">

@@ -30,7 +30,7 @@ public class Place extends Node
         this.token.put(new Colour("DEFAULT", "Default colour"), new Token(new Colour("DEFAULT", "Default colour")));
     }
 
-    public final void setToken(Token token) {
+    public final void addToken(Token token) {
         this.token.put(token.getColour(), token);
     }
 
@@ -38,12 +38,8 @@ public class Place extends Node
         return token.get(colour);
     }
 
-    public final Collection<Token> getToken() {
+    public final Collection<Token> getTokens() {
         return token.values();
-    }
-
-    public final Map<Colour, Token> getTokenMap() {
-        return token;
     }
 
     public final void setPlaceType(Type placeType) {

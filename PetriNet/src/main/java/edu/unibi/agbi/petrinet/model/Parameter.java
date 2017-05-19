@@ -23,14 +23,26 @@ public class Parameter
     private final StringProperty note;
     private final Type type;
 
-    private final Set<IElement> referingNodes;
+    private final String elementIdRelated;
+    private final Set<IElement> elementsUsing;
 
-    public Parameter(String id, String note, String value, Type type) {
+    /**
+     * Default constructor.
+     *
+     * @param id               identifier for this parameter
+     * @param note             an optional note
+     * @param value            the parameter value
+     * @param type             the type or scope of this parameter
+     * @param elementIdRelated the ID of the related element in case this is
+     *                         parameter is of type reference
+     */
+    public Parameter(String id, String note, String value, Type type, String elementIdRelated) {
         this.id = id;
         this.note = new SimpleStringProperty(note);
         this.value = new SimpleStringProperty(value);
         this.type = type;
-        this.referingNodes = new HashSet();
+        this.elementIdRelated = elementIdRelated;
+        this.elementsUsing = new HashSet();
     }
 
     /**
@@ -97,8 +109,7 @@ public class Parameter
     }
 
     /**
-     * Gets the type indicating wether this parameter is used in a local or
-     * global scope.
+     * Gets the indicator for the parameter's type and scope.
      *
      * @return
      */
@@ -107,14 +118,23 @@ public class Parameter
     }
 
     /**
+     * Gets the ID for the element this parameter is related to.
+     *
+     * @return
+     */
+    public String getRelatedElementId() {
+        return elementIdRelated;
+    }
+
+    /**
      * Gets the set of nodes currently using this parameter.
      *
      * @return
      */
-    public Set<IElement> getReferingNodes() {
-        return referingNodes;
+    public Set<IElement> getUsingElements() {
+        return elementsUsing;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Parameter)) {

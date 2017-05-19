@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller;
+package edu.unibi.agbi.gnius.business.controller.editor.element;
 
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
@@ -31,6 +31,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableColumn.CellEditEvent;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
@@ -56,13 +57,14 @@ public class ParameterController implements Initializable
     @FXML private ChoiceBox<Parameter.Type> choiceParamScope;
     @FXML private Button buttonParamCreate;
 
-    @FXML private TableView paramTableLocal;
+    @FXML private TitledPane paneParamLocal;
+    @FXML private TableView tableParamLocal;
     @FXML private TableColumn<Parameter, String> paramNameLocal;
     @FXML private TableColumn<Parameter, String> paramValueLocal;
     @FXML private TableColumn<Parameter, String> paramNoteLocal;
     @FXML private TableColumn<Parameter, Button> paramDeleteLocal;
 
-    @FXML private TableView paramTableGlobal;
+    @FXML private TableView tableParamGlobal;
     @FXML private TableColumn<Parameter, String> paramNameGlobal;
     @FXML private TableColumn<Parameter, String> paramValueGlobal;
     @FXML private TableColumn<Parameter, String> paramNoteGlobal;
@@ -95,7 +97,16 @@ public class ParameterController implements Initializable
      *
      * @param element
      */
-    public void ShowParameterDetails(IDataElement element) {
+    public void ShowParameters(IDataElement element) {
+        if (element != null) {
+            paneParamLocal.setDisable(false);
+            paneParamLocal.setExpanded(true);
+            paneParamLocal.setText("Local - " + element.toString());
+        } else {
+            paneParamLocal.setDisable(true);
+            paneParamLocal.setExpanded(false);
+            paneParamLocal.setText("Local");
+        }
         if (element instanceof DataTransition) {
             transitionSelected = (DataTransition) element;
         } else {
@@ -132,9 +143,6 @@ public class ParameterController implements Initializable
         parametersLocal.clear();
         if (transition != null) {
             parametersLocal.addAll(parameterService.getLocalParameters(transition));
-            paramTableLocal.setDisable(false);
-        } else {
-            paramTableLocal.setDisable(true);
         }
     }
 
@@ -156,7 +164,7 @@ public class ParameterController implements Initializable
      * @param id
      * @param type
      * @return
-     * @throws DataGraphServiceException
+     * @throws DataServiceException
      */
     private void CreateParameter(DataTransition transition) {
 
@@ -199,7 +207,7 @@ public class ParameterController implements Initializable
             return;
         }
 
-        Parameter param = new Parameter(id, note, value, type);
+        Parameter param = new Parameter(id, note, value, type, null);
         try {
             parameterService.addParameter(param, transition);
             if (param.getType() == Parameter.Type.LOCAL) {
@@ -221,13 +229,13 @@ public class ParameterController implements Initializable
      *
      * @param param
      * @param transition
-     * @throws DataGraphServiceException thrown in case the given parameter can
+     * @throws DataServiceException thrown in case the given parameter can
      *                                   not be deleted from the dao - this is
      *                                   usually when there is elements
      *                                   referring to the parameter
      */
-    private void DeleteParameter(Parameter param, IDataElement element) throws ParameterServiceException {
-        parameterService.remove(param, element);
+    private void DeleteParameter(Parameter param) throws ParameterServiceException {
+        parameterService.remove(param);
         if (param.getType() == Parameter.Type.LOCAL) {
             parametersLocal.remove(param);
         } else {
@@ -274,8 +282,8 @@ public class ParameterController implements Initializable
         /**
          * Table local parameters.
          */
-        paramTableLocal.setItems(parametersLocal);
-        paramTableLocal.setEditable(true);
+        tableParamLocal.setItems(parametersLocal);
+        tableParamLocal.setEditable(true);
 
         paramNameLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getId()));
         paramValueLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
@@ -302,10 +310,11 @@ public class ParameterController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 try {
-                    DeleteParameter(cellData.getValue(), transitionSelected);
+                    DeleteParameter(cellData.getValue());
                     setStatus(null, statusParamLocal, "Deleted parameter '" + cellData.getValue().getId() + "'! [LOCAL]", null);
                 } catch (ParameterServiceException ex) {
-                    setStatus(null, statusParamLocal, "Cannot delete parameter.", ex);
+                    cb.setIndeterminate(true);
+                    setStatus(null, statusParamLocal, "Cannot delete parameter!", ex);
                 }
             });
             return new ReadOnlyObjectWrapper(cb);
@@ -321,8 +330,8 @@ public class ParameterController implements Initializable
         /**
          * Table global parameters.
          */
-        paramTableGlobal.setItems(parametersGlobal);
-        paramTableGlobal.setEditable(true);
+        tableParamGlobal.setItems(parametersGlobal);
+        tableParamGlobal.setEditable(true);
 
         paramNameGlobal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getId()));
         paramValueGlobal.setCellValueFactory(new PropertyValueFactory("value"));
@@ -343,7 +352,7 @@ public class ParameterController implements Initializable
                     ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))
                             .setNote(t.getNewValue());
                 });
-        paramReferencesGlobal.setCellValueFactory(cellData -> new ReadOnlyIntegerWrapper(cellData.getValue().getReferingNodes().size()));
+        paramReferencesGlobal.setCellValueFactory(cellData -> new ReadOnlyIntegerWrapper(cellData.getValue().getUsingElements().size()));
         paramReferencesGlobalCellFactory = paramReferencesGlobal.getCellFactory();
         paramReferencesGlobal.setCellFactory(c -> {
             TableCell cell = paramReferencesGlobalCellFactory.call(c);
@@ -358,7 +367,7 @@ public class ParameterController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 try {
-                    DeleteParameter(cellData.getValue(), null);
+                    DeleteParameter(cellData.getValue());
                     setStatus(null, statusParamGlobal, "Deleted parameter '" + cellData.getValue().getId() + "'! [GLOBAL]", null);
                 } catch (ParameterServiceException ex) {
                     cb.setIndeterminate(true);

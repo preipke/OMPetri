@@ -6,9 +6,6 @@
 package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.model.Parameter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -26,11 +23,11 @@ public abstract class Element implements IElement
     protected boolean isEnabled = true;
 
     protected final Set<String> filter;
-    protected final Map<String, Parameter> parameter;
+    protected final Set<String> parameter;
 
     public Element() {
         filter = new TreeSet();
-        parameter = new HashMap();
+        parameter = new TreeSet();
     }
 
     @Override
@@ -59,7 +56,7 @@ public abstract class Element implements IElement
     }
 
     @Override
-    public Map<String, Parameter> getParameters() {
+    public Set<String> getRelatedParameterIds() {
         return parameter;
     }
 

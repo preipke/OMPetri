@@ -2,14 +2,13 @@ package main;
 
 import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
-import edu.unibi.agbi.gnius.core.model.dao.GraphDao;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
@@ -39,7 +38,6 @@ public class TestFXBase extends ApplicationTest {
     
     protected DataService dataGraphService;
     protected SelectionService selectionService;
-    protected GraphDao graphDao;
     protected DataDao dataDao;
 
     @BeforeClass
@@ -59,14 +57,14 @@ public class TestFXBase extends ApplicationTest {
 
         ApplicationTest.launch(Main.class); // verifies that MainApp is a JavaFX application (extends Application)
 
-        BorderPane editorPane = find(EDITOR_PANE_ID);
-        GraphScene graphScene = (GraphScene) editorPane.getCenter();
-        
-        dataGraphService = (DataService) graphScene.getObjects().get(0);
-        selectionService = (SelectionService) graphScene.getObjects().get(1);
-        
-        dataDao = dataGraphService.getActiveModel();
-        graphDao = (GraphDao) graphScene.getGraph();
+//        BorderPane editorPane = find(EDITOR_PANE_ID);
+//        GraphScene graphScene = (GraphScene) editorPane.getCenter();
+//        
+//        dataGraphService = (DataService) graphScene.getObjects().get(0);
+//        selectionService = (SelectionService) graphScene.getObjects().get(1);
+//        
+//        dataDao = dataGraphService.getActiveModel();
+//        graphDao = (GraphDao) graphScene.getGraph();
     }
 
     @Override
@@ -107,7 +105,7 @@ public class TestFXBase extends ApplicationTest {
         return (T) lookup(fxId).queryAll().iterator().next();
     }
 
-    protected void ConnectNodes(List<IGraphNode> places, List<IGraphNode> transitions) throws DataGraphServiceException {
+    protected void ConnectNodes(List<IGraphNode> places, List<IGraphNode> transitions) throws DataServiceException {
 
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
@@ -118,7 +116,7 @@ public class TestFXBase extends ApplicationTest {
                         CreateArc(transition, place);
                     }
                 }
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -137,7 +135,7 @@ public class TestFXBase extends ApplicationTest {
                 for (int i = 0; i < count; i++) {
                     places.add(CreatePlace());
                 }
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.getMessage());
             } finally {
                 isFinished.set(true);
@@ -158,7 +156,7 @@ public class TestFXBase extends ApplicationTest {
                 for (int i = 0; i < count; i++) {
                     transitions.add(CreateTransition());
                 }
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.getMessage());
             } finally {
                 isFinished.set(true);
@@ -169,7 +167,7 @@ public class TestFXBase extends ApplicationTest {
         return transitions;
     }
     
-    protected GraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataGraphServiceException {
+    protected GraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataServiceException {
         
         List<IGraphElement> elements = new ArrayList();
         
@@ -191,7 +189,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 cluster.add(dataGraphService.group(elements));
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -211,7 +209,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 dataGraphService.ungroup(clusters);
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -230,7 +228,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 dataGraphService.remove(arc);
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -245,7 +243,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 dataGraphService.remove(node);
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -254,15 +252,15 @@ public class TestFXBase extends ApplicationTest {
         waitForFxThread(isFinished);
     }
 
-    private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataGraphServiceException {
+    private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataServiceException {
         return dataGraphService.connect(source, target);
     }
 
-    private IGraphNode CreatePlace() throws DataGraphServiceException {
+    private IGraphNode CreatePlace() throws DataServiceException {
         return dataGraphService.create(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
-    private IGraphNode CreateTransition() throws DataGraphServiceException {
+    private IGraphNode CreateTransition() throws DataServiceException {
         return dataGraphService.create(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 

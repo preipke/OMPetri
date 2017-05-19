@@ -6,8 +6,6 @@
 package edu.unibi.agbi.petrinet.entity;
 
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
-import edu.unibi.agbi.petrinet.model.Parameter;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,12 +32,13 @@ public interface IElement
     public Set<String> getFilter();
 
     /**
-     * Gets all (local) parameters that have been created exclusively for this
+     * Gets all parameters related to this element. This can either be
+     * parameters local for this element or parameters that reference this
      * element.
      *
      * @return
      */
-    public Map<String, Parameter> getParameters();
+    public Set<String> getRelatedParameterIds();
 
     public boolean isEnabled();
 

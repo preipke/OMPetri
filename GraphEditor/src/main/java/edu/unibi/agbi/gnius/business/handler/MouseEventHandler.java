@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.ElementController;
-import edu.unibi.agbi.gnius.business.controller.ToolsController;
+import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -14,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
@@ -176,7 +176,7 @@ public class MouseEventHandler {
                  */
                 try {
                     setEditorMode(isInDraggingMode);
-                    mainController.HideSidePanel();
+                    mainController.HideElementPanel();
                 } catch (Exception ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
@@ -220,7 +220,7 @@ public class MouseEventHandler {
 
     private void onMousePressed(MouseEvent event, GraphPane pane) {
 
-        mainController.HideSidePanel();
+        mainController.HideElementPanel();
 
         isPrimaryButtonDown = false;
         isSecondaryButtonDown = false;
@@ -307,7 +307,7 @@ public class MouseEventHandler {
                 if (!event.isControlDown()) {
                     selectionService.unselectAll(); // Clearing current selection.
                 } else {
-                    mainController.HideSidePanel();
+                    mainController.HideElementPanel();
                 }
 
                 if (event.isShiftDown()) {
@@ -339,7 +339,7 @@ public class MouseEventHandler {
                     // Creating node at event location.
                     try {
                         dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
-                    } catch (DataGraphServiceException ex) {
+                    } catch (DataServiceException ex) {
                         messengerService.addToLog(ex.getMessage());
                     }
                 }
@@ -385,7 +385,7 @@ public class MouseEventHandler {
             if (eventTarget instanceof IGraphNode) {
                 try {
                     dataService.connect(arcTemp.getSource(), (IGraphNode) eventTarget);
-                } catch (DataGraphServiceException ex) {
+                } catch (DataServiceException ex) {
                     messengerService.addToLog(ex.getMessage());
                 }
             }
@@ -393,7 +393,7 @@ public class MouseEventHandler {
             selectionService.unhighlight(arcTemp.getSource());
             try {
                 dataService.remove(arcTemp);
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             }
 
@@ -425,12 +425,12 @@ public class MouseEventHandler {
                             selectionService.select(node);
                             selectionService.highlightRelated(node);
                         }
-                        mainController.HideSidePanel();
+                        mainController.HideElementPanel();
                     } else {
                         selectionService.unselectAll();
                         selectionService.select(node);
                         selectionService.highlightRelated(node);
-                        mainController.ShowDetails(node);
+                        mainController.ShowElementDetails(node);
                     }
                 }
             }

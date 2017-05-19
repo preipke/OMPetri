@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller;
+package edu.unibi.agbi.gnius.business.controller.editor.element;
 
+import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
@@ -13,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
@@ -71,9 +72,9 @@ public class ElementController implements Initializable
     @Autowired private MessengerService messengerService;
 
     // Top Container
-    @FXML private VBox elementFrame;
     @FXML private TitledPane identifierPane;
     @FXML private TitledPane propertiesPane;
+    @FXML private VBox propertiesBox;
 
     // Identifier
     @FXML private TextField inputType;
@@ -145,7 +146,7 @@ public class ElementController implements Initializable
         LoadElementProperties(elementSelected);
     }
 
-    public void StoreElementDetails() throws DataGraphServiceException {
+    public void StoreElementDetails() throws DataServiceException {
 
         if (elementSelected == null) {
             return;
@@ -164,7 +165,6 @@ public class ElementController implements Initializable
      */
     private void LoadGuiElements(IDataElement element) {
 
-        identifierPane.setVisible(true);
         inputLabel.setDisable(false);
         
         switch (element.getElementType()) {
@@ -177,9 +177,9 @@ public class ElementController implements Initializable
             default:
                 propertiesPane.setVisible(true);
                 choiceSubtype.setStyle("");
-                elementFrame.getChildren().clear();
-                elementFrame.getChildren().add(propertiesSubtype);
-                elementFrame.getChildren().add(propertiesColor);
+                propertiesBox.getChildren().clear();
+                propertiesBox.getChildren().add(propertiesSubtype);
+                propertiesBox.getChildren().add(propertiesColor);
         }
 
         switch (element.getElementType()) {
@@ -188,15 +188,15 @@ public class ElementController implements Initializable
                 inputLabel.setDisable(true);
                 inputLabel.setText("");
                 inputArcWeight.setStyle("");
-                elementFrame.getChildren().add(propertiesArc);
+                propertiesBox.getChildren().add(propertiesArc);
                 break;
 
             case PLACE:
-                elementFrame.getChildren().add(propertiesPlace);
+                propertiesBox.getChildren().add(propertiesPlace);
                 break;
 
             case TRANSITION:
-                elementFrame.getChildren().add(propertiesTransition);
+                propertiesBox.getChildren().add(propertiesTransition);
                 break;
         }
     }
@@ -286,18 +286,14 @@ public class ElementController implements Initializable
         switch (element.getElementType()) {
 
             case ARC:
-
                 DataArc arc = (DataArc) element;
-
-                Map<Colour, Weight> weights = arc.getWeightMap();
                 Weight weight;
-
                 for (Colour color : colors) {
-                    if (weights.get(color) != null) {
+                    if (arc.getWeight(color) != null) {
                         choicesColour.add(color);
                     }
                 }
-                weight = weights.get(choicesColour.get(0));
+                weight = arc.getWeight(choicesColour.get(0));
                 inputArcWeight.setText(weight.getValue());
                 break;
 
@@ -306,26 +302,21 @@ public class ElementController implements Initializable
                 break;
 
             case PLACE:
-
                 DataPlace place = (DataPlace) element;
-
-                Map<Colour, Token> tokens = place.getTokenMap();
-                Token token = null;
+                Token token;
                 for (Colour color : colors) {
-                    if (tokens.get(color) != null) {
+                    if (place.getToken(color) != null) {
                         choicesColour.add(color);
                     }
                 }
-                token = tokens.get(choicesColour.get(0));
+                token = place.getToken(choicesColour.get(0));
                 inputPlaceToken.setText(Double.toString(token.getValueStart()));
                 inputPlaceTokenMin.setText(Double.toString(token.getValueMin()));
                 inputPlaceTokenMax.setText(Double.toString(token.getValueMax()));
                 break;
 
             case TRANSITION:
-
                 DataTransition transition = (DataTransition) element;
-
                 inputTransitionFunction.setText(transition.getFunction().toString());
                 inputLatestCaretPosition = inputTransitionFunction.getText().length();
                 LoadParameterChoices(transition);
@@ -484,7 +475,7 @@ public class ElementController implements Initializable
         }
     }
     
-    private void StoreElementType(IDataElement element) throws DataGraphServiceException {
+    private void StoreElementType(IDataElement element) throws DataServiceException {
         
         Object itemSelected = choiceSubtype.getSelectionModel().getSelectedItem();
         if (itemSelected == null) {
@@ -528,9 +519,9 @@ public class ElementController implements Initializable
      * Stores node properties. Stores the values from the textfields within the
      * according entity, overwrites old values.
      *
-     * @throws DataGraphServiceException
+     * @throws DataServiceException
      */
-    private void StoreElementProperties(IDataElement element) throws DataGraphServiceException {
+    private void StoreElementProperties(IDataElement element) throws DataServiceException {
 
         // TODO store values according to the selected colour
         Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
@@ -583,7 +574,7 @@ public class ElementController implements Initializable
                         messengerService.addToLog("Value for 'Token (max.)' is not a number!");
                     }
                 }
-                place.setToken(token);
+                place.addToken(token);
 
                 break;
 
@@ -643,7 +634,7 @@ public class ElementController implements Initializable
      * @param element
      */
     private void CreateReferencingParameter(String id, String value, IElement element) {
-        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE);
+        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE, element.getId());
         try {
             parameterService.addParameter(param, element);
             InsertToFunctionInput(id);
@@ -741,7 +732,7 @@ public class ElementController implements Initializable
                 try {
                     StoreElementType(elementSelected);
                     setStatus(choiceSubtype, "", null);
-                } catch (DataGraphServiceException ex) {
+                } catch (DataServiceException ex) {
                     setStatus(choiceSubtype, ex.getMessage(), ex);
                 }
             }
@@ -764,7 +755,7 @@ public class ElementController implements Initializable
             IDataElement elem = elementSelected;
             try {
                 StoreElementDetails();
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             }
             mainController.ShowParameters(elem);

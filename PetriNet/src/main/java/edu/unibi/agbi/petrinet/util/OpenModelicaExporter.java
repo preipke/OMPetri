@@ -259,7 +259,7 @@ public class OpenModelicaExporter
             functionString = "";
             for (FunctionElement element : function.getElements()) {
                 if (element.getType() == FunctionElement.Type.PARAMETER) {
-                    functionString += model.getParameters().get(element.get()).getValue();
+                    functionString += model.getParameter(element.get()).getValue();
                 } else {
                     functionString += element.get();
                 }

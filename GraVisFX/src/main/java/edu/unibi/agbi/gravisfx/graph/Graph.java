@@ -32,11 +32,9 @@ public class Graph
     private final Map<String,IGravisNode> nodes;
     private final Map<String,IGravisConnection> connections;
     
-    private int nextGraphNodeId;
+    private int nextNodeId = 1;
 
-    public Graph(int nextGraphNodeId) {
-        
-        this.nextGraphNodeId = nextGraphNodeId;
+    public Graph() {
 
         this.topLayer = new TopLayer();
 
@@ -71,6 +69,10 @@ public class Graph
                 connection.getTarget().getConnections().add(connection);
             }
         }
+    }
+    
+    public boolean contains(String nodeId) {
+        return nodes.containsKey(nodeId);
     }
 
     public boolean contains(IGravisConnection connection) {
@@ -127,13 +129,7 @@ public class Graph
         return listCopy;
     }
     
-    /**
-     * Get the next available id for nodes and increments the counter.
-     * This makes sure that no number will be available more than once.
-     * 
-     * @return 
-     */
-    public int getNextGraphNodeId() {
-        return nextGraphNodeId++;
+    public int getNextNodeId() {
+        return nextNodeId++;
     }
 }

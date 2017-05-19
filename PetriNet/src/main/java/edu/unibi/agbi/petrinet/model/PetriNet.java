@@ -17,6 +17,8 @@ import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.HashSet;
 import java.util.Set;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  *
@@ -25,34 +27,32 @@ import java.util.Set;
 public class PetriNet
 {
     private String author;
-    private String name;
+    private final StringProperty name;
     private String description;
 
-    private int nextPlaceId;
-    private int nextTransitionId;
-
-    private final Set<Colour> colors;
+    private final Map<String, Colour> colors;
     private final Map<String, Parameter> parameters;
 
     private final Set<String> nodeIds;
     private final Map<String, Arc> arcs;
     private final Map<String, Place> places;
     private final Map<String, Transition> transitions;
+    
+    private int nextPlaceId = 1;
+    private int nextTransitionId = 1;
 
-    public PetriNet(int nextPlaceId, int nextTransitionId) {
-        this.nextPlaceId = nextPlaceId;
-        this.nextTransitionId = nextTransitionId;
-        this.colors = new HashSet();
-        this.colors.add(new Colour("DEFAULT", "Default colour"));
-        this.parameters = new HashMap();
-        this.nodeIds = new HashSet();
+    public PetriNet() {
         this.arcs = new HashMap();
+        this.colors = new HashMap();
+        this.name = new SimpleStringProperty();
+        this.nodeIds = new HashSet();
+        this.parameters = new HashMap();
         this.places = new HashMap();
         this.transitions = new HashMap();
     }
 
     public void add(Colour color) {
-        colors.add(color);
+        colors.put(color.getId(), color);
     }
 
     public void add(Parameter param) {
@@ -72,6 +72,10 @@ public class PetriNet
         } else {
             transitions.put(node.getId(), (Transition) node);
         }
+    }
+    
+    public boolean contains(String nodeId) {
+        return nodeIds.contains(nodeId);
     }
 
     public boolean containsAndNotEqual(Arc arc) {
@@ -108,8 +112,8 @@ public class PetriNet
     }
 
     private IArc remove(Arc arc) {
-        arc.getParameters().values().forEach(param -> {
-            parameters.remove(param.getId());
+        arc.getRelatedParameterIds().forEach(id -> {
+            parameters.remove(id);
         });
         arc.getSource().getArcsOut().remove(arc);
         arc.getTarget().getArcsIn().remove(arc);
@@ -131,56 +135,43 @@ public class PetriNet
         } else {
             node = remove((Transition) node);
         }
-        node.getParameters().values().forEach((param) -> {
-            parameters.remove(param.getId());
+        node.getRelatedParameterIds().forEach((id) -> {
+            parameters.remove(id);
         });
         return node;
     }
 
     private INode remove(Transition transition) {
         transition.getFunction().getParameterIds().forEach(id -> {
-            parameters.get(id).getReferingNodes().remove(transition);
+            parameters.get(id).getUsingElements().remove(transition);
         });
         return transitions.remove(transition.getId());
     }
 
     public Parameter remove(Parameter param) {
+        param.getUsingElements().forEach(elem -> elem.getRelatedParameterIds().remove(param.getId()));
         return parameters.remove(param.getId());
     }
 
     public Collection<Arc> getArcs() {
         return arcs.values();
     }
-
-    public Set<Colour> getColours() {
-        return colors;
+    
+    public Colour getColour(String id) {
+        return colors.get(id);
     }
 
-    /**
-     * Get the next available id for places and increments the counter. This
-     * makes sure that no number will be available more than once.
-     *
-     * @return
-     */
-    public synchronized int getNextPlaceId() {
-        return nextPlaceId++;
+    public Collection<Colour> getColours() {
+        return colors.values();
     }
 
-    /**
-     * Get the next available id for transitions and increments the counter.
-     * This makes sure that no number will be available more than once.
-     *
-     * @return
-     */
-    public synchronized int getNextTransitionId() {
-        return nextTransitionId++;
-    }
-
-    public INode getNode(String id) {
+    public IElement getElement(String id) {
         if (places.containsKey(id)) {
             return places.get(id);
         } else if (transitions.containsKey(id)) {
             return transitions.get(id);
+        } else if (arcs.containsKey(id)) {
+            return arcs.get(id);
         } else {
             return null;
         }
@@ -190,8 +181,16 @@ public class PetriNet
         return nodeIds;
     }
 
-    public Map<String, Parameter> getParameters() {
-        return parameters;
+    public Parameter getParameter(String id) {
+        return parameters.get(id);
+    }
+
+    public Set<String> getParameterIds() {
+        return parameters.keySet();
+    }
+
+    public Collection<Parameter> getParameters() {
+        return parameters.values();
     }
 
     public Collection<Place> getPlaces() {
@@ -210,12 +209,16 @@ public class PetriNet
         this.author = author;
     }
 
-    public String getName() {
+    public StringProperty getNameProperty() {
         return name;
     }
 
+    public String getName() {
+        return name.get();
+    }
+
     public void setName(String name) {
-        this.name = name;
+        this.name.set(name);
     }
 
     public String getDescription() {
@@ -224,5 +227,13 @@ public class PetriNet
 
     public void setDescription(String description) {
         this.description = description;
+    }
+    
+    public int getNextPlaceId() {
+        return nextPlaceId++;
+    }
+    
+    public int getNextTransitionId() {
+        return nextTransitionId++;
     }
 }

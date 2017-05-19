@@ -43,6 +43,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +104,15 @@ public class ResultsController implements Initializable
     @Value("${regex.valuechoice.tokenOut.actual}") private String valueChoiceTokenOutActual;
     @Value("${regex.valuechoice.tokenOut.total}") private String valueChoiceTokenOutTotal;
 
+    private final FileChooser fileChooser;
     private Stage stage;
+    
+    public ResultsController() {
+        fileChooser = new FileChooser();
+        fileChooser.setTitle("Save selected data to XML file");
+        fileChooser.getExtensionFilters().add(new ExtensionFilter("XML file(s) (*.xml)", "*.xml", "*.XML"));
+//        fileChooser.getExtensionFilters().add(new ExtensionFilter("All files", "*"));
+    }
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -272,14 +281,11 @@ public class ResultsController implements Initializable
     }
 
     private void exportData() {
-
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save selected data to XML file");
-
-        File file = fileChooser.showSaveDialog(stage);
-
         try {
-            xmlResultsConverter.exportXml(file, resultsService.getChartData(lineChart));
+            xmlResultsConverter.exportXml(
+                    fileChooser.showSaveDialog(stage), 
+                    resultsService.getChartData(lineChart)
+            );
             setStatus("Data successfully exported!", false);
         } catch (Exception ex) {
             setStatus("Export to XML file failed! [" + ex.getMessage() + "]", true);

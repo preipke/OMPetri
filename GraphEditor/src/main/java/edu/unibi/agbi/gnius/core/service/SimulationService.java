@@ -5,11 +5,11 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.ElementController;
-import edu.unibi.agbi.gnius.business.controller.SimulationController;
+import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.SimulationController;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
@@ -56,7 +56,7 @@ public class SimulationService
 
         try {
             elementController.StoreElementDetails();
-        } catch (DataGraphServiceException ex) {
+        } catch (DataServiceException ex) {
             throw new SimulationServiceException(ex);
         }
         

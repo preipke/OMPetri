@@ -219,7 +219,7 @@ public class SelectionService
             });
         }
         selectionDao.clear();
-        mainController.HideSidePanel();
+        mainController.HideElementPanel();
     }
     
     /**

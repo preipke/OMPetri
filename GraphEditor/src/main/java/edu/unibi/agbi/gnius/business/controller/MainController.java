@@ -5,9 +5,13 @@
  */
 package edu.unibi.agbi.gnius.business.controller;
 
+import edu.unibi.agbi.gnius.business.controller.editor.element.ParameterController;
+import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.ModelController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gnius.core.exception.DataGraphServiceException;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -26,9 +30,12 @@ import org.springframework.stereotype.Controller;
 public class MainController implements Initializable {
     
     @Autowired private MessengerService messengerService;
+    
     @Autowired private ElementController elementController;
+    @Autowired private ModelController modelController;
     @Autowired private ParameterController parameterController;
     
+    @FXML private VBox modelFrame;
     @FXML private VBox elementFrame;
     @FXML private VBox parameterFrame;
 
@@ -36,11 +43,11 @@ public class MainController implements Initializable {
         return (Stage) elementFrame.getScene().getWindow();
     }
     
-    public void HideSidePanel() {
+    public void HideElementPanel() {
         if (elementFrame.isVisible()) {
             try {
                 elementController.StoreElementDetails();
-            } catch (DataGraphServiceException ex) {
+            } catch (DataServiceException ex) {
                 messengerService.addToLog(ex.getMessage());
             }
             elementFrame.setVisible(false);
@@ -48,20 +55,30 @@ public class MainController implements Initializable {
         parameterFrame.setVisible(false);
     }
     
-    public void ShowDetails(IGraphElement element) {
-        elementFrame.setVisible(true);
+    public void HideModelPanel() {
+        modelFrame.setVisible(false);
+    }
+    
+    public void ShowElementDetails(IGraphElement element) {
         parameterFrame.setVisible(false);
+        elementFrame.setVisible(true);
         elementController.ShowElementDetails(element);
+    }
+    
+    public void ShowModel(DataDao dataDao) {
+        modelFrame.setVisible(true);
+        modelController.setModel(dataDao);
     }
     
     public void ShowParameters(IDataElement element) {
         elementFrame.setVisible(false);
         parameterFrame.setVisible(true);
-        parameterController.ShowParameterDetails(element);
+        parameterController.ShowParameters(element);
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        modelFrame.setVisible(false);
         elementFrame.setVisible(false);
         parameterFrame.setVisible(false);
     }
