@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.business.controller.editor;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
@@ -17,12 +18,16 @@ import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.beans.Observable;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
@@ -41,6 +46,7 @@ public class TabsController implements Initializable
     @Autowired private MessengerService messengerService;
     
     @Autowired private MainController mainController;
+    @Autowired private FileMenuController fileMenuController;
     
     @Autowired private MouseEventHandler mouseEventHandler;
     @Autowired private ScrollEventHandler scrollEventHandler;
@@ -104,11 +110,11 @@ public class TabsController implements Initializable
                 mainController.ShowModel(dao);
             }
         });
-        tab.onCloseRequestProperty().addListener(cl -> {
-            System.out.println("Fire close request!");
+        tab.setOnCloseRequest(eh -> {
+            ShowConfirmationDialog(eh);
         });
-        tab.onClosedProperty().addListener(cl -> {
-            System.out.println("Fire closed!");
+        tab.setOnClosed(eh -> {
+            dataService.removeDataDao(dao);
         });
         
         editorTabPane.getTabs().add(0, tab);
@@ -148,6 +154,33 @@ public class TabsController implements Initializable
             prefix = "";
         }
         return prefix + modelName;
+    }
+    
+    private void ShowConfirmationDialog(Event event) {
+
+        DataDao dao = dataService.getActiveDao();
+
+        ButtonType buttonSave = new ButtonType("Save");
+        ButtonType buttonClose = new ButtonType("Close");
+        ButtonType buttonCancel = new ButtonType("Cancel");
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Close model");
+        alert.setHeaderText("Confirm closing model '" + dao.getModel().getName() + "'");
+        alert.setContentText("The model contains unsaved changes. Are you sure you want to close the model and discard any changes?");
+        alert.getButtonTypes().setAll(buttonSave, buttonClose, buttonCancel);
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.get() == buttonSave) {
+            boolean isSaved = fileMenuController.SaveAs(dao);
+            if (!isSaved && event != null) {
+                event.consume();
+            }
+        } else if (result.get() == buttonCancel) {
+            if (event != null) {
+                event.consume();
+            }
+        }
     }
 
     @Override

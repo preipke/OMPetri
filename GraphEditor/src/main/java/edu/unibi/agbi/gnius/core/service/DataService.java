@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,6 +78,7 @@ public class DataService
     private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
     private DataTransition.Type defaultTransitionType = DataTransition.Type.CONTINUOUS;
     
+    private final List<DataDao> dataDaos = new ArrayList();
     private DataDao dataDaoActive;
 
     /**
@@ -89,14 +88,11 @@ public class DataService
      * @throws DataServiceException
      */
     public synchronized void add(Colour colour) throws DataServiceException {
+        dataDaoActive.setHasChanges(true);
         if (dataDaoActive.getModel().getColours().contains(colour)) {
             throw new DataServiceException("Conflict! Another colour has already been stored using the same ID!");
         }
         dataDaoActive.getModel().add(colour);
-    }
-    
-    public synchronized void setActiveDataDao(DataDao dataDao) {
-        dataDaoActive = dataDao;
     }
 
     /**
@@ -111,6 +107,7 @@ public class DataService
         validateArcType(arc, type);
         arc.setArcType(type);
         styleArc(arc);
+        dataDaoActive.setHasChanges(true);
     }
 
     /**
@@ -137,6 +134,7 @@ public class DataService
             messengerService.addToLog("Cannot change place type to '" + type + "'! [" + ex.getMessage() + "]");
             throw new DataServiceException("Cannot change place type to '" + type + "'!");
         }
+        dataDaoActive.setHasChanges(true);
     }
 
     /**
@@ -163,6 +161,7 @@ public class DataService
             messengerService.addToLog("Cannot change place type to '" + type + "'! [" + ex.getMessage() + "]");
             throw new DataServiceException("Cannot change place type to '" + type + "'!");
         }
+        dataDaoActive.setHasChanges(true);
     }
 
     /**
@@ -174,12 +173,14 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    public synchronized IGraphArc connect(IGraphNode source, IGraphNode target) throws DataServiceException {
+    public IGraphArc connect(IGraphNode source, IGraphNode target) throws DataServiceException {
         IGraphArc arc;
         validateConnection(source, target);
         arc = createConnection(source, target, null);
         validateArcType(arc.getDataElement(), defaultArcType);
-        return add(arc);
+        arc = add(arc);
+        dataDaoActive.setHasChanges(true);
+        return arc;
     }
 
     /**
@@ -192,10 +193,7 @@ public class DataService
      * @throws DataServiceException
      */
     public synchronized IGraphNode create(Element.Type type, double posX, double posY) throws DataServiceException {
-
         IGraphNode shape;
-        String id;
-        
         switch (type) {
             case PLACE:
                 DataPlace place;
@@ -214,8 +212,9 @@ public class DataService
         Point2D pos = calculator.getCorrectedMousePosition(dataDaoActive.getGraph(), posX, posY);
         shape.translateXProperty().set(pos.getX());
         shape.translateYProperty().set(pos.getY());
-
-        return add(shape);
+        shape = add(shape);
+        dataDaoActive.setHasChanges(true);
+        return shape;
     }
 
     /**
@@ -225,7 +224,6 @@ public class DataService
      * @return
      */
     public synchronized GraphEdge createTemporaryArc(IGraphNode source) {
-
         GraphEdge edge;
         edge = new GraphEdge(source, null);
         edge.getParentElementHandles().forEach(ele -> {
@@ -237,7 +235,7 @@ public class DataService
         edge.setArrowHeadVisible(true);
         edge.setCircleHeadVisible(false);
         dataDaoActive.getGraph().add(edge);
-
+        dataDaoActive.setHasChanges(true);
         return edge;
     }
     
@@ -247,6 +245,7 @@ public class DataService
         dao.getModel().setDescription("New model.");
         dao.getModel().setName("Untitled");
         dao.getModel().add(DEFAULT_COLOUR);
+        dao.setHasChanges(true);
         return dao;
     }
 
@@ -295,7 +294,9 @@ public class DataService
             clusterRemove(cluster);
         }
 
-        return clusterCreate(nodes, arcs);
+        GraphCluster cluster = clusterCreate(nodes, arcs); 
+        dataDaoActive.setHasChanges(true);
+        return cluster;
     }
 
     /**
@@ -309,6 +310,7 @@ public class DataService
         validateRemoval(arc);
         removeShape(arc);
         removeData(arc.getDataElement());
+        dataDaoActive.setHasChanges(true);
         return arc;
     }
 
@@ -333,6 +335,7 @@ public class DataService
         }
         removeShape(node);
         removeData(node.getDataElement());
+        dataDaoActive.setHasChanges(true);
         return node;
     }
 
@@ -351,6 +354,7 @@ public class DataService
                 remove((IGraphNode) element);
             }
         }
+        dataDaoActive.setHasChanges(true);
     }
 
     /**
@@ -384,6 +388,7 @@ public class DataService
 
             shapes.add(shape);
         }
+        dataDaoActive.setHasChanges(true);
         return shapes;
     }
 
@@ -545,14 +550,13 @@ public class DataService
                 arc = add(arc);
             }
         }
-
+        
         for (IGraphArc arc : arcs) {
             dataDaoActive.getGraph().remove(arc);
         }
         for (IGraphNode node : nodes) {
             dataDaoActive.getGraph().remove(node);
         }
-
         return clusterShape;
     }
 
@@ -1026,6 +1030,13 @@ public class DataService
         return id;
     }
     
+    public synchronized void setActiveDataDao(DataDao dataDao) {
+        if (!dataDaos.contains(dataDao)) {
+            dataDaos.add(dataDao);
+        }
+        dataDaoActive = dataDao;
+    }
+    
     public synchronized DataDao getActiveDao() {
         return dataDaoActive;
     }
@@ -1036,6 +1047,20 @@ public class DataService
 
     public synchronized PetriNet getActiveModel() {
         return dataDaoActive.getModel();
+    }
+    
+    public synchronized List<DataDao> getDataDaosWithChanges() {
+        List<DataDao> daosWithChanges = new ArrayList();
+        for (DataDao dataDao : dataDaos) {
+            if (dataDao.hasChanges()) {
+                daosWithChanges.add(dataDao);
+            }
+        }
+        return daosWithChanges;
+    }
+    
+    public synchronized void removeDataDao(DataDao dataDao) {
+        dataDaos.remove(dataDao);
     }
 
     public void setPlaceTypeDefault(DataPlace.Type type) {

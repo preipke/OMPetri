@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.model.PetriNet;
+import java.io.File;
 
 /**
  *
@@ -16,6 +17,9 @@ public class DataDao
 {
     private final PetriNet model;
     private final Graph graph;
+    
+    private File fileModel;
+    private boolean hasChanges;
     
     public DataDao() {
         model = new PetriNet();
@@ -28,5 +32,21 @@ public class DataDao
     
     public Graph getGraph() {
         return graph;
+    }
+    
+    public void setModelFile(File file) {
+        fileModel = file;
+    }
+    
+    public File getModelFile() {
+        return fileModel;
+    }
+    
+    public void setHasChanges(boolean value) {
+        hasChanges = value;
+    }
+    
+    public boolean hasChanges() {
+        return hasChanges;
     }
 }

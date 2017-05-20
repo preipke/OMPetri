@@ -1,5 +1,6 @@
 package edu.unibi.agbi.gnius;
 
+import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.business.controller.ResultsController;
 import edu.unibi.agbi.gnius.business.handler.KeyEventHandler;
 import javafx.application.Application;
@@ -70,11 +71,8 @@ public class Main extends Application {
         mainStage.setTitle(mainTitle);
         mainStage.setScene(mainScene);
         mainStage.setOnCloseRequest(e -> {
-            try {
-                System.exit(0);
-            } catch (Exception ex) {
-                System.out.println(ex);
-            }
+            MainController mainController = (MainController) springContext.getBean(MainController.class);
+            mainController.ShowDialogExit(e);
         });
         mainStage.show();
         

@@ -56,9 +56,7 @@ public class FileMenuController implements Initializable
 
     private final FileChooser fileChooser;
     private final ObservableList<File> latestFiles;
-
     private ExtensionFilter latestFilter;
-    private File latestFile;
 
     public FileMenuController() {
 
@@ -69,7 +67,7 @@ public class FileMenuController implements Initializable
 
         fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(typeXml);
-        fileChooser.getExtensionFilters().add(typeSbml);
+//        fileChooser.getExtensionFilters().add(typeSbml);
         fileChooser.getExtensionFilters().add(typeOm);
 
         latestFiles = FXCollections.observableArrayList();
@@ -78,6 +76,7 @@ public class FileMenuController implements Initializable
     private void Open(File file) throws Exception {
 
         DataDao dataDao = xmlModelConverter.importXml(file);
+        dataDao.setModelFile(file);
         editorTabsController.CreateModelTab(dataDao);
         
         if (latestFiles.contains(file)) {
@@ -91,33 +90,72 @@ public class FileMenuController implements Initializable
         latestFiles.add(0, file);
     }
 
-    private void SaveFile(File file, ExtensionFilter filter) {
+    private boolean SaveFile(DataDao dao, File file, ExtensionFilter filter) {
         if (file == null || filter == null) {
-            return;
+            return false;
         }
         if (typeXml == filter) {
-            try {
-                xmlModelConverter.exportXml(file, dataService.getActiveDao());
-                messengerService.setTopStatus("XML export complete!", null);
-            } catch (FileNotFoundException | ParserConfigurationException | TransformerException ex) {
-                messengerService.setTopStatus("XML export failed!", ex);
-            }
+            return SaveXml(dao, file);
         } else if (typeSbml == filter) {
-            messengerService.setTopStatus("SBML export is not yet implemented!", null);
-            SaveAs();
+            return SaveSbml(dao, file);
         } else if (typeOm == filter) {
-            try {
-                omExporter.exportMO(dataService.getActiveModel(), file);
-                messengerService.setTopStatus("OpenModelica export complete!", null);
-            } catch (IOException ex) {
-                messengerService.setTopStatus("OpenModelica export failed!", ex);
+            return SaveOm(dao, file);
+        } else {
+            return false;
+        }
+    }
+    
+    private boolean SaveXml(DataDao dao, File file) {
+        try {
+            xmlModelConverter.exportXml(file, dao);
+            messengerService.setTopStatus("XML export complete!", null);
+            dataService.getActiveDao().setModelFile(file);
+            dataService.getActiveDao().setHasChanges(false);
+            return true;
+        } catch (FileNotFoundException | ParserConfigurationException | TransformerException ex) {
+            messengerService.setTopStatus("XML export failed!", ex);
+            return false;
+        }
+    }
+
+    private boolean SaveSbml(DataDao dao, File file) {
+        messengerService.setTopStatus("SBML export is not yet implemented!", null);
+        SaveAs();
+        return false;
+    }
+
+    private boolean SaveOm(DataDao dao, File file) {
+        try {
+            omExporter.exportMO(dao.getModel(), file);
+            messengerService.setTopStatus("OpenModelica export complete!", null);
+        } catch (IOException ex) {
+            messengerService.setTopStatus("OpenModelica export failed!", ex);
+        }
+        return false;
+    }
+    
+    public File ShowFileChooser(DataDao dao) {
+        if (dao != null) {
+            fileChooser.setSelectedExtensionFilter(typeXml);
+            fileChooser.setTitle("Save model '" + dao.getModel().getName() + "'");
+            if (dao.getModelFile() != null) {
+                fileChooser.setInitialDirectory(dao.getModelFile().getParentFile());
+                fileChooser.setInitialFileName(dao.getModelFile().getName());
+            } else {
+                fileChooser.setInitialFileName(dao.getModel().getName());
             }
         }
+        File file =  fileChooser.showSaveDialog(mainController.getStage());
+        if (file != null) {
+            latestFilter = fileChooser.getSelectedExtensionFilter();
+        }
+        return file;
     }
     
     @FXML
     public void New() {
         editorTabsController.CreateModelTab(null);
+        messengerService.setTopStatus("New model created!", null);
     }
 
     @FXML
@@ -126,8 +164,8 @@ public class FileMenuController implements Initializable
             fileChooser.getExtensionFilters().add(typeAll);
         }
         fileChooser.setSelectedExtensionFilter(typeAll);
-        fileChooser.setTitle("Open model data");
-        File file = fileChooser.showOpenDialog(mainController.getStage());
+        fileChooser.setTitle("Open model");
+        File file = ShowFileChooser(null);
         if (file != null) {
             try {
                 Open(file);
@@ -136,23 +174,35 @@ public class FileMenuController implements Initializable
             }
         }
     }
+    
+    @FXML
+    public void Quit() {
+        mainController.ShowDialogExit(null);
+    }
 
     @FXML
     public void Save() {
-        if (latestFile != null && latestFilter != null) {
-            SaveFile(latestFile, latestFilter);
+        if (dataService.getActiveDao().getModelFile() != null && latestFilter != null) {
+            SaveFile(dataService.getActiveDao(), dataService.getActiveDao().getModelFile(), latestFilter);
         } else {
             SaveAs();
         }
     }
+    
+    /**
+     * 
+     * @param dao
+     * @return indicates wether the model has been saved or not
+     */
+    public boolean SaveAs(DataDao dao) {
+        File file = ShowFileChooser(dao);
+        return SaveFile(dao, file, latestFilter);
+    }
 
     @FXML
     public void SaveAs() {
-        fileChooser.getExtensionFilters().remove(typeAll);
-        fileChooser.setTitle("Save model data");
-        latestFile = fileChooser.showSaveDialog(mainController.getStage());
-        latestFilter = fileChooser.getSelectedExtensionFilter();
-        SaveFile(latestFile, latestFilter);
+        File file = ShowFileChooser(dataService.getActiveDao());
+        SaveFile(dataService.getActiveDao(), file, latestFilter);
     }
 
     @Override

@@ -31,7 +31,6 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
