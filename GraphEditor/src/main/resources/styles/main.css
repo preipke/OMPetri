@@ -22,6 +22,14 @@
     -fx-background-color: red;
 }*/
 
+#statusTop {
+    -fx-background-color: -fx-background;
+    -fx-background-radius: 5;
+    -fx-border-color: -fx-base;
+    -fx-border-radius: 5;
+    -fx-padding: 5.0;
+}
+
 .tab:disabled {
     -fx-padding: 0.083333em 0em 0.0769em 0em; /* 1 0 0.99 0 */
     -fx-opacity: 1.0;
@@ -36,8 +44,6 @@
 
 .editorPane {
     -fx-background-color: white;
-    /*    -fx-border-color: black;
-        -fx-border-width: 1;*/
 }
 
 /* Custom LineChart colors for later use */

@@ -14,8 +14,8 @@
         <MenuItem mnemonicParsing="false" onAction="#Open" text="Open…" />
         <Menu fx:id="menuOpenRecent" mnemonicParsing="false" text="Open Recent" />
         <SeparatorMenuItem mnemonicParsing="false" />
-        <MenuItem mnemonicParsing="false" onAction="#Save" text="Save" />
-        <MenuItem mnemonicParsing="false" onAction="#SaveAs" text="Save As…" />
+        <MenuItem mnemonicParsing="false" onAction="#Save" text="Save" fx:id="menuItemSave" />
+        <MenuItem mnemonicParsing="false" onAction="#SaveAs" text="Save As…" fx:id="menuItemSaveAs"  />
         <SeparatorMenuItem mnemonicParsing="false" />
         <MenuItem mnemonicParsing="false" onAction="#Quit" text="Quit" />
     </items>

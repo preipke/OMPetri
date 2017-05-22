@@ -53,12 +53,6 @@ public class SimulationService
     }
 
     public void StartSimulation() throws SimulationServiceException {
-
-        try {
-            elementController.StoreElementDetails();
-        } catch (DataServiceException ex) {
-            throw new SimulationServiceException(ex);
-        }
         
         /**
          * Monitor previous threads. 

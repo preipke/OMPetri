@@ -49,7 +49,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -66,11 +65,11 @@ import org.springframework.stereotype.Controller;
 public class ElementController implements Initializable
 {
     @Autowired private MainController mainController;
-    @Autowired private ParameterService parameterService;
-    @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
+    @Autowired private DataService dataService;
+    @Autowired private ParameterService parameterService;
 
-    // Top Container
+    // Container
     @FXML private TitledPane identifierPane;
     @FXML private TitledPane propertiesPane;
     @FXML private VBox propertiesBox;
@@ -145,18 +144,6 @@ public class ElementController implements Initializable
         LoadElementProperties(elementSelected);
     }
 
-    public void StoreElementDetails() throws DataServiceException {
-
-        if (elementSelected == null) {
-            return;
-        }
-
-        StoreElementInfo(elementSelected);
-        StoreElementProperties(elementSelected);
-        
-        elementSelected = null;
-    }
-
     /**
      * Loads GUI elements specific for the given graph element type.
      *
@@ -175,17 +162,16 @@ public class ElementController implements Initializable
 
             default:
                 propertiesPane.setVisible(true);
-                choiceSubtype.setStyle("");
                 propertiesBox.getChildren().clear();
                 propertiesBox.getChildren().add(propertiesSubtype);
                 propertiesBox.getChildren().add(propertiesColor);
+                choiceSubtype.setStyle("");
         }
 
         switch (element.getElementType()) {
 
             case ARC:
                 inputLabel.setDisable(true);
-                inputLabel.setText("");
                 inputArcWeight.setStyle("");
                 propertiesBox.getChildren().add(propertiesArc);
                 break;
@@ -268,6 +254,8 @@ public class ElementController implements Initializable
         inputName.setText(element.getName());
         if (!inputLabel.isDisabled()) {
             inputLabel.setText(element.getLabelText());
+        } else {
+            inputLabel.setText("");
         }
         inputDescription.setText(element.getDescription());
     }
@@ -319,7 +307,6 @@ public class ElementController implements Initializable
                 inputTransitionFunction.setText(transition.getFunction().toString());
                 inputLatestCaretPosition = inputTransitionFunction.getText().length();
                 LoadParameterChoices(transition);
-                ParseFunctionInputToImage(null, true);
                 break;
         }
 
@@ -447,7 +434,6 @@ public class ElementController implements Initializable
                         MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
                         item.setOnAction(e -> {
                             InsertToFunctionInput(param.getId());
-                            ParseFunctionInputToImage(null, true);
                         });
                         menuParamLocal.getItems().add(item);
                     });
@@ -464,7 +450,6 @@ public class ElementController implements Initializable
                         MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
                         item.setOnAction(e -> {
                             InsertToFunctionInput(param.getId());
-                            ParseFunctionInputToImage(null, true);
                         });
                         menuParamGlobal.getItems().add(item);
                     });
@@ -484,7 +469,6 @@ public class ElementController implements Initializable
         switch (element.getElementType()) {
 
             case ARC:
-
                 DataArc arc = (DataArc) element;
                 DataArc.Type arcType = (DataArc.Type) itemSelected;
                 if (arc.getArcType() != arcType) {
@@ -493,7 +477,6 @@ public class ElementController implements Initializable
                 break;
 
             case PLACE:
-
                 DataPlace place = (DataPlace) element;
                 DataPlace.Type placeType = (DataPlace.Type) itemSelected;
                 if (place.getPlaceType() != placeType) {
@@ -503,7 +486,6 @@ public class ElementController implements Initializable
                 break;
 
             case TRANSITION:
-
                 DataTransition transition = (DataTransition) element;
                 DataTransition.Type transitionType = (DataTransition.Type) itemSelected;
                 if (transition.getTransitionType() != transitionType) {
@@ -511,117 +493,6 @@ public class ElementController implements Initializable
                     dataService.changeTransitionType(transition, transitionType);
                 }
                 break;
-        }
-    }
-
-    /**
-     * Stores node properties. Stores the values from the textfields within the
-     * according entity, overwrites old values.
-     *
-     * @throws DataServiceException
-     */
-    private void StoreElementProperties(IDataElement element) throws DataServiceException {
-
-        // TODO store values according to the selected colour
-        Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
-
-        switch (element.getElementType()) {
-
-            case ARC:
-
-                DataArc arc = (DataArc) element;
-
-                try {
-                    Weight weight = new Weight(colour);
-                    if (!inputArcWeight.getText().isEmpty()) {
-                        weight.setValue(String.valueOf(Double.parseDouble(inputArcWeight.getText().replace(",", "."))));
-                    }
-                    arc.setWeight(weight);
-                } catch (NumberFormatException ex) {
-                    messengerService.addToLog("Given weight is not a number!");
-                }
-
-                break;
-
-            case CLUSTER:
-                System.out.println("TODO StoreElementProperties CLUSTER");
-                break;
-
-            case PLACE:
-
-                DataPlace place = (DataPlace) element;
-
-                Token token = new Token(colour);
-                if (!inputPlaceToken.getText().isEmpty()) {
-                    try {
-                        token.setValueStart(Double.parseDouble(inputPlaceToken.getText().replace(",", ".")));
-                    } catch (NumberFormatException ex) {
-                        messengerService.addToLog("Value for 'Token' is not a number!");
-                    }
-                }
-                if (!inputPlaceTokenMin.getText().isEmpty()) {
-                    try {
-                        token.setValueMin(Double.parseDouble(inputPlaceTokenMin.getText().replace(",", ".")));
-                    } catch (NumberFormatException ex) {
-                        messengerService.addToLog("Value for 'Token (min.)' is not a number!");
-                    }
-                }
-                if (!inputPlaceTokenMax.getText().isEmpty()) {
-                    try {
-                        token.setValueMax(Double.parseDouble(inputPlaceTokenMax.getText().replace(",", ".")));
-                    } catch (NumberFormatException ex) {
-                        messengerService.addToLog("Value for 'Token (max.)' is not a number!");
-                    }
-                }
-                place.addToken(token);
-
-                break;
-
-            case TRANSITION:
-
-                DataTransition transition = (DataTransition) element;
-
-                try {
-                    if (inputTransitionFunction.getText().isEmpty()) {
-                        parameterService.setTransitionFunction(transition, "1");
-                    } else {
-                        ParseFunctionInputToImage(null, false);
-                        parameterService.setTransitionFunction(transition, inputLatestValid);
-                    }
-                } catch (Exception ex) {
-                    messengerService.addToLog(ex.getMessage());
-                }
-
-                break;
-        }
-    }
-
-    /**
-     * Stores info from the property textfields to the given element.
-     *
-     * @param element
-     */
-    private void StoreElementInfo(IDataElement element) {
-        if (!inputName.isDisabled()) {
-            if (inputName.getText() != null) {
-                element.setName(inputName.getText());
-            } else {
-                element.setName("");
-            }
-        }
-        if (!inputLabel.isDisabled()) {
-            if (inputLabel.getText() != null) {
-                element.setLabelText(inputLabel.getText());
-            } else {
-                element.setLabelText("");
-            }
-        }
-        if (!inputDescription.isDisabled()) {
-            if (inputDescription.getText() != null) {
-                element.setDescription(inputDescription.getText());
-            } else {
-                element.setDescription("");
-            }
         }
     }
 
@@ -637,7 +508,6 @@ public class ElementController implements Initializable
         try {
             parameterService.addParameter(param, element);
             InsertToFunctionInput(id);
-            ParseFunctionInputToImage(null, true);
         } catch (ParameterServiceException ex) {
             setStatus(null, "Cannot insert reference!", ex);
         }
@@ -657,8 +527,80 @@ public class ElementController implements Initializable
         inputTransitionFunction.setText(function);
         inputLatestCaretPosition = inputLatestCaretPosition + value.length();
     }
+    
+    private void ParseArcWeight() {
+        
+        if (ValidateNumberInput(inputArcWeight)) {
+            
+            if (elementSelected instanceof DataArc) {
 
-    private void ParseFunctionInputToImage(KeyEvent event, boolean generateImg) {
+                DataArc arc = (DataArc) elementSelected;
+                Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
+                
+                try {
+                    Weight weight = new Weight(colour);
+                    if (!inputArcWeight.getText().isEmpty()) {
+                        weight.setValue(String.valueOf(Double.parseDouble(inputArcWeight.getText().replace(",", "."))));
+                    }
+                    dataService.setArcWeight(arc, weight);
+                } catch (NumberFormatException ex) {
+                    messengerService.addToLog("Exception parsing weight value!", ex);
+                }
+            }
+        }
+    }
+    
+    private void ParsePlaceToken() {
+
+        if (elementSelected instanceof DataPlace) {
+            
+            DataPlace place = (DataPlace) elementSelected;
+            Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
+            
+            try {
+                Token token = new Token(colour);
+                if (ValidateNumberInput(inputPlaceToken)) {
+                    token.setValueStart(Double.parseDouble(inputPlaceToken.getText().replace(",", ".")));
+                }
+                if (ValidateNumberInput(inputPlaceTokenMin)) {
+                    token.setValueMin(Double.parseDouble(inputPlaceTokenMin.getText().replace(",", ".")));
+                }
+                if (ValidateNumberInput(inputPlaceTokenMax)) {
+                    token.setValueMax(Double.parseDouble(inputPlaceTokenMax.getText().replace(",", ".")));
+                }
+                dataService.setPlaceToken(place, token);
+            } catch (NumberFormatException ex) {
+                messengerService.addToLog("Exception parsing token values!", ex);
+            }
+        }
+    }
+    
+    private void ParseTransitionFunction() {
+
+        if (elementSelected instanceof DataTransition) {
+            
+            DataTransition transition = (DataTransition) elementSelected;
+            
+            try {
+                ParseFunctionInputToImage();
+                setStatus(inputTransitionFunction, "Valid!", null);
+            } catch (Exception ex) {
+                setStatus(inputTransitionFunction, "Invalid input!", ex);
+            }
+            
+            try {
+                if (inputTransitionFunction.getText().isEmpty()) {
+                    dataService.setTransitionFunction(transition, "1");
+                } else {
+                    dataService.setTransitionFunction(transition, inputLatestValid);
+                }
+            } catch (DataServiceException ex) {
+                messengerService.addToLog(ex);
+            }
+        }
+    }
+
+    private void ParseFunctionInputToImage() throws Exception {
 
         final DataTransition transition;
         final BufferedImage image;
@@ -670,32 +612,38 @@ public class ElementController implements Initializable
             transition = (DataTransition) elementSelected;
         }
 
-        try {
-            parameterService.ValidateFunction(input, transition);
-            image = PrettyFormulaParser.parseToImage(input);
-            if (generateImg) {
-                SwingUtilities.invokeLater(() -> {
-                    if (swingNodeTransitionFunctionImage.getContent() != null) {
-                        swingNodeTransitionFunctionImage.getContent().removeAll();
-                    }
-                    ImageComponent img = new ImageComponent();
-                    img.setImage(image);
-                    swingNodeTransitionFunctionImage.setContent(img);
-                });
+        parameterService.ValidateFunction(input, transition);
+        image = PrettyFormulaParser.parseToImage(input);
+
+        SwingUtilities.invokeLater(() -> {
+            if (swingNodeTransitionFunctionImage.getContent() != null) {
+                swingNodeTransitionFunctionImage.getContent().removeAll();
             }
-            inputLatestValid = input;
-            setStatus(inputTransitionFunction, "Valid!", null);
-        } catch (DetailedParseCancellationException ex) {
-            if (event != null && event.getCode() != KeyCode.RIGHT && event.getCode() != KeyCode.LEFT) {
-                inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
-            }
-            setStatus(inputTransitionFunction, "Invalid input!", ex);
-        } catch (Exception ex) {
-            setStatus(inputTransitionFunction, "Invalid input!", ex);
-        }
+            ImageComponent img = new ImageComponent();
+            img.setImage(image);
+            swingNodeTransitionFunctionImage.setContent(img);
+        });
+
+        inputLatestValid = input;
     }
 
-    private void ValidateNumberInput(TextField input) {
+    private void setStatus(Control input, String msg, Throwable ex) {
+        if (ex != null) {
+            if (input != null) {
+                input.setStyle("-fx-border-color: red");
+            }
+            statusMessage.setTextFill(Color.RED);
+            messengerService.addToLog(msg, ex);
+        } else {
+            if (input != null) {
+                input.setStyle("");
+            }
+            statusMessage.setTextFill(Color.GREEN);
+        }
+        statusMessage.setText(msg);
+    }
+
+    private boolean ValidateNumberInput(TextField input) {
         try {
             String value = input.getText().replace(",", ".");
             if (!value.matches(regexNumber)) {
@@ -704,23 +652,9 @@ public class ElementController implements Initializable
             setStatus(input, "", null);
         } catch (InputValidationException ex) {
             setStatus(input, "Invalid input!", ex);
+            return false;
         }
-    }
-
-    private void setStatus(Control input, String msg, Throwable thr) {
-        if (thr != null) {
-            if (input != null) {
-                input.setStyle("-fx-border-color: red");
-            }
-            statusMessage.setTextFill(Color.RED);
-            messengerService.addToLog(msg + " [" + thr.getMessage() + "]");
-        } else {
-            if (input != null) {
-                input.setStyle("");
-            }
-            statusMessage.setTextFill(Color.GREEN);
-        }
-        statusMessage.setText(msg);
+        return true;
     }
 
     @Override
@@ -736,13 +670,58 @@ public class ElementController implements Initializable
                 }
             }
         });
-
-        inputArcWeight.textProperty().addListener(cl -> ValidateNumberInput(inputArcWeight));
-        inputPlaceToken.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceToken));
-        inputPlaceTokenMin.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceTokenMin));
-        inputPlaceTokenMax.textProperty().addListener(cl -> ValidateNumberInput(inputPlaceTokenMax));
-
-        inputTransitionFunction.textProperty().addListener(e -> ParseFunctionInputToImage(null, true));
+        
+        inputName.textProperty().addListener(cl -> {
+            if (!inputName.isDisabled()) {
+                if (inputName.getText() != null) {
+                    elementSelected.setName(inputName.getText());
+                } else {
+                    elementSelected.setName("");
+                }
+            }
+        });
+        inputLabel.textProperty().addListener(cl -> {
+            if (!inputLabel.isDisabled()) {
+                if (inputLabel.getText() != null) {
+                    elementSelected.setLabelText(inputLabel.getText());
+                } else {
+                    elementSelected.setLabelText("");
+                }
+            }
+        });
+        inputDescription.textProperty().addListener(cl -> {
+            if (!inputDescription.isDisabled()) {
+                if (inputDescription.getText() != null) {
+                    elementSelected.setDescription(inputDescription.getText());
+                } else {
+                    elementSelected.setDescription("");
+                }
+            }
+        });
+        inputArcWeight.textProperty().addListener(cl -> {
+            ParseArcWeight();
+        });
+        inputPlaceToken.textProperty().addListener(cl -> {
+            ParsePlaceToken();
+        });
+        inputPlaceTokenMin.textProperty().addListener(cl -> {
+            ParsePlaceToken();
+        });
+        inputPlaceTokenMax.textProperty().addListener(cl -> {
+            ParsePlaceToken();
+        });
+        inputTransitionFunction.textProperty().addListener(e -> {
+            ParseTransitionFunction();
+        });
+        inputTransitionFunction.setOnKeyTyped(eh -> {
+            try {
+                PrettyFormulaParser.parseToImage(inputTransitionFunction.getText().replace(",", "."));
+            } catch (DetailedParseCancellationException ex) {
+                if (eh != null && eh.getCode() != KeyCode.RIGHT && eh.getCode() != KeyCode.LEFT) {
+                    inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
+                }
+            }
+        });
         inputTransitionFunction.setOnMouseClicked(e -> {
             inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
         });
@@ -751,13 +730,7 @@ public class ElementController implements Initializable
         });
 
         menuItemParamEdit.setOnAction(e -> {
-            IDataElement elem = elementSelected;
-            try {
-                StoreElementDetails();
-            } catch (DataServiceException ex) {
-                messengerService.addToLog(ex.getMessage());
-            }
-            mainController.ShowParameters(elem);
+            mainController.ShowParameters(elementSelected);
         });
     }
 }

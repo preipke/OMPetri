@@ -519,7 +519,7 @@ public class XmlModelConverter
         return place;
     }
 
-    private DataTransition getDataTransition(final Element elem) throws IOException {
+    private DataTransition getDataTransition(final Element elem) throws Exception {
 
         NodeList nodes;
         Element tmp;
@@ -569,7 +569,7 @@ public class XmlModelConverter
         return colour;
     }
 
-    private Function getFunction(Element elem) throws IOException {
+    private Function getFunction(Element elem) throws Exception {
         NodeList nodes = elem.getElementsByTagName(tagFunction);
         if (nodes.getLength() > 0) {
             if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {

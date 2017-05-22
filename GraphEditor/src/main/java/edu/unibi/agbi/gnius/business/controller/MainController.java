@@ -11,10 +11,8 @@ import edu.unibi.agbi.gnius.business.controller.editor.model.ModelController;
 import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
-import edu.unibi.agbi.gnius.core.service.MessengerService;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -24,8 +22,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,51 +34,48 @@ import org.springframework.stereotype.Controller;
  * @author PR
  */
 @Controller
-public class MainController implements Initializable {
-    
-    @Autowired private MessengerService messengerService;
+public class MainController implements Initializable
+{
     @Autowired private DataService dataService;
-    
+
     @Autowired private FileMenuController fileMenuController;
     @Autowired private ElementController elementController;
     @Autowired private ModelController modelController;
     @Autowired private ParameterController parameterController;
-    
+
     @FXML private VBox modelFrame;
     @FXML private VBox elementFrame;
     @FXML private VBox parameterFrame;
+    @FXML private Label statusTop;
 
     public Stage getStage() {
         return (Stage) elementFrame.getScene().getWindow();
     }
     
+    public Label getStatusTop() {
+        return statusTop;
+    }
+
     public void HideElementPanel() {
-        if (elementFrame.isVisible()) {
-            try {
-                elementController.StoreElementDetails();
-            } catch (DataServiceException ex) {
-                messengerService.addToLog(ex.getMessage());
-            }
-            elementFrame.setVisible(false);
-        }
+        elementFrame.setVisible(false);
         parameterFrame.setVisible(false);
     }
-    
+
     public void HideModelPanel() {
         modelFrame.setVisible(false);
     }
-    
+
     public void ShowDialogExit(Event event) {
-        
+
         List<DataDao> daos = dataService.getDataDaosWithChanges();
 
         ButtonType buttonSave = new ButtonType("Save");
         ButtonType buttonQuit = new ButtonType("Exit");
         ButtonType buttonCancel = new ButtonType("Cancel");
-        
+
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirm exit");
-        
+
         if (daos.isEmpty()) {
             alert.setHeaderText("Close the application");
             alert.setContentText("Are you sure you want to close the application?");
@@ -112,18 +107,18 @@ public class MainController implements Initializable {
             }
         }
     }
-    
+
     public void ShowElementDetails(IGraphElement element) {
         parameterFrame.setVisible(false);
         elementFrame.setVisible(true);
         elementController.ShowElementDetails(element);
     }
-    
+
     public void ShowModel(DataDao dataDao) {
         modelFrame.setVisible(true);
         modelController.setModel(dataDao);
     }
-    
+
     public void ShowParameters(IDataElement element) {
         elementFrame.setVisible(false);
         parameterFrame.setVisible(true);

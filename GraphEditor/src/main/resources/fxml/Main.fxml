@@ -23,6 +23,11 @@
         <StackPane VBox.vgrow="ALWAYS">
             <children>
                 <fx:include StackPane.alignment="CENTER" source="editor/Tabs.fxml" fx:id="editorTabPane" />
+                <Label StackPane.alignment="TOP_CENTER" id="statusTop" fx:id="statusTop" text="wasd123" >
+                    <StackPane.margin>
+                        <Insets top="30.0" />
+                    </StackPane.margin>
+                </Label>
                 <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="modelFrame" >
                     <children>
                         <fx:include source="editor/model/Model.fxml" />

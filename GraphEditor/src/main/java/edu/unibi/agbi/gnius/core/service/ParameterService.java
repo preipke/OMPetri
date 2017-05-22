@@ -9,10 +9,8 @@ import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -73,18 +71,16 @@ public class ParameterService
      *
      * @param transition
      * @param functionString
-     * @throws edu.unibi.agbi.gnius.core.exception.ParameterServiceException
+     * @throws ParameterServiceException
      */
-    public void setTransitionFunction(DataTransition transition, String functionString) throws ParameterServiceException {
+    public void setTransitionFunction(DataTransition transition, String functionString) throws Exception {
         removeParameterReferences(transition);
         try {
-            Function function = functionBuilder.build(functionString);
-            transition.setFunction(function);
-        } catch (IOException ex) {
-            throw new ParameterServiceException("");
+            transition.setFunction(functionBuilder.build(functionString));
+        } finally {
+            addParameterReferences(transition);
+            removeUnusedReferencingParameter();
         }
-        addParameterReferences(transition);
-        removeUnusedReferencingParameter();
     }
 
     /**

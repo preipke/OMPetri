@@ -73,14 +73,14 @@ public class TabsController implements Initializable
                 try {
                     dataService.styleElement((IGraphNode) node);
                 } catch (DataServiceException ex) {
-                    messengerService.addToLog(ex.getMessage());
+                    messengerService.addToLog("Failed to style nodes for existing model.", ex);
                 }
             });
             dao.getGraph().getConnections().forEach(connection -> {
                 try {
                     dataService.styleElement((IGraphArc) connection);
                 } catch (DataServiceException ex) {
-                    messengerService.addToLog(ex.getMessage());
+                    messengerService.addToLog("Failed to style arcs for existing model.", ex);
                 }
             });
         }
@@ -119,6 +119,8 @@ public class TabsController implements Initializable
         
         editorTabPane.getTabs().add(0, tab);
         editorTabPane.getSelectionModel().select(0);
+        
+        messengerService.setTopStatus("New model created!", null);
     }
     
     private String getTabName(Tab tab, String modelName) {
@@ -167,7 +169,7 @@ public class TabsController implements Initializable
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Close model");
         alert.setHeaderText("Confirm closing model '" + dao.getModel().getName() + "'");
-        alert.setContentText("The model contains unsaved changes. Are you sure you want to close the model and discard any changes?");
+        alert.setContentText("The model contains unsaved work. Are you sure you want to close the model and discard any changes?");
         alert.getButtonTypes().setAll(buttonSave, buttonClose, buttonCancel);
 
         Optional<ButtonType> result = alert.showAndWait();

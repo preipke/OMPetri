@@ -48,6 +48,8 @@ public class FileMenuController implements Initializable
     @Autowired private OpenModelicaExporter omExporter;
 
     @FXML private Menu menuOpenRecent;
+    @FXML private MenuItem menuItemSave;
+    @FXML private MenuItem menuItemSaveAs;
 
     private final ExtensionFilter typeAll;
     private final ExtensionFilter typeXml;
@@ -66,9 +68,6 @@ public class FileMenuController implements Initializable
         typeOm = new ExtensionFilter("OpenModelica file(s) (*.om)", "*.om", "*.OM");
 
         fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(typeXml);
-//        fileChooser.getExtensionFilters().add(typeSbml);
-        fileChooser.getExtensionFilters().add(typeOm);
 
         latestFiles = FXCollections.observableArrayList();
     }
@@ -120,7 +119,6 @@ public class FileMenuController implements Initializable
 
     private boolean SaveSbml(DataDao dao, File file) {
         messengerService.setTopStatus("SBML export is not yet implemented!", null);
-        SaveAs();
         return false;
     }
 
@@ -134,17 +132,25 @@ public class FileMenuController implements Initializable
         return false;
     }
     
-    public File ShowFileChooser(DataDao dao) {
-        if (dao != null) {
-            fileChooser.setSelectedExtensionFilter(typeXml);
-            fileChooser.setTitle("Save model '" + dao.getModel().getName() + "'");
-            if (dao.getModelFile() != null) {
-                fileChooser.setInitialDirectory(dao.getModelFile().getParentFile());
-                fileChooser.setInitialFileName(dao.getModelFile().getName());
-            } else {
-                fileChooser.setInitialFileName(dao.getModel().getName());
-            }
+    public File ShowSaveFile(DataDao dao) {
+        
+        if (dao == null) {
+            return null;
         }
+        
+        fileChooser.getExtensionFilters().clear();
+        fileChooser.getExtensionFilters().add(typeXml);
+//        fileChooser.getExtensionFilters().add(typeSbml);
+        fileChooser.getExtensionFilters().add(typeOm);
+        fileChooser.setTitle("Save model '" + dao.getModel().getName() + "'");
+        
+        if (dao.getModelFile() != null) {
+            fileChooser.setInitialDirectory(dao.getModelFile().getParentFile());
+            fileChooser.setInitialFileName(dao.getModelFile().getName());
+        } else {
+            fileChooser.setInitialFileName(dao.getModel().getName());
+        }
+        
         File file =  fileChooser.showSaveDialog(mainController.getStage());
         if (file != null) {
             latestFilter = fileChooser.getSelectedExtensionFilter();
@@ -152,20 +158,22 @@ public class FileMenuController implements Initializable
         return file;
     }
     
+    public File ShowOpenFile() {
+        fileChooser.getExtensionFilters().clear();
+        fileChooser.getExtensionFilters().add(typeAll);
+        fileChooser.getExtensionFilters().add(typeXml);
+        fileChooser.setTitle("Open model");
+        return fileChooser.showOpenDialog(mainController.getStage());
+    }
+    
     @FXML
     public void New() {
         editorTabsController.CreateModelTab(null);
-        messengerService.setTopStatus("New model created!", null);
     }
 
     @FXML
     public void Open() {
-        if (!fileChooser.getExtensionFilters().contains(typeAll)) {
-            fileChooser.getExtensionFilters().add(typeAll);
-        }
-        fileChooser.setSelectedExtensionFilter(typeAll);
-        fileChooser.setTitle("Open model");
-        File file = ShowFileChooser(null);
+        File file = ShowOpenFile();
         if (file != null) {
             try {
                 Open(file);
@@ -182,8 +190,29 @@ public class FileMenuController implements Initializable
 
     @FXML
     public void Save() {
-        if (dataService.getActiveDao().getModelFile() != null && latestFilter != null) {
-            SaveFile(dataService.getActiveDao(), dataService.getActiveDao().getModelFile(), latestFilter);
+        
+        File file = dataService.getActiveDao().getModelFile();
+        ExtensionFilter filter = null;
+        
+        if (file != null) {
+            
+            String tmp[] = file.getName().replace(".", " ").split(" ");
+            
+            if (tmp.length > 0) {
+
+                String fileExt = "*." + tmp[tmp.length - 1];
+
+                for (String ext : typeXml.getExtensions()) {
+                    if (fileExt.equalsIgnoreCase(ext)) {
+                        filter = typeXml;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (filter != null) {
+            SaveFile(dataService.getActiveDao(), file, filter);
         } else {
             SaveAs();
         }
@@ -195,13 +224,13 @@ public class FileMenuController implements Initializable
      * @return indicates wether the model has been saved or not
      */
     public boolean SaveAs(DataDao dao) {
-        File file = ShowFileChooser(dao);
+        File file = ShowSaveFile(dao);
         return SaveFile(dao, file, latestFilter);
     }
 
     @FXML
     public void SaveAs() {
-        File file = ShowFileChooser(dataService.getActiveDao());
+        File file = ShowSaveFile(dataService.getActiveDao());
         SaveFile(dataService.getActiveDao(), file, latestFilter);
     }
 
@@ -223,9 +252,26 @@ public class FileMenuController implements Initializable
                             }
                         });
                         menuOpenRecent.getItems().add(0, item);
+                        menuOpenRecent.setDisable(false);
                     });
                 }
             }
         });
+        dataService.getDataDaosList().addListener(new ListChangeListener()
+        {
+            @Override
+            public void onChanged(ListChangeListener.Change change) {
+                if (dataService.getDataDaosList().size() > 0) {
+                    menuItemSave.setDisable(false);
+                    menuItemSaveAs.setDisable(false);
+                } else {
+                    menuItemSave.setDisable(true);
+                    menuItemSaveAs.setDisable(true);
+                }
+            }
+        });
+        menuOpenRecent.setDisable(true);
+        menuItemSave.setDisable(true);
+        menuItemSaveAs.setDisable(true);
     }
 }

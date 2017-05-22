@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,7 +56,7 @@ public class DataService
     private static final String PREFIX_ID_GRAPHNODE = "N";
     private static final String PREFIX_ID_PLACE = "P";
     private static final String PREFIX_ID_TRANSITION = "T";
-    
+
     @Autowired private Calculator calculator;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
@@ -77,8 +79,8 @@ public class DataService
     private final DataArc.Type defaultArcType = DataArc.Type.NORMAL;
     private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
     private DataTransition.Type defaultTransitionType = DataTransition.Type.CONTINUOUS;
-    
-    private final List<DataDao> dataDaos = new ArrayList();
+
+    private final ObservableList<DataDao> dataDaos = FXCollections.observableArrayList();
     private DataDao dataDaoActive;
 
     /**
@@ -106,8 +108,8 @@ public class DataService
     public synchronized void changeArcType(DataArc arc, DataArc.Type type) throws DataServiceException {
         validateArcType(arc, type);
         arc.setArcType(type);
-        styleArc(arc);
         dataDaoActive.setHasChanges(true);
+        styleArc(arc);
     }
 
     /**
@@ -128,13 +130,13 @@ public class DataService
             for (IArc arc : place.getArcsOut()) {
                 validateArcType(arc, arc.getArcType());
             }
-            stylePlace(place);
         } catch (DataServiceException ex) {
             place.setPlaceType(typeOld);
             messengerService.addToLog("Cannot change place type to '" + type + "'! [" + ex.getMessage() + "]");
             throw new DataServiceException("Cannot change place type to '" + type + "'!");
         }
         dataDaoActive.setHasChanges(true);
+        stylePlace(place);
     }
 
     /**
@@ -155,13 +157,13 @@ public class DataService
             for (IArc arc : transition.getArcsOut()) {
                 validateArcType(arc, defaultArcType);
             }
-            styleTransition(transition);
         } catch (DataServiceException ex) {
             transition.setTransitionType(typeOld);
             messengerService.addToLog("Cannot change place type to '" + type + "'! [" + ex.getMessage() + "]");
             throw new DataServiceException("Cannot change place type to '" + type + "'!");
         }
         dataDaoActive.setHasChanges(true);
+        styleTransition(transition);
     }
 
     /**
@@ -205,7 +207,7 @@ public class DataService
                 transition = new DataTransition(createTransitionId(), defaultTransitionType);
                 shape = new GraphTransition(createGraphNodeId(), transition);
                 break;
-                
+
             default:
                 throw new DataServiceException("Cannot create element of undefined type!");
         }
@@ -238,7 +240,7 @@ public class DataService
         dataDaoActive.setHasChanges(true);
         return edge;
     }
-    
+
     public DataDao createDao() {
         DataDao dao = new DataDao();
         dao.getModel().setAuthor(System.getProperty("user.name"));
@@ -294,7 +296,7 @@ public class DataService
             clusterRemove(cluster);
         }
 
-        GraphCluster cluster = clusterCreate(nodes, arcs); 
+        GraphCluster cluster = clusterCreate(nodes, arcs);
         dataDaoActive.setHasChanges(true);
         return cluster;
     }
@@ -550,7 +552,7 @@ public class DataService
                 arc = add(arc);
             }
         }
-        
+
         for (IGraphArc arc : arcs) {
             dataDaoActive.getGraph().remove(arc);
         }
@@ -699,14 +701,14 @@ public class DataService
      * @throws DataServiceException
      */
     private synchronized IGraphArc convertArcShape(IGraphArc shape) throws DataServiceException {
-        
+
         // Temporarily remove parameters to allow conversion without failing validation
         Set<String> paramsTmp = new TreeSet();
         for (String key : shape.getDataElement().getRelatedParameterIds()) {
             paramsTmp.add(key);
         }
         shape.getDataElement().getRelatedParameterIds().clear();
-        
+
         // Convert
         remove(shape);
         if (shape instanceof GraphEdge) {
@@ -716,10 +718,10 @@ public class DataService
         }
         add(shape);
         styleArc(shape.getDataElement());
-        
+
         // Restore parameters again
         shape.getDataElement().getRelatedParameterIds().addAll(paramsTmp);
-        
+
         return shape;
     }
 
@@ -897,6 +899,7 @@ public class DataService
 
     /**
      * Validates the subtype of an arc.
+     *
      * @param arc
      * @param typeArc
      * @throws DataServiceException
@@ -923,8 +926,7 @@ public class DataService
      *
      * @param source
      * @param target
-     * @throws DataServiceException thrown in case the connection is not
-     *                                   valid
+     * @throws DataServiceException thrown in case the connection is not valid
      */
     private synchronized void validateConnection(IGraphNode source, IGraphNode target) throws DataServiceException {
 
@@ -957,7 +959,7 @@ public class DataService
                 }
             }
         }
-        
+
     }
 
     /**
@@ -965,7 +967,7 @@ public class DataService
      *
      * @param arc
      * @throws DataServiceException thrown in case the graph arc can not be
-     *                                   deleted
+     *                              deleted
      */
     private synchronized void validateRemoval(IGraphArc arc) throws DataServiceException {
         IDataArc data = arc.getDataElement();
@@ -1005,38 +1007,38 @@ public class DataService
             }
         }
     }
-    
-    private String createGraphNodeId() {
+
+    private synchronized String createGraphNodeId() {
         String id;
         do {
             id = PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextNodeId();
         } while (dataDaoActive.getGraph().contains(id));
         return id;
     }
-    
-    private String createPlaceId() {
+
+    private synchronized String createPlaceId() {
         String id;
         do {
             id = PREFIX_ID_PLACE + dataDaoActive.getModel().getNextPlaceId();
         } while (dataDaoActive.getModel().contains(id));
         return id;
     }
-    
-    private String createTransitionId() {
+
+    private synchronized String createTransitionId() {
         String id;
         do {
             id = PREFIX_ID_TRANSITION + dataDaoActive.getModel().getNextTransitionId();
         } while (dataDaoActive.getModel().contains(id));
         return id;
     }
-    
+
     public synchronized void setActiveDataDao(DataDao dataDao) {
         if (!dataDaos.contains(dataDao)) {
             dataDaos.add(dataDao);
         }
         dataDaoActive = dataDao;
     }
-    
+
     public synchronized DataDao getActiveDao() {
         return dataDaoActive;
     }
@@ -1048,7 +1050,7 @@ public class DataService
     public synchronized PetriNet getActiveModel() {
         return dataDaoActive.getModel();
     }
-    
+
     public synchronized List<DataDao> getDataDaosWithChanges() {
         List<DataDao> daosWithChanges = new ArrayList();
         for (DataDao dataDao : dataDaos) {
@@ -1059,15 +1061,38 @@ public class DataService
         return daosWithChanges;
     }
     
+    public ObservableList getDataDaosList() {
+        return dataDaos;
+    }
+
     public synchronized void removeDataDao(DataDao dataDao) {
         dataDaos.remove(dataDao);
+    }
+
+    public synchronized void setArcWeight(DataArc arc, Weight weight) {
+        arc.addWeight(weight);
+        dataDaoActive.setHasChanges(true);
     }
 
     public void setPlaceTypeDefault(DataPlace.Type type) {
         defaultPlaceType = type;
     }
 
+    public synchronized void setPlaceToken(DataPlace place, Token token) {
+        place.addToken(token);
+        dataDaoActive.setHasChanges(true);
+    }
+
     public void setTransitionTypeDefault(DataTransition.Type type) {
         defaultTransitionType = type;
+    }
+
+    public synchronized void setTransitionFunction(DataTransition transition, String functionString) throws DataServiceException {
+        try {
+            parameterService.setTransitionFunction(transition, functionString);
+            dataDaoActive.setHasChanges(true);
+        } catch (Exception ex) {
+            throw new DataServiceException("Cannot build function from input '" + functionString + "'! [" + ex.getMessage() + "]");
+        }
     }
 }
