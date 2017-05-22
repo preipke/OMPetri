@@ -47,13 +47,20 @@ public class MessengerService
      * Prints a message in the top status label.
      *
      * @param msg the message to print
+     */
+    public void setTopStatus(String msg) {
+        setTopStatusText(msg);
+    }
+
+    /**
+     * Prints a message in the top status label.
+     *
+     * @param msg the message to print
      * @param thr indicates wether this status is related to an error, otherwise
      *            set to null
      */
     public void setTopStatus(String msg, Throwable thr) {
-        
         setTopStatusText(msg);
-        
         if (thr != null) {
             addToLog(msg, thr);
         }

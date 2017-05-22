@@ -21,19 +21,19 @@ import java.util.Arrays;
  * @author PR
  */
 public class SimulationServer extends Thread {
-    
+
     private final int SIZE_OF_INT; // size of modelica int;
-    
+
     private ServerSocket serverSocket;
     private int serverPort = 17015;
-    
+
     private boolean isRunning; // indicates wether the server is up and running
     private boolean isFailed; // indicates wether the server has been terminated
-    private String errorMessage;
-    
+    private SimulationServiceException exception;
+
     private String[] simulationVariables;
     private Simulation simulation;
-    
+
     public SimulationServer() {
         if (Utility.isOsWindows()) {
             SIZE_OF_INT = 4;
@@ -41,35 +41,35 @@ public class SimulationServer extends Thread {
             SIZE_OF_INT = 8;
         }
     }
-    
+
     public boolean isRunning() {
         return isRunning;
     }
-    
+
     public boolean isFailed() {
         return isFailed;
     }
-    
-    public String getErrorMessage() {
-        return errorMessage;
+
+    public SimulationServiceException getException() {
+        return exception;
     }
-    
+
     public int getSimulationServerPort() {
         return serverPort;
     }
-    
+
     public String[] getSimulationVariables() {
         return simulationVariables;
     }
-    
+
     public double getSimulationIterationCount() {
         return simulation.getResults()[0].size();
     }
-    
+
     public void setSimulation(Simulation simulation) {
         this.simulation = simulation;
     }
-    
+
     public void terminate() {
         isRunning = false;
         isFailed = false;
@@ -80,12 +80,12 @@ public class SimulationServer extends Thread {
 
         Socket client;
         DataInputStream inputStream;
-        
+
         isFailed = false;
         isRunning = true;
         simulationVariables = null;
         simulation = null;
-        
+
         /**
          * Open Server Socket.
          */
@@ -97,30 +97,42 @@ public class SimulationServer extends Thread {
         synchronized (this) {
             this.notify(); // notify that socket is ready
         }
-        
+
         /**
          * Process incoming data.
          */
         try {
-            client = serverSocket.accept(); // blocks until connection found
-            inputStream = new DataInputStream(client.getInputStream());
-
-            simulationVariables = ReadSimulationVariables(inputStream);
-            
-            synchronized (this) {
-                this.notify(); // notify thread that variables have been initalized
-                try {
-                    this.wait(); // wait for initialization of simulation storage object
-                } catch (InterruptedException ex) {
-                    throw new SimulationServiceException("Simulation server got interrupted while waiting for simulation storage object! [" + ex + "]");
-                }
+            try {
+                client = serverSocket.accept(); // blocks until connection found
+                inputStream = new DataInputStream(client.getInputStream());
+            } catch (IOException ex) {
+                throw new SimulationServiceException("Failed accepting client!", ex);
             }
-            
-            ReadAndStoreSimulationResults(inputStream, simulation);
-            
-        } catch (IOException | SimulationServiceException ex) {
+
+            try {
+                simulationVariables = ReadSimulationVariables(inputStream);
+            } catch (IOException ex) {
+                throw new SimulationServiceException("Failed reading variables!", ex);
+            }
+
+            try {
+                synchronized (this) {
+                    this.notify(); // notify thread that variables have been initalized
+                    this.wait(); // wait for initialization of simulation storage object
+                }
+            } catch (InterruptedException ex) {
+                throw new SimulationServiceException("Server got interrupted while waiting for storage object!", ex);
+            }
+
+            try {
+                ReadAndStoreSimulationResults(inputStream, simulation);
+            } catch (IOException ex) {
+                throw new SimulationServiceException("Failed reading results!", ex);
+            }
+
+        } catch (SimulationServiceException ex) {
             isFailed = true;
-            errorMessage = "Exception processing incoming data! [" + ex.getMessage() + "]";
+            exception = ex;
         } finally {
             try {
                 serverSocket.close();
@@ -133,18 +145,19 @@ public class SimulationServer extends Thread {
             }
         }
     }
-    
+
     /**
      * Creates the server socket. Returns null if it fails for any reasons.
-     * @return 
+     *
+     * @return
      */
     private ServerSocket CreateServerSocket() {
-        
+
         boolean isSocketReady;
         int countPortsChecked = 0;
-        
+
         isSocketReady = false;
-        
+
         while (!isSocketReady && countPortsChecked < 20) {
             try {
                 serverSocket = new java.net.ServerSocket(serverPort);
@@ -155,32 +168,33 @@ public class SimulationServer extends Thread {
                 countPortsChecked++;
             }
         }
-        
+
         if (isSocketReady) {
             return serverSocket;
         } else {
             return null;
         }
     }
-    
+
     private byte[] buffer;
     private ByteBuffer byteBuffer;
-    
+
     private int vars, doubles, ints, bools, expected, length;
     private byte btmp;
-    
+
     /**
      * Reads data from the given input stream.
+     *
      * @param inputStream
-     * @throws IOException 
+     * @throws IOException
      */
     private String[] ReadSimulationVariables(DataInputStream inputStream) throws IOException {
-        
+
         String[] names;
-        
+
         int lengthMax = 2048;
         buffer = new byte[lengthMax];
-        
+
         // read status
         inputStream.readFully(buffer, 0, 1); // server status id
 
@@ -222,16 +236,15 @@ public class SimulationServer extends Thread {
 //            System.out.println(n);
 //        }
 //        System.out.println("<< END: INCOMING NODE NAMES:");
-        
         return names;
     }
-    
+
     public void ReadAndStoreSimulationResults(DataInputStream inputStream, Simulation simulation) throws IOException {
 
         Object[] data;
         String[] messages;
         int id, index;
-        
+
         while (isRunning) {
 
             inputStream.readFully(buffer, 0, 5); // blocks until msg received

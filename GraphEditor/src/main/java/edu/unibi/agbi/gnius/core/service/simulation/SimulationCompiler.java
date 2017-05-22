@@ -91,7 +91,7 @@ public final class SimulationCompiler
         try {
             process = pb.start();
         } catch (IOException ex) {
-            throw new SimulationServiceException("Failed to starting the build process! [" + ex.getMessage() + "]");
+            throw new SimulationServiceException("Failed to start the build process! [" + ex.getMessage() + "]");
         }
 
         /**
@@ -106,13 +106,10 @@ public final class SimulationCompiler
         /**
          * Read the build process output and parse the path to the executable.
          */
-        try {
-            String output = parseInput(process.getInputStream());
-            simulationReferences.setSimulationExecutablePath(
-                    parseSimulationExecutablePath(output));
-        } catch (SimulationServiceException ex) {
-            throw new SimulationServiceException(ex.getMessage());
-        }
+        String output;
+        output = parseInput(process.getInputStream());
+        output = parseSimulationExecutablePath(output);
+        simulationReferences.setSimulationExecutablePath(output);
 
         return simulationReferences;
     }
@@ -218,7 +215,7 @@ public final class SimulationCompiler
             input.read(bytes);
             output = new String(bytes);
         } catch (IOException ex) {
-            throw new SimulationServiceException("Exception reading the build process output!");
+            throw new SimulationServiceException("Exception reading the simulation build process output! [" + ex.getMessage() + "]");
         }
 
         return output;
@@ -231,23 +228,25 @@ public final class SimulationCompiler
      * @param output
      * @return
      */
-    private String parseSimulationExecutablePath(String output) throws SimulationServiceException {
+    private String parseSimulationExecutablePath(final String output) throws SimulationServiceException {
 
+        String path;
+        
         try {
-            output = output.substring(output.lastIndexOf("{"));
-            output = Utility.parseSubstring(output, "\"", "\"");
+            path = output.substring(output.lastIndexOf("{"));
+            path = Utility.parseSubstring(path, "\"", "\"");
         } catch (Exception ex) {
-            throw new SimulationServiceException("Path for simulation executable can not be parsed! ['" + output + "']");
+            throw new SimulationServiceException("Path to simulation executable can not be parsed. Output: \n" + output);
         }
 
-        if (output == null) {
-            throw new SimulationServiceException("Path for simulation executable is not available. Build failed! ['" + output + "']");
+        if (path == null) {
+            throw new SimulationServiceException("Build failed. Output: \n" + output);
         }
 
         if (Utility.isOsWindows()) {
-            output += ".exe";
+            path += ".exe";
         }
 
-        return output;
+        return path;
     }
 }

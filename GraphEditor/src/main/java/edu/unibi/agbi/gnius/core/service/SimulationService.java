@@ -5,12 +5,11 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
 import edu.unibi.agbi.gnius.business.controller.editor.model.SimulationController;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
@@ -36,7 +35,6 @@ public class SimulationService
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private SimulationController simulationControlsController;
-    @Autowired private ElementController elementController;
     @Autowired private SimulationCompiler simulationCompiler;
     
 
@@ -67,9 +65,14 @@ public class SimulationService
             threads.remove(t);
         });
 
-        messengerService.addToLog("Starting simulation...");
+        Platform.runLater(() -> {
+            messengerService.setTopStatus("Starting simulation!");
+            messengerService.addToLog("Starting simulation for model '" + dataService.getActiveModel().getName() + "'...");
+        });
         Thread thread = new Thread(() -> {
 
+            DataDao data = dataService.getActiveDao();
+            
             try {
                 /**
                  * Execute compiler.
@@ -79,9 +82,9 @@ public class SimulationService
                     Platform.runLater(() -> {
                         simulationControlsController.setSimulationProgress(-1);
                     });
-                    simulationReferences = simulationCompiler.compile(dataService.getActiveModel());
+                    simulationReferences = simulationCompiler.compile(data.getModel());
                 } catch (SimulationServiceException ex) {
-                    throw new SimulationServiceException("Simulation failed during compilation! [" + ex.getMessage() + "]");
+                    throw new SimulationServiceException("Simulation failed!", ex);
                 }
 
                 /**
@@ -93,12 +96,12 @@ public class SimulationService
                     try {
                         simulationServer.wait(); // wait for notification from server -> started or failed
                     } catch (InterruptedException ex) {
-                        throw new SimulationServiceException("Simulation failed while waiting for server start! [" + ex.getMessage() + "]");
+                        throw new SimulationServiceException("Simulation failed while waiting for server start!", ex);
                     }
                 }
                 if (!simulationServer.isRunning()) {
                     if (simulationServer.isFailed()) {
-                        throw new SimulationServiceException("Simulation failed while starting the server! [" + simulationServer.getErrorMessage() + "]");
+                        throw new SimulationServiceException("Simulation failed while starting the server!", simulationServer.getException());
                     } else {
                         throw new SimulationServiceException("Simulation server is not running!");
                     }
@@ -118,13 +121,13 @@ public class SimulationService
                         try {
                             simulationExecuter.wait(); // wait for notification from executer -> process started or failed
                         } catch (InterruptedException ex) {
-                            throw new SimulationServiceException("Simulation failed while waiting for simulation process start! [" + ex.getMessage() + "]");
+                            throw new SimulationServiceException("Executer got interrupted!", ex);
                         }
                     }
                     simulationExecuterOutputReader = simulationExecuter.getSimulationOutputReader();
                 }
                 if (simulationExecuter.isFailed()) {
-                    throw new SimulationServiceException("Simulation failed while starting the simulation process! [" + simulationExecuter.getErrorMessage() + "]");
+                    throw new SimulationServiceException("Executing simulation failed!", simulationExecuter.getException());
                 }
 
                 /**
@@ -135,15 +138,15 @@ public class SimulationService
                         try {
                             simulationServer.wait(); // wait for notification from server -> variables initialized or failed
                         } catch (InterruptedException ex) {
-                            throw new SimulationServiceException("Simulation failed while waiting for data storage initialization! [" + ex.getMessage() + "]");
+                            throw new SimulationServiceException("Storage initialization failed!", ex);
                         }
                     }
                 }
                 if (!simulationServer.isRunning()) {
                     if (simulationServer.isFailed()) {
-                        throw new SimulationServiceException("Simulation failed while initializing variables! [" + simulationServer.getErrorMessage() + "]");
+                        throw new SimulationServiceException("Server failed!", simulationServer.getException());
                     } else {
-                        throw new SimulationServiceException("Simulation server is not running!");
+                        throw new SimulationServiceException("Server is not running!");
                     }
                 }
 
@@ -192,10 +195,16 @@ public class SimulationService
                     }
                 }
                 
+                Platform.runLater(() -> {
+                    messengerService.setTopStatus("Simulation for '" + data.getModel().getName() + "' finished!");
+                    messengerService.addToLog("Simulation for '" + data.getModel().getName() + "' finished!");
+                });
             } catch (SimulationServiceException ex) {
-                messengerService.addToLog(ex.getMessage());
+                Platform.runLater(() -> {
+                    messengerService.setTopStatus("Simulation for '" + data.getModel().getName() + "' failed!");
+                    messengerService.addToLog("Simulation for '" + data.getModel().getName() + "' failed! " + ex.getMessage(), ex.getThrowable());
+                });
             } finally {
-                messengerService.addToLog("Finished simulating!");
                 Platform.runLater(() -> {
                     simulationControlsController.setSimulationProgress(1);
                     simulationControlsController.Unlock();

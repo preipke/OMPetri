@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service.simulation;
 
+import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,7 +25,7 @@ public class SimulationExecuter extends Thread
     private final int simServerPort;
 
     private boolean isFailed;
-    private String errorMessage;
+    private SimulationServiceException exception;
 
     private double simStopTime;
     private int simIntervals;
@@ -43,8 +44,8 @@ public class SimulationExecuter extends Thread
         return isFailed;
     }
 
-    public String getErrorMessage() {
-        return errorMessage;
+    public SimulationServiceException getException() {
+        return exception;
     }
 
     public void setSimulationStopTime(double simStopTime) {
@@ -132,7 +133,7 @@ public class SimulationExecuter extends Thread
             simulationOutputReader = new BufferedReader(new InputStreamReader(simulationProcess.getInputStream()));
         } catch (IOException ex) {
             isFailed = true;
-            errorMessage = "Failed starting the simulation process! [" + ex.getMessage() + "]";
+            exception = new SimulationServiceException("Failed to start the simulation process!", ex);
         } finally {
             synchronized (this) {
                 this.notifyAll();
