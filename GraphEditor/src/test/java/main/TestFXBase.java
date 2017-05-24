@@ -1,7 +1,6 @@
 package main;
 
 import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -9,7 +8,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gravisfx.presentation.GraphScene;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +17,14 @@ import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.testfx.framework.junit.ApplicationTest;
 import org.testfx.api.*;
 
@@ -31,14 +32,14 @@ import org.testfx.api.*;
  *
  * @author PR
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@SpringBootTest(classes=Main.class)
 public class TestFXBase extends ApplicationTest {
 
     private final static boolean HEADLESS = true;
-    private final static String EDITOR_PANE_ID = "#editorPane";
     
-    protected DataService dataGraphService;
-    protected SelectionService selectionService;
-    protected DataDao dataDao;
+    @Autowired protected DataService dataService;
+    @Autowired protected SelectionService selectionService;
 
     @BeforeClass
     public static void setupHeadlessMode() {
@@ -54,17 +55,8 @@ public class TestFXBase extends ApplicationTest {
 
     @Before
     public void setUpClass() throws Exception {
-
         ApplicationTest.launch(Main.class); // verifies that MainApp is a JavaFX application (extends Application)
-
-//        BorderPane editorPane = find(EDITOR_PANE_ID);
-//        GraphScene graphScene = (GraphScene) editorPane.getCenter();
-//        
-//        dataGraphService = (DataService) graphScene.getObjects().get(0);
-//        selectionService = (SelectionService) graphScene.getObjects().get(1);
-//        
-//        dataDao = dataGraphService.getActiveModel();
-//        graphDao = (GraphDao) graphScene.getGraph();
+        dataService.setActiveDataDao(dataService.createDao());
     }
 
     @Override
@@ -188,7 +180,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                cluster.add(dataGraphService.group(elements));
+                cluster.add(dataService.group(elements));
             } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -208,7 +200,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                dataGraphService.ungroup(clusters);
+                dataService.ungroup(clusters);
             } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -227,7 +219,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                dataGraphService.remove(arc);
+                dataService.remove(arc);
             } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -242,7 +234,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                dataGraphService.remove(node);
+                dataService.remove(node);
             } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -253,15 +245,15 @@ public class TestFXBase extends ApplicationTest {
     }
 
     private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataServiceException {
-        return dataGraphService.connect(source, target);
+        return dataService.connect(source, target);
     }
 
     private IGraphNode CreatePlace() throws DataServiceException {
-        return dataGraphService.create(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
+        return dataService.create(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
     private IGraphNode CreateTransition() throws DataServiceException {
-        return dataGraphService.create(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
+        return dataService.create(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 
     private void waitForFxThread(AtomicBoolean isFinished) {

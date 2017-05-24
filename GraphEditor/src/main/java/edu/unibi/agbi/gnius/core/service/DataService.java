@@ -175,7 +175,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    public IGraphArc connect(IGraphNode source, IGraphNode target) throws DataServiceException {
+    public synchronized IGraphArc connect(IGraphNode source, IGraphNode target) throws DataServiceException {
         IGraphArc arc;
         validateConnection(source, target);
         arc = createConnection(source, target, null);
@@ -247,7 +247,6 @@ public class DataService
         dao.getModel().setDescription("New model.");
         dao.getModel().setName("Untitled");
         dao.getModel().add(DEFAULT_COLOUR);
-        dao.setHasChanges(true);
         return dao;
     }
 
@@ -479,7 +478,7 @@ public class DataService
      * @param node
      * @return
      */
-    private synchronized IGraphNode add(IGraphNode node) throws DataServiceException {
+    private IGraphNode add(IGraphNode node) throws DataServiceException {
         if (node.getDataElement() != null) {
             if (node.getDataElement().getElementType() != Element.Type.CLUSTER) {
                 if (dataDaoActive.getModel().containsAndNotEqual(node.getDataElement())) {
@@ -502,7 +501,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized GraphCluster clusterCreate(List<IGraphNode> nodes, List<IGraphArc> arcs) throws DataServiceException {
+    private GraphCluster clusterCreate(List<IGraphNode> nodes, List<IGraphArc> arcs) throws DataServiceException {
 
         List<IGraphArc> arcsToCluster = new ArrayList();
         List<IGraphArc> arcsFromCluster = new ArrayList();
@@ -568,7 +567,7 @@ public class DataService
      * @param cluster
      * @return
      */
-    private synchronized IGraphCluster clusterRemove(IGraphCluster cluster) throws DataServiceException {
+    private IGraphCluster clusterRemove(IGraphCluster cluster) throws DataServiceException {
 
         List<IGraphArc> clusteredArcs = cluster.getDataElement().getClusteredArcs();
         List<IGraphNode> clusteredNodes = cluster.getDataElement().getClusteredNodes();
@@ -603,7 +602,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized IGraphNode clone(IGraphNode target) throws DataServiceException {
+    private IGraphNode clone(IGraphNode target) throws DataServiceException {
         IDataNode node = target.getDataElement();
         switch (node.getElementType()) {
             case PLACE:
@@ -623,7 +622,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized IGraphNode copy(IGraphNode target) throws DataServiceException {
+    private IGraphNode copy(IGraphNode target) throws DataServiceException {
         IDataNode node = target.getDataElement();
         switch (node.getElementType()) {
             case PLACE:
@@ -649,7 +648,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized IGraphArc createConnection(IGraphNode source, IGraphNode target, DataArc dataArc) throws DataServiceException {
+    private IGraphArc createConnection(IGraphNode source, IGraphNode target, DataArc dataArc) throws DataServiceException {
 
         if (dataArc == null) {
             dataArc = new DataArc(source.getDataElement(), target.getDataElement(), defaultArcType);
@@ -700,7 +699,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized IGraphArc convertArcShape(IGraphArc shape) throws DataServiceException {
+    private IGraphArc convertArcShape(IGraphArc shape) throws DataServiceException {
 
         // Temporarily remove parameters to allow conversion without failing validation
         Set<String> paramsTmp = new TreeSet();
@@ -731,7 +730,7 @@ public class DataService
      * @param node
      * @return
      */
-    private synchronized IDataElement removeData(IDataElement element) throws DataServiceException {
+    private IDataElement removeData(IDataElement element) throws DataServiceException {
         if (element != null) {
             if (element.getShapes().isEmpty()) {
                 dataDaoActive.getModel().remove(element);
@@ -748,7 +747,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized IGraphArc removeShape(IGraphArc arc) throws DataServiceException {
+    private IGraphArc removeShape(IGraphArc arc) throws DataServiceException {
 
         dataDaoActive.getGraph().remove(arc);
         if (arc.getDataElement() != null) {
@@ -781,7 +780,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    private synchronized IGraphNode removeShape(IGraphNode node) throws DataServiceException {
+    private IGraphNode removeShape(IGraphNode node) throws DataServiceException {
         dataDaoActive.getGraph().remove(node);
         if (node.getDataElement() != null) {
             node.getDataElement().getShapes().remove(node);
@@ -796,7 +795,7 @@ public class DataService
      * @param element
      * @param styleParent
      */
-    private synchronized void setElementStyle(IDataElement element, String styleParent, String styleChildren) {
+    private void setElementStyle(IDataElement element, String styleParent, String styleChildren) {
         for (IGraphElement elem : element.getShapes()) {
             elem.getParentElementHandles().forEach(s -> {
                 s.setActiveStyleClass(styleParent);
@@ -807,7 +806,7 @@ public class DataService
         }
     }
 
-    private synchronized void styleArc(DataArc arc) throws DataServiceException {
+    private void styleArc(DataArc arc) throws DataServiceException {
         if (arc.getArcType() != null) {
             switch (arc.getArcType()) {
                 case INHIBITORY:
@@ -848,7 +847,7 @@ public class DataService
         }
     }
 
-    private synchronized void stylePlace(DataPlace place) throws DataServiceException {
+    private void stylePlace(DataPlace place) throws DataServiceException {
         switch (place.getPlaceType()) {
             case CONTINUOUS:
                 place.getShapes().forEach(s -> {
@@ -869,7 +868,7 @@ public class DataService
         }
     }
 
-    private synchronized void styleTransition(DataTransition transition) throws DataServiceException {
+    private void styleTransition(DataTransition transition) throws DataServiceException {
         switch (transition.getTransitionType()) {
             case CONTINUOUS:
                 transition.getShapes().forEach(s -> {
@@ -904,7 +903,7 @@ public class DataService
      * @param typeArc
      * @throws DataServiceException
      */
-    private synchronized void validateArcType(IArc arc, DataArc.Type typeArc) throws DataServiceException {
+    private void validateArcType(IArc arc, DataArc.Type typeArc) throws DataServiceException {
         if (Element.Type.PLACE == arc.getTarget().getElementType()) {
             switch (typeArc) {
                 case NORMAL:
@@ -928,7 +927,7 @@ public class DataService
      * @param target
      * @throws DataServiceException thrown in case the connection is not valid
      */
-    private synchronized void validateConnection(IGraphNode source, IGraphNode target) throws DataServiceException {
+    private void validateConnection(IGraphNode source, IGraphNode target) throws DataServiceException {
 
         IDataNode dataSource = source.getDataElement();
         IDataNode dataTarget = target.getDataElement();
@@ -969,7 +968,7 @@ public class DataService
      * @throws DataServiceException thrown in case the graph arc can not be
      *                              deleted
      */
-    private synchronized void validateRemoval(IGraphArc arc) throws DataServiceException {
+    private void validateRemoval(IGraphArc arc) throws DataServiceException {
         IDataArc data = arc.getDataElement();
         if (data != null) {
             if (data.getShapes().size() <= 1) {
@@ -988,7 +987,7 @@ public class DataService
      * @param node
      * @throws DataServiceException
      */
-    private synchronized void validateRemoval(IGraphNode node) throws DataServiceException {
+    private void validateRemoval(IGraphNode node) throws DataServiceException {
         IDataNode data = node.getDataElement();
         if (data != null) {
             try {
@@ -1008,7 +1007,7 @@ public class DataService
         }
     }
 
-    private synchronized String createGraphNodeId() {
+    private String createGraphNodeId() {
         String id;
         do {
             id = PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextNodeId();
@@ -1016,7 +1015,7 @@ public class DataService
         return id;
     }
 
-    private synchronized String createPlaceId() {
+    private String createPlaceId() {
         String id;
         do {
             id = PREFIX_ID_PLACE + dataDaoActive.getModel().getNextPlaceId();
@@ -1024,7 +1023,7 @@ public class DataService
         return id;
     }
 
-    private synchronized String createTransitionId() {
+    private String createTransitionId() {
         String id;
         do {
             id = PREFIX_ID_TRANSITION + dataDaoActive.getModel().getNextTransitionId();
