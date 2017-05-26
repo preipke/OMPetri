@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
 import edu.unibi.agbi.gnius.business.controller.editor.model.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -32,6 +31,7 @@ import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import edu.unibi.agbi.gravisfx.entity.IGravisChild;
+import javafx.animation.Animation;
 
 /**
  *
@@ -49,20 +49,19 @@ public class MouseEventHandler {
 
     @Autowired private Calculator calculator;
 
-    private boolean isInitialized = false;
-    private boolean isPrimaryButtonDown = false;
-    private boolean isSecondaryButtonDown = false;
-
-    private final double secondsBeforeCreatingArc = .35d; // TODO assign custom value in preferences
-
-    private final Rectangle selectionFrame;
-
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInDraggingMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInNodeCreationMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInSelectionFrameMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInFreeMode = new SimpleBooleanProperty(true);
+
+    private final PauseTransition pauseTransition;
+    private final Rectangle selectionFrame;
+    private final double secondsBeforeCreatingArc = .35d; // TODO assign custom value in preferences
+
+    private boolean isInitialized = false;
+    private boolean isPrimaryButtonDown = false;
 
     private MouseEvent mouseEventMovedLatest;
     private MouseEvent mouseEventMovedPrevious;
@@ -76,6 +75,7 @@ public class MouseEventHandler {
         selectionFrame.setStrokeWidth(1);
         selectionFrame.setStrokeLineCap(StrokeLineCap.ROUND);
         selectionFrame.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.6));
+        pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
     }
 
     /**
@@ -92,11 +92,6 @@ public class MouseEventHandler {
         // reihenfolge: pressed -> released -> clicked
     }
 
-    /**
-     * Sets the on mouse move event actions.
-     * Also registers key events. Must be done after showing stage (Scene is
-     * null before).
-     */
     private void onMouseMoved(MouseEvent event, GraphPane pane) {
 
         mouseEventMovedLatest = event;
@@ -218,12 +213,11 @@ public class MouseEventHandler {
         mouseEventMovedPrevious = event;
     }
 
-    private void onMousePressed(MouseEvent event, GraphPane pane) {
+    private void onMousePressed(final MouseEvent event, GraphPane pane) {
 
         mainController.HideElementPanel();
 
         isPrimaryButtonDown = false;
-        isSecondaryButtonDown = false;
 
         mouseEventMovedPrevious = event; // used for dragging to avoid initial null pointer
         mouseEventPressed.consume(); // avoids multiple pause transitions
@@ -273,12 +267,15 @@ public class MouseEventHandler {
                     }
 
                     if (isInFreeMode.get()) {
+                        
+                        if (pauseTransition != null && pauseTransition.getStatus() == Animation.Status.RUNNING) {
+                            System.out.println("Double click!");
+                        }
 
                         /**
                          * Arc Creation Mode. Creates a new arc after a certain
                          * time if event is not consumed.
                          */
-                        PauseTransition pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
                         pauseTransition.setOnFinished(e -> {
                             if (!event.isConsumed()) {
                                 try {
@@ -286,9 +283,6 @@ public class MouseEventHandler {
                                     selectionService.unselectAll();
                                     selectionService.highlight(node);
                                     arcTemp = dataService.createTemporaryArc(node);
-                                    arcTemp.endXProperty().set(node.translateXProperty().add(node.getOffsetX()).get());
-                                    arcTemp.endYProperty().set(node.translateYProperty().add(node.getOffsetY()).get());
-
                                 } catch (Exception ex) {
                                     messengerService.addToLog(ex.getMessage());
                                 }
@@ -344,12 +338,6 @@ public class MouseEventHandler {
                     }
                 }
             }
-        } else if (event.isSecondaryButtonDown()) {
-
-            isSecondaryButtonDown = true;
-
-            // TODO
-            // Context menu
         }
     }
 

@@ -56,11 +56,7 @@ public class TabsController implements Initializable
 
     @Value("${css.editor.pane}") private String paneStyleClass;
     
-    private GraphScene graphScene;
-
-    public GraphPane getGraphPane() {
-        return graphScene.getGraphPane();
-    }
+    private GraphPane activePane;
     
     public void CreateModelTab(DataDao dataDao) {
         
@@ -91,7 +87,7 @@ public class TabsController implements Initializable
         scene.getGraphPane().getStyleClass().add(paneStyleClass);
         
         mouseEventHandler.registerTo(scene.getGraphPane());
-        scrollEventHandler.registerTo(scene.getGraphPane());
+        scrollEventHandler.registerTo(scene.getGraphPane(), dao);
         
         BorderPane pane = new BorderPane();
         pane.setPadding(new Insets(5));
@@ -105,22 +101,30 @@ public class TabsController implements Initializable
         });
         tab.selectedProperty().addListener(cl -> {
             if (tab.isSelected()) {
+                activePane = scene.getGraphPane();
                 dataService.setActiveDataDao(dao);
                 mainController.HideElementPanel();
                 mainController.ShowModel(dao);
             }
         });
         tab.setOnCloseRequest(eh -> {
-            ShowConfirmationDialog(eh);
+            if (dao.hasChanges()) {
+                ShowConfirmationDialog(eh);
+            }
         });
         tab.setOnClosed(eh -> {
             dataService.removeDataDao(dao);
+            dao.clear();
         });
         
         editorTabPane.getTabs().add(0, tab);
         editorTabPane.getSelectionModel().select(0);
         
         messengerService.setTopStatus("New model created!", null);
+    }
+    
+    public GraphPane getActiveGraphPane() {
+        return activePane;
     }
     
     private String getTabName(Tab tab, String modelName) {

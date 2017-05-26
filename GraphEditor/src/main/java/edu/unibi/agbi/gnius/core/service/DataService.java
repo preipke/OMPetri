@@ -212,11 +212,26 @@ public class DataService
                 throw new DataServiceException("Cannot create element of undefined type!");
         }
         Point2D pos = calculator.getCorrectedMousePosition(dataDaoActive.getGraph(), posX, posY);
-        shape.translateXProperty().set(pos.getX());
-        shape.translateYProperty().set(pos.getY());
+        shape.translateXProperty().set(pos.getX() + shape.getOffsetX());
+        shape.translateYProperty().set(pos.getY() + shape.getOffsetY());
         shape = add(shape);
         dataDaoActive.setHasChanges(true);
         return shape;
+    }
+
+    /**
+     * Creates a new data access object.
+     * 
+     * @return 
+     */
+    public DataDao createDao() {
+        DataDao dao = new DataDao();
+        dao.getModel().setAuthor(System.getProperty("user.name"));
+        dao.getModel().setDescription("New model.");
+        dao.getModel().setName("Untitled");
+        dao.getModel().add(DEFAULT_COLOUR);
+        dao.setHasChanges(false);
+        return dao;
     }
 
     /**
@@ -237,17 +252,7 @@ public class DataService
         edge.setArrowHeadVisible(true);
         edge.setCircleHeadVisible(false);
         dataDaoActive.getGraph().add(edge);
-        dataDaoActive.setHasChanges(true);
         return edge;
-    }
-
-    public DataDao createDao() {
-        DataDao dao = new DataDao();
-        dao.getModel().setAuthor(System.getProperty("user.name"));
-        dao.getModel().setDescription("New model.");
-        dao.getModel().setName("Untitled");
-        dao.getModel().add(DEFAULT_COLOUR);
-        return dao;
     }
 
     /**
@@ -363,11 +368,11 @@ public class DataService
      * the latest mouse pointer location.
      *
      * @param nodes
-     * @param clone
+     * @param cutting
      * @return
      * @throws DataServiceException
      */
-    public synchronized List<IGraphNode> paste(List<IGraphNode> nodes, boolean clone) throws DataServiceException {
+    public synchronized List<IGraphNode> paste(List<IGraphNode> nodes, boolean cutting) throws DataServiceException {
 
         Point2D center = calculator.getCenter(nodes);
         Point2D position = calculator.getCorrectedMousePositionLatest(dataDaoActive.getGraph());
@@ -377,12 +382,13 @@ public class DataService
 
         for (int i = 0; i < nodes.size(); i++) {
 
-            if (clone) {
-                shape = clone(nodes.get(i));
+            if (cutting) {
+//                shape = clone(nodes.get(i));
+                shape = nodes.get(i);
             } else {
                 shape = copy(nodes.get(i));
+                add(shape);
             }
-            add(shape);
 
             shape.translateXProperty().set(nodes.get(i).translateXProperty().get() - center.getX() + position.getX());
             shape.translateYProperty().set(nodes.get(i).translateYProperty().get() - center.getY() + position.getY());
@@ -958,7 +964,6 @@ public class DataService
                 }
             }
         }
-
     }
 
     /**
@@ -1010,7 +1015,7 @@ public class DataService
     private String createGraphNodeId() {
         String id;
         do {
-            id = PREFIX_ID_GRAPHNODE + dataDaoActive.getGraph().getNextNodeId();
+            id = PREFIX_ID_GRAPHNODE + dataDaoActive.getNextNodeId();
         } while (dataDaoActive.getGraph().contains(id));
         return id;
     }
@@ -1018,7 +1023,7 @@ public class DataService
     private String createPlaceId() {
         String id;
         do {
-            id = PREFIX_ID_PLACE + dataDaoActive.getModel().getNextPlaceId();
+            id = PREFIX_ID_PLACE + dataDaoActive.getNextPlaceId();
         } while (dataDaoActive.getModel().contains(id));
         return id;
     }
@@ -1026,7 +1031,7 @@ public class DataService
     private String createTransitionId() {
         String id;
         do {
-            id = PREFIX_ID_TRANSITION + dataDaoActive.getModel().getNextTransitionId();
+            id = PREFIX_ID_TRANSITION + dataDaoActive.getNextTransitionId();
         } while (dataDaoActive.getModel().contains(id));
         return id;
     }

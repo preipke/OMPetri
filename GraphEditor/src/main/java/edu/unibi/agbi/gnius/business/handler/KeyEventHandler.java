@@ -9,6 +9,9 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -28,7 +31,9 @@ public class KeyEventHandler
     @Autowired private MessengerService messengerService;
     @Autowired private MouseEventHandler mouseEventHandler;
     
-    private boolean isCloning;
+    private DataDao activeDao;
+    private List<IGraphNode> nodes;
+    private boolean isCutting;
     
     public void registerTo(Scene scene) {
         scene.setOnKeyPressed(e -> onKeyPressed(e));
@@ -57,17 +62,23 @@ public class KeyEventHandler
         else if (event.isControlDown()) {
 
             if (event.getCode().equals(KeyCode.C)) {
-                selectionService.copy();
-                isCloning = false;
+                activeDao = dataService.getActiveDao();
+                nodes = selectionService.copy();
+                isCutting = false;
 
             } else if (event.getCode().equals(KeyCode.X)) {
-                selectionService.copy();
-                isCloning = true;
+                activeDao = dataService.getActiveDao();
+                nodes = selectionService.copy();
+                isCutting = true;
 
             } else if (event.getCode().equals(KeyCode.V)) {
                 selectionService.unselectAll();
                 try {
-                    selectionService.selectAll(dataService.paste(selectionService.getCopiedNodes(), isCloning));
+                    if (activeDao != dataService.getActiveDao()) {
+                        selectionService.selectAll(dataService.paste(nodes, false));
+                    } else {
+                        selectionService.selectAll(dataService.paste(nodes, isCutting));
+                    }
                 } catch (DataServiceException ex) {
                     messengerService.addToLog(ex);
                 }

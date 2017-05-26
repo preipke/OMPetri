@@ -21,9 +21,18 @@ public class DataDao
     private File fileModel;
     private boolean hasChanges;
     
+    private int nextNodeId = 1;
+    private int nextPlaceId = 1;
+    private int nextTransitionId = 1;
+    
+    private int scalePower = 0;
+    
     public DataDao() {
         model = new PetriNet();
         graph = new Graph();
+        nextNodeId = 1;
+        nextPlaceId = 1;
+        nextTransitionId = 1;
     }
     
     public PetriNet getModel() {
@@ -32,6 +41,11 @@ public class DataDao
     
     public Graph getGraph() {
         return graph;
+    }
+    
+    public void clear() {
+        graph.clear();
+        model.clear();
     }
     
     public void setModelFile(File file) {
@@ -48,5 +62,25 @@ public class DataDao
     
     public boolean hasChanges() {
         return hasChanges;
+    }
+    
+    public int getNextNodeId() {
+        return nextNodeId++;
+    }
+    
+    public int getNextPlaceId() {
+        return nextPlaceId++;
+    }
+    
+    public int getNextTransitionId() {
+        return nextTransitionId++;
+    }
+    
+    public int getScalePower() {
+        return scalePower;
+    }
+    
+    public void setScalePower(int power) {
+        scalePower = power;
     }
 }

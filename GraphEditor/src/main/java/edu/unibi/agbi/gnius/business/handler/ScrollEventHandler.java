@@ -5,8 +5,12 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
+import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.scene.input.ScrollEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,50 +20,44 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScrollEventHandler
 {
-    private final double scaleBase = 1.0;
-    private final double scaleFactor = 1.1;
-    private int scalePower = 0;
+    @Autowired private MainController mainController;
     
-    private final double SCALE_MAX = 10.d;
-    private final double SCALE_MIN = .01d;
+    @Value("${zoom.scale.base}") private double scaleBase;
+    @Value("${zoom.scale.factor}") private double scaleFactor;
+    @Value("${zoom.scale.max}") private double scaleMax;
+    @Value("${zoom.scale.min}") private double scaleMin;
     
-    public void registerTo(GraphPane graphPane) {
+    public void registerTo(GraphPane graphPane, DataDao dao) {
         
         graphPane.setOnScroll(( ScrollEvent event ) -> {
             
-            double scale_t1, scale_t0;
+            double scale_t0, scale_t1;
             
-            scale_t0 = scaleBase * Math.pow(scaleFactor , scalePower);
+            scale_t0 = scaleBase * Math.pow(scaleFactor , dao.getScalePower());
             
             if (event.getDeltaY() > 0) {
-                scalePower++;
+                scale_t1 = scaleBase * Math.pow(scaleFactor, dao.getScalePower() + 1);
+                if (scale_t1 > scaleMax) {
+                    return;
+                }
+                dao.setScalePower(dao.getScalePower() + 1);
             } else {
-                scalePower--;
+                scale_t1 = scaleBase * Math.pow(scaleFactor, dao.getScalePower() - 1);
+                if (scale_t1 < scaleMin) {
+                    return;
+                }
+                dao.setScalePower(dao.getScalePower() - 1);
             }
-            
-            scale_t1 = scaleBase * Math.pow(scaleFactor , scalePower);
             
             graphPane.getTopLayer().getScale().setX(scale_t1);
             graphPane.getTopLayer().getScale().setY(scale_t1);
             
-            /**
-             * Following is used to make sure focus is kept on the mouse pointer location.
-             * TODO apply max / min zoom.
-             */
-            double startX, startY, endX, endY;
-            double translateX, translateY;
-            
-            startX = event.getX() - graphPane.getTopLayer().translateXProperty().get();
-            startY = event.getY() - graphPane.getTopLayer().translateYProperty().get();
-
-            endX = startX * scale_t1 / scale_t0;
-            endY = startY * scale_t1 / scale_t0;
-
-            translateX = startX - endX;
-            translateY = startY - endY;
-                
-            graphPane.getTopLayer().setTranslateX(graphPane.getTopLayer().translateXProperty().get() + translateX);
-            graphPane.getTopLayer().setTranslateY(graphPane.getTopLayer().translateYProperty().get() + translateY);
+            mainController.ApplyZoomOffset(
+                    graphPane, 
+                    event.getX(), 
+                    event.getY(), 
+                    scale_t1 / scale_t0
+            );
         });
     }
 }

@@ -35,8 +35,6 @@ public class ToolsController implements Initializable
     @FXML private MenuItem buttonCreatePlace;
     @FXML private MenuItem buttonCreateTransition;
     @FXML private Button buttonRemove;
-    @FXML private Button buttonCopy;
-    @FXML private Button buttonClone;
     @FXML private Button buttonClusterCreate;
     @FXML private Button buttonClusterRemove;
     
@@ -88,8 +86,6 @@ public class ToolsController implements Initializable
             createNodeType = Element.Type.TRANSITION; 
             EnableCreatingNodes();
         });
-        buttonCopy.setDisable(true);
-        buttonClone.setDisable(true);
         buttonRemove.setOnAction(e -> RemoveSelected());
         buttonClusterCreate.setOnAction(e -> CreateCluster());
         buttonClusterRemove.setOnAction(e -> RemoveCluster());

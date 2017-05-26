@@ -10,6 +10,7 @@ import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -192,7 +193,7 @@ public class TestFXBase extends ApplicationTest {
         return cluster.get(0);
     }
     
-    protected void RemoveCluster(GraphCluster cluster) {
+    protected void UngroupCluster(GraphCluster cluster) {
         
         final List<IGraphElement> clusters = new ArrayList();
         clusters.add(cluster);
@@ -210,7 +211,7 @@ public class TestFXBase extends ApplicationTest {
         waitForFxThread(isFinished);
     }
     
-    protected int getRandomIndex(List list) {
+    protected int getRandomIndex(Collection list) {
         return (int) Math.floor(Math.random() * list.size());
     }
     

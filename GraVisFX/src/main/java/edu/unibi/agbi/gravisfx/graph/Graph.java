@@ -12,6 +12,7 @@ import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +32,6 @@ public class Graph
 
     private final Map<String,IGravisNode> nodes;
     private final Map<String,IGravisConnection> connections;
-    
-    private int nextNodeId = 1;
 
     public Graph() {
 
@@ -71,6 +70,14 @@ public class Graph
         }
     }
     
+    public void clear() {
+        labelLayer.getChildren().clear();
+        nodeLayer.getChildren().clear();
+        connectionLayer.getChildren().clear();
+        nodes.clear();
+        connections.clear();
+    }
+    
     public boolean contains(String nodeId) {
         return nodes.containsKey(nodeId);
     }
@@ -86,9 +93,33 @@ public class Graph
     public IGravisConnection getConnection(String id) {
         return connections.get(id);
     }
+
+    public Collection<IGravisConnection> getConnections() {
+        return connections.values();
+    }
+
+    public List<IGravisConnection> getConnectionsCopy() {
+        List<IGravisConnection> listCopy = new ArrayList();
+        for (IGravisConnection connection : connections.values()) {
+            listCopy.add(connection);
+        }
+        return listCopy;
+    }
     
     public IGravisNode getNode(String id) {
         return nodes.get(id);
+    }
+
+    public Collection<IGravisNode> getNodes() {
+        return nodes.values();
+    }
+
+    public List<IGravisNode> getNodesCopy() {
+        List<IGravisNode> listCopy = new ArrayList();
+        for (IGravisNode node : nodes.values()) {
+            listCopy.add(node);
+        }
+        return listCopy;
     }
 
     public IGravisNode remove(IGravisNode node) {
@@ -111,25 +142,5 @@ public class Graph
             connection.getTarget().getConnections().remove(connection);
         }
         return connection;
-    }
-
-    public List<IGravisNode> getNodes() {
-        List<IGravisNode> listCopy = new ArrayList();
-        for (IGravisNode node : nodes.values()) {
-            listCopy.add(node);
-        }
-        return listCopy;
-    }
-
-    public List<IGravisConnection> getConnections() {
-        List<IGravisConnection> listCopy = new ArrayList();
-        for (IGravisConnection connection : connections.values()) {
-            listCopy.add(connection);
-        }
-        return listCopy;
-    }
-    
-    public int getNextNodeId() {
-        return nextNodeId++;
     }
 }

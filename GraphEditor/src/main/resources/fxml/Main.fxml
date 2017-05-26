@@ -23,12 +23,34 @@
         <StackPane VBox.vgrow="ALWAYS">
             <children>
                 <fx:include StackPane.alignment="CENTER" source="editor/Tabs.fxml" fx:id="editorTabPane" />
-                <Label StackPane.alignment="TOP_CENTER" id="statusTop" fx:id="statusTop" text="wasd123" >
+                <Label StackPane.alignment="TOP_CENTER" id="statusTop" fx:id="statusTop" visible="false" >
                     <StackPane.margin>
                         <Insets top="30.0" />
                     </StackPane.margin>
                 </Label>
-                <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="modelFrame" >
+                <HBox StackPane.alignment="BOTTOM_CENTER" spacing="5.0" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="zoomFrame">
+                    <children>
+                        <Button id="buttonCenter" onAction="#CenterNodes" mnemonicParsing="false">
+                            <tooltip>
+                                <Tooltip text="Center nodes"/>
+                            </tooltip>
+                        </Button>
+                        <Button id="buttonZoomOut" onAction="#ZoomOut" mnemonicParsing="false">
+                            <tooltip>
+                                <Tooltip text="Zoom out"/>
+                            </tooltip>
+                        </Button>
+                        <Button id="buttonZoomIn" onAction="#ZoomIn" mnemonicParsing="false">
+                            <tooltip>
+                                <Tooltip text="Zoom in"/>
+                            </tooltip>
+                        </Button>
+                    </children>
+                    <StackPane.margin>
+                        <Insets bottom="5.0" />
+                    </StackPane.margin>
+                </HBox>
+                <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="modelFrame">
                     <children>
                         <fx:include source="editor/model/Model.fxml" />
                         <fx:include source="editor/model/Tools.fxml" />
@@ -44,7 +66,7 @@
         </StackPane>
         <HBox alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="ALWAYS">
             <children>
-                <Label maxWidth="-1.0" text="Left status" HBox.hgrow="NEVER">
+                <Label maxWidth="-1.0" HBox.hgrow="NEVER">
                     <font>
                         <Font size="11.0" fx:id="x3" />
                     </font>
@@ -53,7 +75,7 @@
                     </textFill>
                 </Label>
                 <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
-                <Label font="$x3" maxWidth="-1.0" text="Right status" textFill="$x4" HBox.hgrow="NEVER" />
+                <Label font="$x3" maxWidth="-1.0" textFill="$x4" HBox.hgrow="NEVER" />
             </children>
             <padding>
                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

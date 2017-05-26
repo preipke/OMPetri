@@ -60,6 +60,8 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
         LineTo lt = new LineTo();
         this.endXProperty = lt.xProperty();
         this.endYProperty = lt.yProperty();
+        this.endXProperty.set(source.translateXProperty().add(source.getOffsetX()).get());
+        this.endYProperty.set(source.translateYProperty().add(source.getOffsetY()).get());
 
         this.arrow = new GravisChildArrow(this);
         this.arrow.rotateProperty().bind(this.getArrowAngleBinding(endYProperty, endXProperty, endYProperty));

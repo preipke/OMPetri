@@ -27,46 +27,47 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 public class SelectionService
 {
     @Autowired private MainController mainController;
-    
+
     private final SelectionDao selectionDao;
-    
-    private List<IGraphNode> selectedNodesCopy;
+
     private List<GravisShapeHandle> highlightedElementsHandles;
-    
+
     @Autowired
     public SelectionService(SelectionDao selectionDao) {
         this.selectionDao = selectionDao;
     }
-    
+
     /**
-     * Creates a copy of the selected elements.
+     * Creates a copy of all selected nodes.
+     *
+     * @return
      */
-    public void copy() {
-        
-        selectedNodesCopy = new ArrayList();
-        
+    public List<IGraphNode> copy() {
+        List<IGraphNode> nodesCopy = new ArrayList();
         for (IGraphElement element : getSelectedElements()) {
             if (element instanceof IGraphNode) {
-                selectedNodesCopy.add((IGraphNode) element);
+                nodesCopy.add((IGraphNode) element);
             }
         }
+        return nodesCopy;
     }
-    
+
     /**
-     * Enables hovering for the given element. Also enables hovering for
-     * all related subelements.
-     * @param element 
+     * Enables hovering for the given element. Also enables hovering for all
+     * related subelements.
+     *
+     * @param element
      */
     public void hover(IGravisElement element) {
 
         if (highlightedElementsHandles != null) {
-            
+
             for (GravisShapeHandle handle : highlightedElementsHandles) {
                 handle.setHovered(false);
             }
             highlightedElementsHandles = null;
         }
-        
+
         if (element != null) {
 
             if (element instanceof IGraphNode || element instanceof IGraphArc) {
@@ -82,10 +83,11 @@ public class SelectionService
             }
         }
     }
-    
+
     /**
      * Highlight the given element.
-     * @param element 
+     *
+     * @param element
      */
     public void highlight(IGraphElement element) {
         element.getElementHandles().forEach(ele -> {
@@ -93,10 +95,11 @@ public class SelectionService
         });
         selectionDao.addHighlight(element);
     }
-    
+
     /**
      * Highlight related objects. Only if those are not already selected.
-     * @param element 
+     *
+     * @param element
      */
     public void highlightRelated(IGraphElement element) {
         IDataElement dataElement = element.getDataElement();
@@ -111,9 +114,10 @@ public class SelectionService
             }
         }
     }
-    
+
     /**
      * Remove element highlight.
+     *
      * @param element
      */
     public void unhighlight(IGraphElement element) {
@@ -122,16 +126,17 @@ public class SelectionService
         });
         selectionDao.removeHighlight(element);
     }
-    
+
     /**
      * Removes element highlight from all related. Only if no other related
      * element is selected anymore.
-     * @param element 
+     *
+     * @param element
      */
     public void unhighlightRelated(IGraphElement element) {
-        
+
         IDataElement dataElement = element.getDataElement();
-        
+
         boolean isStillSelected = false;
         for (IGraphElement relatedShape : dataElement.getShapes()) {
             if (relatedShape.getElementHandles().get(0).isSelected()) {
@@ -145,13 +150,14 @@ public class SelectionService
             }
         }
     }
-    
+
     /**
      * Selects the given element.
+     *
      * @param element
      */
     public void select(IGraphElement element) {
-        
+
         hover(null);
 
         if (element.getElementHandles().get(0).isHighlighted()) {
@@ -170,10 +176,11 @@ public class SelectionService
             ele.putOnTop();
         });
     }
-    
+
     /**
      * Select element and all related.
-     * @param element 
+     *
+     * @param element
      */
     public void selectAll(IGraphElement element) {
         IDataElement dataElement = element.getDataElement();
@@ -181,9 +188,10 @@ public class SelectionService
             select(relatedElement);
         }
     }
-    
+
     /**
      * Selects the given nodes and all their related.
+     *
      * @param nodes
      */
     public void selectAll(List<IGraphNode> nodes) {
@@ -191,11 +199,12 @@ public class SelectionService
             selectAll(element);
         }
     }
-    
+
     /**
      * Remove selection.
+     *
      * @param arc
-     * @return 
+     * @return
      */
     public boolean unselect(IGraphElement arc) {
         arc.getElementHandles().forEach(ele -> {
@@ -203,7 +212,7 @@ public class SelectionService
         });
         return selectionDao.removeSelection(arc);
     }
-    
+
     /**
      * Clear selected and highlighted elements.
      */
@@ -221,20 +230,13 @@ public class SelectionService
         selectionDao.clear();
         mainController.HideElementPanel();
     }
-    
+
     /**
      * Get selected elements.
-     * @return 
+     *
+     * @return
      */
     public List<IGraphElement> getSelectedElements() {
         return selectionDao.getSelectedElements();
-    }
-    
-    /**
-     * Get copied nodes.
-     * @return 
-     */
-    public List<IGraphNode> getCopiedNodes() {
-        return selectedNodesCopy;
     }
 }

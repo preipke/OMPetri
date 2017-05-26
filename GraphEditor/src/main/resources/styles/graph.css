@@ -140,11 +140,11 @@
 .transition:highlighted {
     -fx-stroke: darkblue;
     -fx-stroke-width: 2px;
-    -fx-stroke-dash-array: 1px 4px;
+    -fx-stroke-dash-array: 1px 6px;
 }
 
 .transitionStochastic {
-    -fx-fill: blue;
+    -fx-fill: darkblue;
     -fx-stroke: black;
     -fx-stroke-width: 1px;
     -fx-stroke-type: outside;
@@ -155,10 +155,10 @@
 }
 .transitionStochastic:selected {
     -fx-stroke: black;
-    -fx-stroke-width: 3px;
+    -fx-stroke-width: 2px;
 }
 .transitionStochastic:highlighted {
     -fx-stroke: black;
-    -fx-stroke-width: 3px;
-    -fx-stroke-dash-array: 1px 8px;
+    -fx-stroke-width: 2px;
+    -fx-stroke-dash-array: 1px 6px;
 }

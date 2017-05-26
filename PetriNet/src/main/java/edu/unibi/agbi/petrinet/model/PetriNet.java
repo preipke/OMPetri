@@ -15,7 +15,9 @@ import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -37,9 +39,6 @@ public class PetriNet
     private final Map<String, Arc> arcs;
     private final Map<String, Place> places;
     private final Map<String, Transition> transitions;
-    
-    private int nextPlaceId = 1;
-    private int nextTransitionId = 1;
 
     public PetriNet() {
         this.arcs = new HashMap();
@@ -72,6 +71,15 @@ public class PetriNet
         } else {
             transitions.put(node.getId(), (Transition) node);
         }
+    }
+    
+    public void clear() {
+        colors.clear();
+        parameters.clear();
+        nodeIds.clear();
+        arcs.clear();
+        places.clear();
+        transitions.clear();
     }
     
     public boolean contains(String nodeId) {
@@ -156,6 +164,14 @@ public class PetriNet
     public Collection<Arc> getArcs() {
         return arcs.values();
     }
+
+    public List<Arc> getArcsCopy() {
+        List<Arc> arcsCopy = new ArrayList();
+        for (Arc arc : arcs.values()) {
+            arcsCopy.add(arc);
+        }
+        return arcsCopy;
+    }
     
     public Colour getColour(String id) {
         return colors.get(id);
@@ -197,8 +213,24 @@ public class PetriNet
         return places.values();
     }
 
+    public List<Place> getPlacesCopy() {
+        List<Place> placesCopy = new ArrayList();
+        for (Place place : places.values()) {
+            placesCopy.add(place);
+        }
+        return placesCopy;
+    }
+
     public Collection<Transition> getTransitions() {
         return transitions.values();
+    }
+
+    public List<Transition> getTransitionsCopy() {
+        List<Transition> transitionCopy = new ArrayList();
+        for (Transition transition : transitions.values()) {
+            transitionCopy.add(transition);
+        }
+        return transitionCopy;
     }
 
     public String getAuthor() {
@@ -227,13 +259,5 @@ public class PetriNet
 
     public void setDescription(String description) {
         this.description = description;
-    }
-    
-    public int getNextPlaceId() {
-        return nextPlaceId++;
-    }
-    
-    public int getNextTransitionId() {
-        return nextTransitionId++;
     }
 }
