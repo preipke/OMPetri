@@ -23,15 +23,15 @@ public class Main extends Application {
     
     private final String mainFxml = "/fxml/Main.fxml";
     private final String mainTitle = "GraVisFX - Editor";
-    private final String resultsFxml = "/fxml/Results.fxml";
-    private final String resultsTitle = "GraVisFX - Results Viewer";
+//    private final String resultsFxml = "/fxml/Results.fxml";
+//    private final String resultsTitle = "GraVisFX - Results Viewer";
     
     private final String mainCss = "/styles/main.css";
     private final String graphCss = "/styles/graph.css";
     
     private ConfigurableApplicationContext springContext;
     private Parent mainRoot;
-    private Parent resultsRoot;
+//    private Parent resultsRoot;
     
     @Override
     public void init() throws Exception {
@@ -45,24 +45,24 @@ public class Main extends Application {
         mainRoot = mainLoader.load();
         
         // init results window
-        FXMLLoader resultsLoader = new FXMLLoader();
-        resultsLoader.setControllerFactory(springContext::getBean); // tell fxml loader who is in charge of instantiating controllers, java 8 method reference to spring
-        resultsLoader.setLocation(getClass().getResource(resultsFxml));
-        resultsRoot = resultsLoader.load();
+//        FXMLLoader resultsLoader = new FXMLLoader();
+//        resultsLoader.setControllerFactory(springContext::getBean); // tell fxml loader who is in charge of instantiating controllers, java 8 method reference to spring
+//        resultsLoader.setLocation(getClass().getResource(resultsFxml));
+//        resultsRoot = resultsLoader.load();
     }
 
     @Override
     public void start(Stage mainStage) throws Exception {
         
-        Scene resultsScene = new Scene(resultsRoot);
-        resultsScene.getStylesheets().add(mainCss);
-        
-        Stage resultsStage = new Stage();
-        resultsStage.setTitle(resultsTitle);
-        resultsStage.setScene(resultsScene);
-        
-        ResultsController resultsController = (ResultsController) springContext.getBean(ResultsController.class);
-        resultsController.setStage(resultsStage);
+//        Scene resultsScene = new Scene(resultsRoot);
+//        resultsScene.getStylesheets().add(mainCss);
+//        
+//        Stage resultsStage = new Stage();
+//        resultsStage.setTitle(resultsTitle);
+//        resultsStage.setScene(resultsScene);
+//        
+//        ResultsController resultsController = (ResultsController) springContext.getBean(ResultsController.class);
+//        resultsController.setStage(resultsStage);
         
         Scene mainScene = new Scene(mainRoot);
         mainScene.getStylesheets().add(mainCss);

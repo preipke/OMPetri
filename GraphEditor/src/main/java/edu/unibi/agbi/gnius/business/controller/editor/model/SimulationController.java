@@ -9,6 +9,7 @@ import edu.unibi.agbi.gnius.business.controller.ResultsController;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -97,7 +98,13 @@ public class SimulationController implements Initializable
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        buttonOpenResultsViewer.setOnAction(e -> resultsController.ShowWindow());
+        buttonOpenResultsViewer.setOnAction(e -> {
+            try {
+                resultsController.ShowWindow();
+            } catch (IOException ex) {
+                System.out.println(ex.toString());
+            }
+        });
         
         buttonSimStart.setOnAction(e -> StartSimulationAndLock());
         buttonSimStop.setOnAction(e -> StopSimulation());

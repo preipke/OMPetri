@@ -44,15 +44,14 @@ public class ResultsService
      *
      * @param lineChart
      * @param data
-     * @return true if data has been added, false if not
+     * @throws ResultsServiceException
      */
-    public synchronized boolean add(LineChart lineChart, SimulationData data) {
-        resultsDao.add(data);
-        if (!resultsDao.contains(lineChart, data)) {
-            resultsDao.add(lineChart, data);
-            return true;
+    public synchronized void add(LineChart lineChart, SimulationData data) throws ResultsServiceException {
+        if (resultsDao.contains(lineChart, data)) {
+            throw new ResultsServiceException("Duplicate data entry for line chart! Not adding.");
         }
-        return false;
+        resultsDao.add(data);
+        resultsDao.add(lineChart, data);
     }
 
     /**
@@ -84,6 +83,7 @@ public class ResultsService
     public synchronized void hide(LineChart lineChart, SimulationData data) {
         lineChart.getData().remove(data.getSeries());
         data.setShown(false);
+        data.updateMilliSecondLastStatusChange();
     }
 
     /**
@@ -97,6 +97,7 @@ public class ResultsService
             lineChart.getData().add(data.getSeries());
         }
         data.setShown(true);
+        data.updateMilliSecondLastStatusChange();
     }
 
     /**
