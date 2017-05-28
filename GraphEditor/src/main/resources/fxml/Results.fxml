@@ -6,8 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" spacing="5.0" 
-      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="1200.0" spacing="5.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane hgap="10.0" vgap="5.0">
          <children>
@@ -21,7 +20,12 @@
             <TextField fx:id="elementFilterInput" promptText="Filter elements..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <TextField fx:id="valueFilterInput" promptText="Filter values..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <Button fx:id="buttonClearFilter" mnemonicParsing="false" text="Clear" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <Button fx:id="buttonAddChoice" mnemonicParsing="false" text="Add" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+               <children>
+                  <Button fx:id="buttonAddSelected" mnemonicParsing="false" text="Add" />
+                  <CheckBox fx:id="checkboxAutoAddSelected" mnemonicParsing="false" text="Auto add following results for this selection" />
+               </children>
+            </HBox>
          </children>
          <columnConstraints>
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
@@ -48,6 +52,8 @@
             <Button fx:id="buttonDisableAll" mnemonicParsing="false" text="Disable All" />
             <Button fx:id="buttonClearAll" mnemonicParsing="false" text="Clear All" />
             <Separator orientation="VERTICAL" />
+            <Button fx:id="buttonRefresh" mnemonicParsing="false" />
+            <Separator orientation="VERTICAL" />
             <Label fx:id="statusMessageLabel" />
          </children>
          <VBox.margin>
@@ -62,18 +68,18 @@
                      <children>
                         <TableView fx:id="tableView" VBox.vgrow="ALWAYS">
                            <columns>
-                              <TableColumn fx:id="columnDateTime" maxWidth="1.7976931348623157E308" text="DateTime" />
-                              <TableColumn fx:id="columnModel" maxWidth="1.7976931348623157E308" text="Model" />
-                              <TableColumn fx:id="columnAuthor" maxWidth="1.7976931348623157E308" text="Author" />
-                              <TableColumn fx:id="columnElementId" maxWidth="1.7976931348623157E308" prefWidth="30.0" text="ID" />
-                              <TableColumn fx:id="columnElementName" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Name" />
-                              <TableColumn fx:id="columnValueName" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Value" />
-                              <TableColumn fx:id="columnValueStart" prefWidth="40.0" text="Start" />
-                              <TableColumn fx:id="columnValueEnd" prefWidth="40.0" text="End" />
-                              <TableColumn fx:id="columnValueMin" prefWidth="40.0" text="Min" />
-                              <TableColumn fx:id="columnValueMax" prefWidth="40.0" text="Max" />
-                              <TableColumn fx:id="columnEnable" maxWidth="1.7976931348623157E308" prefWidth="25.0" resizable="false" />
-                              <TableColumn fx:id="columnDrop" maxWidth="1.7976931348623157E308" prefWidth="25.0" resizable="false" />
+                              <TableColumn fx:id="columnDateTime" editable="false" maxWidth="1.7976931348623157E308" text="DateTime" />
+                              <TableColumn fx:id="columnModel" editable="false" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Model" />
+                              <TableColumn fx:id="columnElementId" editable="false" maxWidth="1.7976931348623157E308" prefWidth="30.0" text="ID" />
+                              <TableColumn fx:id="columnElementName" editable="false" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Name" />
+                              <TableColumn fx:id="columnValueName" editable="false" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Value" />
+                              <TableColumn fx:id="columnValueStart" editable="false" prefWidth="40.0" text="Start" />
+                              <TableColumn fx:id="columnValueEnd" editable="false" prefWidth="40.0" text="End" />
+                              <TableColumn fx:id="columnValueMin" editable="false" prefWidth="40.0" text="Min" />
+                              <TableColumn fx:id="columnValueMax" editable="false" prefWidth="40.0" text="Max" />
+                              <TableColumn fx:id="columnAutoAdd" editable="false" maxWidth="1.7976931348623157E308" minWidth="35.0" prefWidth="35.0" sortable="false" text="Add" />
+                              <TableColumn fx:id="columnEnable" editable="false" maxWidth="1.7976931348623157E308" minWidth="35.0" prefWidth="35.0" resizable="false" sortable="false" text="Show" />
+                              <TableColumn fx:id="columnDrop" editable="false" maxWidth="1.7976931348623157E308" minWidth="35.0" prefWidth="35.0" resizable="false" sortable="false" text="Drop" />
                            </columns>
                            <VBox.margin>
                               <Insets />

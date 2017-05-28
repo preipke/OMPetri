@@ -104,7 +104,7 @@ public class TabsController implements Initializable
                 activePane = scene.getGraphPane();
                 dataService.setActiveDataDao(dao);
                 mainController.HideElementPanel();
-                mainController.ShowModel(dao);
+                mainController.ShowModelPanel(dao);
             }
         });
         tab.setOnCloseRequest(eh -> {

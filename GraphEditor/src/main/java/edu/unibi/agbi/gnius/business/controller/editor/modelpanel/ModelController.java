@@ -3,15 +3,17 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.model;
+package edu.unibi.agbi.gnius.business.controller.editor.modelpanel;
 
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import java.net.URL;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -21,7 +23,10 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelController implements Initializable
 {
+    @Value("${format.datetime}") private String formatDateTime;
+    
     @FXML private TextField inputAuthor;
+    @FXML private TextField inputCreationDate;
     @FXML private TextArea inputDescription;
     @FXML private TextField inputName;
     
@@ -33,6 +38,7 @@ public class ModelController implements Initializable
         }
         dataDaoActive = dataDao;
         inputAuthor.setText(dataDaoActive.getModel().getAuthor());
+        inputCreationDate.setText(dataDaoActive.getModel().getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
         inputDescription.setText(dataDaoActive.getModel().getDescription());
         inputName.setText(dataDaoActive.getModel().getName());
     }

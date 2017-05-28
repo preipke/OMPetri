@@ -18,18 +18,17 @@ import javafx.scene.chart.XYChart;
 public class SimulationData
 {
     private final Simulation simulation;
-    private final String elementId;
-    private final String elementName;
+    private final IElement element;
     private final String variable;
     private XYChart.Series series;
     
+    private boolean isAutoAdding;
     private boolean isShown;
     private long timeLastStatusChange;
 
     public SimulationData(Simulation simulation, IElement element, String value) {
         this.simulation = simulation;
-        this.elementId = element.getId();
-        this.elementName = element.getName();
+        this.element = element;
         this.variable = value;
     }
 
@@ -37,12 +36,16 @@ public class SimulationData
         return simulation;
     }
     
+    public IElement getElement() {
+        return element;
+    }
+    
     public String getElementId() {
-        return elementId;
+        return element.getId();
     }
     
     public String getElementName() {
-        return elementName;
+        return element.getName();
     }
 
     public String getVariable() {
@@ -57,19 +60,28 @@ public class SimulationData
         return series;
     }
     
+    public void setAutoAdding(boolean value) {
+        isAutoAdding = value;
+    }
+    
+    public boolean isAutoAdding() {
+        return isAutoAdding;
+    }
+    
     public void setShown(boolean value) {
         isShown = value;
+        timeLastStatusChange = System.currentTimeMillis();
     }
     
     public boolean isShown() {
         return isShown;
     }
 
-    public void updateMilliSecondLastStatusChange() {
-        timeLastStatusChange = System.currentTimeMillis();
-    }
-
-    public long timeMilliSecondLastStatusChange() {
+    /**
+     * Gets the time in milliseconds the for the latest shown status change.
+     * @return 
+     */
+    public long getTimeLastShownStatusChange() {
         return timeLastStatusChange;
     }
 
@@ -85,7 +97,7 @@ public class SimulationData
         if (!data.getSimulation().equals(simulation)) {
             return false;
         }
-        if (!data.getElementId().contentEquals(elementId)) {
+        if (!data.getElementId().contentEquals(element.getId())) {
             return false;
         }
         return data.getVariable().contentEquals(variable);
@@ -95,7 +107,7 @@ public class SimulationData
     public int hashCode() {
         int hash = 5;
         hash = 23 * hash + Objects.hashCode(this.simulation);
-        hash = 23 * hash + Objects.hashCode(this.elementId);
+        hash = 23 * hash + Objects.hashCode(this.element.getId());
         hash = 23 * hash + Objects.hashCode(this.variable);
         return hash;
     }

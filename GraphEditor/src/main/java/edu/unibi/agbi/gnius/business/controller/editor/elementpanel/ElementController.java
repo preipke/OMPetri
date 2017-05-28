@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.element;
+package edu.unibi.agbi.gnius.business.controller.editor.elementpanel;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
@@ -730,7 +730,7 @@ public class ElementController implements Initializable
         });
 
         menuItemParamEdit.setOnAction(e -> {
-            mainController.ShowParameters(elementSelected);
+            mainController.ShowElementParameters(elementSelected);
         });
     }
 }

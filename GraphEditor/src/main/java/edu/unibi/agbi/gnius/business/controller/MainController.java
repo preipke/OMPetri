@@ -6,9 +6,9 @@
 package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.business.controller.editor.TabsController;
-import edu.unibi.agbi.gnius.business.controller.editor.element.ParameterController;
-import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
-import edu.unibi.agbi.gnius.business.controller.editor.model.ModelController;
+import edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ParameterController;
+import edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ElementController;
+import edu.unibi.agbi.gnius.business.controller.editor.modelpanel.ModelController;
 import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -155,16 +155,16 @@ public class MainController implements Initializable
         elementController.ShowElementDetails(element);
     }
 
-    public void ShowModel(DataDao dataDao) {
-        zoomFrame.setVisible(true);
-        modelFrame.setVisible(true);
-        modelController.setModel(dataDao);
-    }
-
-    public void ShowParameters(IDataElement element) {
+    public void ShowElementParameters(IDataElement element) {
         elementFrame.setVisible(false);
         parameterFrame.setVisible(true);
         parameterController.ShowParameters(element);
+    }
+
+    public void ShowModelPanel(DataDao dataDao) {
+        zoomFrame.setVisible(true);
+        modelFrame.setVisible(true);
+        modelController.setModel(dataDao);
     }
     
     @FXML

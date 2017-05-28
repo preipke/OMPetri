@@ -14,7 +14,7 @@ import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.FunctionElement;
-import edu.unibi.agbi.petrinet.model.PetriNet;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -44,12 +44,12 @@ public class OpenModelicaExporter
         properties.load(OpenModelicaExporter.class.getResourceAsStream(propertiesPath));
     }
 
-    public References export(PetriNet petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public References export(Model petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
         fileMO = exportMO(petriNet, fileMO);
         return exportMOS(petriNet, fileMOS, fileMO, workDirectory);
     }
 
-    public File exportMO(PetriNet model, File file) throws IOException {
+    public File exportMO(Model model, File file) throws IOException {
 
         PrintWriter writer = new PrintWriter(file);
 
@@ -436,7 +436,7 @@ public class OpenModelicaExporter
      * @return map containing filter variables and the referenced elements
      * @throws IOException
      */
-    public References exportMOS(PetriNet model, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public References exportMOS(Model model, File fileMOS, File fileMO, File workDirectory) throws IOException {
 
         References references = new References();
 

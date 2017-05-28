@@ -31,9 +31,10 @@ import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.PetriNet;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -227,7 +228,9 @@ public class DataService
     public DataDao createDao() {
         DataDao dao = new DataDao();
         dao.getModel().setAuthor(System.getProperty("user.name"));
+        dao.getModel().setCreationDateTime(LocalDateTime.now());
         dao.getModel().setDescription("New model.");
+        dao.getModel().setId(String.valueOf(System.nanoTime()));
         dao.getModel().setName("Untitled");
         dao.getModel().add(DEFAULT_COLOUR);
         dao.setHasChanges(false);
@@ -1051,7 +1054,7 @@ public class DataService
         return dataDaoActive.getGraph();
     }
 
-    public synchronized PetriNet getActiveModel() {
+    public synchronized Model getActiveModel() {
         return dataDaoActive.getModel();
     }
 

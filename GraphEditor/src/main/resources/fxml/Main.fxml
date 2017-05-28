@@ -52,16 +52,16 @@
                 </HBox>
                 <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="modelFrame">
                     <children>
-                        <fx:include source="editor/model/Model.fxml" />
-                        <fx:include source="editor/model/Tools.fxml" />
-                        <fx:include source="editor/model/Simulation.fxml" />
+                        <fx:include source="editor/modelpanel/Model.fxml" />
+                        <fx:include source="editor/modelpanel/Tools.fxml" />
+                        <fx:include source="editor/modelpanel/Simulation.fxml" />
                     </children>
                     <StackPane.margin>
                         <Insets top="30.0" />
                     </StackPane.margin>
                 </VBox>
-                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/element/Element.fxml" fx:id="elementFrame" />
-                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/element/Parameter.fxml" fx:id="parameterFrame" />
+                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/elementpanel/Element.fxml" fx:id="elementFrame" />
+                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/elementpanel/Parameter.fxml" fx:id="parameterFrame" />
             </children>
         </StackPane>
         <HBox alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="ALWAYS">

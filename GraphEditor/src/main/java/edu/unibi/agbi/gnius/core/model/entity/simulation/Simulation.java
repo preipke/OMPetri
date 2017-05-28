@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.model.Model;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -20,17 +21,15 @@ import java.util.Objects;
  */
 public class Simulation
 {
-    private final LocalDateTime dateTime;
-    private final String authorName;
-    private final String modelName;
+    private final LocalDateTime simulationTime;
+    private final Model model;
     private final String[] variables;
     private final References variableReferences;
     private final List<Object>[] results;
 
-    public Simulation(String authorName, String modelName, String[] variables, References variableReferences) {
-        this.dateTime = LocalDateTime.now();
-        this.authorName = authorName;
-        this.modelName = modelName;
+    public Simulation(Model model, String[] variables, References variableReferences) {
+        this.simulationTime = LocalDateTime.now();
+        this.model = model;
         this.variables = variables;
         this.variableReferences = variableReferences;
         this.results = new ArrayList[variables.length];
@@ -49,6 +48,10 @@ public class Simulation
             results[i].add(data[i]);
         }
     }
+    
+    public String getModelId() {
+        return model.getId();
+    }
 
     /**
      * Gets simulation author's name.
@@ -56,7 +59,7 @@ public class Simulation
      * @return
      */
     public String getAuthorName() {
-        return authorName;
+        return model.getAuthor();
     }
 
     /**
@@ -65,7 +68,7 @@ public class Simulation
      * @return
      */
     public String getModelName() {
-        return modelName;
+        return model.getName();
     }
 
     /**
@@ -74,7 +77,7 @@ public class Simulation
      * @return
      */
     public LocalDateTime getDateTime() {
-        return dateTime;
+        return simulationTime;
     }
 
     /**
@@ -92,7 +95,7 @@ public class Simulation
      * @return
      */
     public Map<IElement, List<String>> getElementFilterReferences() {
-        return variableReferences.getElementFilterReferences();
+        return variableReferences.getElementToFilterReferences();
     }
 
     /**
@@ -101,7 +104,7 @@ public class Simulation
      * @return
      */
     public Map<String,IElement> getFilterElementReferences() {
-        return variableReferences.getFilterElementReferences();
+        return variableReferences.getFilterToElementReferences();
     }
 
     /**
@@ -126,28 +129,23 @@ public class Simulation
 
         Simulation simulation = (Simulation) object;
 
-        if (!simulation.getDateTime().isEqual(dateTime)) {
+        if (!simulation.getDateTime().isEqual(simulationTime)) {
             return false;
         }
 
-        if (!modelName.contentEquals(simulation.getModelName())) {
-            return false;
-        }
-
-        return authorName.contentEquals(simulation.getAuthorName());
+        return model.getId().contentEquals(simulation.getModelId());
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.dateTime);
-        hash = 59 * hash + Objects.hashCode(this.authorName);
-        hash = 59 * hash + Objects.hashCode(this.modelName);
+        hash = 59 * hash + Objects.hashCode(this.simulationTime);
+        hash = 59 * hash + Objects.hashCode(this.getModelId());
         return hash;
     }
 
     @Override
     public String toString() {
-        return dateTime.format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + " " + getModelName();
+        return simulationTime.format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + " " + getModelName();
     }
 }

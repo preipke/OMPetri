@@ -75,7 +75,8 @@ public class ResultsController implements Initializable
     @FXML private TextField simulationFilterInput;
     @FXML private TextField elementFilterInput;
     @FXML private TextField valueFilterInput;
-    @FXML private Button buttonAddChoice;
+    @FXML private Button buttonAddSelected;
+    @FXML private CheckBox checkboxAutoAddSelected;
     @FXML private Button buttonClearFilter;
     @FXML private Label statusMessageLabel;
 
@@ -84,11 +85,12 @@ public class ResultsController implements Initializable
     @FXML private Button buttonEnableAll;
     @FXML private Button buttonDisableAll;
     @FXML private Button buttonClearAll;
+    @FXML private Button buttonRefresh;
 
     @FXML private TableView<SimulationData> tableView;
+    @FXML private TableColumn<SimulationData, CheckBox> columnAutoAdd;
     @FXML private TableColumn<SimulationData, String> columnDateTime;
     @FXML private TableColumn<SimulationData, String> columnModel;
-    @FXML private TableColumn<SimulationData, String> columnAuthor;
     @FXML private TableColumn<SimulationData, String> columnElementId;
     @FXML private TableColumn<SimulationData, String> columnElementName;
     @FXML private TableColumn<SimulationData, String> columnValueName;
@@ -127,6 +129,26 @@ public class ResultsController implements Initializable
         fileChooser.getExtensionFilters().add(new ExtensionFilter("XML file(s) (*.xml)", "*.xml", "*.XML"));
     }
 
+    public LineChart getLineChart() {
+        return lineChart;
+    }
+
+    public TableView<SimulationData> getTableView() {
+        return tableView;
+    }
+    
+    public ChoiceBox getElementChoices() {
+        return elementChoices;
+    }
+    
+    public ChoiceBox getSimulationChoices() {
+        return simulationChoices;
+    }
+    
+    public ChoiceBox getValueChoices() {
+        return valueChoices;
+    }
+
     public void setStage(Stage stage) {
         this.stage = stage;
     }
@@ -151,6 +173,9 @@ public class ResultsController implements Initializable
         stg.show();
         stg.setIconified(false);
         stg.toFront();
+        stg.setOnCloseRequest(e -> {
+            resultsService.drop(controller.getLineChart());
+        });
         
         controller.setStage(stg);
     }
@@ -160,9 +185,9 @@ public class ResultsController implements Initializable
         int index = simulationChoices.getSelectionModel().getSelectedIndex();
 
         ObservableList<Simulation> choices = FXCollections.observableArrayList();
-        for (Simulation simulation : resultsService.getSimulations()) {
+        resultsService.getSimulations().forEach(simulation -> {
             choices.add(simulation);
-        }
+        });
 
         simulationChoices.setItems(choices);
         simulationChoices.getSelectionModel().select(index);
@@ -180,12 +205,11 @@ public class ResultsController implements Initializable
             
             Set<IElement> elements = simulationChoice.getElementFilterReferences().keySet();
             ObservableList<IElement> choices = FXCollections.observableArrayList();
-            for (IElement element : elements) {
-                if (element.getElementType() == Element.Type.ARC) {
-                    continue;
-                }
-                choices.add(element);
-            }
+            elements.stream()
+                    .filter(element -> (element.getElementType() != Element.Type.ARC))
+                    .forEach((element) -> {
+                        choices.add(element);
+                    });
             choices.sort(Comparator.comparing(IElement::toString));
 
             elementChoices.getItems().clear();
@@ -249,16 +273,19 @@ public class ResultsController implements Initializable
         }
 
         SimulationData data = new SimulationData(simulationChoice, elementChoice, valueChoice.getValue());
+        
+        if (checkboxAutoAddSelected.isSelected()) {
+            resultsService.addForAutoAdding(lineChart, data);
+        }
 
         try {
             resultsService.add(lineChart, data);
             try {
-                resultsService.UpdateSeries(data);
                 resultsService.show(lineChart, data);
-                setStatus("The selected data has been added!");
             } catch (ResultsServiceException ex) {
-                setStatus("Adding data has failed!", ex);
+                setStatus("Adding data to chart failed!", ex);
             }
+            setStatus("The selected data has been added!");
         } catch (ResultsServiceException ex) {
             setStatus("The selected data has already been added! Please check the table below.", ex);
         }
@@ -362,6 +389,9 @@ public class ResultsController implements Initializable
     }
 
     private String getStartValueString(List<Data> data) {
+        if (data.isEmpty()) {
+            return "N/A";
+        }
         return String.valueOf(
                 round(
                         parseDouble(
@@ -370,6 +400,9 @@ public class ResultsController implements Initializable
     }
 
     private String getEndValueString(List<Data> data) {
+        if (data.isEmpty()) {
+            return "N/A";
+        }
         return String.valueOf(
                 round(
                         parseDouble(
@@ -378,6 +411,9 @@ public class ResultsController implements Initializable
     }
 
     private String getMinValueString(List<Data> data) {
+        if (data.isEmpty()) {
+            return "N/A";
+        }
         double value, min = parseDouble(data.get(0).getYValue());
         for (Data d : data) {
             value = parseDouble(d.getYValue());
@@ -389,6 +425,9 @@ public class ResultsController implements Initializable
     }
 
     private String getMaxValueString(List<Data> data) {
+        if (data.isEmpty()) {
+            return "N/A";
+        }
         double value, max = parseDouble(data.get(0).getYValue());
         for (Data d : data) {
             value = parseDouble(d.getYValue());
@@ -416,26 +455,30 @@ public class ResultsController implements Initializable
     
     private void ClearAllItems() {
         while (!tableView.getItems().isEmpty()) {
-            resultsService.drop(lineChart, tableView.getItems().get(0));
+            resultsService.drop(getLineChart(), getTableView().getItems().get(0));
         }
     }
     
     private void DisableAllItems() {
         tableView.getItems().forEach(data -> {
-            if ((System.currentTimeMillis() - data.timeMilliSecondLastStatusChange()) < 1000) {
+            if ((System.currentTimeMillis() - data.getTimeLastShownStatusChange()) < 1000) {
                 return;
             }
-            resultsService.hide(lineChart, data);
+            resultsService.hide(getLineChart(), data);
         });
         tableView.refresh();
     }
     
     private void EnableAllItems() {
         tableView.getItems().forEach(data -> {
-            if ((System.currentTimeMillis() - data.timeMilliSecondLastStatusChange()) < 1000) {
+            if ((System.currentTimeMillis() - data.getTimeLastShownStatusChange()) < 1000) {
                 return;
             }
-            resultsService.show(lineChart, data);
+            try {
+                resultsService.show(getLineChart(), data);
+            } catch (ResultsServiceException ex) {
+                setStatus("Failed enabling item.", ex);
+            }
         });
         tableView.refresh();
     }
@@ -451,34 +494,37 @@ public class ResultsController implements Initializable
             @Override
             public void onChanged(ListChangeListener.Change change) {
                 RefreshSimulationChoices();
-                setStatus("New simulation(s) added!");
+                change.next();
+                if (change.wasAdded()) {
+                    setStatus("New simulation(s) added!");
+                }
             }
         });
         simulationFilterInput.setOnKeyReleased(e -> {
             RefreshSimulationChoices();
-            simulationChoices.show();
-            elementChoices.hide();
-            valueChoices.hide();
+            getSimulationChoices().show();
+            getElementChoices().hide();
+            getValueChoices().hide();
         });
 
         simulationChoices.valueProperty().addListener(cl -> RefreshElementChoices());
         elementFilterInput.setOnKeyReleased(e -> {
             RefreshElementChoices();
-            simulationChoices.hide();
-            elementChoices.show();
-            valueChoices.hide();
+            getSimulationChoices().hide();
+            getElementChoices().show();
+            getValueChoices().hide();
         });
 
         elementChoices.valueProperty().addListener(cl -> RefreshValueChoices());
         valueFilterInput.setOnKeyReleased(e -> {
             RefreshValueChoices();
-            simulationChoices.hide();
-            elementChoices.hide();
-            valueChoices.show();
+            getSimulationChoices().hide();
+            getElementChoices().hide();
+            getValueChoices().show();
         });
 
         buttonClearFilter.setOnAction(e -> clearFilterInputs());
-        buttonAddChoice.setOnAction(e -> addSelectedChoiceToChart());
+        buttonAddSelected.setOnAction(e -> addSelectedChoiceToChart());
 
         /**
          * IO buttons.
@@ -489,6 +535,7 @@ public class ResultsController implements Initializable
         buttonEnableAll.setOnAction(e -> EnableAllItems());
         buttonDisableAll.setOnAction(e -> DisableAllItems());
         buttonClearAll.setOnAction(e -> ClearAllItems());
+        buttonRefresh.setOnAction(e -> getTableView().refresh());
 
         /**
          * LineChart.
@@ -505,18 +552,39 @@ public class ResultsController implements Initializable
          * TableView.
          */
         Callback<TableColumn<SimulationData, Button>, TableCell<SimulationData, Button>> columnDropCellFactory;
-        Callback<TableColumn<SimulationData, CheckBox>, TableCell<SimulationData, CheckBox>> columnEnableCellFactory;
+        Callback<TableColumn<SimulationData, CheckBox>, TableCell<SimulationData, CheckBox>> columnAutoAddCellFactory, columnEnableCellFactory;
 
         tableView.setItems(FXCollections.observableArrayList());
         try {
-            resultsService.add(lineChart, tableView.getItems());
+            resultsService.add(lineChart, tableView);
         } catch (ResultsServiceException ex) {
             System.out.println(ex.getMessage());
         }
 
+        columnAutoAdd.setCellValueFactory(cellData -> {
+            CheckBox cb = new CheckBox();
+            cb.setSelected(resultsService.containsForAutoAdding(getLineChart(), cellData.getValue()));
+            cb.selectedProperty().addListener(e -> {
+                if (cb.selectedProperty().getValue()) {
+                    resultsService.addForAutoAdding(getLineChart(), cellData.getValue());
+                } else {
+                    resultsService.removeFromAutoAdding(getLineChart(), cellData.getValue());
+                }
+                getTableView().refresh();
+            });
+            return new ReadOnlyObjectWrapper(cb);
+        });
+        columnAutoAddCellFactory = columnAutoAdd.getCellFactory();
+        columnAutoAdd.setCellFactory(c -> {
+            TableCell cell = columnAutoAddCellFactory.call(c);
+            Tooltip tooltip = new Tooltip("Disables or enables auto adding of following data");
+            cell.setTooltip(tooltip);
+            return cell;
+        });
+                
+                
         columnDateTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDateTime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss"))));
         columnModel.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getModelName()));
-        columnAuthor.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getAuthorName()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementId()));
         columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementName()));
         columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getValueName(cellData.getValue().getVariable(), cellData.getValue().getSimulation())));
@@ -530,7 +598,7 @@ public class ResultsController implements Initializable
             cb.setSelected(cellData.getValue().isShown());
             cb.selectedProperty().addListener(e -> {
                 // wait for animations to finish or LineChart breaks if data is added/removed too fast
-                if ((System.currentTimeMillis() - cellData.getValue().timeMilliSecondLastStatusChange()) < 1000) {
+                if ((System.currentTimeMillis() - cellData.getValue().getTimeLastShownStatusChange()) < 1000) {
                     if (cellData.getValue().isShown()) {
                         if (!cb.isSelected()) {
                             cb.setSelected(true);
@@ -544,13 +612,12 @@ public class ResultsController implements Initializable
                 }
                 if (cb.selectedProperty().getValue()) {
                     try {
-                        resultsService.UpdateSeries(cellData.getValue());
+                        resultsService.show(getLineChart(), cellData.getValue());
                     } catch (ResultsServiceException ex) {
                         messengerService.addToLog("Updating data failed! [" +ex.getMessage()+ "]");
                     }
-                    resultsService.show(lineChart, cellData.getValue());
                 } else {
-                    resultsService.hide(lineChart, cellData.getValue());
+                    resultsService.hide(getLineChart(), cellData.getValue());
                 }
             });
             return new ReadOnlyObjectWrapper(cb);
@@ -567,7 +634,7 @@ public class ResultsController implements Initializable
             cb.setAllowIndeterminate(true);
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
-                resultsService.drop(lineChart, cellData.getValue());
+                resultsService.drop(getLineChart(), cellData.getValue());
                 setStatus("Data has been dropped!");
             });
             return new ReadOnlyObjectWrapper(cb);

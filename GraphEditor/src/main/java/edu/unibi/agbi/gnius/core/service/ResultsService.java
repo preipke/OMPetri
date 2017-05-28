@@ -9,10 +9,15 @@ import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.TableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,24 +28,57 @@ import org.springframework.stereotype.Service;
 @Service
 public class ResultsService
 {
-    @Autowired private ResultsDao resultsDao;
+    private final ResultsDao resultsDao;
+
+    @Autowired private MessengerService messengerService;
+
+    @Autowired
+    public ResultsService(ResultsDao resultsDao) {
+        this.resultsDao = resultsDao;
+        this.resultsDao.getSimulations().addListener(new ListChangeListener()
+        {
+            @Override
+            public void onChanged(ListChangeListener.Change change) {
+                change.next();
+                if (change.wasAdded()) {
+                    try {
+                        Simulation simulation
+                                = ResultsService.this.resultsDao.getSimulations()
+                                        .get(ResultsService.this.resultsDao.getSimulations().size() - 1);
+                        AutoAddData(simulation);
+                    } catch (ResultsServiceException ex) {
+                        messengerService.addToLog("Exception while auto adding results data!", ex);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * Gets the data for all performed simulations.
+     *
+     * @return
+     */
+    public synchronized ObservableList<Simulation> getSimulations() {
+        return resultsDao.getSimulations();
+    }
 
     /**
      * Adds the given line chart and related table item list to the storage.
      *
      * @param lineChart
-     * @param list
+     * @param tableView
      * @throws ResultsServiceException
      */
-    public synchronized void add(LineChart lineChart, ObservableList<SimulationData> list) throws ResultsServiceException {
+    public synchronized void add(LineChart lineChart, TableView tableView) throws ResultsServiceException {
         if (resultsDao.contains(lineChart)) {
-            throw new ResultsServiceException("The given line chart has already been stored! Cannot overwrite existing observable list.");
+            throw new ResultsServiceException("Line chart has already been stored! Cannot overwrite existing data list.");
         }
-        resultsDao.add(lineChart, list);
+        resultsDao.add(lineChart, tableView);
     }
 
     /**
-     * Adds data to the line chart if data is not yet contained.
+     * Attempts to add data to a line charts corresponding table.
      *
      * @param lineChart
      * @param data
@@ -48,10 +86,18 @@ public class ResultsService
      */
     public synchronized void add(LineChart lineChart, SimulationData data) throws ResultsServiceException {
         if (resultsDao.contains(lineChart, data)) {
-            throw new ResultsServiceException("Duplicate data entry for line chart! Not adding.");
+            throw new ResultsServiceException("Duplicate entry for line chart");
         }
-        resultsDao.add(data);
         resultsDao.add(lineChart, data);
+    }
+
+    /**
+     * Drops all data related to a line chart.
+     *
+     * @param lineChart the line chart that will be dropped
+     */
+    public synchronized void drop(LineChart lineChart) {
+        resultsDao.remove(lineChart);
     }
 
     /**
@@ -66,12 +112,14 @@ public class ResultsService
         resultsDao.remove(lineChart, data);
     }
 
-    public List<SimulationData> getChartData(LineChart lineChart) {
-        return resultsDao.getResultsTableList(lineChart);
-    }
-
-    public ObservableList<Simulation> getSimulations() {
-        return resultsDao.getSimulations();
+    /**
+     * Get simulation data related to a line chart.
+     *
+     * @param lineChart
+     * @return
+     */
+    public synchronized List<SimulationData> getChartData(LineChart lineChart) {
+        return resultsDao.getChartResultsList(lineChart);
     }
 
     /**
@@ -83,7 +131,6 @@ public class ResultsService
     public synchronized void hide(LineChart lineChart, SimulationData data) {
         lineChart.getData().remove(data.getSeries());
         data.setShown(false);
-        data.updateMilliSecondLastStatusChange();
     }
 
     /**
@@ -91,24 +138,29 @@ public class ResultsService
      *
      * @param lineChart
      * @param data
+     * @throws ResultsServiceException
      */
-    public synchronized void show(LineChart lineChart, SimulationData data) {
-        if (!lineChart.getData().contains(data.getSeries())) {
-            lineChart.getData().add(data.getSeries());
+    public synchronized void show(LineChart lineChart, SimulationData data) throws ResultsServiceException {
+        updateSeries(data);
+        if (data.getSeries() != null) {
+            if (!lineChart.getData().contains(data.getSeries())) {
+                lineChart.getData().add(data.getSeries());
+            }
+            data.setShown(true);
+        } else {
+            throw new ResultsServiceException("No chart data available");
         }
-        data.setShown(true);
-        data.updateMilliSecondLastStatusChange();
     }
 
     /**
-     * Updates the series for the given data object.Loads data from the
+     * Updates the series for the given data object. Loads data from the
      * simulation and adds all additional entries to the series. Updates the
      * related chart.
      *
      * @param data
-     * @throws edu.unibi.agbi.gnius.core.exception.ResultsServiceException
+     * @throws ResultsServiceException
      */
-    public synchronized void UpdateSeries(SimulationData data) throws ResultsServiceException {
+    private synchronized void updateSeries(SimulationData data) throws ResultsServiceException {
 
         XYChart.Series seriesOld = data.getSeries();
         List<Object>[] results = data.getSimulation().getResults();
@@ -128,7 +180,7 @@ public class ResultsService
             }
 
             if (variableIndex > variables.length) {
-                throw new ResultsServiceException("Variable '" + variableTarget + "' cannot be found in the references!");
+                throw new ResultsServiceException("Filter variable '" + variableTarget + "' cannot be found in the references!");
             }
 
             if (seriesOld != null) {
@@ -141,15 +193,85 @@ public class ResultsService
                         (Number) results[variableIndex].get(i)
                 ));
             }
-            seriesNew.setName("'" + data.getElementId() + "'");
+            seriesNew.setName("'" + data.getElementId() + "' (" + data.getSimulation().toString() + ")");
 
             if (seriesOld != null) {
-                XYChart chart = data.getSeries().getChart();
-                chart.getData().remove(seriesOld);
-                chart.getData().remove(seriesNew);
+                XYChart chart = seriesOld.getChart();
+                if (chart != null) {
+                    chart.getData().remove(seriesOld);
+                    chart.getData().add(seriesNew);
+                }
             }
-
             data.setSeries(seriesNew);
+        }
+    }
+    
+    public synchronized void addForAutoAdding(LineChart lineChart, SimulationData data) {
+        resultsDao.addForAutoAdding(lineChart, data);
+    }
+    
+    public synchronized boolean containsForAutoAdding(LineChart lineChart, SimulationData data) {
+        return resultsDao.containsForAutoAdding(lineChart, data);
+    }
+    
+    public synchronized void removeFromAutoAdding(LineChart lineChart, SimulationData data) {
+        resultsDao.removeFromAutoAdding(lineChart, data);
+    }
+    
+    private synchronized void AutoAddData(Simulation simulation) throws ResultsServiceException {
+
+        Map<String, Map<IElement, Set<String>>> modelsToAutoAdd;
+        Map<IElement, Set<String>> elementsToAutoAdd;
+        Set<String> valuesToAutoAdd;
+        SimulationData data;
+
+        // validate all active charts
+        for (LineChart lineChart : resultsDao.getLineChartWithAutoAdding()) {
+
+            modelsToAutoAdd = resultsDao.getDataAutoAdd(lineChart);
+            
+            if (modelsToAutoAdd != null) {
+
+                elementsToAutoAdd = modelsToAutoAdd.get(simulation.getModelId());
+
+                if (elementsToAutoAdd != null) {
+                    
+                    // validate elements chosen for auto adding to be available
+                    for (IElement elem : elementsToAutoAdd.keySet()) {
+
+                        valuesToAutoAdd = elementsToAutoAdd.get(elem);
+
+                        if (valuesToAutoAdd != null) {
+
+                            // validate values chosen for auto adding to be available
+                            for (String valueToAutoAdd : valuesToAutoAdd) {
+
+                                if (simulation.getFilterElementReferences().containsKey(valueToAutoAdd)) {
+
+                                    // create and add data to chart
+                                    data = new SimulationData(simulation, elem, valueToAutoAdd);
+
+                                    try {
+                                        add(lineChart, data);
+                                    } catch (ResultsServiceException ex) {
+                                        System.out.println("Duplicate results entry");
+                                    }
+                                    show(lineChart, data);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    public synchronized void UpdateAutoAddedData() throws ResultsServiceException {
+        for (LineChart lineChart : resultsDao.getLineChartWithAutoAdding()) {
+            for (SimulationData data : resultsDao.getChartTable(lineChart).getItems()) {
+                updateSeries(data);
+            }
+            resultsDao.getChartTable(lineChart).refresh();
         }
     }
 }

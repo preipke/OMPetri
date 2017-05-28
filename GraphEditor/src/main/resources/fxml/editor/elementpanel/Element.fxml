@@ -8,7 +8,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox fx:id="elementFrame" maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.element.ElementController">
+<VBox fx:id="elementFrame" maxHeight="-Infinity" maxWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ElementController">
     <children>
         <TitledPane fx:id="identifierPane" animated="false" text="Identifier">
             <content>
@@ -48,7 +50,7 @@
                                       <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                                   </rowConstraints>
                               </GridPane>
-                        <HBox alignment="TOP_CENTER" spacing="10.0">
+                        <HBox alignment="TOP_CENTER" disable="true" spacing="10.0">
                            <children>
                               <Button mnemonicParsing="false" text="Clone" />
                               <Button mnemonicParsing="false" text="Disable" />

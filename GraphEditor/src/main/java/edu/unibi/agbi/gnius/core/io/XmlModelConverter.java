@@ -28,7 +28,6 @@ import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import javax.xml.parsers.DocumentBuilder;
@@ -63,7 +62,7 @@ public class XmlModelConverter
     private final String attrAuthor = "author";
     private final String attrColourId = "colourId";
     private final String attrCurved = "curved";
-    private final String attrDateTime = "dateTime";
+    private final String attrCreationDateTime = "creationDateTime";
     private final String attrDescription = "description";
     private final String attrElementId = "elementId";
     private final String attrId = "id";
@@ -216,10 +215,11 @@ public class XmlModelConverter
 
         model = dom.createElement(tagModel); // create the root element
 
-        model.setAttribute(attrName, dataDao.getModel().getName());
         model.setAttribute(attrAuthor, dataDao.getModel().getAuthor());
+        model.setAttribute(attrCreationDateTime, dataDao.getModel().getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
         model.setAttribute(attrDescription, dataDao.getModel().getDescription());
-        model.setAttribute(attrDateTime, LocalDateTime.now().format(DateTimeFormatter.ofPattern(formatDateTime)));
+        model.setAttribute(attrId, dataDao.getModel().getId());
+        model.setAttribute(attrName, dataDao.getModel().getName());
 
         model.appendChild(arcElements);
         model.appendChild(placeElements);
@@ -581,12 +581,13 @@ public class XmlModelConverter
     }
 
     private DataDao getDataDao(Element elem) {
-        DataDao dataDao = new DataDao();
-        dataDao.getModel().setAuthor(elem.getAttribute(attrAuthor));
-        dataDao.getModel().setDescription(elem.getAttribute(attrDescription));
-//        dataDao.getModel().setDate(elem.getAttribute(attrDateTime));
-        dataDao.getModel().setName(elem.getAttribute(attrName));
-        return dataDao;
+        DataDao dao = new DataDao();
+        dao.getModel().setAuthor(elem.getAttribute(attrAuthor));
+        dao.getModel().setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
+        dao.getModel().setDescription(elem.getAttribute(attrDescription));
+        dao.getModel().setId(elem.getAttribute(attrId));
+        dao.getModel().setName(elem.getAttribute(attrName));
+        return dao;
     }
 
     private IGraphNode getShapeForNode(Element elem, IGraphNode node) {

@@ -5,7 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.editor.model.SimulationController;
+import edu.unibi.agbi.gnius.business.controller.editor.modelpanel.SimulationController;
+import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
@@ -13,6 +14,7 @@ import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,6 +36,7 @@ public class SimulationService
 
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
+    @Autowired private ResultsService resultsService;
     @Autowired private SimulationController simulationControlsController;
     @Autowired private SimulationCompiler simulationCompiler;
     
@@ -44,8 +47,8 @@ public class SimulationService
         this.threads = new ArrayList();
     }
 
-    public Simulation InitSimulation(String authorName, String modelName, String[] variables, References variableReferences) {
-        Simulation simulation = new Simulation(authorName, modelName, variables, variableReferences);
+    public Simulation InitSimulation(Model model, String[] variables, References variableReferences) {
+        Simulation simulation = new Simulation(model, variables, variableReferences);
         resultsDao.add(simulation);
         return simulation;
     }
@@ -151,8 +154,8 @@ public class SimulationService
                 }
 
                 Platform.runLater(() -> {
-                    Simulation simulation = InitSimulation(dataService.getActiveModel().getAuthor(),
-                            dataService.getActiveModel().getName(),
+                    Simulation simulation = InitSimulation(
+                            data.getModel(),
                             simulationServer.getSimulationVariables(),
                             simulationReferences
                     );
@@ -166,7 +169,9 @@ public class SimulationService
                     synchronized (this) {
                         while (simulationServer.isRunning()) {
                             Platform.runLater(() -> {
-                                simulationControlsController.setSimulationProgress(simulationServer.getSimulationIterationCount() / simulationControlsController.getSimulationIntervals());
+                                simulationControlsController.setSimulationProgress(
+                                                simulationServer.getSimulationIterationCount() / simulationControlsController.getSimulationIntervals()
+                                );
                             });
                             this.wait(250);
                         }
@@ -198,6 +203,11 @@ public class SimulationService
                 Platform.runLater(() -> {
                     messengerService.setTopStatus("Simulation for '" + data.getModel().getName() + "' finished!");
                     messengerService.addToLog("Simulation for '" + data.getModel().getName() + "' finished!");
+                    try {
+                        resultsService.UpdateAutoAddedData();
+                    } catch (ResultsServiceException ex) {
+                        messengerService.addToLog("Failed updating auto added data!", ex);
+                    }
                 });
             } catch (SimulationServiceException ex) {
                 Platform.runLater(() -> {

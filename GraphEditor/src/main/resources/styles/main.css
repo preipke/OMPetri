@@ -31,6 +31,15 @@
     -fx-pref-width: 26px;
 }
 
+#buttonRefresh {
+    -fx-background-image: url("/icons/refresh.png");
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 20px;
+    -fx-pref-height: 26px;
+    -fx-pref-width: 26px;
+}
+
 #buttonZoomIn {
     -fx-background-image: url('/icons/zoomin.png');
     -fx-background-repeat: no-repeat;

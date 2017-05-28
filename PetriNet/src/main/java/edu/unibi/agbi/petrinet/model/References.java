@@ -14,57 +14,60 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 
 /**
  * Container for references between IElement data objects and filter variables
- * used throughout OpenModelica's simulation. 
+ * used throughout OpenModelica's simulation.
+ *
  * @author PR
  */
-public class References {
-    
+public class References
+{
     private String pathSimulationExecutable;
-    private final Map<String,IElement> filterElementReferences;
-    private final Map<IElement,List<String>> elementFilterReferences;
-    
+    private final Map<String, IElement> filterToElementReferences;
+    private final Map<IElement, List<String>> elementToFilterReferences;
+
     public References() {
-        filterElementReferences = new HashMap();
-        elementFilterReferences = new HashMap();
+        filterToElementReferences = new HashMap();
+        elementToFilterReferences = new HashMap();
     }
-    
+
     /**
-     * Adds and maps the given IElement to the given String.
-     * @param filter String representing a filter variable
+     * Adds a reference, mapping a filter variable to an element.
+     *
+     * @param filter  String representing a filter variable
      * @param element IElement data object
-     * @throws IOException 
+     * @throws IOException
      */
     public void addFilterReference(String filter, IElement element) throws IOException {
-        if (filterElementReferences.containsKey(filter)) {
-            throw new IOException("Filter -> Element reference already exists! Don't overwrite!");
+        if (filterToElementReferences.containsKey(filter)) {
+            throw new IOException("Filter to element reference already exists! Cannot be overwritten.");
         }
-        filterElementReferences.put(filter, element);
+        filterToElementReferences.put(filter, element);
     }
-    
+
     /**
-     * Adds and maps the given String to the given IElement.
+     * Adds a reference, mapping an element to one or multiple filter variables.
+     *
      * @param element IElement data object
-     * @param filter String representing a filter variable
+     * @param filter  String representing a filter variable
      */
     public void addElementReference(IElement element, String filter) {
-        if (!elementFilterReferences.containsKey(element)) {
-            elementFilterReferences.put(element, new ArrayList());
+        if (!elementToFilterReferences.containsKey(element)) {
+            elementToFilterReferences.put(element, new ArrayList());
         }
-        elementFilterReferences.get(element).add(filter);
+        elementToFilterReferences.get(element).add(filter);
     }
-    
-    public Map<String,IElement> getFilterElementReferences() {
-        return filterElementReferences;
+
+    public Map<String, IElement> getFilterToElementReferences() {
+        return filterToElementReferences;
     }
-    
-    public Map<IElement,List<String>> getElementFilterReferences() {
-        return elementFilterReferences;
+
+    public Map<IElement, List<String>> getElementToFilterReferences() {
+        return elementToFilterReferences;
     }
-    
+
     public void setSimulationExecutablePath(String pathSimulationExecutable) {
         this.pathSimulationExecutable = pathSimulationExecutable;
     }
-    
+
     public String getSimulationExectuablePath() {
         return pathSimulationExecutable;
     }

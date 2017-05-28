@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.core.service.simulation;
 
 import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.util.Utility;
-import edu.unibi.agbi.petrinet.model.PetriNet;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
@@ -48,7 +48,7 @@ public final class SimulationCompiler
      * @return String representing the path to the simulation executable
      * @throws SimulationServiceException
      */
-    public References compile(PetriNet model) throws SimulationServiceException {
+    public References compile(Model model) throws SimulationServiceException {
 
         final Process process;
         ProcessBuilder pb;
