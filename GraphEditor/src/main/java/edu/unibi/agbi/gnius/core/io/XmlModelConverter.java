@@ -215,11 +215,11 @@ public class XmlModelConverter
 
         model = dom.createElement(tagModel); // create the root element
 
-        model.setAttribute(attrAuthor, dataDao.getModel().getAuthor());
-        model.setAttribute(attrCreationDateTime, dataDao.getModel().getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
-        model.setAttribute(attrDescription, dataDao.getModel().getDescription());
-        model.setAttribute(attrId, dataDao.getModel().getId());
-        model.setAttribute(attrName, dataDao.getModel().getName());
+        model.setAttribute(attrAuthor, dataDao.getAuthor());
+        model.setAttribute(attrCreationDateTime, dataDao.getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
+        model.setAttribute(attrDescription, dataDao.getDescription());
+        model.setAttribute(attrId, dataDao.getId());
+        model.setAttribute(attrName, dataDao.getModelName());
 
         model.appendChild(arcElements);
         model.appendChild(placeElements);
@@ -582,11 +582,11 @@ public class XmlModelConverter
 
     private DataDao getDataDao(Element elem) {
         DataDao dao = new DataDao();
-        dao.getModel().setAuthor(elem.getAttribute(attrAuthor));
-        dao.getModel().setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
-        dao.getModel().setDescription(elem.getAttribute(attrDescription));
-        dao.getModel().setId(elem.getAttribute(attrId));
-        dao.getModel().setName(elem.getAttribute(attrName));
+        dao.setAuthor(elem.getAttribute(attrAuthor));
+        dao.setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
+        dao.setModelDescription(elem.getAttribute(attrDescription));
+        dao.setModelId(elem.getAttribute(attrId));
+        dao.setModelName(elem.getAttribute(attrName));
         return dao;
     }
 

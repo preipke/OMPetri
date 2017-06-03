@@ -124,7 +124,7 @@ public class FileMenuController implements Initializable
 
     private boolean SaveOm(DataDao dao, File file) {
         try {
-            omExporter.exportMO(dao.getModel(), file);
+            omExporter.exportMO(dao.getModelName(), dao.getModel(), file);
             messengerService.setTopStatus("OpenModelica export complete!", null);
         } catch (IOException ex) {
             messengerService.setTopStatus("OpenModelica export failed!", ex);
@@ -142,13 +142,13 @@ public class FileMenuController implements Initializable
         fileChooser.getExtensionFilters().add(typeXml);
 //        fileChooser.getExtensionFilters().add(typeSbml);
         fileChooser.getExtensionFilters().add(typeOm);
-        fileChooser.setTitle("Save model '" + dao.getModel().getName() + "'");
+        fileChooser.setTitle("Save model '" + dao.getModelName() + "'");
         
         if (dao.getModelFile() != null) {
             fileChooser.setInitialDirectory(dao.getModelFile().getParentFile());
             fileChooser.setInitialFileName(dao.getModelFile().getName());
         } else {
-            fileChooser.setInitialFileName(dao.getModel().getName());
+            fileChooser.setInitialFileName(dao.getModelName());
         }
         
         File file =  fileChooser.showSaveDialog(mainController.getStage());

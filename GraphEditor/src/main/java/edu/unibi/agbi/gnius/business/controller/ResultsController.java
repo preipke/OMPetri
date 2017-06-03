@@ -105,19 +105,21 @@ public class ResultsController implements Initializable
     @FXML private TextField inputChartTitle;
     @FXML private TextField inputChartLabelX;
     @FXML private TextField inputChartLabelY;
+//    @FXML private TextField inputChartResolution;
+//    @FXML private CheckBox checkboxChartAnimated;
 
     @Value("${results.tableview.decimalplaces}") private Integer decimalPlaces;
     @Value("${results.linechart.default.title}") private String defaultTitle;
     @Value("${results.linechart.default.xlabel}") private String defaultXLabel;
     @Value("${results.linechart.default.ylabel}") private String defaultYLabel;
     
-    @Value("${regex.valuechoice.fire}") private String valueChoiceFire;
-    @Value("${regex.valuechoice.speed}") private String valueChoiceSpeed;
-    @Value("${regex.valuechoice.token}") private String valueChoiceToken;
-    @Value("${regex.valuechoice.tokenIn.actual}") private String valueChoiceTokenInActual;
-    @Value("${regex.valuechoice.tokenIn.total}") private String valueChoiceTokenInTotal;
-    @Value("${regex.valuechoice.tokenOut.actual}") private String valueChoiceTokenOutActual;
-    @Value("${regex.valuechoice.tokenOut.total}") private String valueChoiceTokenOutTotal;
+    @Value("${regex.value.fire}") private String valueChoiceFire;
+    @Value("${regex.value.speed}") private String valueChoiceSpeed;
+    @Value("${regex.value.token}") private String valueChoiceToken;
+    @Value("${regex.value.tokenIn.actual}") private String valueChoiceTokenInActual;
+    @Value("${regex.value.tokenIn.total}") private String valueChoiceTokenInTotal;
+    @Value("${regex.value.tokenOut.actual}") private String valueChoiceTokenOutActual;
+    @Value("${regex.value.tokenOut.total}") private String valueChoiceTokenOutTotal;
 
     private final FileChooser fileChooser;
     private Stage stage;
@@ -273,10 +275,6 @@ public class ResultsController implements Initializable
         }
 
         SimulationData data = new SimulationData(simulationChoice, elementChoice, valueChoice.getValue());
-        
-        if (checkboxAutoAddSelected.isSelected()) {
-            resultsService.addForAutoAdding(lineChart, data);
-        }
 
         try {
             resultsService.add(lineChart, data);
@@ -284,10 +282,15 @@ public class ResultsController implements Initializable
                 resultsService.show(lineChart, data);
             } catch (ResultsServiceException ex) {
                 setStatus("Adding data to chart failed!", ex);
+                return;
             }
             setStatus("The selected data has been added!");
         } catch (ResultsServiceException ex) {
             setStatus("The selected data has already been added! Please check the table below.", ex);
+        }
+        
+        if (checkboxAutoAddSelected.isSelected()) {
+            resultsService.addForAutoAdding(lineChart, data);
         }
     }
 
@@ -364,25 +367,21 @@ public class ResultsController implements Initializable
         } else if (value.matches(valueChoiceToken)) {
             return "Token";
         } else if (value.matches(valueChoiceTokenInActual)) {
-            return "Incoming from "
-                    + ((DataArc) simulation.getFilterElementReferences().get(value))
-                            .getSource().toString()
-                    + " [ACTUAL]";
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "[ACTUAL] Incoming from "
+                    + arc.getSource().toString();
         } else if (value.matches(valueChoiceTokenInTotal)) {
-            return "Incoming from "
-                    + ((DataArc) simulation.getFilterElementReferences().get(value))
-                            .getSource().toString()
-                    + " [TOTAL]";
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "[TOTAL] Incoming from "
+                    + arc.getSource().toString();
         } else if (value.matches(valueChoiceTokenOutActual)) {
-            return "Outgoing to "
-                    + ((DataArc) simulation.getFilterElementReferences().get(value))
-                            .getTarget().toString()
-                    + " [ACTUAL]";
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "[ACTUAL] Outgoing to "
+                    + arc.getTarget().toString();
         } else if (value.matches(valueChoiceTokenOutTotal)) {
-            return "Outgoing to "
-                    + ((DataArc) simulation.getFilterElementReferences().get(value))
-                            .getTarget().toString()
-                    + " [TOTAL]";
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "[TOTAL] Outgoing to "
+                    + arc.getTarget().toString();
         } else {
             return null;
         }

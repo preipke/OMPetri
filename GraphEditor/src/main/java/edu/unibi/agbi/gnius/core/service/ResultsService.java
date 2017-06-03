@@ -181,6 +181,8 @@ public class ResultsService
 
             if (variableIndex > variables.length) {
                 throw new ResultsServiceException("Filter variable '" + variableTarget + "' cannot be found in the references!");
+            } else if (variableIndex > results.length) {
+                throw new ResultsServiceException("Filter variable '" + variableTarget + "' was found but no results available!");
             }
 
             if (seriesOld != null) {

@@ -27,14 +27,26 @@ public class FunctionBuilder
         properties.load(FunctionBuilder.class.getResourceAsStream(propertiesPath));
     }
     
+    public String getNumberRegex() {
+        return properties.getProperty("regex.function.number");
+    }
+    
+    public String getOperatorRegex() {
+        return properties.getProperty("regex.function.operator");
+    }
+    
+    public String getParameterRegex() {
+        return properties.getProperty("regex.function.parameter");
+    }
+    
     public Function build(String functionString) throws Exception {
         
         Function function = new Function();
         FunctionElement element;
         
-        Pattern patternNumber = Pattern.compile(properties.getProperty("regex.function.number"));
-        Pattern patternOperator = Pattern.compile(properties.getProperty("regex.function.operator"));
-        Pattern patternParamater = Pattern.compile(properties.getProperty("regex.function.parameter"));
+        Pattern patternNumber = Pattern.compile(getNumberRegex());
+        Pattern patternOperator = Pattern.compile(getOperatorRegex());
+        Pattern patternParamater = Pattern.compile(getParameterRegex());
         
         if (functionString != null) {
 

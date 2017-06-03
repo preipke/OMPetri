@@ -13,6 +13,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Parameter;
+import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
@@ -50,6 +51,7 @@ public class ParameterController implements Initializable
 {
     @Autowired private ParameterService parameterService;
     @Autowired private MessengerService messengerService;
+    @Autowired private FunctionBuilder functionBuilder;
 
     @FXML private TextField inputParamName;
     @FXML private TextField inputParamNote;
@@ -75,13 +77,12 @@ public class ParameterController implements Initializable
     @FXML private Label statusParamGlobal;
     @FXML private Label statusParamLocal;
 
-    @Value("${regex.function.number}") private String regexFunctionNumber;
-    @Value("${regex.function.parameter}") private String regexFunctionParameter;
-
-    @Value("${param.name.reference.fire}") private String referenceFireName;
-    @Value("${param.name.reference.speed}") private String referenceSpeedName;
-    @Value("${param.name.reference.token}") private String referenceTokenName;
-    @Value("${param.name.reference.tokenflow}") private String referenceTokenflowName;
+    @Value("${regex.param.ident.flowIn.actual}") private String regexParamIdentFlowInActual;
+    @Value("${regex.param.ident.flowIn.total}") private String regexParamIdentFlowInTotal;
+    @Value("${regex.param.ident.flowOut.actual}") private String regexParamIdentFlowOutActual;
+    @Value("${regex.param.ident.flowOut.total}") private String regexParamIdentFlowOutTotal;
+    @Value("${regex.param.ident.speed}") private String regexParamIdentSpeed;
+    @Value("${regex.param.ident.token}") private String regexParamIdentToken;
 
     private final ObservableList<Parameter> parametersLocal;
     private final ObservableList<Parameter> parametersGlobal;
@@ -99,17 +100,14 @@ public class ParameterController implements Initializable
      */
     public void ShowParameters(IDataElement element) {
         if (element != null) {
-            paneParamLocal.setDisable(false);
-            paneParamLocal.setExpanded(true);
             paneParamLocal.setText("Local - " + element.toString());
+            if (element instanceof DataTransition) {
+                transitionSelected = (DataTransition) element;
+            } else {
+                transitionSelected = null;
+            }
         } else {
-            paneParamLocal.setDisable(true);
-            paneParamLocal.setExpanded(false);
-            paneParamLocal.setText("Local");
-        }
-        if (element instanceof DataTransition) {
-            transitionSelected = (DataTransition) element;
-        } else {
+            paneParamLocal.setText("Local - < ALL >");
             transitionSelected = null;
         }
         ClearInputsAndLabels();
@@ -175,18 +173,17 @@ public class ParameterController implements Initializable
 
         // Validate id
         try {
-            if (id.isEmpty() | !id.matches(regexFunctionParameter)) {
-                throw new InputValidationException("Trying to create parameter using restricted characters");
+            if (id.isEmpty() | !id.matches(functionBuilder.getParameterRegex())) {
+                throw new InputValidationException("Trying to create parameter using restricted characters or identifier format");
             }
-            String[] restrictedSequences = new String[]{
-                referenceFireName, referenceSpeedName,
-                referenceTokenName, referenceTokenflowName
+            String[] restrictedRegex = new String[]{
+                regexParamIdentFlowInActual, regexParamIdentFlowInTotal,
+                regexParamIdentFlowOutActual, regexParamIdentFlowOutTotal,
+                regexParamIdentSpeed, regexParamIdentToken
             };
-            for (String sequence : restrictedSequences) {
-                if (id.length() >= sequence.length()) {
-                    if (id.substring(0, sequence.length()).matches(sequence)) {
-                        throw new InputValidationException("Trying to create paramaeter using restricted identifier '" + sequence + "'");
-                    }
+            for (String regex : restrictedRegex) {
+                if (id.matches(regex)) {
+                    throw new InputValidationException("Trying to create parameter using restricted identifier");
                 }
             }
             setStatus(inputParamName, statusParamCreate, "", null);
@@ -198,7 +195,7 @@ public class ParameterController implements Initializable
         // Validate value
         try {
             value = value.replace(",", ".");
-            if (value.isEmpty() | !value.matches(regexFunctionNumber)) {
+            if (value.isEmpty() | !value.matches(functionBuilder.getNumberRegex())) {
                 throw new InputValidationException("");
             }
             setStatus(inputParamValue, statusParamCreate, "", null);
@@ -209,7 +206,7 @@ public class ParameterController implements Initializable
 
         Parameter param = new Parameter(id, note, value, type, null);
         try {
-            parameterService.addParameter(param, transition);
+            parameterService.add(param, transition);
             if (param.getType() == Parameter.Type.LOCAL) {
                 parametersLocal.add(param);
             } else if (param.getType() == Parameter.Type.GLOBAL) {
@@ -289,7 +286,7 @@ public class ParameterController implements Initializable
         paramValueLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getValue()));
         paramValueLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramValueLocal.setOnEditCommit((CellEditEvent<Parameter, String> t) -> {
-            if (!t.getNewValue().replace(",", ".").matches(regexFunctionNumber)) {
+            if (!t.getNewValue().replace(",", ".").matches(functionBuilder.getNumberRegex())) {
                 setStatus(null, statusParamLocal, "Invalid value!", new InputValidationException("'" + t.getNewValue() + "' is no real number"));
             } else {
                 ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))
@@ -337,7 +334,7 @@ public class ParameterController implements Initializable
         paramValueGlobal.setCellValueFactory(new PropertyValueFactory("value"));
         paramValueGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramValueGlobal.setOnEditCommit((CellEditEvent<Parameter, String> t) -> {
-            if (!t.getNewValue().replace(",", ".").matches(regexFunctionNumber)) {
+            if (!t.getNewValue().replace(",", ".").matches(functionBuilder.getNumberRegex())) {
                 setStatus(null, statusParamGlobal, "Invalid value!", new InputValidationException("'"+t.getNewValue()+"' is no real number"));
             } else {
                 ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))

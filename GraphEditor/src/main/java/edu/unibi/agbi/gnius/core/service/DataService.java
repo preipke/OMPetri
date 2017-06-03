@@ -53,7 +53,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataService
 {
-    private static final Colour DEFAULT_COLOUR = new Colour("DEFAULT", "Default colour");
+    private static final Colour DEFAULT_COLOUR = new Colour("WHITE", "Default colour");
     private static final String PREFIX_ID_GRAPHNODE = "N";
     private static final String PREFIX_ID_PLACE = "P";
     private static final String PREFIX_ID_TRANSITION = "T";
@@ -201,6 +201,7 @@ public class DataService
             case PLACE:
                 DataPlace place;
                 place = new DataPlace(createPlaceId(), defaultPlaceType);
+                place.addToken(new Token(DEFAULT_COLOUR));
                 shape = new GraphPlace(createGraphNodeId(), place);
                 break;
             case TRANSITION:
@@ -227,11 +228,11 @@ public class DataService
      */
     public DataDao createDao() {
         DataDao dao = new DataDao();
-        dao.getModel().setAuthor(System.getProperty("user.name"));
-        dao.getModel().setCreationDateTime(LocalDateTime.now());
-        dao.getModel().setDescription("New model.");
-        dao.getModel().setId(String.valueOf(System.nanoTime()));
-        dao.getModel().setName("Untitled");
+        dao.setAuthor(System.getProperty("user.name"));
+        dao.setCreationDateTime(LocalDateTime.now());
+        dao.setModelDescription("New model.");
+        dao.setModelId(String.valueOf(System.nanoTime()));
+        dao.setModelName("Untitled");
         dao.getModel().add(DEFAULT_COLOUR);
         dao.setHasChanges(false);
         return dao;
@@ -635,14 +636,14 @@ public class DataService
         IDataNode node = target.getDataElement();
         switch (node.getElementType()) {
             case PLACE:
-                DataPlace dataPlace;
-                dataPlace = new DataPlace(createPlaceId(), ((DataPlace) node).getPlaceType());
-                dataPlace.addToken(new Token(DEFAULT_COLOUR));
-                return new GraphPlace(createGraphNodeId(), dataPlace);
+                DataPlace place;
+                place = new DataPlace(createPlaceId(), ((DataPlace) node).getPlaceType());
+                place.addToken(new Token(DEFAULT_COLOUR));
+                return new GraphPlace(createGraphNodeId(), place);
             case TRANSITION:
-                DataTransition dataTransition;
-                dataTransition = new DataTransition(createTransitionId(), ((DataTransition) node).getTransitionType());
-                return new GraphTransition(createGraphNodeId(), dataTransition);
+                DataTransition transition;
+                transition = new DataTransition(createTransitionId(), ((DataTransition) node).getTransitionType());
+                return new GraphTransition(createGraphNodeId(), transition);
             default:
                 throw new DataServiceException("Cannot copy the given type of element! [" + node.getElementType() + "]");
         }

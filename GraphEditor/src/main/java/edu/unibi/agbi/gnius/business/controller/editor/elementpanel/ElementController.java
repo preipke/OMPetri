@@ -16,14 +16,13 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.InputValidationException;
-import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
-import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import edu.unibi.agbi.prettyformulafx.main.DetailedParseCancellationException;
 import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
@@ -32,8 +31,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingNode;
@@ -68,6 +65,7 @@ public class ElementController implements Initializable
     @Autowired private MessengerService messengerService;
     @Autowired private DataService dataService;
     @Autowired private ParameterService parameterService;
+    @Autowired private FunctionBuilder functionBuilder;
 
     // Container
     @FXML private TitledPane identifierPane;
@@ -112,13 +110,6 @@ public class ElementController implements Initializable
     @FXML private MenuItem menuItemParamEdit;
 
     @FXML private Label statusMessage;
-
-    @Value("${param.name.reference.fire}") private String referenceFireName;
-    @Value("${param.name.reference.speed}") private String referenceSpeedName;
-    @Value("${param.name.reference.token}") private String referenceTokenName;
-    @Value("${param.name.reference.tokenflow}") private String referenceTokenflowName;
-
-    @Value("${regex.function.number}") private String regexNumber;
 
     private IDataElement elementSelected;
     private String inputLatestValid;
@@ -334,21 +325,18 @@ public class ElementController implements Initializable
                     final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
                     if (place.getArcsIn().size() > 0) {
 
-                        IntegerProperty arcIndex = new SimpleIntegerProperty(0);
                         place.getArcsIn().forEach(arc -> {
 
-                            arcIndex.set(arcIndex.get() + 1);
-                            String ident = referenceTokenflowName + arc.getTarget().getId() + arc.getSource().getId();
-                            String value = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + arcIndex.get() + "]";
+                            String ident = arc.getTarget().getId() + arc.getSource().getId();
 
                             MenuItem itemArcFlow = new MenuItem("Actual | f(t)");
                             itemArcFlow.setOnAction(e -> {
-                                CreateReferencingParameter(ident + "_now", "der(" + value + ")", arc);
+                                InsertToFunctionInput(ident + "_now");
                             });
 
                             MenuItem itemArcFlowDer = new MenuItem("Total | F(t)");
                             itemArcFlowDer.setOnAction(e -> {
-                                CreateReferencingParameter(ident + "_total", value, arc);
+                                InsertToFunctionInput(ident + "_total");
                             });
 
                             Menu menuArc = new Menu("Token Flow from " + arc.getSource().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
@@ -364,21 +352,18 @@ public class ElementController implements Initializable
                     final Menu menuPlaceArcsOut = new Menu("Outgoing Arcs");
                     if (place.getArcsOut().size() > 0) {
 
-                        IntegerProperty arcIndex = new SimpleIntegerProperty(0);
                         place.getArcsOut().forEach(arc -> {
 
-                            arcIndex.set(arcIndex.get() + 1);
-                            String ident = referenceTokenflowName + arc.getSource().getId() + arc.getTarget().getId();
-                            String value = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + arcIndex.get() + "]";
+                            String ident = arc.getSource().getId() + arc.getTarget().getId();
 
                             MenuItem itemArcFlow = new MenuItem("Actual | f(t)");
                             itemArcFlow.setOnAction(e -> {
-                                CreateReferencingParameter(ident + "_now", "der(" + value + ")", arc);
+                                InsertToFunctionInput(ident + "_now");
                             });
 
                             MenuItem itemArcFlowDer = new MenuItem("Total | F(t)");
                             itemArcFlowDer.setOnAction(e -> {
-                                CreateReferencingParameter(ident + "_total", value, arc);
+                                InsertToFunctionInput(ident + "_total");
                             });
 
                             Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getTarget().getId() + "->" + arc.getSource().getId() + ")");
@@ -393,7 +378,7 @@ public class ElementController implements Initializable
 
                     MenuItem itemPlaceToken = new MenuItem("Token");
                     itemPlaceToken.setOnAction(e -> {
-                        CreateReferencingParameter(referenceTokenName + place.getId(), "'" + place.getId() + "'.t", place);
+                        InsertToFunctionInput(place.getId());
                     });
 
                     Menu menuPlace = new Menu("(" + place.getId() + ") " + place.getName());
@@ -410,14 +395,11 @@ public class ElementController implements Initializable
 
                     MenuItem itemTransitionSpeed = new MenuItem("Speed | v(t)");
                     itemTransitionSpeed.setOnAction(e -> {
-                        CreateReferencingParameter(referenceSpeedName + transition.getId(), "'" + transition.getId() + "'.actualSpeed", transition);
+                        InsertToFunctionInput(transition.getId());
                     });
 
                     MenuItem itemTransitionFire = new MenuItem("Fire | 0 or 1");
-                    itemTransitionFire.setOnAction(e -> {
-                        CreateReferencingParameter(referenceFireName + transition.getId(), "'" + transition.getId() + "'.fire", transition);
-                    });
-                    itemTransitionFire.setDisable(true); // not supported by PNlib yet
+                    itemTransitionFire.setDisable(true);
 
                     Menu menuTransition = new Menu("(" + transition.getId() + ") " + transition.getName());
                     menuTransition.getItems().add(itemTransitionFire);
@@ -497,23 +479,6 @@ public class ElementController implements Initializable
     }
 
     /**
-     * Creates a parameter that references an element.
-     *
-     * @param id
-     * @param value
-     * @param element
-     */
-    private void CreateReferencingParameter(String id, String value, IElement element) {
-        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE, element.getId());
-        try {
-            parameterService.addParameter(param, element);
-            InsertToFunctionInput(id);
-        } catch (ParameterServiceException ex) {
-            setStatus(null, "Cannot insert reference!", ex);
-        }
-    }
-
-    /**
      * Inserts the given parameter to the function input. Inserts the function
      * at the latest caret position, moves caret by values length.
      *
@@ -582,7 +547,7 @@ public class ElementController implements Initializable
             DataTransition transition = (DataTransition) elementSelected;
             
             try {
-                ParseFunctionInputToImage();
+                ParseInputToImage(inputTransitionFunction.getText().replace(",", "."));
                 setStatus(inputTransitionFunction, "Valid!", null);
             } catch (Exception ex) {
                 setStatus(inputTransitionFunction, "Invalid input!", ex);
@@ -600,16 +565,15 @@ public class ElementController implements Initializable
         }
     }
 
-    private void ParseFunctionInputToImage() throws Exception {
+    private void ParseInputToImage(String input) throws Exception {
 
         final DataTransition transition;
         final BufferedImage image;
-        final String input = inputTransitionFunction.getText().replace(",", ".");
 
-        if (elementSelected == null || elementSelected.getElementType() != Element.Type.TRANSITION) {
-            return;
-        } else {
+        if (elementSelected != null && elementSelected.getElementType() == Element.Type.TRANSITION) {
             transition = (DataTransition) elementSelected;
+        } else {
+            return;
         }
 
         parameterService.ValidateFunction(input, transition);
@@ -646,7 +610,7 @@ public class ElementController implements Initializable
     private boolean ValidateNumberInput(TextField input) {
         try {
             String value = input.getText().replace(",", ".");
-            if (!value.matches(regexNumber)) {
+            if (!value.matches(functionBuilder.getNumberRegex())) {
                 throw new InputValidationException("'" + value + "' is not a number");
             }
             setStatus(input, "", null);
@@ -717,8 +681,8 @@ public class ElementController implements Initializable
             try {
                 PrettyFormulaParser.parseToImage(inputTransitionFunction.getText().replace(",", "."));
             } catch (DetailedParseCancellationException ex) {
-                if (eh != null && eh.getCode() != KeyCode.RIGHT && eh.getCode() != KeyCode.LEFT) {
-                    inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
+                if (eh != null && eh.getCode() != KeyCode.RIGHT && eh.getCode() != KeyCode.LEFT && eh.getCode() != KeyCode.UNDERSCORE) {
+//                    inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
                 }
             }
         });

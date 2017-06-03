@@ -7,13 +7,11 @@ package edu.unibi.agbi.gnius.business.controller.editor.modelpanel;
 
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import java.net.URL;
-import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -23,10 +21,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ModelController implements Initializable
 {
-    @Value("${format.datetime}") private String formatDateTime;
-    
     @FXML private TextField inputAuthor;
-    @FXML private TextField inputCreationDate;
     @FXML private TextArea inputDescription;
     @FXML private TextField inputName;
     
@@ -37,20 +32,19 @@ public class ModelController implements Initializable
             updateModelInfo();
         }
         dataDaoActive = dataDao;
-        inputAuthor.setText(dataDaoActive.getModel().getAuthor());
-        inputCreationDate.setText(dataDaoActive.getModel().getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
-        inputDescription.setText(dataDaoActive.getModel().getDescription());
-        inputName.setText(dataDaoActive.getModel().getName());
+        inputAuthor.setText(dataDaoActive.getAuthor());
+        inputDescription.setText(dataDaoActive.getDescription());
+        inputName.setText(dataDaoActive.getModelName());
     }
     
     public void updateModelInfo() {
-        dataDaoActive.getModel().setAuthor(inputAuthor.getText());
-        dataDaoActive.getModel().setDescription(inputDescription.getText());
-        dataDaoActive.getModel().setName(inputName.getText());
+        dataDaoActive.setAuthor(inputAuthor.getText());
+        dataDaoActive.setModelDescription(inputDescription.getText());
+        dataDaoActive.setModelName(inputName.getText());
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        inputName.textProperty().addListener(cl -> dataDaoActive.getModel().setName(inputName.getText()));
+        inputName.textProperty().addListener(cl -> dataDaoActive.setModelName(inputName.getText()));
     }
 }

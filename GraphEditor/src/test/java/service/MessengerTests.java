@@ -11,6 +11,6 @@ import main.TestFXBase;
  *
  * @author PR
  */
-public class MessengerTests extends TestFXBase {
+public class MessengerTests { //extends TestFXBase {
     
 }

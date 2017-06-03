@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.simulation;
 
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.petrinet.model.References;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.model.Model;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -22,14 +22,14 @@ import java.util.Objects;
 public class Simulation
 {
     private final LocalDateTime simulationTime;
-    private final Model model;
+    private final DataDao dataDao;
     private final String[] variables;
     private final References variableReferences;
     private final List<Object>[] results;
 
-    public Simulation(Model model, String[] variables, References variableReferences) {
+    public Simulation(DataDao dataDao, String[] variables, References variableReferences) {
         this.simulationTime = LocalDateTime.now();
-        this.model = model;
+        this.dataDao = dataDao;
         this.variables = variables;
         this.variableReferences = variableReferences;
         this.results = new ArrayList[variables.length];
@@ -50,7 +50,7 @@ public class Simulation
     }
     
     public String getModelId() {
-        return model.getId();
+        return dataDao.getId();
     }
 
     /**
@@ -59,7 +59,7 @@ public class Simulation
      * @return
      */
     public String getAuthorName() {
-        return model.getAuthor();
+        return dataDao.getAuthor();
     }
 
     /**
@@ -68,7 +68,7 @@ public class Simulation
      * @return
      */
     public String getModelName() {
-        return model.getName();
+        return dataDao.getModelName();
     }
 
     /**
@@ -133,7 +133,7 @@ public class Simulation
             return false;
         }
 
-        return model.getId().contentEquals(simulation.getModelId());
+        return dataDao.getId().contentEquals(simulation.getModelId());
     }
 
     @Override
@@ -147,5 +147,9 @@ public class Simulation
     @Override
     public String toString() {
         return simulationTime.format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + " " + getModelName();
+    }
+    
+    public String toStringShort() {
+        return simulationTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " " + getModelName();
     }
 }

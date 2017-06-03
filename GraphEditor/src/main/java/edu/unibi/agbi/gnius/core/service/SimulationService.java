@@ -47,8 +47,8 @@ public class SimulationService
         this.threads = new ArrayList();
     }
 
-    public Simulation InitSimulation(Model model, String[] variables, References variableReferences) {
-        Simulation simulation = new Simulation(model, variables, variableReferences);
+    public Simulation InitSimulation(DataDao dataDao, String[] variables, References variableReferences) {
+        Simulation simulation = new Simulation(dataDao, variables, variableReferences);
         resultsDao.add(simulation);
         return simulation;
     }
@@ -70,7 +70,7 @@ public class SimulationService
 
         Platform.runLater(() -> {
             messengerService.setTopStatus("Starting simulation!");
-            messengerService.addToLog("Starting simulation for model '" + dataService.getActiveModel().getName() + "'...");
+            messengerService.addToLog("Starting simulation for model '" + dataService.getActiveDao().getModelName() + "'...");
         });
         Thread thread = new Thread(() -> {
 
@@ -85,7 +85,7 @@ public class SimulationService
                     Platform.runLater(() -> {
                         simulationControlsController.setSimulationProgress(-1);
                     });
-                    simulationReferences = simulationCompiler.compile(data.getModel());
+                    simulationReferences = simulationCompiler.compile(data);
                 } catch (SimulationServiceException ex) {
                     throw new SimulationServiceException("Simulation failed!", ex);
                 }
@@ -155,7 +155,7 @@ public class SimulationService
 
                 Platform.runLater(() -> {
                     Simulation simulation = InitSimulation(
-                            data.getModel(),
+                            data,
                             simulationServer.getSimulationVariables(),
                             simulationReferences
                     );
@@ -201,8 +201,8 @@ public class SimulationService
                 }
                 
                 Platform.runLater(() -> {
-                    messengerService.setTopStatus("Simulation for '" + data.getModel().getName() + "' finished!");
-                    messengerService.addToLog("Simulation for '" + data.getModel().getName() + "' finished!");
+                    messengerService.setTopStatus("Simulation for '" + data.getModelName() + "' finished!");
+                    messengerService.addToLog("Simulation for '" + data.getModelName() + "' finished!");
                     try {
                         resultsService.UpdateAutoAddedData();
                     } catch (ResultsServiceException ex) {
@@ -211,8 +211,8 @@ public class SimulationService
                 });
             } catch (SimulationServiceException ex) {
                 Platform.runLater(() -> {
-                    messengerService.setTopStatus("Simulation for '" + data.getModel().getName() + "' failed!");
-                    messengerService.addToLog("Simulation for '" + data.getModel().getName() + "' failed! " + ex.getMessage(), ex.getThrowable());
+                    messengerService.setTopStatus("Simulation for '" + data.getModelName() + "' failed!");
+                    messengerService.addToLog("Simulation for '" + data.getModelName() + "' failed! " + ex.getMessage(), ex.getThrowable());
                 });
             } finally {
                 Platform.runLater(() -> {

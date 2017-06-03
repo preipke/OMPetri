@@ -95,9 +95,9 @@ public class TabsController implements Initializable
         
         Tab tab = new Tab("Model");
         tab.setContent(pane);
-        tab.setText(getTabName(tab, dao.getModel().getName()));
-        dao.getModel().getNameProperty().addListener(cl -> {
-            tab.setText(getTabName(tab, dao.getModel().getName()));
+        tab.setText(getTabName(tab, dao.getModelName()));
+        dao.getNameProperty().addListener(cl -> {
+            tab.setText(getTabName(tab, dao.getModelName())); // todo: check names for all tabs
         });
         tab.selectedProperty().addListener(cl -> {
             if (tab.isSelected()) {
@@ -172,7 +172,7 @@ public class TabsController implements Initializable
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Close model");
-        alert.setHeaderText("Confirm closing model '" + dao.getModel().getName() + "'");
+        alert.setHeaderText("Confirm closing model '" + dao.getModelName() + "'");
         alert.setContentText("The model contains unsaved work. Are you sure you want to close the model and discard any changes?");
         alert.getButtonTypes().setAll(buttonSave, buttonClose, buttonCancel);
 
