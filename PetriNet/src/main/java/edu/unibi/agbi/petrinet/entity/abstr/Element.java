@@ -22,11 +22,9 @@ public abstract class Element implements IElement
 
     protected boolean isEnabled = true;
 
-    protected final Set<String> filter;
     protected final Set<String> parameter;
 
     public Element() {
-        filter = new TreeSet();
         parameter = new TreeSet();
     }
 
@@ -48,11 +46,6 @@ public abstract class Element implements IElement
     @Override
     public void setName(String name) {
         this.name = name;
-    }
-
-    @Override
-    public Set<String> getFilter() {
-        return filter;
     }
 
     @Override

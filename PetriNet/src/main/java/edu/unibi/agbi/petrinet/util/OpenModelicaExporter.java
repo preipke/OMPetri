@@ -25,6 +25,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -44,12 +46,20 @@ public class OpenModelicaExporter
         properties.load(OpenModelicaExporter.class.getResourceAsStream(propertiesPath));
     }
 
-    public References export(Model petriNet, File fileMOS, File fileMO, File workDirectory) throws IOException {
-        fileMO = exportMO(petriNet, fileMO);
-        return exportMOS(petriNet, fileMOS, fileMO, workDirectory);
+    public References export(String name, Model model, File fileMOS, File fileMO, File workDirectory) throws IOException {
+        fileMO = exportMO(name, model, fileMO);
+        return exportMOS(name, model, fileMOS, fileMO, workDirectory);
     }
 
-    public File exportMO(Model model, File file) throws IOException {
+    /**
+     * 
+     * @param name
+     * @param model
+     * @param file
+     * @return
+     * @throws IOException 
+     */
+    public File exportMO(String name, Model model, File file) throws IOException {
 
         PrintWriter writer = new PrintWriter(file);
 
@@ -63,7 +73,7 @@ public class OpenModelicaExporter
         /**
          * Model name.
          */
-        writer.append("model '" + model.getName() + "'");
+        writer.append("model '" + name + "'");
         writer.println();
 
         /**
@@ -131,7 +141,7 @@ public class OpenModelicaExporter
                     break;
                     
                 default:
-                    throw new IOException("Unhandled place type detected! [" + place.getPlaceType() + "]");
+                    throw new IOException("Unhandled place type: " + place.getPlaceType());
             }
             writer.append(" '" + place.getId() + "'");
             writer.append("(nIn=" + place.getArcsIn().size());
@@ -243,7 +253,7 @@ public class OpenModelicaExporter
                     break;
                     
                 default:
-                    throw new IOException("Unhandelt transition type detected! [" + transition.getTransitionType() + "]");
+                    throw new IOException("Unhandled transition type: " + transition.getTransitionType());
             }
             writer.append(" '" + transition.getId() + "'");
             writer.append("(nIn=" + transition.getArcsIn().size());
@@ -418,7 +428,7 @@ public class OpenModelicaExporter
         writer.append(INDENT + "annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
         writer.println();
 
-        writer.append("end '" + model.getName() + "'");
+        writer.append("end '" + name + "'");
         writer.append(";");
         writer.println();
 
@@ -429,6 +439,7 @@ public class OpenModelicaExporter
 
     /**
      *
+     * @param name
      * @param model
      * @param fileMOS
      * @param fileMO
@@ -436,80 +447,23 @@ public class OpenModelicaExporter
      * @return map containing filter variables and the referenced elements
      * @throws IOException
      */
-    public References exportMOS(Model model, File fileMOS, File fileMO, File workDirectory) throws IOException {
+    public References exportMOS(String name, Model model, File fileMOS, File fileMO, File workDirectory) throws IOException {
 
-        References references = new References();
+        References references = getModelReferences(model);
+        Collection<String> filters = references.getFilterToElementReferences().keySet();
 
-        String filter = "variableFilter=\"";
-        String tmp;
-        int index;
-
-        for (IElement arc : model.getArcs()) {
-            arc.getFilter().clear();
+        String allFilter = "variableFilter=\"";
+        for (String filter : filters) {
+            allFilter += filter + "|";
         }
 
-        for (INode place : model.getPlaces()) {
-
-            place.getFilter().clear();
-
-            tmp = "'" + place.getId() + "'.t";
-            references.addElementReference(place, tmp);
-            references.addFilterReference(tmp, place);
-            filter += tmp + "|";
-
-            index = 1;
-            for (IArc arc : place.getArcsOut()) {
-
-                tmp = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
-                references.addElementReference(place, tmp);
-                references.addFilterReference(tmp, arc);
-                filter += tmp + "|";
-
-                tmp = "der(" + tmp + ")";
-                references.addElementReference(place, tmp);
-                references.addFilterReference(tmp, arc);
-                filter += tmp + "|";
-
-                index++;
-            }
-
-            index = 1;
-            for (IArc arc : place.getArcsIn()) {
-
-                tmp = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
-                references.addElementReference(place, tmp);
-                references.addFilterReference(tmp, arc);
-                filter += tmp + "|";
-
-                tmp = "der(" + tmp + ")";
-                references.addElementReference(place, tmp);
-                references.addFilterReference(tmp, arc);
-                filter += tmp + "|";
-
-                index++;
-            }
-        }
-
-        for (INode transition : model.getTransitions()) {
-
-            transition.getFilter().clear();
-
-            String[] vars = new String[]{"fire", "actualSpeed"};
-            for (String var : vars) {
-                tmp = "'" + transition.getId() + "'." + var;
-                references.addElementReference(transition, tmp);
-                references.addFilterReference(tmp, transition);
-                filter += tmp + "|";
-            }
-        }
-
-        filter = filter.substring(0, filter.length() - 1);
-        filter = filter.replace(".", "\\\\."); // might cause problems when custom names are used
-        filter = filter.replace("[", "\\\\[");
-        filter = filter.replace("]", "\\\\]");
-        filter = filter.replace("(", "\\\\(");
-        filter = filter.replace(")", "\\\\)");
-        filter += "\"";
+        allFilter = allFilter.substring(0, allFilter.length() - 1);
+        allFilter = allFilter.replace(".", "\\\\."); // might cause problems when custom names are used
+        allFilter = allFilter.replace("[", "\\\\[");
+        allFilter = allFilter.replace("]", "\\\\]");
+        allFilter = allFilter.replace("(", "\\\\(");
+        allFilter = allFilter.replace(")", "\\\\)");
+        allFilter += "\"";
 
         FileWriter fstream = new FileWriter(fileMOS);
         BufferedWriter out = new BufferedWriter(fstream);
@@ -522,11 +476,116 @@ public class OpenModelicaExporter
         out.write("getErrorString();\r\n");
         out.write("setCommandLineOptions(\"--preOptModules+=unitChecking\");");
         out.write("getErrorString();\r\n");
-        out.write("buildModel('" + model.getName() + "', " + filter + "); ");
+        out.write("buildModel('" + name + "', " + allFilter + "); ");
+//        out.write("buildModel('" + model.getName() + "'); ");
         out.write("getErrorString();\r\n");
 
         out.close();
 
+        return references;
+    }
+    
+    /**
+     * Creates and gets element filter references for an entire model.
+     * 
+     * @param model
+     * @return
+     * @throws IOException 
+     */
+    public References getModelReferences(Model model) throws IOException {
+        References references = new References();
+        for (INode place : model.getPlaces()) {
+            setPlaceReferences(references, (Place) place);
+        }
+        for (INode transition : model.getTransitions()) {
+            setTransitionReferences(references, (Transition) transition);
+        }
+        return references;
+    }
+    
+    /**
+     * Sets element filter references for a place.
+     * 
+     * @param references
+     * @param place
+     * @return
+     * @throws IOException 
+     */
+    private References setPlaceReferences(References references, Place place) throws IOException {
+        
+        String filter;
+        int index;
+
+        // uncomment if making public
+//        if (references.getElementToFilterReferences().containsKey(place)) {
+//            references.getElementToFilterReferences().get(place).clear();
+//        }
+
+        filter = "'" + place.getId() + "'.t";
+        references.addElementReference(place, filter);
+        references.addFilterReference(filter, place);
+
+        if (place.getPlaceType() == Place.Type.CONTINUOUS) {
+
+            index = 1;
+            for (IArc arc : place.getArcsOut()) {
+
+                filter = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
+                references.addElementReference(place, filter);
+                references.addFilterReference(filter, arc);
+
+                filter = "der(" + filter + ")";
+                references.addElementReference(place, filter);
+                references.addFilterReference(filter, arc);
+
+                index++;
+            }
+
+            index = 1;
+            for (IArc arc : place.getArcsIn()) {
+
+                filter = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
+                references.addElementReference(place, filter);
+                references.addFilterReference(filter, arc);
+
+                filter = "der(" + filter + ")";
+                references.addElementReference(place, filter);
+                references.addFilterReference(filter, arc);
+
+                index++;
+            }
+        }
+        
+        return references;
+    }
+    
+    /**
+     * Sets element filter references for a transition.
+     * 
+     * @param references
+     * @param transition
+     * @return 
+     * @throws IOException 
+     */
+    private References setTransitionReferences(References references, Transition transition) throws IOException {
+        
+        String filter;
+        
+        // uncomment if making public
+//        if (references.getElementToFilterReferences().containsKey(transition)) {
+//            references.getElementToFilterReferences().get(transition).clear();
+//        }
+            
+        if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
+            filter = "'" + transition.getId() + "'.actualSpeed";
+            references.addElementReference(transition, filter);
+            references.addFilterReference(filter, transition);
+        }
+
+        filter = "'" + transition.getId() + "'.fire";
+        references.addElementReference(transition, filter);
+        references.addFilterReference(filter, transition);
+        
         return references;
     }
 

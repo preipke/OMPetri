@@ -38,9 +38,12 @@ public class References
      */
     public void addFilterReference(String filter, IElement element) throws IOException {
         if (filterToElementReferences.containsKey(filter)) {
-            throw new IOException("Filter to element reference already exists! Cannot be overwritten.");
+            if (!filterToElementReferences.get(filter).getId().contentEquals(element.getId())) {
+                throw new IOException("Cannot set filter '" + filter + "' to reference element '" + element.getId() + "'. It is already used to reference element '" + filterToElementReferences.get(filter).getId() + "'.");
+            }
+        } else {
+            filterToElementReferences.put(filter, element);
         }
-        filterToElementReferences.put(filter, element);
     }
 
     /**

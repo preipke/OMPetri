@@ -23,15 +23,6 @@ public interface IElement
     public void setName(String name);
 
     /**
-     * Gets a set of all filter names related to this element. These names will
-     * be returned by the data stream from the OpenModelica simulation
-     * executable.
-     *
-     * @return
-     */
-    public Set<String> getFilter();
-
-    /**
      * Gets all parameters related to this element. This can either be
      * parameters local for this element or parameters that reference this
      * element.

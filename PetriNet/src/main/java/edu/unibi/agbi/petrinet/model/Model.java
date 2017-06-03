@@ -15,13 +15,10 @@ import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 /**
  *
@@ -29,12 +26,6 @@ import javafx.beans.property.StringProperty;
  */
 public class Model
 {
-    private String id;
-    private LocalDateTime creationDateTime;
-    private String author;
-    private final StringProperty name;
-    private String description;
-
     private final Map<String, Colour> colors;
     private final Map<String, Parameter> parameters;
 
@@ -46,7 +37,6 @@ public class Model
     public Model() {
         this.arcs = new HashMap();
         this.colors = new HashMap();
-        this.name = new SimpleStringProperty();
         this.nodeIds = new HashSet();
         this.parameters = new HashMap();
         this.places = new HashMap();
@@ -234,49 +224,5 @@ public class Model
             transitionCopy.add(transition);
         }
         return transitionCopy;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
-    
-    public LocalDateTime getCreationDateTime() {
-        return creationDateTime;
-    }
-    
-    public void setCreationDateTime(LocalDateTime creationDateTime) {
-        this.creationDateTime = creationDateTime;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public String getId() {
-        return id;
-    }
-    
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public StringProperty getNameProperty() {
-        return name;
-    }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public void setName(String name) {
-        this.name.set(name);
     }
 }

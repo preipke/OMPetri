@@ -27,7 +27,6 @@ public class Place extends Node
         super(id);
         this.type = Element.Type.PLACE;
         this.token = new HashMap();
-        this.token.put(new Colour("DEFAULT", "Default colour"), new Token(new Colour("DEFAULT", "Default colour")));
     }
 
     public final void addToken(Token token) {

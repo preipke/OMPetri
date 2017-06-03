@@ -49,8 +49,12 @@ public class FunctionBuilder
             int index = 0;
 
             while (index < functionString.length()) {
-
-                if (foundNumber && numberMatcher.start() == index) {
+                
+                if (numberMatcher.start() < index) { // detects number in ref param IDs - has to be skipped
+                    
+                    foundNumber = numberMatcher.find();
+                    
+                } else if (foundNumber && numberMatcher.start() == index) {
 
                     element = new FunctionElement(numberMatcher.group(), Type.NUMBER);
                     function.getElements().add(element);
