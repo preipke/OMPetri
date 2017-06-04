@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
+
+<Menu mnemonicParsing="false" text="View" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.unibi.agbi.gnius.business.controller.menu.ViewMenuController">
+    <items>
+        <MenuItem onAction="#ShowParams" mnemonicParsing="false" text="View Parameters" />
+        <SeparatorMenuItem mnemonicParsing="false" />
+        <MenuItem onAction="#OpenLogWindow" mnemonicParsing="false" text="Open Log Window" />
+        <MenuItem onAction="#OpenNewResultsWindow" mnemonicParsing="false" text="Open New Results Window" />
+    </items>
+</Menu>

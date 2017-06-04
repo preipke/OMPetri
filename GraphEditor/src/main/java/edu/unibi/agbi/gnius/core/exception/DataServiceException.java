@@ -14,4 +14,8 @@ public class DataServiceException extends Exception
     public DataServiceException(String msg) {
         super(msg);
     }
+    
+    public DataServiceException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
 }

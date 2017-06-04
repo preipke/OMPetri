@@ -46,8 +46,8 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
 
         label = new GravisChildLabel(this);
-        label.xProperty().bind(translateXProperty().add(getOffsetX() + GravisProperties.LABEL_OFFSET_X));
-        label.yProperty().bind(translateYProperty().add(getOffsetY() + GravisProperties.LABEL_OFFSET_Y));
+        label.xProperty().bind(translateXProperty().add(getCenterOffsetX() + GravisProperties.LABEL_OFFSET_X));
+        label.yProperty().bind(translateYProperty().add(getCenterOffsetY() + GravisProperties.LABEL_OFFSET_Y));
         
         rectangle = new GravisChildRectangle(this);
         rectangle.setWidth(GravisProperties.RECTANGLE_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
@@ -83,12 +83,12 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
 
     @Override
-    public final double getOffsetX() {
+    public final double getCenterOffsetX() {
         return getWidth() / 2;
     }
 
     @Override
-    public final double getOffsetY() {
+    public final double getCenterOffsetY() {
         return getHeight() / 2;
     }
 

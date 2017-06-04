@@ -30,47 +30,41 @@ public class KeyEventHandler
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private MouseEventHandler mouseEventHandler;
-    
+
     private DataDao activeDao;
     private List<IGraphNode> nodes;
     private boolean isCutting;
-    
+
     public void registerTo(Scene scene) {
         scene.setOnKeyPressed(e -> onKeyPressed(e));
     }
-    
+
     private void onKeyPressed(KeyEvent event) {
 
         if (event.getCode().equals(KeyCode.ESCAPE)) {
             mouseEventHandler.UnlockEditorMode();
             selectionService.unselectAll();
-        } /**
-         * Delete selected nodes.
-         */
+        } 
         else if (event.getCode().equals(KeyCode.DELETE)) {
+            /**
+             * Delete selected nodes.
+             */
             Platform.runLater(() -> {
-                try {
-                    dataService.remove(selectionService.getSelectedElements());
-                } catch (DataServiceException ex) {
-                    messengerService.addToLog(ex.getMessage());
-                }
+                dataService.remove(selectionService.getSelectedElements());
                 selectionService.unselectAll();
             });
-        } /**
-         * Copy, clone or paste selected nodes.
-         */
-        else if (event.isControlDown()) {
-
+        } else if (event.isControlDown()) {
+            /**
+             * Copy, clone or paste selected nodes.
+             */
             if (event.getCode().equals(KeyCode.C)) {
                 activeDao = dataService.getActiveDao();
                 nodes = selectionService.copy();
                 isCutting = false;
-
             } else if (event.getCode().equals(KeyCode.X)) {
                 activeDao = dataService.getActiveDao();
                 nodes = selectionService.copy();
                 isCutting = true;
-
             } else if (event.getCode().equals(KeyCode.V)) {
                 selectionService.unselectAll();
                 try {
@@ -80,7 +74,7 @@ public class KeyEventHandler
                         selectionService.selectAll(dataService.paste(nodes, isCutting));
                     }
                 } catch (DataServiceException ex) {
-                    messengerService.addToLog(ex);
+                    messengerService.addException(ex);
                 }
             }
         }

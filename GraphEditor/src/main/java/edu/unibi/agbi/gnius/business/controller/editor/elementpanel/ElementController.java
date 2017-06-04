@@ -51,7 +51,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javax.swing.SwingUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 /**
@@ -260,6 +259,8 @@ public class ElementController implements Initializable
 
         ObservableList<Colour> choicesColour = FXCollections.observableArrayList();
         Collection<Colour> colors = dataService.getActiveModel().getColours();
+        
+        choiceColour.setItems(choicesColour); // assign upfront, input listeners accesses on text change
 
         switch (element.getElementType()) {
 
@@ -272,6 +273,7 @@ public class ElementController implements Initializable
                     }
                 }
                 weight = arc.getWeight(choicesColour.get(0));
+                choiceColour.getSelectionModel().select(0); // must be done here for listener
                 inputArcWeight.setText(weight.getValue());
                 break;
 
@@ -288,6 +290,7 @@ public class ElementController implements Initializable
                     }
                 }
                 token = place.getToken(choicesColour.get(0));
+                choiceColour.getSelectionModel().select(0); // must be done here for listener
                 inputPlaceToken.setText(Double.toString(token.getValueStart()));
                 inputPlaceTokenMin.setText(Double.toString(token.getValueMin()));
                 inputPlaceTokenMax.setText(Double.toString(token.getValueMax()));
@@ -301,8 +304,6 @@ public class ElementController implements Initializable
                 break;
         }
 
-        choiceColour.setItems(choicesColour);
-        choiceColour.getSelectionModel().select(0);
     }
 
     /**
@@ -327,15 +328,15 @@ public class ElementController implements Initializable
 
                         place.getArcsIn().forEach(arc -> {
 
-                            String ident = arc.getTarget().getId() + arc.getSource().getId();
+                            String ident = arc.getSource().getId() + arc.getTarget().getId();
 
-                            MenuItem itemArcFlow = new MenuItem("Actual | f(t)");
-                            itemArcFlow.setOnAction(e -> {
+                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
+                            itemArcFlowDer.setOnAction(e -> {
                                 InsertToFunctionInput(ident + "_now");
                             });
 
-                            MenuItem itemArcFlowDer = new MenuItem("Total | F(t)");
-                            itemArcFlowDer.setOnAction(e -> {
+                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
+                            itemArcFlow.setOnAction(e -> {
                                 InsertToFunctionInput(ident + "_total");
                             });
 
@@ -356,17 +357,17 @@ public class ElementController implements Initializable
 
                             String ident = arc.getSource().getId() + arc.getTarget().getId();
 
-                            MenuItem itemArcFlow = new MenuItem("Actual | f(t)");
-                            itemArcFlow.setOnAction(e -> {
+                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
+                            itemArcFlowDer.setOnAction(e -> {
                                 InsertToFunctionInput(ident + "_now");
                             });
 
-                            MenuItem itemArcFlowDer = new MenuItem("Total | F(t)");
-                            itemArcFlowDer.setOnAction(e -> {
+                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
+                            itemArcFlow.setOnAction(e -> {
                                 InsertToFunctionInput(ident + "_total");
                             });
 
-                            Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getTarget().getId() + "->" + arc.getSource().getId() + ")");
+                            Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
                             menuArc.getItems().add(itemArcFlowDer);
                             menuArc.getItems().add(itemArcFlow);
 
@@ -509,7 +510,7 @@ public class ElementController implements Initializable
                     }
                     dataService.setArcWeight(arc, weight);
                 } catch (NumberFormatException ex) {
-                    messengerService.addToLog("Exception parsing weight value!", ex);
+                    messengerService.addException("Exception parsing weight value!", ex);
                 }
             }
         }
@@ -535,7 +536,7 @@ public class ElementController implements Initializable
                 }
                 dataService.setPlaceToken(place, token);
             } catch (NumberFormatException ex) {
-                messengerService.addToLog("Exception parsing token values!", ex);
+                messengerService.addException("Exception parsing token values!", ex);
             }
         }
     }
@@ -548,9 +549,9 @@ public class ElementController implements Initializable
             
             try {
                 ParseInputToImage(inputTransitionFunction.getText().replace(",", "."));
-                setStatus(inputTransitionFunction, "Valid!", null);
+                setInputStatus(inputTransitionFunction, false);
             } catch (Exception ex) {
-                setStatus(inputTransitionFunction, "Invalid input!", ex);
+                setInputStatus(inputTransitionFunction, true);
             }
             
             try {
@@ -560,7 +561,7 @@ public class ElementController implements Initializable
                     dataService.setTransitionFunction(transition, inputLatestValid);
                 }
             } catch (DataServiceException ex) {
-                messengerService.addToLog(ex);
+                messengerService.addException(ex);
             }
         }
     }
@@ -591,20 +592,16 @@ public class ElementController implements Initializable
         inputLatestValid = input;
     }
 
-    private void setStatus(Control input, String msg, Throwable ex) {
-        if (ex != null) {
-            if (input != null) {
-                input.setStyle("-fx-border-color: red");
-            }
+    private void setInputStatus(Control input, boolean isError) {
+        if (isError) {
+            input.setStyle("-fx-border-color: red");
             statusMessage.setTextFill(Color.RED);
-            messengerService.addToLog(msg, ex);
+            statusMessage.setText("Invalid!");
         } else {
-            if (input != null) {
-                input.setStyle("");
-            }
+            input.setStyle("");
             statusMessage.setTextFill(Color.GREEN);
+            statusMessage.setText("Valid!");
         }
-        statusMessage.setText(msg);
     }
 
     private boolean ValidateNumberInput(TextField input) {
@@ -613,9 +610,9 @@ public class ElementController implements Initializable
             if (!value.matches(functionBuilder.getNumberRegex())) {
                 throw new InputValidationException("'" + value + "' is not a number");
             }
-            setStatus(input, "", null);
+            setInputStatus(input, false);
         } catch (InputValidationException ex) {
-            setStatus(input, "Invalid input!", ex);
+            setInputStatus(input, true);
             return false;
         }
         return true;
@@ -628,9 +625,10 @@ public class ElementController implements Initializable
             if (elementSelected != null) {
                 try {
                     StoreElementType(elementSelected);
-                    setStatus(choiceSubtype, "", null);
+                    setInputStatus(choiceSubtype, false);
                 } catch (DataServiceException ex) {
-                    setStatus(choiceSubtype, ex.getMessage(), ex);
+                    setInputStatus(choiceSubtype, true);
+                    messengerService.addException("Cannot change subtype!", ex);
                 }
             }
         });

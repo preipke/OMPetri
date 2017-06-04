@@ -200,13 +200,8 @@ public class TestFXBase extends ApplicationTest {
         
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
-            try {
-                dataService.ungroup(clusters);
-            } catch (DataServiceException ex) {
-                System.out.println(ex.toString());
-            } finally {
-                isFinished.set(true);
-            }
+            dataService.ungroup(clusters);
+            isFinished.set(true);
         });
         waitForFxThread(isFinished);
     }

@@ -115,7 +115,7 @@ public class ResultsDao
         }
     }
     
-    public Set<LineChart> getLineChartWithAutoAdding() {
+    public Set<LineChart> getLineChartsWithAutoAdding() {
         return chartSimulationDataAutoAdd.keySet();
     }
     

@@ -8,15 +8,13 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox fx:id="elementFrame" maxHeight="-Infinity" maxWidth="-Infinity" 
-      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ElementController">
+<VBox fx:id="elementFrame" maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ElementController">
     <children>
         <TitledPane fx:id="identifierPane" animated="false" text="Identifier">
-            <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0">
-                    <children>
-                  <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <content>
+            <BorderPane>
+               <center>
+                  <VBox spacing="10.0" BorderPane.alignment="CENTER">
                      <children>
                               <GridPane hgap="5.0">
                                   <children>
@@ -58,9 +56,9 @@
                         </HBox>
                      </children>
                   </VBox>
-                    </children>
-                </AnchorPane>
-            </content>
+               </center>
+            </BorderPane>
+         </content>
         </TitledPane>
         <TitledPane fx:id="propertiesPane" animated="false" text="Properties">
             <content>
@@ -122,9 +120,9 @@
                                                 <Label text="Token" />
                                                 <Label text="Token (min.)" GridPane.rowIndex="1" />
                                                 <Label text="Token (max.)" GridPane.rowIndex="2" />
-                                                <TextField fx:id="inputPlaceTokenMax" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                                <TextField fx:id="inputPlaceTokenMin" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                                <TextField fx:id="inputPlaceToken" GridPane.columnIndex="1" />
+                                                <TextField fx:id="inputPlaceTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                                <TextField fx:id="inputPlaceTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                                <TextField fx:id="inputPlaceToken" text="0" GridPane.columnIndex="1" />
                                             </children>
                                             <columnConstraints>
                                                 <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />

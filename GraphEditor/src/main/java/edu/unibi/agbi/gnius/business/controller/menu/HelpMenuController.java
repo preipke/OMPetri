@@ -8,13 +8,13 @@ package edu.unibi.agbi.gnius.business.controller.menu;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 /**
  *
  * @author PR
  */
-@Component
+@Controller
 public class HelpMenuController implements Initializable
 {
 

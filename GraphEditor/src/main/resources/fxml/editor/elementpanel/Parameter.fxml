@@ -73,7 +73,7 @@
                 </AnchorPane>
             </content>
         </TitledPane>
-        <TitledPane animated="false" text="Global Parameter" VBox.vgrow="ALWAYS">
+        <TitledPane animated="false" text="Global" VBox.vgrow="ALWAYS">
             <content>
                 <AnchorPane>
                     <children>

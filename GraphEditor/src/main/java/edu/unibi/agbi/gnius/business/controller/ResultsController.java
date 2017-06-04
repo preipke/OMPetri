@@ -61,7 +61,7 @@ import org.springframework.stereotype.Controller;
 public class ResultsController implements Initializable
 {
     private final String resultsFxml = "/fxml/Results.fxml";
-    private final String resultsTitle = "GraVisFX - Results Viewer";
+    private final String resultsTitle = "Application - Results Viewer";
     private final String mainCss = "/styles/main.css";
     
     @Autowired private ApplicationContext applicationContext;
@@ -155,7 +155,7 @@ public class ResultsController implements Initializable
         this.stage = stage;
     }
 
-    public void ShowWindow() throws IOException {
+    public void OpenWindow() {
         
         ResultsController controller = new ResultsController();
         applicationContext.getAutowireCapableBeanFactory().autowireBean(controller);
@@ -164,7 +164,13 @@ public class ResultsController implements Initializable
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource(resultsFxml));
         loader.setController(controller);
-        Parent root = loader.load();
+        Parent root;
+        try {
+            root = loader.load();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+            return;
+        }
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add(mainCss);
@@ -240,7 +246,7 @@ public class ResultsController implements Initializable
             for (String value : values) {
                 name = getValueName(value, simulationChoice);
                 if (name == null) {
-                    messengerService.addToLog("Cannot find data for undefined value! ['" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "']");
+                    messengerService.addWarning("Unhandled value choice will not be available for displaying: '" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "'");
                     continue;
                 }
                 choice = new ValueChoice(name, value);
@@ -264,13 +270,13 @@ public class ResultsController implements Initializable
         ValueChoice valueChoice = (ValueChoice) valueChoices.getSelectionModel().getSelectedItem();
 
         if (simulationChoice == null) {
-            setStatus("Select a simulation before adding!", new ResultsServiceException("Trying to add incomplete data object"));
+            setStatus("Select a simulation before adding!", true);
             return;
         } else if (elementChoice == null) {
-            setStatus("Select an element before adding!", new ResultsServiceException("Trying to add incomplete data object"));
+            setStatus("Select an element before adding!", true);
             return;
         } else if (valueChoice == null) {
-            setStatus("Select a value before adding!", new ResultsServiceException("Trying to add incomplete data object"));
+            setStatus("Select a value before adding!", true);
             return;
         }
 
@@ -281,12 +287,13 @@ public class ResultsController implements Initializable
             try {
                 resultsService.show(lineChart, data);
             } catch (ResultsServiceException ex) {
-                setStatus("Adding data to chart failed!", ex);
+                setStatus("Adding data to chart failed!", true);
+                messengerService.addException("Adding data to chart failed!", ex);
                 return;
             }
-            setStatus("The selected data has been added!");
+            setStatus("The selected data has been added!", false);
         } catch (ResultsServiceException ex) {
-            setStatus("The selected data has already been added! Please check the table below.", ex);
+            setStatus("The selected data has already been added! Please check the table below.", true);
         }
         
         if (checkboxAutoAddSelected.isSelected()) {
@@ -331,16 +338,14 @@ public class ResultsController implements Initializable
             choiceBox.getSelectionModel().select(selectedIndex);
         }
     }
-    
-    private void setStatus(String msg) {
-        statusMessageLabel.setText("[" + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME) + "] " + msg);
-            statusMessageLabel.setTextFill(Color.GREEN);
-    }
 
-    private void setStatus(String msg, Throwable thr) {
-        setStatus(msg);
-        statusMessageLabel.setTextFill(Color.RED);
-        messengerService.addToLog(msg, thr);
+    private void setStatus(String msg, boolean isError) {
+        if (isError) {
+            statusMessageLabel.setTextFill(Color.RED);
+        } else {
+            statusMessageLabel.setTextFill(Color.GREEN);
+        }
+        statusMessageLabel.setText("[" + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME) + "] " + msg);
     }
 
     private void exportData() {
@@ -349,9 +354,9 @@ public class ResultsController implements Initializable
                     fileChooser.showSaveDialog(stage), 
                     resultsService.getChartData(lineChart)
             );
-            setStatus("Data successfully exported!");
+            setStatus("Data successfully exported!", false);
         } catch (Exception ex) {
-            setStatus("Export to XML file failed!", ex);
+            setStatus("Export to XML file failed!", true);
         }
     }
 
@@ -476,7 +481,8 @@ public class ResultsController implements Initializable
             try {
                 resultsService.show(getLineChart(), data);
             } catch (ResultsServiceException ex) {
-                setStatus("Failed enabling item.", ex);
+                setStatus("Failed enabling item(s)!", true);
+                messengerService.addException("Adding data to chart failed!", ex);
             }
         });
         tableView.refresh();
@@ -495,7 +501,7 @@ public class ResultsController implements Initializable
                 RefreshSimulationChoices();
                 change.next();
                 if (change.wasAdded()) {
-                    setStatus("New simulation(s) added!");
+                    setStatus("New simulation(s) added!", false);
                 }
             }
         });
@@ -613,7 +619,7 @@ public class ResultsController implements Initializable
                     try {
                         resultsService.show(getLineChart(), cellData.getValue());
                     } catch (ResultsServiceException ex) {
-                        messengerService.addToLog("Updating data failed! [" +ex.getMessage()+ "]");
+                        messengerService.addException("Updating data failed!", ex);
                     }
                 } else {
                     resultsService.hide(getLineChart(), cellData.getValue());
@@ -634,7 +640,7 @@ public class ResultsController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 resultsService.drop(getLineChart(), cellData.getValue());
-                setStatus("Data has been dropped!");
+                setStatus("Data has been dropped!", false);
             });
             return new ReadOnlyObjectWrapper(cb);
         });

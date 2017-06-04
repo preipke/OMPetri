@@ -150,12 +150,18 @@ public class MainController implements Initializable
     }
 
     public void ShowElementDetails(IGraphElement element) {
+        if (tabsController.getActiveGraphPane() == null) {
+            return;
+        }
         parameterFrame.setVisible(false);
         elementFrame.setVisible(true);
         elementController.ShowElementDetails(element);
     }
 
     public void ShowElementParameters(IDataElement element) {
+        if (tabsController.getActiveGraphPane() == null) {
+            return;
+        }
         elementFrame.setVisible(false);
         parameterFrame.setVisible(true);
         parameterController.ShowParameters(element);

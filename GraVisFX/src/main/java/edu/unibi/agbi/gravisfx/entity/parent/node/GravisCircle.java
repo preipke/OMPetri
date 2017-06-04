@@ -103,12 +103,12 @@ public class GravisCircle extends Circle implements IGravisNode
     }
 
     @Override
-    public final double getOffsetX() {
+    public final double getCenterOffsetX() {
         return 0; // position is fixed to shape center
     }
 
     @Override
-    public final double getOffsetY() {
+    public final double getCenterOffsetY() {
         return 0; // position is fixed to shape center
     }
 

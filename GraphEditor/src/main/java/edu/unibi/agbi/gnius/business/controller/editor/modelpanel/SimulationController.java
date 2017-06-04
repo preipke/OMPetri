@@ -8,7 +8,6 @@ package edu.unibi.agbi.gnius.business.controller.editor.modelpanel;
 import edu.unibi.agbi.gnius.business.controller.ResultsController;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
-import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SimulationController implements Initializable
 {
-    @Autowired private MessengerService messengerService;
     @Autowired private SimulationService simulationService;
     @Autowired private ResultsController resultsController;
     
@@ -86,25 +84,14 @@ public class SimulationController implements Initializable
         inputSimStopTime.setDisable(true);
         inputSimIntervals.setDisable(true);
         choicesSimIntegrator.setDisable(true);
-        try {
-            simulationService.StartSimulation();
-            buttonSimStop.setDisable(false);
-        } catch (SimulationServiceException ex) {
-            messengerService.addToLog(ex);
-            StopSimulation();
-        }
+        simulationService.StartSimulation();
+        buttonSimStop.setDisable(false);
     }
     
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        buttonOpenResultsViewer.setOnAction(e -> {
-            try {
-                resultsController.ShowWindow();
-            } catch (IOException ex) {
-                System.out.println(ex.toString());
-            }
-        });
+        buttonOpenResultsViewer.setOnAction(e -> resultsController.OpenWindow());
         
         buttonSimStart.setOnAction(e -> StartSimulationAndLock());
         buttonSimStop.setOnAction(e -> StopSimulation());

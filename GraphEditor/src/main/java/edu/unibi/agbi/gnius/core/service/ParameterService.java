@@ -489,12 +489,12 @@ public class ParameterService
             param.getUsingElements().remove(element);
             if (!param.getUsingElements().isEmpty()) {
                 param.getUsingElements().add(element);
-                throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
+                throw new ParameterServiceException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
             }
             param.getUsingElements().add(element);
         } else {
             if (!param.getUsingElements().isEmpty()) {
-                throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
+                throw new ParameterServiceException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
             }
         }
     }

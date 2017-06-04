@@ -53,7 +53,7 @@ public class SimulationService
         return simulation;
     }
 
-    public void StartSimulation() throws SimulationServiceException {
+    public void StartSimulation() {
         
         /**
          * Monitor previous threads. 
@@ -69,8 +69,7 @@ public class SimulationService
         });
 
         Platform.runLater(() -> {
-            messengerService.setTopStatus("Starting simulation!");
-            messengerService.addToLog("Starting simulation for model '" + dataService.getActiveDao().getModelName() + "'...");
+            messengerService.printMessage("Starting simulation...");
         });
         Thread thread = new Thread(() -> {
 
@@ -87,7 +86,7 @@ public class SimulationService
                     });
                     simulationReferences = simulationCompiler.compile(data);
                 } catch (SimulationServiceException ex) {
-                    throw new SimulationServiceException("Simulation failed!", ex);
+                    throw new SimulationServiceException("Simulation compilation failed!", ex);
                 }
 
                 /**
@@ -179,40 +178,42 @@ public class SimulationService
                     simulationExecuter.join();
                     simulationServer.join();
                 } catch (InterruptedException ex) {
-
-                }
-
-                /**
-                 * Read simulation output.
-                 */
-                if (simulationExecuterOutputReader != null) {
-                    try {
-                        System.out.println("--- Server output ---");
-                        String line;
-                        while ((line = simulationExecuterOutputReader.readLine()) != null) {
-                            if (line.length() > 0) {
-                                System.out.println(line);
-                            }
-                        }
-                        simulationExecuterOutputReader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    throw new SimulationServiceException("The simulation has been interrupted.");
                 }
                 
                 Platform.runLater(() -> {
-                    messengerService.setTopStatus("Simulation for '" + data.getModelName() + "' finished!");
-                    messengerService.addToLog("Simulation for '" + data.getModelName() + "' finished!");
+                    
+                    // Simulation output.
+                    if (simulationExecuterOutputReader != null) {
+                        try {
+                            messengerService.addMessage("--- Simulation output ---");
+                            String line;
+                            while ((line = simulationExecuterOutputReader.readLine()) != null) {
+                                if (line.length() > 0) {
+                                    messengerService.addMessage(line);
+                                }
+                            }
+                            simulationExecuterOutputReader.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    
+                    messengerService.printMessage("Simulating '" + data.getModelName() + "' finished!");
                     try {
                         resultsService.UpdateAutoAddedData();
                     } catch (ResultsServiceException ex) {
-                        messengerService.addToLog("Failed updating auto added data!", ex);
+                        messengerService.addException("Failed to update auto added data series!", ex);
                     }
                 });
             } catch (SimulationServiceException ex) {
                 Platform.runLater(() -> {
-                    messengerService.setTopStatus("Simulation for '" + data.getModelName() + "' failed!");
-                    messengerService.addToLog("Simulation for '" + data.getModelName() + "' failed! " + ex.getMessage(), ex.getThrowable());
+                    messengerService.printMessage("Simulation for '" + data.getModelName() + "' stopped!");
+                    if (ex.getCause() != null) {
+                        messengerService.addException("Simulation for '" + data.getModelName() + "' stopped! ", ex.getCause());
+                    } else {
+                        messengerService.addException("Simulation for '" + data.getModelName() + "' stopped! ", ex);
+                    }
                 });
             } finally {
                 Platform.runLater(() -> {
@@ -226,9 +227,11 @@ public class SimulationService
     }
 
     public void StopSimulation() {
-        threads.stream().filter((t) -> (t.isAlive())).forEach(t -> {
-            System.out.println("Interrupting thread!");
-            t.interrupt();
-        });
+        threads.stream()
+                .filter((t) -> (t.isAlive()))
+                .forEach(t -> {
+                    System.out.println("Interrupting simulation thread!");
+                    t.interrupt();
+                });
     }
 }

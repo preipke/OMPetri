@@ -47,7 +47,7 @@ public class ResultsService
                                         .get(ResultsService.this.resultsDao.getSimulations().size() - 1);
                         AutoAddData(simulation);
                     } catch (ResultsServiceException ex) {
-                        messengerService.addToLog("Exception while auto adding results data!", ex);
+                        messengerService.addException("Exception while auto adding results data!", ex);
                     }
                 }
             }
@@ -228,7 +228,7 @@ public class ResultsService
         SimulationData data;
 
         // validate all active charts
-        for (LineChart lineChart : resultsDao.getLineChartWithAutoAdding()) {
+        for (LineChart lineChart : resultsDao.getLineChartsWithAutoAdding()) {
 
             modelsToAutoAdd = resultsDao.getDataAutoAdd(lineChart);
             
@@ -269,7 +269,7 @@ public class ResultsService
     }
     
     public synchronized void UpdateAutoAddedData() throws ResultsServiceException {
-        for (LineChart lineChart : resultsDao.getLineChartWithAutoAdding()) {
+        for (LineChart lineChart : resultsDao.getLineChartsWithAutoAdding()) {
             for (SimulationData data : resultsDao.getChartTable(lineChart).getItems()) {
                 updateSeries(data);
             }

@@ -10,6 +10,7 @@ import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Parameter;
@@ -99,15 +100,18 @@ public class ParameterController implements Initializable
      * @param element
      */
     public void ShowParameters(IDataElement element) {
+        choiceParamScope.getItems().clear();
+        choiceParamScope.getItems().add(Parameter.Type.GLOBAL);
         if (element != null) {
-            paneParamLocal.setText("Local - " + element.toString());
+            paneParamLocal.setText(element.toString() + " - Local");
             if (element instanceof DataTransition) {
                 transitionSelected = (DataTransition) element;
             } else {
                 transitionSelected = null;
             }
+            choiceParamScope.getItems().add(Parameter.Type.LOCAL);
         } else {
-            paneParamLocal.setText("Local - < ALL >");
+            paneParamLocal.setText("<ALL> - Local");
             transitionSelected = null;
         }
         ClearInputsAndLabels();
@@ -186,7 +190,7 @@ public class ParameterController implements Initializable
                     throw new InputValidationException("Trying to create parameter using restricted identifier");
                 }
             }
-            setStatus(inputParamName, statusParamCreate, "", null);
+            setStatus(inputParamName, statusParamCreate, "");
         } catch (InputValidationException ex) {
             setStatus(inputParamName, statusParamCreate, "Invalid parameter name!", ex);
             return;
@@ -198,7 +202,7 @@ public class ParameterController implements Initializable
             if (value.isEmpty() | !value.matches(functionBuilder.getNumberRegex())) {
                 throw new InputValidationException("");
             }
-            setStatus(inputParamValue, statusParamCreate, "", null);
+            setStatus(inputParamValue, statusParamCreate, "");
         } catch (InputValidationException ex) {
             setStatus(inputParamValue, statusParamCreate, "Invalid parameter value!", ex);
             return;
@@ -215,7 +219,7 @@ public class ParameterController implements Initializable
             inputParamName.clear();
             inputParamNote.clear();
             inputParamValue.clear();
-            setStatus(null, statusParamCreate, "Created parameter '" + param.getId() + "'! [" + param.getType() + "]", null);
+            setStatus(null, statusParamCreate, "Created parameter '" + param.getId() + "'! [" + param.getType() + "]");
         } catch (ParameterServiceException ex) {
             setStatus(null, statusParamCreate, "Parameter creation failed!", ex);
         }
@@ -239,6 +243,14 @@ public class ParameterController implements Initializable
             parametersGlobal.remove(param);
         }
     }
+    
+    private void setStatus(TextField input, Label label, String msg) {
+        if (input != null) {
+            input.setStyle("");
+        }
+        label.setTextFill(Color.GREEN);
+        label.setText(msg);
+    }
 
     /**
      * Sets a label's text and coloring.
@@ -248,20 +260,15 @@ public class ParameterController implements Initializable
      * @param msg
      * @param thr
      */
-    public void setStatus(TextField input, Label label, String msg, Throwable thr) {
-        if (thr != null) {
-            if (input != null) {
-                input.setStyle("-fx-border-color: red");
-            }
-            label.setTextFill(Color.RED);
-            messengerService.addToLog(msg + " [" + thr.getMessage() + "]");
-        } else {
-            if (input != null) {
-                input.setStyle("");
-            }
-            label.setTextFill(Color.GREEN);
+    private void setStatus(TextField input, Label label, String msg, Throwable thr) {
+        if (input != null) {
+            input.setStyle("-fx-border-color: red");
         }
+        label.setTextFill(Color.RED);
         label.setText(msg);
+        if (thr != null) {
+            messengerService.addException(msg, thr);
+        }
     }
 
     @Override
@@ -271,9 +278,6 @@ public class ParameterController implements Initializable
         Callback<TableColumn<Parameter, Button>, TableCell<Parameter, Button>> paramDeleteGlobalCellFactory;
         Callback<TableColumn<Parameter, Number>, TableCell<Parameter, Number>> paramReferencesGlobalCellFactory;
 
-        choiceParamScope.getItems().clear();
-        choiceParamScope.getItems().add(Parameter.Type.GLOBAL);
-        choiceParamScope.getItems().add(Parameter.Type.LOCAL);
         buttonParamCreate.setOnAction(e -> CreateParameter(transitionSelected));
 
         /**
@@ -287,11 +291,11 @@ public class ParameterController implements Initializable
         paramValueLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramValueLocal.setOnEditCommit((CellEditEvent<Parameter, String> t) -> {
             if (!t.getNewValue().replace(",", ".").matches(functionBuilder.getNumberRegex())) {
-                setStatus(null, statusParamLocal, "Invalid value!", new InputValidationException("'" + t.getNewValue() + "' is no real number"));
+                setStatus(null, statusParamLocal, "Invalid value!", null);
             } else {
                 ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))
                         .setValue(t.getNewValue().replace(",", "."));
-                setStatus(null, statusParamLocal, "Value changed!", null);
+                setStatus(null, statusParamLocal, "Value changed!");
             }
         });
         paramNoteLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getNote()));
@@ -308,7 +312,7 @@ public class ParameterController implements Initializable
             cb.setOnAction(e -> {
                 try {
                     DeleteParameter(cellData.getValue());
-                    setStatus(null, statusParamLocal, "Deleted parameter '" + cellData.getValue().getId() + "'! [LOCAL]", null);
+                    setStatus(null, statusParamLocal, "Deleted parameter '" + cellData.getValue().getId() + "'! [LOCAL]");
                 } catch (ParameterServiceException ex) {
                     cb.setIndeterminate(true);
                     setStatus(null, statusParamLocal, "Cannot delete parameter!", ex);
@@ -335,11 +339,11 @@ public class ParameterController implements Initializable
         paramValueGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramValueGlobal.setOnEditCommit((CellEditEvent<Parameter, String> t) -> {
             if (!t.getNewValue().replace(",", ".").matches(functionBuilder.getNumberRegex())) {
-                setStatus(null, statusParamGlobal, "Invalid value!", new InputValidationException("'"+t.getNewValue()+"' is no real number"));
+                setStatus(null, statusParamGlobal, "Invalid value!", null);
             } else {
                 ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))
                         .setValue(t.getNewValue().replace(",", "."));
-                setStatus(null, statusParamGlobal, "Value changed!", null);
+                setStatus(null, statusParamGlobal, "Value changed!");
             }
         });
         paramNoteGlobal.setCellValueFactory(new PropertyValueFactory("note"));
@@ -365,7 +369,7 @@ public class ParameterController implements Initializable
             cb.setOnAction(e -> {
                 try {
                     DeleteParameter(cellData.getValue());
-                    setStatus(null, statusParamGlobal, "Deleted parameter '" + cellData.getValue().getId() + "'! [GLOBAL]", null);
+                    setStatus(null, statusParamGlobal, "Deleted parameter '" + cellData.getValue().getId() + "'! [GLOBAL]");
                 } catch (ParameterServiceException ex) {
                     cb.setIndeterminate(true);
                     setStatus(null, statusParamGlobal, "Cannot delete parameter!", ex);

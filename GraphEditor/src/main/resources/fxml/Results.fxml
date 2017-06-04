@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.chart.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
@@ -118,7 +119,7 @@
                <children>
                   <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
-                        <LineChart fx:id="lineChart" VBox.vgrow="ALWAYS">
+                        <LineChart fx:id="lineChart" animated="false" VBox.vgrow="ALWAYS">
                            <xAxis>
                               <NumberAxis />
                            </xAxis>

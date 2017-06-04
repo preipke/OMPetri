@@ -14,10 +14,9 @@
     <children>
         <MenuBar id="menuBar">
             <menus>
-                <fx:include fx:id="fileMenu" source="menu/FileMenu.fxml" />
-                <!--<fx:include fx:id="editMenu" source="menu/EditMenu.fxml" />
-                <fx:include fx:id="simulationMenu" source="menu/SimulationMenu.fxml" />-->
-                <fx:include fx:id="helpMenu" source="menu/HelpMenu.fxml" />
+                <fx:include source="menu/FileMenu.fxml" />
+                <fx:include source="menu/ViewMenu.fxml" />
+                <fx:include source="menu/HelpMenu.fxml" />
             </menus>
         </MenuBar>
         <StackPane VBox.vgrow="ALWAYS">

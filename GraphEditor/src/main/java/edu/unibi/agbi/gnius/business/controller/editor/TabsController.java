@@ -69,14 +69,14 @@ public class TabsController implements Initializable
                 try {
                     dataService.styleElement((IGraphNode) node);
                 } catch (DataServiceException ex) {
-                    messengerService.addToLog("Failed to style nodes for existing model.", ex);
+                    messengerService.addException("Failed to style nodes for existing model.", ex);
                 }
             });
             dao.getGraph().getConnections().forEach(connection -> {
                 try {
                     dataService.styleElement((IGraphArc) connection);
                 } catch (DataServiceException ex) {
-                    messengerService.addToLog("Failed to style arcs for existing model.", ex);
+                    messengerService.addException("Failed to style arcs for existing model.", ex);
                 }
             });
         }
@@ -120,7 +120,7 @@ public class TabsController implements Initializable
         editorTabPane.getTabs().add(0, tab);
         editorTabPane.getSelectionModel().select(0);
         
-        messengerService.setTopStatus("New model created!", null);
+        messengerService.printMessage("New model created!");
     }
     
     public GraphPane getActiveGraphPane() {
@@ -196,6 +196,8 @@ public class TabsController implements Initializable
         editorTabPane.getTabs().addListener((Observable ll) -> {
             if (editorTabPane.getTabs().size() == 1) {
                 mainController.HideModelPanel();
+                mainController.HideElementPanel();
+                activePane = null;
             }
         });
     }

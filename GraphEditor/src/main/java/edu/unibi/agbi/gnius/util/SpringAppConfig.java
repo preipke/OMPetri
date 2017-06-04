@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.util;
 
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
-import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.io.OpenModelicaExporter;
 import java.io.IOException;
 import java.util.ResourceBundle;
 import org.springframework.context.annotation.Bean;

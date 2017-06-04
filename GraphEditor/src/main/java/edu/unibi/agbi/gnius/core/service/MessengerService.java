@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
+import edu.unibi.agbi.gnius.business.controller.LogController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import javafx.animation.FadeTransition;
 import javafx.scene.control.Label;
@@ -20,19 +21,35 @@ import org.springframework.stereotype.Service;
 public class MessengerService
 {
     @Autowired private MainController mainController;
-    
+    @Autowired private LogController logController;
+
     private FadeTransition topStatusFader;
 
-    public void addToLog(String msg) {
-        System.out.println(msg);
+    public void addMessage(String msg) {
+        logController.toTextArea(msg);
     }
 
-    public void addToLog(Throwable thr) {
-        System.out.println(thr.getMessage());
+    public void addWarning(String msg) {
+        logController.toTextArea(msg);
     }
 
-    public void addToLog(String msg, Throwable thr) {
-        System.out.println(msg + " [" + thr.getMessage() + "]");
+    public void addException(Throwable thr) {
+        logController.toTextArea("Exception! [" + thr.getMessage() + "]");
+        logController.toExceptionsTable(thr);
+    }
+
+    public void addException(String msg, Throwable thr) {
+        logController.toTextArea(msg + " [" + thr.getMessage() + "]");
+        logController.toExceptionsTable(msg, thr);
+    }
+
+    public void printMessage(String msg) {
+        setTopStatusText(msg);
+    }
+
+    public void setStatusAndAddExceptionToLog(String msg, Throwable thr) {
+        setTopStatusText(msg);
+        addException(msg, thr);
     }
 
     public void setLeftStatus(String msg) {
@@ -43,35 +60,12 @@ public class MessengerService
 
     }
 
-    /**
-     * Prints a message in the top status label.
-     *
-     * @param msg the message to print
-     */
-    public void setTopStatus(String msg) {
-        setTopStatusText(msg);
-    }
-
-    /**
-     * Prints a message in the top status label.
-     *
-     * @param msg the message to print
-     * @param thr indicates wether this status is related to an error, otherwise
-     *            set to null
-     */
-    public void setTopStatus(String msg, Throwable thr) {
-        setTopStatusText(msg);
-        if (thr != null) {
-            addToLog(msg, thr);
-        }
-    }
-    
     private void setTopStatusText(final String msg) {
-        
+
         Label label = mainController.getStatusTop();
         label.setText(msg);
         label.setVisible(true);
-        
+
         if (topStatusFader == null) {
             topStatusFader = new FadeTransition(Duration.millis(3000));
             topStatusFader.setNode(label);

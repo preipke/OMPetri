@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
 public class ToolsController implements Initializable
 {
     @Autowired private MouseEventHandler mouseEventHandler;
-    @Autowired private DataService dataGraphService;
+    @Autowired private DataService dataService;
     @Autowired private SelectionService selectionService;
     @Autowired private MessengerService messengerService;
     
@@ -48,32 +48,25 @@ public class ToolsController implements Initializable
         try {
             mouseEventHandler.setNodeCreationMode();
         } catch (Exception ex) {
-            messengerService.addToLog(ex.getMessage());
+            messengerService.addException("Cannot switch to node creation mode!", ex);
         }
     }
     
     private void CreateCluster() {
         try {
-            dataGraphService.group(selectionService.getSelectedElements());
+            dataService.group(selectionService.getSelectedElements());
         } catch (DataServiceException ex) {
-            messengerService.addToLog(ex);
+            messengerService.addException(ex);
         }
     }
     
     private void RemoveCluster() {
-        try {
-            dataGraphService.ungroup(selectionService.getSelectedElements());
-        } catch (DataServiceException ex) {
-            messengerService.addToLog(ex);
-        }
+        dataService.ungroup(selectionService.getSelectedElements());
     }
     
     private void RemoveSelected() {
-        try {
-            dataGraphService.remove(selectionService.getSelectedElements());
-        } catch (DataServiceException ex) {
-            messengerService.addToLog(ex);
-        }
+        dataService.remove(selectionService.getSelectedElements());
+        selectionService.unselectAll();
     }
 
     @Override

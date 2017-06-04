@@ -54,14 +54,14 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
         this.target = null;
 
         MoveTo mv = new MoveTo();
-        mv.xProperty().bind(source.translateXProperty().add(source.getOffsetX()));
-        mv.yProperty().bind(source.translateYProperty().add(source.getOffsetY()));
+        mv.xProperty().bind(source.translateXProperty().add(source.getCenterOffsetX()));
+        mv.yProperty().bind(source.translateYProperty().add(source.getCenterOffsetY()));
 
         LineTo lt = new LineTo();
         this.endXProperty = lt.xProperty();
         this.endYProperty = lt.yProperty();
-        this.endXProperty.set(source.translateXProperty().add(source.getOffsetX()).get());
-        this.endYProperty.set(source.translateYProperty().add(source.getOffsetY()).get());
+        this.endXProperty.set(source.translateXProperty().add(source.getCenterOffsetX()).get());
+        this.endYProperty.set(source.translateYProperty().add(source.getCenterOffsetY()).get());
 
         this.arrow = new GravisChildArrow(this);
         this.arrow.rotateProperty().bind(this.getArrowAngleBinding(endYProperty, endXProperty, endYProperty));
@@ -120,11 +120,11 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX();
-                double y1 = source.translateYProperty().get() + source.getOffsetY();
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -176,11 +176,11 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX();
-                double y1 = source.translateYProperty().get() + source.getOffsetY();
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -209,8 +209,8 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
         this.target = target;
 
         MoveTo mv = new MoveTo();
-        mv.xProperty().bind(source.translateXProperty().add(source.getOffsetX()));
-        mv.yProperty().bind(source.translateYProperty().add(source.getOffsetY()));
+        mv.xProperty().bind(source.translateXProperty().add(source.getCenterOffsetX()));
+        mv.yProperty().bind(source.translateYProperty().add(source.getCenterOffsetY()));
 
         LineTo lt = new LineTo();
         this.endXProperty = lt.xProperty();
@@ -256,8 +256,8 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX() + 0.0001;
-                double y1 = source.translateYProperty().get() + source.getOffsetY() + 0.0001;
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX() + 0.0001;
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY() + 0.0001;
 
                 double x2 = endX.get();
                 double y2 = endY.get();

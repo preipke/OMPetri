@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.util;
+package edu.unibi.agbi.petrinet.io;
 
 import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
@@ -25,8 +24,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -513,6 +510,7 @@ public class OpenModelicaExporter
      */
     private References setPlaceReferences(References references, Place place) throws IOException {
         
+        Transition transition;
         String filter;
         int index;
 
@@ -529,29 +527,35 @@ public class OpenModelicaExporter
 
             index = 1;
             for (IArc arc : place.getArcsOut()) {
+                
+                transition = (Transition) arc.getTarget();
+                if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
+                    
+                    filter = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
+                    references.addElementReference(place, filter);
+                    references.addFilterReference(filter, arc);
 
-                filter = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
-                references.addElementReference(place, filter);
-                references.addFilterReference(filter, arc);
-
-                filter = "der(" + filter + ")";
-                references.addElementReference(place, filter);
-                references.addFilterReference(filter, arc);
-
+                    filter = "der(" + filter + ")";
+                    references.addElementReference(place, filter);
+                    references.addFilterReference(filter, arc);
+                }
                 index++;
             }
 
             index = 1;
             for (IArc arc : place.getArcsIn()) {
+                
+                transition = (Transition) arc.getSource();
+                if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
 
-                filter = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
-                references.addElementReference(place, filter);
-                references.addFilterReference(filter, arc);
+                    filter = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
+                    references.addElementReference(place, filter);
+                    references.addFilterReference(filter, arc);
 
-                filter = "der(" + filter + ")";
-                references.addElementReference(place, filter);
-                references.addFilterReference(filter, arc);
-
+                    filter = "der(" + filter + ")";
+                    references.addElementReference(place, filter);
+                    references.addFilterReference(filter, arc);
+                }
                 index++;
             }
         }

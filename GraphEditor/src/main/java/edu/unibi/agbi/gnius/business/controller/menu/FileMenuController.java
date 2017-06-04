@@ -11,7 +11,7 @@ import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.io.OpenModelicaExporter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -107,27 +107,30 @@ public class FileMenuController implements Initializable
     private boolean SaveXml(DataDao dao, File file) {
         try {
             xmlModelConverter.exportXml(file, dao);
-            messengerService.setTopStatus("XML export complete!", null);
+            messengerService.printMessage("XML export complete!");
             dataService.getActiveDao().setModelFile(file);
             dataService.getActiveDao().setHasChanges(false);
             return true;
         } catch (FileNotFoundException | ParserConfigurationException | TransformerException ex) {
-            messengerService.setTopStatus("XML export failed!", ex);
+            messengerService.printMessage("XML export failed!");
+            messengerService.setStatusAndAddExceptionToLog("XML export to '" + file.getName() + "' failed!", ex);
             return false;
         }
     }
 
     private boolean SaveSbml(DataDao dao, File file) {
-        messengerService.setTopStatus("SBML export is not yet implemented!", null);
+        messengerService.printMessage("SBML export is not yet implemented!");
+        messengerService.addWarning("SBML export is not yet implemented! Select a different format.");
         return false;
     }
 
     private boolean SaveOm(DataDao dao, File file) {
         try {
             omExporter.exportMO(dao.getModelName(), dao.getModel(), file);
-            messengerService.setTopStatus("OpenModelica export complete!", null);
+            messengerService.printMessage("OpenModelica export complete!");
         } catch (IOException ex) {
-            messengerService.setTopStatus("OpenModelica export failed!", ex);
+            messengerService.printMessage("OpenModelica export failed!");
+            messengerService.setStatusAndAddExceptionToLog("OpenModelica export failed!", ex);
         }
         return false;
     }
@@ -178,7 +181,8 @@ public class FileMenuController implements Initializable
             try {
                 Open(file);
             } catch (Exception ex) {
-                messengerService.setTopStatus("File import failed!", ex);
+                messengerService.printMessage("File import failed!");
+                messengerService.setStatusAndAddExceptionToLog("Importing data from '" + file.getName() + "' failed!", ex);
             }
         }
     }
@@ -248,7 +252,8 @@ public class FileMenuController implements Initializable
                             try {
                                 Open(file);
                             } catch (Exception ex) {
-                                messengerService.setTopStatus("File import failed!", ex);
+                                messengerService.printMessage("File import failed!");
+                                messengerService.setStatusAndAddExceptionToLog("Importing data from '" + file.getName() + "' failed!", ex);
                             }
                         });
                         menuOpenRecent.getItems().add(0, item);

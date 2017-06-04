@@ -65,11 +65,11 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX();
-                double y1 = source.translateYProperty().get() + source.getOffsetY();
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x3, y3;
                 x3 = (x1 + x2) / 2;
@@ -121,11 +121,11 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX();
-                double y1 = source.translateYProperty().get() + source.getOffsetY();
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x = (x1 - x2);
                 double y = (y2 - y1);
@@ -171,11 +171,11 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX();
-                double y1 = source.translateYProperty().get() + source.getOffsetY();
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -227,11 +227,11 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getOffsetX();
-                double y1 = source.translateYProperty().get() + source.getOffsetY();
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -268,8 +268,8 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
                 double x1 = bindingCurveControlX.get();
                 double y1 = bindingCurveControlY.get();
 
-                double x2 = target.translateXProperty().get() + target.getOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getOffsetY() + 0.0001;
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
                 double x = (x2 - x1);
                 double y = (y2 - y1);
@@ -304,8 +304,8 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
         };
         
         MoveTo mv = new MoveTo();
-        mv.xProperty().bind(source.translateXProperty().add(source.getOffsetX()));
-        mv.yProperty().bind(source.translateYProperty().add(source.getOffsetY()));
+        mv.xProperty().bind(source.translateXProperty().add(source.getCenterOffsetX()));
+        mv.yProperty().bind(source.translateYProperty().add(source.getCenterOffsetY()));
 
         QuadCurveTo qct = new QuadCurveTo();
         qct.controlXProperty().bind(bindingCurveControlX);

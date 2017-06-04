@@ -14,6 +14,7 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
@@ -66,6 +67,7 @@ public class MouseEventHandler {
     private MouseEvent mouseEventMovedLatest;
     private MouseEvent mouseEventMovedPrevious;
     private MouseEvent mouseEventPressed;
+    private MouseEvent mouseEventPressedPrevious;
 
     private GraphEdge arcTemp;
     
@@ -98,6 +100,7 @@ public class MouseEventHandler {
 
         if (!isInitialized) {
             mouseEventPressed = event; // to avoid null-pointer on dragged
+            mouseEventPressedPrevious = event;
             isInitialized = true;
         }
 
@@ -113,6 +116,7 @@ public class MouseEventHandler {
     private void onMouseDragged(MouseEvent event, GraphPane pane) {
 
         mouseEventPressed.consume(); // for PauseTransition
+        mouseEventPressedPrevious.consume();
         mouseEventMovedLatest = event;
 
         if (event.isPrimaryButtonDown()) {
@@ -173,7 +177,7 @@ public class MouseEventHandler {
                     setEditorMode(isInDraggingMode);
                     mainController.HideElementPanel();
                 } catch (Exception ex) {
-                    messengerService.addToLog(ex.getMessage());
+                    messengerService.addException("Cannot switch to node dragging mode!", ex);
                 }
 
                 Object eventTarget = event.getTarget();
@@ -221,6 +225,7 @@ public class MouseEventHandler {
 
         mouseEventMovedPrevious = event; // used for dragging to avoid initial null pointer
         mouseEventPressed.consume(); // avoids multiple pause transitions
+        mouseEventPressedPrevious = mouseEventPressed;
         mouseEventPressed = event;
 
         /**
@@ -269,7 +274,13 @@ public class MouseEventHandler {
                     if (isInFreeMode.get()) {
                         
                         if (pauseTransition != null && pauseTransition.getStatus() == Animation.Status.RUNNING) {
-                            System.out.println("Double click!");
+                            if (mouseEventPressedPrevious.getTarget() == mouseEventPressed.getTarget()) {
+                                if (mouseEventPressed.getTarget() instanceof GraphCluster) {
+                                    System.out.println("Double clicked cluster!");
+                                } else {
+                                    System.out.println("Double click on target!");
+                                }
+                            }
                         }
 
                         /**
@@ -284,7 +295,7 @@ public class MouseEventHandler {
                                     selectionService.highlight(node);
                                     arcTemp = dataService.createTemporaryArc(node);
                                 } catch (Exception ex) {
-                                    messengerService.addToLog(ex.getMessage());
+                                    messengerService.addException("Cannot switch to arc creation mode!", ex);
                                 }
                             }
                         });
@@ -314,7 +325,7 @@ public class MouseEventHandler {
                     try {
                         setEditorMode(isInSelectionFrameMode);
                     } catch (Exception ex) {
-                        messengerService.addToLog(ex.getMessage());
+                        messengerService.addException("Cannot switch to selection frame mode!", ex);
                     }
 
                     Point2D pos = calculator.getCorrectedMousePosition(
@@ -334,7 +345,7 @@ public class MouseEventHandler {
                     try {
                         dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
                     } catch (DataServiceException ex) {
-                        messengerService.addToLog(ex.getMessage());
+                        messengerService.addException("Cannot create node!", ex);
                     }
                 }
             }
@@ -374,7 +385,8 @@ public class MouseEventHandler {
                 try {
                     dataService.connect(arcTemp.getSource(), (IGraphNode) eventTarget);
                 } catch (DataServiceException ex) {
-                    messengerService.addToLog(ex.getMessage());
+                    messengerService.printMessage("Cannot connect nodes!");
+                    messengerService.setStatusAndAddExceptionToLog("Selected nodes cannot be connected!", ex);
                 }
             }
 
@@ -382,7 +394,7 @@ public class MouseEventHandler {
             try {
                 dataService.remove(arcTemp);
             } catch (DataServiceException ex) {
-                messengerService.addToLog(ex.getMessage());
+                messengerService.addException(ex);
             }
 
             disableMode(isInArcCreationMode);

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.LogController">
+    <children>
+        <TitledPane animated="false" maxHeight="1.7976931348623157E308" prefHeight="350.0" text="Log" VBox.vgrow="ALWAYS">
+            <content>
+                <BorderPane>
+                    <center>
+                        <TextArea fx:id="textLog" BorderPane.alignment="CENTER" />
+                    </center>
+                </BorderPane>
+            </content>
+        </TitledPane>
+        <TitledPane animated="false" maxHeight="1.7976931348623157E308" prefHeight="250.0" text="Exceptions" VBox.vgrow="ALWAYS">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <TableView fx:id="tableLog" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <columns>
+                                <TableColumn fx:id="columnTime" editable="false" prefWidth="125.0" text="Time" />
+                                <TableColumn fx:id="columnType" editable="false" prefWidth="125.0" text="Type" />
+                                <TableColumn fx:id="columnMessage" editable="false" prefWidth="250.0" text="Message" />
+                                <TableColumn fx:id="columnCause" editable="false" prefWidth="250.0" text="Cause" />
+                            </columns>
+                        </TableView>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+    </children>
+</VBox>
