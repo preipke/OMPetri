@@ -37,7 +37,7 @@ public class OpenModelicaExporter
 
     private final String propertiesPath = "/openmodelica.properties";
     private final Properties properties;
-    
+
     public OpenModelicaExporter() throws IOException {
         properties = new Properties();
         properties.load(OpenModelicaExporter.class.getResourceAsStream(propertiesPath));
@@ -49,12 +49,12 @@ public class OpenModelicaExporter
     }
 
     /**
-     * 
+     *
      * @param name
      * @param model
      * @param file
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     public File exportMO(String name, Model model, File file) throws IOException {
 
@@ -102,12 +102,10 @@ public class OpenModelicaExporter
          * Places.
          */
         boolean isFirst, isInnerFirst;
-        String tmp1, tmp2, tmp3, tokenType, functionType, functionString;
+        String functionType, functionString, tokenType, tmp1, tmp2, tmp3;
         Function function;
         Token token;
         Weight weight;
-        INode arcSource, arcTarget;
-        int index;
 
         for (Place place : places) {
 
@@ -117,7 +115,7 @@ public class OpenModelicaExporter
 
             writer.append(INDENT);
             switch (place.getPlaceType()) {
-                
+
                 case CONTINUOUS:
                     if (isColoredPn) {
                         writer.append(properties.getProperty("pnlib.colored.place.continuous"));
@@ -126,7 +124,7 @@ public class OpenModelicaExporter
                     }
                     tokenType = "Marks";
                     break;
-                    
+
                 case DISCRETE:
                     if (isColoredPn) {
                         writer.append(properties.getProperty("pnlib.colored.place.discrete"));
@@ -136,7 +134,7 @@ public class OpenModelicaExporter
                     }
                     tokenType = "Tokens";
                     break;
-                    
+
                 default:
                     throw new IOException("Unhandled place type: " + place.getPlaceType());
             }
@@ -218,7 +216,7 @@ public class OpenModelicaExporter
 
             writer.append(INDENT);
             switch (transition.getTransitionType()) {
-                
+
                 case CONTINUOUS:
                     if (isColoredPn) {
                         writer.append(properties.getProperty("pnlib.colored.transition.continuous"));
@@ -228,7 +226,7 @@ public class OpenModelicaExporter
                         functionType = "maximumSpeed";
                     }
                     break;
-                    
+
                 case DISCRETE:
                     if (isColoredPn) {
                         writer.append(properties.getProperty("pnlib.colored.transition.discrete"));
@@ -238,7 +236,7 @@ public class OpenModelicaExporter
                         functionType = "delay";
                     }
                     break;
-                    
+
                 case STOCHASTIC:
                     if (isColoredPn) {
                         writer.append(properties.getProperty("pnlib.colored.transition.stochastic"));
@@ -248,7 +246,7 @@ public class OpenModelicaExporter
                         functionType = "h"; // TODO
                     }
                     break;
-                    
+
                 default:
                     throw new IOException("Unhandled transition type: " + transition.getTransitionType());
             }
@@ -256,12 +254,12 @@ public class OpenModelicaExporter
             writer.append("(nIn=" + transition.getArcsIn().size());
             writer.append(",nOut=" + transition.getArcsOut().size());
             writer.append("," + functionType);
-            
+
             function = transition.getFunction();
             if (!function.getUnit().isEmpty()) {
                 writer.append("(final unit=\"" + function.getUnit() + "\")");
             }
-            
+
             // Function and parameters
             functionString = "";
             for (FunctionElement element : function.getElements()) {
@@ -362,9 +360,7 @@ public class OpenModelicaExporter
                 }
 
                 if (isColoredPn) {
-
                     tmp2 += "{" + tmp3 + "}/*" + arc.getSource().getId() + "*/";
-
                 }
 
             }
@@ -378,60 +374,136 @@ public class OpenModelicaExporter
         }
 
         /**
-         * Connections.
+         * Arcs.
          */
+        for (IArc arc : arcs) {
+
+            switch (arc.getArcType()) {
+
+                case INHIBITORY:
+                    writer.append(INDENT);
+                    writer.append(properties.getProperty("pnlib.arc.inhibitory"));
+                    writer.append(" '" + arc.getId() + "';");
+                    writer.println();
+                    break;
+
+                case NORMAL:
+                    break;
+
+                case READ:
+                    writer.append(INDENT);
+                    writer.append(properties.getProperty("pnlib.arc.read"));
+                    writer.append(" '" + arc.getId() + "';");
+                    writer.println();
+                    break;
+
+                case TEST:
+                    writer.append(INDENT);
+                    writer.append(properties.getProperty("pnlib.arc.test"));
+                    writer.append(" '" + arc.getId() + "';");
+                    writer.println();
+                    break;
+
+                default:
+                    throw new IOException("Cannot export unhandled arc type: " + arc.getArcType());
+            }
+        }
+
         writer.append("equation");
         writer.println();
 
-        for (IArc a : arcs) {
+        /**
+         * Connections.
+         */
+        for (IArc arc : arcs) {
 
-            writer.append(INDENT);
-            writer.append("connect(");
-
-            arcSource = a.getSource();
-            arcTarget = a.getTarget();
-
-            index = 1;
-            for (IArc arc : arcSource.getArcsOut()) {
-                if (arcTarget.equals(arc.getTarget())) {
+            switch (arc.getArcType()) {
+                case NORMAL:
+                    writer.append(getConnectionNormal(arc));
                     break;
-                }
-                index++;
-            }
-            if (arcSource instanceof Place) {
-                writer.append("'" + arcSource.getId() + "'.outTransition[" + index + "],");
-            } else {
-                writer.append("'" + arcSource.getId() + "'.outPlaces[" + index + "],");
-            }
 
-            index = 1;
-            for (IArc arc : arcTarget.getArcsIn()) {
-                if (arcSource.equals(arc.getSource())) {
+                case INHIBITORY:
+                    try {
+                        writer.append(getConnectionNonNormal(arc));
+                    } catch (IOException ex) {
+                        throw new IOException(ex.getMessage() + " Inhibitory arc cannot connect transition to place.");
+                    }
                     break;
-                }
-                index++;
-            }
-            if (arcTarget instanceof Place) {
-                writer.append("'" + arcTarget.getId() + "'.inTransition[" + index + "]");
-            } else {
-                writer.append("'" + arcTarget.getId() + "'.inPlaces[" + index + "]");
-            }
 
-            writer.append(")");
-            //writer.append(" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))");
-            writer.append(";");
+                case TEST:
+                    try {
+                        writer.append(getConnectionNonNormal(arc));
+                    } catch (IOException ex) {
+                        throw new IOException(ex.getMessage() + " Text arc cannot connect transition to place.");
+                    }
+                    break;
+
+                case READ:
+                    try {
+                        writer.append(getConnectionNonNormal(arc));
+                    } catch (IOException ex) {
+                        throw new IOException(ex.getMessage() + " Read arc cannot connect transition to place.");
+                    }
+                    break;
+
+                default:
+                    throw new IOException("Unhandled connection for arc type '" + arc.getArcType() + "'.");
+            }
             writer.println();
         }
+        
         writer.append(INDENT + "annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
         writer.println();
 
-        writer.append("end '" + name + "'");
-        writer.append(";");
+        writer.append("end '" + name + "';");
         writer.println();
 
         writer.close();
 
         return file;
+    }
+
+    private String getConnectionNormal(IArc arc) throws IOException {
+
+        String connection;
+
+        connection = INDENT + "connect(";
+        if (arc.getSource() instanceof Place) {
+            connection += "'" + arc.getSource().getId() + "'.outTransition[" + getArcIndexWithTargetNode(arc.getSource().getArcsOut(), arc.getTarget()) + "],";
+            connection += "'" + arc.getTarget().getId() + "'.inPlaces[" + getArcIndexWithSourceNode(arc.getTarget().getArcsIn(), arc.getSource()) + "]";
+        } else {
+            connection += "'" + arc.getSource().getId() + "'.outPlaces[" + getArcIndexWithTargetNode(arc.getSource().getArcsOut(), arc.getTarget()) + "],";
+            connection += "'" + arc.getTarget().getId() + "'.inTransition[" + getArcIndexWithSourceNode(arc.getTarget().getArcsIn(), arc.getSource()) + "]";
+        }
+        connection += ")";
+//        connection +=" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))";
+        connection += ";";
+
+        return connection;
+    }
+
+    private String getConnectionNonNormal(IArc arc) throws IOException {
+
+        String connection;
+
+        if (arc.getSource() instanceof Place) {
+            connection = INDENT + "connect(";
+            connection += "'" + arc.getSource().getId() + "'.outTransition[" + getArcIndexWithTargetNode(arc.getSource().getArcsOut(), arc.getTarget()) + "],";
+            connection += "'" + arc.getId() + "'.inPlace";
+            connection += ")";
+//            connection +=" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))";
+            connection += ";\n";
+            connection += INDENT + "connect(";
+            connection += "'" + arc.getId() + "'.outTransition,";
+            connection += "'" + arc.getTarget().getId() + "'.inPlaces[" + getArcIndexWithSourceNode(arc.getTarget().getArcsIn(), arc.getSource()) + "]";
+            connection += ")";
+//            connection +=" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))";
+            connection += ";";
+        } else {
+            throw new IOException("Invalid connection found!");
+        }
+
+        return connection;
     }
 
     /**
@@ -481,13 +553,13 @@ public class OpenModelicaExporter
 
         return references;
     }
-    
+
     /**
      * Creates and gets element filter references for an entire model.
-     * 
+     *
      * @param model
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     public References getModelReferences(Model model) throws IOException {
         References references = new References();
@@ -499,17 +571,17 @@ public class OpenModelicaExporter
         }
         return references;
     }
-    
+
     /**
      * Sets element filter references for a place.
-     * 
+     *
      * @param references
      * @param place
      * @return
-     * @throws IOException 
+     * @throws IOException
      */
     private References setPlaceReferences(References references, Place place) throws IOException {
-        
+
         Transition transition;
         String filter;
         int index;
@@ -518,7 +590,6 @@ public class OpenModelicaExporter
 //        if (references.getElementToFilterReferences().containsKey(place)) {
 //            references.getElementToFilterReferences().get(place).clear();
 //        }
-
         filter = "'" + place.getId() + "'.t";
         references.addElementReference(place, filter);
         references.addFilterReference(filter, place);
@@ -527,10 +598,10 @@ public class OpenModelicaExporter
 
             index = 1;
             for (IArc arc : place.getArcsOut()) {
-                
+
                 transition = (Transition) arc.getTarget();
                 if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
-                    
+
                     filter = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
                     references.addElementReference(place, filter);
                     references.addFilterReference(filter, arc);
@@ -544,7 +615,7 @@ public class OpenModelicaExporter
 
             index = 1;
             for (IArc arc : place.getArcsIn()) {
-                
+
                 transition = (Transition) arc.getSource();
                 if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
 
@@ -559,27 +630,26 @@ public class OpenModelicaExporter
                 index++;
             }
         }
-        
+
         return references;
     }
-    
+
     /**
      * Sets element filter references for a transition.
-     * 
+     *
      * @param references
      * @param transition
-     * @return 
-     * @throws IOException 
+     * @return
+     * @throws IOException
      */
     private References setTransitionReferences(References references, Transition transition) throws IOException {
-        
+
         String filter;
-        
+
         // uncomment if making public
 //        if (references.getElementToFilterReferences().containsKey(transition)) {
 //            references.getElementToFilterReferences().get(transition).clear();
 //        }
-            
         if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
             filter = "'" + transition.getId() + "'.actualSpeed";
             references.addElementReference(transition, filter);
@@ -589,8 +659,30 @@ public class OpenModelicaExporter
         filter = "'" + transition.getId() + "'.fire";
         references.addElementReference(transition, filter);
         references.addFilterReference(filter, transition);
-        
+
         return references;
+    }
+
+    private int getArcIndexWithSourceNode(Collection<IArc> arcs, INode source) throws IOException {
+        int index = 1;
+        for (IArc a : arcs) {
+            if (source.equals(a.getSource())) {
+                return index;
+            }
+            index++;
+        }
+        throw new IOException("Node cannot be found to be source of the given arcs!");
+    }
+
+    private int getArcIndexWithTargetNode(Collection<IArc> arcs, INode target) throws IOException {
+        int index = 1;
+        for (IArc a : arcs) {
+            if (target.equals(a.getTarget())) {
+                return index;
+            }
+            index++;
+        }
+        throw new IOException("Node cannot be found to be target of the given arcs!");
     }
 
     /**
