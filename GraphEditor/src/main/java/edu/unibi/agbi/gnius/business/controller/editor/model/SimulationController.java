@@ -3,12 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.modelpanel;
+package edu.unibi.agbi.gnius.business.controller.editor.model;
 
 import edu.unibi.agbi.gnius.business.controller.ResultsController;
-import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SimulationService;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -44,9 +42,9 @@ public class SimulationController implements Initializable
     @FXML private ProgressBar progressSim;
     
     @Value("#{'${simulation.integrators}'.split(',')}") private List<String> simIntegratorsList;
-    @Value("${simulation.value.intervals}") private String simIntervals;
-    @Value("${simulation.value.start}") private String simStartTime;
-    @Value("${simulation.value.stop}") private String simStopTime;
+    @Value("${simulation.default.intervals}") private String simIntervals;
+    @Value("${simulation.default.start}") private String simStartTime;
+    @Value("${simulation.default.stop}") private String simStopTime;
     
     public double getSimulationStopTime() throws NumberFormatException {
         return Double.parseDouble(inputSimStopTime.getText());

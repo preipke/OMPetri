@@ -75,8 +75,8 @@ public class FileMenuController implements Initializable
     private void Open(File file) throws Exception {
 
         DataDao dataDao = xmlModelConverter.importXml(file);
-        dataDao.setModelFile(file);
-        editorTabsController.CreateModelTab(dataDao);
+        dataDao.setFile(file);
+        editorTabsController.CreateTab(dataDao);
         
         if (latestFiles.contains(file)) {
             menuOpenRecent.getItems().remove(latestFiles.indexOf(file));
@@ -108,8 +108,8 @@ public class FileMenuController implements Initializable
         try {
             xmlModelConverter.exportXml(file, dao);
             messengerService.printMessage("XML export complete!");
-            dataService.getActiveDao().setModelFile(file);
-            dataService.getActiveDao().setHasChanges(false);
+            dataService.getDao().setFile(file);
+            dataService.getDao().setHasChanges(false);
             return true;
         } catch (FileNotFoundException | ParserConfigurationException | TransformerException ex) {
             messengerService.printMessage("XML export failed!");
@@ -147,9 +147,9 @@ public class FileMenuController implements Initializable
         fileChooser.getExtensionFilters().add(typeOm);
         fileChooser.setTitle("Save model '" + dao.getModelName() + "'");
         
-        if (dao.getModelFile() != null) {
-            fileChooser.setInitialDirectory(dao.getModelFile().getParentFile());
-            fileChooser.setInitialFileName(dao.getModelFile().getName());
+        if (dao.getFile() != null) {
+            fileChooser.setInitialDirectory(dao.getFile().getParentFile());
+            fileChooser.setInitialFileName(dao.getFile().getName());
         } else {
             fileChooser.setInitialFileName(dao.getModelName());
         }
@@ -171,7 +171,7 @@ public class FileMenuController implements Initializable
     
     @FXML
     public void New() {
-        editorTabsController.CreateModelTab(null);
+        editorTabsController.CreateTab(null);
     }
 
     @FXML
@@ -195,7 +195,7 @@ public class FileMenuController implements Initializable
     @FXML
     public void Save() {
         
-        File file = dataService.getActiveDao().getModelFile();
+        File file = dataService.getDao().getFile();
         ExtensionFilter filter = null;
         
         if (file != null) {
@@ -216,7 +216,7 @@ public class FileMenuController implements Initializable
         }
         
         if (filter != null) {
-            SaveFile(dataService.getActiveDao(), file, filter);
+            SaveFile(dataService.getDao(), file, filter);
         } else {
             SaveAs();
         }
@@ -234,8 +234,8 @@ public class FileMenuController implements Initializable
 
     @FXML
     public void SaveAs() {
-        File file = ShowSaveFile(dataService.getActiveDao());
-        SaveFile(dataService.getActiveDao(), file, latestFilter);
+        File file = ShowSaveFile(dataService.getDao());
+        SaveFile(dataService.getDao(), file, latestFilter);
     }
 
     @Override
@@ -262,11 +262,11 @@ public class FileMenuController implements Initializable
                 }
             }
         });
-        dataService.getDataDaosList().addListener(new ListChangeListener()
+        dataService.getDaos().addListener(new ListChangeListener()
         {
             @Override
             public void onChanged(ListChangeListener.Change change) {
-                if (dataService.getDataDaosList().size() > 0) {
+                if (dataService.getDaos().size() > 0) {
                     menuItemSave.setDisable(false);
                     menuItemSaveAs.setDisable(false);
                 } else {

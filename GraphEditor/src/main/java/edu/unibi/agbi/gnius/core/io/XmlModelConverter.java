@@ -40,7 +40,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,8 +55,8 @@ public class XmlModelConverter
 {
     @Autowired private FunctionBuilder functionBuilder;
 
-    @Value("${format.datetime}") private String formatDateTime;
-    @Value("${xml.model.data.dtd}") private String dtdModelData;
+    private final String formatDateTime = "yy-MM-dd HH:mm:ss";
+    private final String dtdModelData = "model.dtd";
 
     private final String attrAuthor = "author";
     private final String attrColourId = "colourId";
@@ -217,8 +216,8 @@ public class XmlModelConverter
 
         model.setAttribute(attrAuthor, dataDao.getAuthor());
         model.setAttribute(attrCreationDateTime, dataDao.getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
-        model.setAttribute(attrDescription, dataDao.getDescription());
-        model.setAttribute(attrId, dataDao.getId());
+        model.setAttribute(attrDescription, dataDao.getModelDescription());
+        model.setAttribute(attrId, dataDao.getDaoId());
         model.setAttribute(attrName, dataDao.getModelName());
 
         model.appendChild(arcElements);
@@ -322,7 +321,7 @@ public class XmlModelConverter
                         DataPlace place = getDataPlace((Element) nodes.item(i));
                         dataDao.getModel().add(place);
                         for (IGraphElement shape : place.getShapes()) {
-                            dataDao.getGraph().add((IGraphNode) shape);
+                            dataDao.getGraphRoot().add((IGraphNode) shape);
                         }
                     }
                 }
@@ -348,7 +347,7 @@ public class XmlModelConverter
                         });
                         dataDao.getModel().add(transition);
                         for (IGraphElement shape : transition.getShapes()) {
-                            dataDao.getGraph().add((IGraphNode) shape);
+                            dataDao.getGraphRoot().add((IGraphNode) shape);
                         }
                     }
                 }
@@ -383,7 +382,7 @@ public class XmlModelConverter
                         );
                         dataDao.getModel().add(arc);
                         for (IGraphElement shape : arc.getShapes()) {
-                            dataDao.getGraph().add((IGraphArc) shape);
+                            dataDao.getGraphRoot().add((IGraphArc) shape);
                         }
                     }
                 }
@@ -443,17 +442,16 @@ public class XmlModelConverter
 
                         if (curved) {
                             shape = new GraphCurve(
-                                    (IGraphNode) dataDao.getGraph().getNode(tmp.getAttribute(attrSource)),
-                                    (IGraphNode) dataDao.getGraph().getNode(tmp.getAttribute(attrTarget)),
+                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrSource)),
+                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrTarget)),
                                     arc);
                         } else {
                             shape = new GraphEdge(
-                                    (IGraphNode) dataDao.getGraph().getNode(tmp.getAttribute(attrSource)),
-                                    (IGraphNode) dataDao.getGraph().getNode(tmp.getAttribute(attrTarget)),
+                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrSource)),
+                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrTarget)),
                                     arc);
                         }
-
-                        arc.getShapes().add(shape);
+//                        arc.getShapes().add(shape);
                     }
                 }
             }
@@ -502,11 +500,8 @@ public class XmlModelConverter
                 GraphPlace shape;
                 for (int i = 0; i < nodes.getLength(); i++) {
                     if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-
                         shape = new GraphPlace(null, place);
-                        shape = (GraphPlace) getShapeForNode((Element) nodes.item(i), shape);
-
-                        place.getShapes().add(shape);
+                        setShapePos((Element) nodes.item(i), shape);
                     }
                 }
             }
@@ -543,11 +538,8 @@ public class XmlModelConverter
                 GraphTransition shape;
                 for (int i = 0; i < nodes.getLength(); i++) {
                     if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-
                         shape = new GraphTransition(null, transition);
-                        shape = (GraphTransition) getShapeForNode((Element) nodes.item(i), shape);
-
-                        transition.getShapes().add(shape);
+                        setShapePos((Element) nodes.item(i), shape);
                     }
                 }
             }
@@ -585,12 +577,12 @@ public class XmlModelConverter
         dao.setAuthor(elem.getAttribute(attrAuthor));
         dao.setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
         dao.setModelDescription(elem.getAttribute(attrDescription));
-        dao.setModelId(elem.getAttribute(attrId));
+        dao.setDaoId(elem.getAttribute(attrId));
         dao.setModelName(elem.getAttribute(attrName));
         return dao;
     }
 
-    private IGraphNode getShapeForNode(Element elem, IGraphNode node) {
+    private IGraphNode setShapePos(Element elem, IGraphNode node) {
         node.setId(elem.getAttribute(attrId));
         node.translateXProperty().set(Double.parseDouble(elem.getAttribute(attrPosX)));
         node.translateYProperty().set(Double.parseDouble(elem.getAttribute(attrPosY)));

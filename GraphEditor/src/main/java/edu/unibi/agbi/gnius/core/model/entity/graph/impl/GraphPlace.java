@@ -20,6 +20,7 @@ public class GraphPlace extends GravisCircle implements IGraphNode
     public GraphPlace(String id, DataPlace dataPlace) {
         super(id);
         this.dataPlace = dataPlace;
+        this.dataPlace.getShapes().add(this);
         this.setInnerRectangleVisible(false);
     }
     

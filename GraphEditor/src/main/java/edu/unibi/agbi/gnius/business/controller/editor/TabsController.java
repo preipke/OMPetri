@@ -58,21 +58,21 @@ public class TabsController implements Initializable
     
     private GraphPane activePane;
     
-    public void CreateModelTab(DataDao dataDao) {
+    public void CreateTab(DataDao dataDao) {
         
         final DataDao dao;
         if (dataDao == null) {
             dao = dataService.createDao();
         } else {
             dao = dataDao;
-            dao.getGraph().getNodes().forEach(node -> {
+            dao.getGraphRoot().getNodes().forEach(node -> { // TODO style every level
                 try {
                     dataService.styleElement((IGraphNode) node);
                 } catch (DataServiceException ex) {
                     messengerService.addException("Failed to style nodes for existing model.", ex);
                 }
             });
-            dao.getGraph().getConnections().forEach(connection -> {
+            dao.getGraphRoot().getConnections().forEach(connection -> {
                 try {
                     dataService.styleElement((IGraphArc) connection);
                 } catch (DataServiceException ex) {
@@ -81,13 +81,14 @@ public class TabsController implements Initializable
             });
         }
         
-        GraphScene scene = new GraphScene(dao.getGraph());
+        GraphScene scene = new GraphScene(dao.getGraphRoot());
         scene.widthProperty().bind(editorTabPane.widthProperty());
         scene.heightProperty().bind(editorTabPane.heightProperty());
         scene.getGraphPane().getStyleClass().add(paneStyleClass);
+        dao.setGraphPane(scene.getGraphPane());
         
-        mouseEventHandler.registerTo(scene.getGraphPane());
-        scrollEventHandler.registerTo(scene.getGraphPane(), dao);
+        mouseEventHandler.registerTo(dao.getGraphPane());
+        scrollEventHandler.registerTo(dao);
         
         BorderPane pane = new BorderPane();
         pane.setPadding(new Insets(5));
@@ -96,13 +97,13 @@ public class TabsController implements Initializable
         Tab tab = new Tab("Model");
         tab.setContent(pane);
         tab.setText(getTabName(tab, dao.getModelName()));
-        dao.getNameProperty().addListener(cl -> {
+        dao.modelNameProperty().addListener(cl -> {
             tab.setText(getTabName(tab, dao.getModelName())); // todo: check names for all tabs
         });
         tab.selectedProperty().addListener(cl -> {
             if (tab.isSelected()) {
-                activePane = scene.getGraphPane();
-                dataService.setActiveDataDao(dao);
+                activePane = dao.getGraphPane();
+                dataService.setDao(dao);
                 mainController.HideElementPanel();
                 mainController.ShowModelPanel(dao);
             }
@@ -113,7 +114,7 @@ public class TabsController implements Initializable
             }
         });
         tab.setOnClosed(eh -> {
-            dataService.removeDataDao(dao);
+            dataService.remove(dao);
             dao.clear();
         });
         
@@ -123,7 +124,12 @@ public class TabsController implements Initializable
         messengerService.printMessage("New model created!");
     }
     
-    public GraphPane getActiveGraphPane() {
+    /**
+     * Gets the currently visible graph pane.
+     * 
+     * @return 
+     */
+    public GraphPane getGraphPane() {
         return activePane;
     }
     
@@ -164,7 +170,7 @@ public class TabsController implements Initializable
     
     private void ShowConfirmationDialog(Event event) {
 
-        DataDao dao = dataService.getActiveDao();
+        DataDao dao = dataService.getDao();
 
         ButtonType buttonSave = new ButtonType("Save");
         ButtonType buttonClose = new ButtonType("Close");
@@ -191,7 +197,7 @@ public class TabsController implements Initializable
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        buttonCreateTab.setOnAction(el -> CreateModelTab(null));
+        buttonCreateTab.setOnAction(el -> CreateTab(null));
         editorTabPane.getTabs().remove(0);
         editorTabPane.getTabs().addListener((Observable ll) -> {
             if (editorTabPane.getTabs().size() == 1) {

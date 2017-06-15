@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:id="hierarchyFrame" maxHeight="-Infinity" maxWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController">
+    <children>
+        <TitledPane animated="false" text="Hierarchy" HBox.hgrow="ALWAYS">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <TreeView fx:id="treeGraphHierarchy" prefHeight="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+    </children>
+    <StackPane.margin>
+        <Insets bottom="2.0" />
+    </StackPane.margin>
+</VBox>

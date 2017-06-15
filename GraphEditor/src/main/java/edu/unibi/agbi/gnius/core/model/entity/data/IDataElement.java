@@ -6,8 +6,8 @@
 package edu.unibi.agbi.gnius.core.model.entity.data;
 
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import java.util.List;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.util.Set;
 
 /**
  *
@@ -23,5 +23,5 @@ public interface IDataElement extends IElement
 
     public void setLabelText(String text);
 
-    public List<IGraphElement> getShapes();
+    public Set<IGraphElement> getShapes();
 }

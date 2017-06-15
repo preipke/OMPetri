@@ -5,10 +5,14 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -16,18 +20,33 @@ import java.util.List;
  */
 public final class DataClusterArc extends DataArc {
     
-    private final List<IGraphElement> shapes;
+    private final Set<IGraphElement> shapes;
     private final DataCluster dataCluster;
     
     public DataClusterArc(DataCluster dataCluster) {
         super(dataCluster, dataCluster, null);
         super.type = Element.Type.CLUSTERARC;
-        this.shapes = new ArrayList();
+        this.shapes = new HashSet();
         this.dataCluster = dataCluster;
     }
     
-    public DataCluster getDataCluster() {
+    public DataCluster getRelatedCluster() {
         return dataCluster;
+    }
+    
+    public List<IDataArc> getStoredDataArcs() {
+        List<IDataArc> dataArcs = new ArrayList();
+        for (IGraphElement elem : shapes) {
+            if (elem instanceof IGraphArc) {
+                dataArcs.add(((IGraphArc) elem).getDataElement());
+            }
+        }
+        return dataArcs;
+    }
+
+    @Override
+    public Set<IGraphElement> getShapes() {
+        return shapes;
     }
 
     @Override
@@ -48,10 +67,5 @@ public final class DataClusterArc extends DataArc {
     @Override
     public void setLabelText(String text) {
         throw new UnsupportedOperationException("This method is not meant to be used at any time.");
-    }
-
-    @Override
-    public List<IGraphElement> getShapes() {
-        return shapes;
     }
 }

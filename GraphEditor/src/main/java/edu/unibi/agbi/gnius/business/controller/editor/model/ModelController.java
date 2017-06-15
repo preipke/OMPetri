@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.modelpanel;
+package edu.unibi.agbi.gnius.business.controller.editor.model;
 
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import java.net.URL;
@@ -27,13 +27,13 @@ public class ModelController implements Initializable
     
     private DataDao dataDaoActive;
     
-    public void setModel(DataDao dataDao) {
+    public void setDao(DataDao dataDao) {
         if (dataDaoActive != null) {
             updateModelInfo();
         }
         dataDaoActive = dataDao;
         inputAuthor.setText(dataDaoActive.getAuthor());
-        inputDescription.setText(dataDaoActive.getDescription());
+        inputDescription.setText(dataDaoActive.getModelDescription());
         inputName.setText(dataDaoActive.getModelName());
     }
     

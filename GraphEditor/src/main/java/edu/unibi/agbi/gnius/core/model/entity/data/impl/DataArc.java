@@ -9,8 +9,8 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -18,17 +18,22 @@ import java.util.List;
  */
 public class DataArc extends Arc implements IDataArc
 {
-    private final List<IGraphElement> shapes;
+    private final Set<IGraphElement> shapes;
     
     private String description = "";
     
+    public DataArc(IDataNode source, Arc.Type arctype) {
+        super(source, arctype);
+        this.shapes = new HashSet();
+    }
+    
     public DataArc(IDataNode source, IDataNode target, Arc.Type arctype) {
         super(source, target, arctype);
-        this.shapes = new ArrayList();
+        this.shapes = new HashSet();
     }
 
     @Override
-    public List<IGraphElement> getShapes() {
+    public Set<IGraphElement> getShapes() {
         return shapes;
     }
 

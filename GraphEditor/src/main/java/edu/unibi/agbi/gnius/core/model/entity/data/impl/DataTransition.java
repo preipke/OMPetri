@@ -10,7 +10,9 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -18,19 +20,19 @@ import java.util.List;
  */
 public final class DataTransition extends Transition implements IDataNode
 {
-    private final List<IGraphElement> shapes;
-    
+    private final Set<IGraphElement> shapes;
+
     private String description = "";
-    
+
     public DataTransition(String id, Transition.Type type) {
         super(id);
         setTransitionType(type);
         this.name = this.id;
-        this.shapes = new ArrayList();
+        this.shapes = new HashSet();
     }
 
     @Override
-    public List<IGraphElement> getShapes() {
+    public Set<IGraphElement> getShapes() {
         return shapes;
     }
 
@@ -43,21 +45,25 @@ public final class DataTransition extends Transition implements IDataNode
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
+    @Override
+    public String getLabelText() {
+        if (shapes.isEmpty()) {
+            return null;
+        }
+        return ((IGraphNode) shapes.iterator().next()).getLabel().getText();
+    }
+
     /**
-     * Sets the label text for this data node and all related shapes in the scene.
-     * @param text 
+     * Sets the label text for all related shapes in the scene.
+     *
+     * @param text
      */
     @Override
     public void setLabelText(String text) {
         for (IGraphElement shape : shapes) {
-            ((IGraphNode)shape).getLabel().setText(text);
+            ((IGraphNode) shape).getLabel().setText(text);
         }
-    }
-    
-    @Override
-    public String getLabelText() {
-        return ((IGraphNode)shapes.get(0)).getLabel().getText();
     }
 
     @Override

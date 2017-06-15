@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import edu.unibi.agbi.petrinet.model.Model;
 import java.io.File;
 import java.time.LocalDateTime;
@@ -19,28 +20,41 @@ import javafx.beans.property.StringProperty;
 public class DataDao
 {
     private final Model model;
-    private final Graph graph;
+    private final Graph graphParent;
+    private GraphPane graphPane;
     
+    private int scalePower = 0;
+    
+    private final StringProperty name;
     private LocalDateTime creationDateTime;
     private String id;
     private String author;
     private String description;
-    private final StringProperty name;
 
-    private File fileModel;
+    private File file;
     private boolean hasChanges;
     
+    private int nextClusterId;
     private int nextNodeId;
     private int nextPlaceId;
     private int nextTransitionId;
     
-    private int scalePower = 0;
-    
     public DataDao() {
-        model = new Model();
-        graph = new Graph();
         name = new SimpleStringProperty();
+        model = new Model();
+        graphParent = new Graph(null);
+        graphParent.nameProperty().bind(name);
+        nextClusterId = 1;
         nextNodeId = 1;
+        nextPlaceId = 1;
+        nextTransitionId = 1;
+    }
+    
+    public void clear() {
+        graphParent.clear();
+        model.clear();
+        nextNodeId = 1;
+        nextClusterId = 1;
         nextPlaceId = 1;
         nextTransitionId = 1;
     }
@@ -49,29 +63,36 @@ public class DataDao
         return model;
     }
     
-    public Graph getGraph() {
-        return graph;
+    public Graph getGraphRoot() {
+        return graphParent;
     }
     
-    public void clear() {
-        graph.clear();
-        model.clear();
+    public GraphPane getGraphPane() {
+        return graphPane;
     }
     
-    public void setModelFile(File file) {
-        fileModel = file;
+    public void setGraphPane(GraphPane graphPane) {
+        this.graphPane = graphPane;
     }
     
-    public File getModelFile() {
-        return fileModel;
+    public File getFile() {
+        return file;
+    }
+    
+    public void setFile(File file) {
+        this.file = file;
+    }
+    
+    public boolean hasChanges() {
+        return hasChanges;
     }
     
     public void setHasChanges(boolean value) {
         hasChanges = value;
     }
     
-    public boolean hasChanges() {
-        return hasChanges;
+    public int getNextClusterId() {
+        return nextClusterId++;
     }
     
     public int getNextNodeId() {
@@ -110,7 +131,7 @@ public class DataDao
         this.creationDateTime = creationDateTime;
     }
 
-    public String getDescription() {
+    public String getModelDescription() {
         return description;
     }
 
@@ -118,16 +139,12 @@ public class DataDao
         this.description = description;
     }
     
-    public String getId() {
+    public String getDaoId() {
         return id;
     }
     
-    public void setModelId(String id) {
+    public void setDaoId(String id) {
         this.id = id;
-    }
-
-    public StringProperty getNameProperty() {
-        return name;
     }
 
     public String getModelName() {
@@ -136,5 +153,9 @@ public class DataDao
 
     public void setModelName(String name) {
         this.name.set(name);
+    }
+
+    public StringProperty modelNameProperty() {
+        return name;
     }
 }

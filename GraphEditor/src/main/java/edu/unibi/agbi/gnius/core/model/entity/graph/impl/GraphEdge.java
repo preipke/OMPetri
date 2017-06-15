@@ -18,14 +18,15 @@ public class GraphEdge extends GravisEdge implements IGraphArc
 {
     private final DataArc dataArc;
     
-    public GraphEdge(IGraphNode source, DataArc dataArc) {
+    public GraphEdge(IGraphNode source) {
         super(source);
-        this.dataArc = dataArc;
+        this.dataArc = null;
     }
     
     public GraphEdge(IGraphNode source, IGraphNode target, DataArc dataArc) {
         super(source, target);
         this.dataArc = dataArc;
+        this.dataArc.getShapes().add(this);
     }
     
     @Override

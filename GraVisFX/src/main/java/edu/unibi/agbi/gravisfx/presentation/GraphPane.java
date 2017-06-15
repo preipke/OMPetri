@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.presentation;
 
-import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
+import edu.unibi.agbi.gravisfx.graph.Graph;
 import javafx.scene.layout.Pane;
 
 /**
@@ -14,18 +14,27 @@ import javafx.scene.layout.Pane;
  */
 public final class GraphPane extends Pane
 {
-    private final TopLayer topLayer;
+    private final Graph graphRoot;
+    private Graph graph;
 
-    public GraphPane(TopLayer topLayer) {
-
+    public GraphPane(Graph graph) {
         super();
-
-        this.topLayer = topLayer;
-
-        getChildren().add(topLayer);
+        getChildren().add(graph);
+        this.graphRoot = graph;
+        this.graph = graph;
+    }
+    
+    public void setGraph(Graph graph) {
+        getChildren().remove(this.graph);
+        getChildren().add(graph);
+        this.graph = graph;
     }
 
-    public TopLayer getTopLayer() {
-        return topLayer;
+    public Graph getGraph() {
+        return graph;
+    }
+    
+    public Graph getGraphRoot() {
+        return graphRoot;
     }
 }

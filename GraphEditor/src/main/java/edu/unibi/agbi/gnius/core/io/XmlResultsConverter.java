@@ -17,7 +17,6 @@ import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.*;
 
@@ -28,8 +27,8 @@ import org.w3c.dom.*;
 @Component
 public class XmlResultsConverter
 {
-    @Value("${format.datetime}") private String formatDateTime;
-    @Value("${xml.results.data.dtd}") private String dtdResultsData;
+    private final String formatDateTime = "yy-MM-dd HH:mm:ss";
+    private final String dtdResultsData = "results.dtd";
     
     private final String attrAuthor = "author";
     private final String attrDateTime = "dateTime";

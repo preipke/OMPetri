@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.elementpanel;
+package edu.unibi.agbi.gnius.business.controller.editor.element;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
@@ -125,7 +125,7 @@ public class ElementController implements Initializable
         elementSelected = element.getDataElement();
 
         if (elementSelected.getElementType() == Element.Type.CLUSTERARC) {
-            elementSelected = ((DataClusterArc) elementSelected).getDataCluster();
+            elementSelected = ((DataClusterArc) elementSelected).getRelatedCluster(); // TODO 
         }
 
         LoadGuiElements(elementSelected);
@@ -258,7 +258,7 @@ public class ElementController implements Initializable
     private void LoadElementProperties(IDataElement element) {
 
         ObservableList<Colour> choicesColour = FXCollections.observableArrayList();
-        Collection<Colour> colors = dataService.getActiveModel().getColours();
+        Collection<Colour> colors = dataService.getModel().getColours();
         
         choiceColour.setItems(choicesColour); // assign upfront, input listeners accesses on text change
 
@@ -319,7 +319,7 @@ public class ElementController implements Initializable
         menuParamLocal.getItems().clear();
         menuParamGlobal.getItems().clear();
 
-        dataService.getActiveModel().getPlaces().stream()
+        dataService.getModel().getPlaces().stream()
                 .filter(place -> place.getId().toLowerCase().contains(filter) || place.getName().toLowerCase().contains(filter))
                 .forEach(place -> {
 
@@ -390,7 +390,7 @@ public class ElementController implements Initializable
                     menuRefPlaces.getItems().add(menuPlace);
                 });
 
-        dataService.getActiveModel().getTransitions().stream()
+        dataService.getModel().getTransitions().stream()
                 .filter(transition -> transition.getId().toLowerCase().contains(filter) || transition.getName().toLowerCase().contains(filter))
                 .forEach(transition -> {
 

@@ -51,10 +51,10 @@ public class ParameterService
             add(param);
         } else {
             if (element != null) {
-                if (dataService.getActiveModel().containsAndNotEqual(param)) {
+                if (dataService.getModel().containsAndNotEqual(param)) {
                     throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
                 }
-                dataService.getActiveModel().add(param);
+                dataService.getModel().add(param);
                 element.getRelatedParameterIds().add(param.getId());
             } else {
                 throw new ParameterServiceException("A reference element is required for storing non global parameters!");
@@ -72,10 +72,10 @@ public class ParameterService
         if (Parameter.Type.GLOBAL != param.getType()) {
             throw new ParameterServiceException("Wrong method for adding non global parameters! Reference element required.");
         }
-        if (dataService.getActiveModel().containsAndNotEqual(param)) {
+        if (dataService.getModel().containsAndNotEqual(param)) {
             throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
         }
-        dataService.getActiveModel().add(param);
+        dataService.getModel().add(param);
     }
 
     /**
@@ -128,17 +128,17 @@ public class ParameterService
      */
     private void removeUnusedReferencingParameter() {
         List<Parameter> paramsUnused = new ArrayList();
-        dataService.getActiveModel().getParameters().forEach(param -> {
+        dataService.getModel().getParameters().forEach(param -> {
             if (param.getType() == Parameter.Type.REFERENCE) {
                 if (param.getUsingElements().isEmpty()) {
-                    dataService.getActiveModel()
+                    dataService.getModel()
                             .getElement(param.getRelatedElementId()).getRelatedParameterIds()
                             .remove(param.getId());
                     paramsUnused.add(param);
                 }
             }
         });
-        paramsUnused.forEach(param -> dataService.getActiveModel().remove(param));
+        paramsUnused.forEach(param -> dataService.getModel().remove(param));
     }
 
     /**
@@ -232,7 +232,7 @@ public class ParameterService
      */
     public List<Parameter> getGlobalParameters() {
         List<Parameter> parameters = new ArrayList();
-        for (Parameter param : dataService.getActiveModel().getParameters()) {
+        for (Parameter param : dataService.getModel().getParameters()) {
             if (param.getType() == Parameter.Type.GLOBAL) {
                 parameters.add(param);
             }
@@ -259,7 +259,7 @@ public class ParameterService
                 }
             }
         } else {
-            dataService.getActiveModel().getParameters().forEach(p -> {
+            dataService.getModel().getParameters().forEach(p -> {
                 if (p.getType() == Parameter.Type.LOCAL) {
                     parameters.add(p);
                 }
@@ -276,7 +276,7 @@ public class ParameterService
      * @return
      */
     public Parameter getParameter(String id) {
-        return dataService.getActiveModel().getParameter(id);
+        return dataService.getModel().getParameter(id);
     }
 
     /**
@@ -285,7 +285,7 @@ public class ParameterService
      * @return
      */
     public Set<String> getParameterIds() {
-        return dataService.getActiveModel().getParameterIds();
+        return dataService.getModel().getParameterIds();
     }
     
     /**
@@ -306,7 +306,7 @@ public class ParameterService
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getActiveModel().getElement(idSource + "_" + idTarget);
+            element = dataService.getModel().getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
@@ -327,7 +327,7 @@ public class ParameterService
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getActiveModel().getElement(idSource + "_" + idTarget);
+            element = dataService.getModel().getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
@@ -348,7 +348,7 @@ public class ParameterService
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getActiveModel().getElement(idSource + "_" + idTarget);
+            element = dataService.getModel().getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
@@ -369,7 +369,7 @@ public class ParameterService
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getActiveModel().getElement(idSource + "_" + idTarget);
+            element = dataService.getModel().getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
@@ -385,14 +385,14 @@ public class ParameterService
             }
         } else if (candidate.matches(regexParamToken)) {
 
-            element = dataService.getActiveModel().getElement(candidate);
+            element = dataService.getModel().getElement(candidate);
             if (element != null && element.getElementType() == Element.Type.PLACE) {
                 
                 return CreateReferencingParameter(candidate, "'" + element.getId() + "'.t", element);
             }
         } else if (candidate.matches(regexTransitionSpeed)) {
 
-            element = dataService.getActiveModel().getElement(candidate);
+            element = dataService.getModel().getElement(candidate);
             if (element != null && element.getElementType() == Element.Type.TRANSITION) {
                 
                 return CreateReferencingParameter(candidate, "'" + element.getId() + "'.actualSpeed", element);
@@ -410,7 +410,7 @@ public class ParameterService
      */
     public void remove(Parameter param) throws ParameterServiceException {
         ValidateRemoval(param);
-        dataService.getActiveModel().remove(param);
+        dataService.getModel().remove(param);
     }
 
     /**

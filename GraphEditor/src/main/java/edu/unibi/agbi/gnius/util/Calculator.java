@@ -62,8 +62,8 @@ public class Calculator
 
     public Point2D getCorrectedMousePosition(Graph graph, double posX, double posY) {
         double x, y;
-        x = (posX - graph.getTopLayer().translateXProperty().get()) / graph.getTopLayer().getScale().getX();
-        y = (posY - graph.getTopLayer().translateYProperty().get()) / graph.getTopLayer().getScale().getY();
+        x = (posX - graph.translateXProperty().get()) / graph.getScale().getX();
+        y = (posY - graph.translateYProperty().get()) / graph.getScale().getY();
         return new Point2D(x, y);
     }
 
@@ -83,14 +83,14 @@ public class Calculator
      * @param pane
      * @return
      */
-    public synchronized double getScaleDifference(Graph graph, GraphPane pane) {
+    public synchronized double getScaleDifference(GraphPane pane) {
 
         double max_X = Double.MIN_VALUE;
         double min_X = Double.MAX_VALUE;
         double max_Y = Double.MIN_VALUE;
         double min_Y = Double.MAX_VALUE;
 
-        for (IGravisNode node : graph.getNodes()) {
+        for (IGravisNode node : pane.getGraph().getNodes()) {
             if (max_X < node.translateXProperty().get()) {
                 max_X = node.translateXProperty().get();
             }

@@ -7,44 +7,70 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
  * @author PR
  */
-public class DataCluster extends Node implements IDataNode {
-    
-    private static final String IDENT = "C";
-    private static int COUNT = 0;
-    
-    private final List<IGraphElement> shapes;
-    
-    private final List<IGraphNode> nodes;
-    private final List<IGraphArc> arcs;
-    
+public class DataCluster extends Node implements IDataNode
+{
+    private final Set<IGraphElement> shapes;
+    private final Graph layer;
+
+//    private final IGraphCluster parentCluster;
+//    private final List<IGraphCluster> childCluster;
+    private final List<IGraphNode> nodesInside;
+
+    private final Set<IGraphArc> arcsInside;
+    private final Set<IGraphArc> arcsToOutside;
+
     private String description = "";
-    
-    public DataCluster(List<IGraphNode> nodes, List<IGraphArc> arcs) {
-        super(IDENT + ++COUNT);
+
+    /**
+     *
+     * @param id          the unique identifier for this node
+     * @param layer       graph layer that presents the elements inside this cluster
+     * @param nodesInside list of nodes that are inside the cluster
+     * @param arcsInside  list of arcs that connect the nodes inside the cluster
+     * @param arcsOutside list of arcs that connect to nodes outside the cluster
+     */
+    public DataCluster(String id, Graph layer, List<IGraphNode> nodesInside, Set<IGraphArc> arcsInside, Set<IGraphArc> arcsOutside) {
+        super(id);
         super.type = Element.Type.CLUSTER;
         super.name = id;
-        this.nodes = nodes;
-        this.arcs = arcs;
-        this.shapes = new ArrayList();
+
+        this.shapes = new HashSet();
+        this.layer = layer;
+
+        this.nodesInside = nodesInside;
+        this.arcsInside = arcsInside;
+        this.arcsToOutside = arcsOutside;
     }
     
-    public List<IGraphNode> getClusteredNodes() {
-        return nodes;
+    public Graph getLayer() {
+        return layer;
     }
-    
-    public List<IGraphArc> getClusteredArcs() {
-        return arcs;
+
+    public List<IGraphNode> getClusteredNodesInside() {
+        return nodesInside;
+    }
+
+    public Set<IGraphArc> getClusteredArcsInside() {
+        return arcsInside;
+    }
+
+    public Set<IGraphArc> getClusteredArcsToOutside() {
+        return arcsToOutside;
     }
 
     @Override
@@ -59,22 +85,26 @@ public class DataCluster extends Node implements IDataNode {
 
     @Override
     public String getLabelText() {
-        return ((IGraphNode)shapes.get(0)).getLabel().getText();
+        if (shapes.isEmpty()) {
+            return null;
+        }
+        return ((IGraphNode) shapes.iterator().next()).getLabel().getText();
     }
 
     /**
-     * Sets the label text for this data node and all related shapes in the scene.
-     * @param text 
+     * Sets the label text for all related shapes in the scene.
+     *
+     * @param text
      */
     @Override
     public void setLabelText(String text) {
         for (IGraphElement shape : shapes) {
-            ((IGraphNode)shape).getLabel().setText(text);
+            ((IGraphNode) shape).getLabel().setText(text);
         }
     }
 
     @Override
-    public List<IGraphElement> getShapes() {
+    public Set<IGraphElement> getShapes() {
         return shapes;
     }
 

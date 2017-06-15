@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.editor.modelpanel.SimulationController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.SimulationController;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
@@ -14,7 +14,6 @@ import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
-import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +38,6 @@ public class SimulationService
     @Autowired private ResultsService resultsService;
     @Autowired private SimulationController simulationControlsController;
     @Autowired private SimulationCompiler simulationCompiler;
-    
 
     @Autowired
     public SimulationService(ResultsDao resultsDao) {
@@ -73,7 +71,7 @@ public class SimulationService
         });
         Thread thread = new Thread(() -> {
 
-            DataDao data = dataService.getActiveDao();
+            DataDao data = dataService.getDao();
             
             try {
                 /**

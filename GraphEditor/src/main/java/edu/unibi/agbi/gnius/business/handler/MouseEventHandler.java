@@ -5,17 +5,19 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.editor.modelpanel.ToolsController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
+import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.util.Calculator;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.presentation.GraphPane;
 import javafx.animation.PauseTransition;
@@ -31,8 +33,7 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import edu.unibi.agbi.gravisfx.entity.IGravisChild;
-import javafx.animation.Animation;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -41,14 +42,17 @@ import javafx.animation.Animation;
 @Component
 public class MouseEventHandler {
 
-    @Autowired private SelectionService selectionService;
     @Autowired private DataService dataService;
+    @Autowired private HierarchyService hierarchyService;
     @Autowired private MessengerService messengerService;
+    @Autowired private SelectionService selectionService;
 
     @Autowired private MainController mainController;
     @Autowired private ToolsController editorToolsController;
 
     @Autowired private Calculator calculator;
+    
+    @Value("${timing.doubleclick.delay}") private double doubleClickDelay;
 
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
@@ -57,9 +61,8 @@ public class MouseEventHandler {
     private final BooleanProperty isInSelectionFrameMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInFreeMode = new SimpleBooleanProperty(true);
 
-    private final PauseTransition pauseTransition;
     private final Rectangle selectionFrame;
-    private final double secondsBeforeCreatingArc = .35d; // TODO assign custom value in preferences
+    private PauseTransition pauseTransition;
 
     private boolean isInitialized = false;
     private boolean isPrimaryButtonDown = false;
@@ -69,7 +72,7 @@ public class MouseEventHandler {
     private MouseEvent mouseEventPressed;
     private MouseEvent mouseEventPressedPrevious;
 
-    private GraphEdge arcTemp;
+    private IGraphArc arcTemp;
     
     public MouseEventHandler() {
         selectionFrame = new Rectangle(0, 0, 0, 0);
@@ -77,7 +80,6 @@ public class MouseEventHandler {
         selectionFrame.setStrokeWidth(1);
         selectionFrame.setStrokeLineCap(StrokeLineCap.ROUND);
         selectionFrame.setFill(Color.LIGHTBLUE.deriveColor(0, 1.2, 1, 0.6));
-        pauseTransition = new PauseTransition(Duration.seconds(secondsBeforeCreatingArc));
     }
 
     /**
@@ -101,6 +103,7 @@ public class MouseEventHandler {
         if (!isInitialized) {
             mouseEventPressed = event; // to avoid null-pointer on dragged
             mouseEventPressedPrevious = event;
+            pauseTransition = new PauseTransition(Duration.seconds(doubleClickDelay));
             isInitialized = true;
         }
 
@@ -128,12 +131,12 @@ public class MouseEventHandler {
                  */
                 Point2D pos_t0
                         = calculator.getCorrectedMousePosition(
-                                dataService.getActiveGraph(),
+                                dataService.getGraph(),
                                 mouseEventPressed.getX(),
                                 mouseEventPressed.getY());
                 Point2D pos_t1
                         = calculator.getCorrectedMousePosition(
-                                dataService.getActiveGraph(),
+                                dataService.getGraph(),
                                 mouseEventMovedLatest.getX(),
                                 mouseEventMovedLatest.getY());
 
@@ -161,7 +164,7 @@ public class MouseEventHandler {
                  */
                 Point2D correctedMousePos
                         = calculator.getCorrectedMousePosition(
-                                dataService.getActiveGraph(),
+                                dataService.getGraph(),
                                 event.getX(),
                                 event.getY());
 
@@ -190,12 +193,12 @@ public class MouseEventHandler {
 
                     Point2D pos_t0
                             = calculator.getCorrectedMousePosition(
-                                    dataService.getActiveGraph(),
+                                    dataService.getGraph(),
                                     mouseEventMovedPrevious.getX(), 
                                     mouseEventMovedPrevious.getY());
                     Point2D pos_t1
                             = calculator.getCorrectedMousePosition(
-                                    dataService.getActiveGraph(),
+                                    dataService.getGraph(),
                                     mouseEventMovedLatest.getX(),
                                     mouseEventMovedLatest.getY());
 
@@ -210,8 +213,8 @@ public class MouseEventHandler {
             /**
              * Dragging the entire graph.
              */
-            pane.getTopLayer().setTranslateX((mouseEventMovedLatest.getX() - mouseEventMovedPrevious.getX() + pane.getTopLayer().translateXProperty().get()));
-            pane.getTopLayer().setTranslateY((mouseEventMovedLatest.getY() - mouseEventMovedPrevious.getY() + pane.getTopLayer().translateYProperty().get()));
+            pane.getGraph().setTranslateX((mouseEventMovedLatest.getX() - mouseEventMovedPrevious.getX() + pane.getGraph().translateXProperty().get()));
+            pane.getGraph().setTranslateY((mouseEventMovedLatest.getY() - mouseEventMovedPrevious.getY() + pane.getGraph().translateYProperty().get()));
         }
 
         mouseEventMovedPrevious = event;
@@ -273,13 +276,13 @@ public class MouseEventHandler {
 
                     if (isInFreeMode.get()) {
                         
-                        if (pauseTransition != null && pauseTransition.getStatus() == Animation.Status.RUNNING) {
-                            if (mouseEventPressedPrevious.getTarget() == mouseEventPressed.getTarget()) {
-                                if (mouseEventPressed.getTarget() instanceof GraphCluster) {
-                                    System.out.println("Double clicked cluster!");
-                                } else {
-                                    System.out.println("Double click on target!");
-                                }
+                        /**
+                         * Double click.
+                         */
+                        if (event.getClickCount() == 2) {
+                            if (node instanceof GraphCluster) {
+                                hierarchyService.open((GraphCluster) node);
+                                return;
                             }
                         }
 
@@ -290,10 +293,10 @@ public class MouseEventHandler {
                         pauseTransition.setOnFinished(e -> {
                             if (!event.isConsumed()) {
                                 try {
-                                    setEditorMode(isInArcCreationMode);
                                     selectionService.unselectAll();
                                     selectionService.highlight(node);
-                                    arcTemp = dataService.createTemporaryArc(node);
+                                    arcTemp = dataService.createConnectionTmp(node);
+                                    setEditorMode(isInArcCreationMode);
                                 } catch (Exception ex) {
                                     messengerService.addException("Cannot switch to arc creation mode!", ex);
                                 }
@@ -329,7 +332,7 @@ public class MouseEventHandler {
                     }
 
                     Point2D pos = calculator.getCorrectedMousePosition(
-                            dataService.getActiveGraph(),
+                            dataService.getGraph(),
                             mouseEventPressed.getX(), 
                             mouseEventPressed.getY());
                     selectionFrame.setX(pos.getX());
@@ -337,7 +340,7 @@ public class MouseEventHandler {
                     selectionFrame.setWidth(0);
                     selectionFrame.setHeight(0);
 
-                    pane.getTopLayer().getChildren().add(selectionFrame);
+                    pane.getGraph().getChildren().add(selectionFrame);
 
                 } else if (isInNodeCreationMode.get()) {
 
@@ -359,7 +362,7 @@ public class MouseEventHandler {
             /**
              * Selection Frame Mode. Selecting nodes using the rectangle.
              */
-            for (Node node : pane.getTopLayer().getNodeLayer().getChildren()) {
+            for (Node node : pane.getGraph().getNodeLayerChildren()) {
                 if (node instanceof IGraphNode) {
                     if (node.getBoundsInParent().intersects(selectionFrame.getBoundsInParent())) {
                         Platform.runLater(() -> {
@@ -368,7 +371,7 @@ public class MouseEventHandler {
                     }
                 }
             }
-            pane.getTopLayer().getChildren().remove(selectionFrame);
+            pane.getGraph().getChildren().remove(selectionFrame);
             disableMode(isInSelectionFrameMode);
 
         } else if (isInArcCreationMode.get()) {

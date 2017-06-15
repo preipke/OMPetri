@@ -21,6 +21,7 @@ public class GraphCurve extends GravisCurve implements IGraphArc
     public GraphCurve(IGraphNode source , IGraphNode target , DataArc dataArc) {
         super(source , target);
         this.dataArc = dataArc;
+        this.dataArc.getShapes().add(this);
     }
     
     @Override

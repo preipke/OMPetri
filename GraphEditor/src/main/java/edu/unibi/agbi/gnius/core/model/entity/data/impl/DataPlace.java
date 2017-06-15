@@ -10,7 +10,9 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -18,7 +20,7 @@ import java.util.List;
  */
 public final class DataPlace extends Place implements IDataNode
 {
-    private final List<IGraphElement> shapes;
+    private final Set<IGraphElement> shapes;
 
     private String description = "";
 
@@ -26,11 +28,11 @@ public final class DataPlace extends Place implements IDataNode
         super(id);
         setPlaceType(type);
         this.name = this.id;
-        this.shapes = new ArrayList();
+        this.shapes = new HashSet();
     }
 
     @Override
-    public List<IGraphElement> getShapes() {
+    public Set<IGraphElement> getShapes() {
         return shapes;
     }
 
@@ -44,6 +46,14 @@ public final class DataPlace extends Place implements IDataNode
         return description;
     }
 
+    @Override
+    public String getLabelText() {
+        if (shapes.isEmpty()) {
+            return null;
+        }
+        return ((IGraphNode) shapes.iterator().next()).getLabel().getText();
+    }
+
     /**
      * Sets the label text for all related shapes in the scene.
      *
@@ -54,14 +64,6 @@ public final class DataPlace extends Place implements IDataNode
         for (IGraphElement shape : shapes) {
             ((IGraphNode) shape).getLabel().setText(text);
         }
-    }
-
-    @Override
-    public String getLabelText() {
-        if (shapes.isEmpty()) {
-            return null;
-        }
-        return ((IGraphNode) shapes.get(0)).getLabel().getText();
     }
 
     @Override

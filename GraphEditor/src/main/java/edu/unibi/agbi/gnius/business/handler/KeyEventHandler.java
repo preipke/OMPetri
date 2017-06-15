@@ -11,6 +11,7 @@ import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -26,9 +27,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class KeyEventHandler
 {
-    @Autowired private SelectionService selectionService;
     @Autowired private DataService dataService;
+    @Autowired private HierarchyService hierarchyService;
     @Autowired private MessengerService messengerService;
+    @Autowired private SelectionService selectionService;
     @Autowired private MouseEventHandler mouseEventHandler;
 
     private DataDao activeDao;
@@ -53,22 +55,24 @@ public class KeyEventHandler
                 dataService.remove(selectionService.getSelectedElements());
                 selectionService.unselectAll();
             });
+        } else if (event.getCode().equals(KeyCode.BACK_SPACE)) {
+            hierarchyService.climb();
         } else if (event.isControlDown()) {
             /**
-             * Copy, clone or paste selected nodes.
+             * Copy, cut or paste selected nodes.
              */
             if (event.getCode().equals(KeyCode.C)) {
-                activeDao = dataService.getActiveDao();
+                activeDao = dataService.getDao();
                 nodes = selectionService.copy();
                 isCutting = false;
             } else if (event.getCode().equals(KeyCode.X)) {
-                activeDao = dataService.getActiveDao();
+                activeDao = dataService.getDao();
                 nodes = selectionService.copy();
                 isCutting = true;
             } else if (event.getCode().equals(KeyCode.V)) {
                 selectionService.unselectAll();
                 try {
-                    if (activeDao != dataService.getActiveDao()) {
+                    if (activeDao != dataService.getDao()) {
                         selectionService.selectAll(dataService.paste(nodes, false));
                     } else {
                         selectionService.selectAll(dataService.paste(nodes, isCutting));

@@ -10,45 +10,74 @@ import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.ConnectionLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
-import edu.unibi.agbi.gravisfx.graph.layer.TopLayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import javafx.scene.transform.Scale;
 
 /**
- * The Graph model. Serves as an access object to the stored scene objects.
+ * Layer for the graph pane. This class groups and stores elements that are
+ * presented in the scene and belong to the graph such as nodes, connections and
+ * labels.
+ *
+ * Layer object hierarchically reference its parental and child layers, allowing
+ * switching between layers by removing/adding the according layer from or to
+ * the graph pane.
+ *
+ * Each layer has additional stacking sublayers for nodes, connections and
+ * labels.
  *
  * @author PR
  */
-public class Graph
+public class Graph extends Group
 {
-    private final TopLayer topLayer;
+    private final Map<String, IGravisNode> nodes;
+    private final Map<String, IGravisConnection> connections;
 
+    private final ConnectionLayer connectionLayer;
     private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
-    private final ConnectionLayer connectionLayer;
 
-    private final Map<String,IGravisNode> nodes;
-    private final Map<String,IGravisConnection> connections;
+    private final Scale scale;
 
-    public Graph() {
+    private final StringProperty name;
+    private final List<Graph> childGraphs;
+    private Graph parentGraph;
 
-        this.topLayer = new TopLayer();
+    public Graph(Graph parentGraph) {
 
-        this.labelLayer = topLayer.getLabelLayer();
-        this.nodeLayer = topLayer.getNodeLayer();
-        this.connectionLayer = topLayer.getConnectionLayer();
-
+        this.name = new SimpleStringProperty();
+        
         this.nodes = new HashMap();
         this.connections = new HashMap();
-    }
 
-    public TopLayer getTopLayer() {
-        return topLayer;
-    }
+        this.connectionLayer = new ConnectionLayer();
+        this.labelLayer = new LabelLayer();
+        this.nodeLayer = new NodeLayer();
 
+        // order matters! connections > nodes > labels
+        this.getChildren().add(connectionLayer);
+        this.getChildren().add(nodeLayer);
+        this.getChildren().add(labelLayer);
+
+        this.scale = new Scale(1.0d, 1.0d);
+        this.getTransforms().add(scale);
+
+        this.childGraphs = new ArrayList();
+        this.parentGraph = parentGraph;
+        if (parentGraph != null) {
+            parentGraph.getChildGraphs().add(this);
+        }
+    }
+    
     public void add(IGravisNode node) {
         if (!nodes.containsKey(node.getId())) {
             nodes.put(node.getId(), node);
@@ -67,19 +96,21 @@ public class Graph
                 connection.getTarget().getParents().add(connection.getSource());
                 connection.getTarget().getConnections().add(connection);
             }
+        } else {
+            System.out.println("Connection ID already present! -> " + connection.getId());
         }
     }
-    
+
     public void clear() {
+        connectionLayer.getChildren().clear();
         labelLayer.getChildren().clear();
         nodeLayer.getChildren().clear();
-        connectionLayer.getChildren().clear();
-        nodes.clear();
         connections.clear();
+        nodes.clear();
     }
     
-    public boolean contains(String nodeId) {
-        return nodes.containsKey(nodeId);
+    public boolean contains(String id) {
+        return connections.containsKey(id) || nodes.containsKey(id);
     }
 
     public boolean contains(IGravisConnection connection) {
@@ -89,21 +120,13 @@ public class Graph
     public boolean contains(IGravisNode node) {
         return nodes.containsKey(node.getId());
     }
-    
+
     public IGravisConnection getConnection(String id) {
         return connections.get(id);
     }
 
     public Collection<IGravisConnection> getConnections() {
         return connections.values();
-    }
-
-    public List<IGravisConnection> getConnectionsCopy() {
-        List<IGravisConnection> listCopy = new ArrayList();
-        for (IGravisConnection connection : connections.values()) {
-            listCopy.add(connection);
-        }
-        return listCopy;
     }
     
     public IGravisNode getNode(String id) {
@@ -112,14 +135,6 @@ public class Graph
 
     public Collection<IGravisNode> getNodes() {
         return nodes.values();
-    }
-
-    public List<IGravisNode> getNodesCopy() {
-        List<IGravisNode> listCopy = new ArrayList();
-        for (IGravisNode node : nodes.values()) {
-            listCopy.add(node);
-        }
-        return listCopy;
     }
 
     public IGravisNode remove(IGravisNode node) {
@@ -142,5 +157,63 @@ public class Graph
             connection.getTarget().getConnections().remove(connection);
         }
         return connection;
+    }
+    
+    public String getName() {
+        return name.get();
+    }
+    
+    public void setName(String name) {
+        this.name.set(name);
+    }
+    
+    public StringProperty nameProperty() {
+        return name;
+    }
+
+    /**
+     * Sets the parent for this graph. Also reassigns this layers child
+     * relations.
+     *
+     * @param parentGraph
+     */
+    public void setParentGraph(Graph parentGraph) {
+        this.parentGraph.getChildGraphs().remove(this);
+        parentGraph.getChildGraphs().add(this);
+        this.parentGraph = parentGraph;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public Graph getParentGraph() {
+        return parentGraph;
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<Graph> getChildGraphs() {
+        return childGraphs;
+    }
+
+    /**
+     * Gets the scale applied to the layer.
+     *
+     * @return
+     */
+    public Scale getScale() {
+        return scale;
+    }
+    
+    public Collection<Node> getNodeLayerChildren() {
+        return nodeLayer.getChildren();
+    }
+    
+    @Override
+    public String toString() {
+        return name.get();
     }
 }

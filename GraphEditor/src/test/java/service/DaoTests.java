@@ -1,12 +1,12 @@
 package service;
 
 import main.TestFXBase;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
@@ -25,7 +25,7 @@ public class DaoTests extends TestFXBase {
 
     int placeCount = 5;
     int transitionCount = 3;
-    int nodesInCluster = 5;
+    int nodesInCluster = 3;
     IGraphArc tmpArc;
     IGraphNode tmpNode;
 
@@ -40,18 +40,18 @@ public class DaoTests extends TestFXBase {
 
         Assert.assertEquals(
                 places.size() + transitions.size(),
-                dataService.getActiveModel().getNodeIds().size(),
-                dataService.getActiveGraph().getNodes().size());
+                dataService.getModel().getNodeIds().size(),
+                dataService.getGraph().getNodes().size());
         Assert.assertEquals(
                 places.size(),
-                dataService.getActiveModel().getPlaces().size());
+                dataService.getModel().getPlaces().size());
         Assert.assertEquals(
                 transitions.size(),
-                dataService.getActiveModel().getTransitions().size());
+                dataService.getModel().getTransitions().size());
         Assert.assertEquals(
                 0,
-                dataService.getActiveModel().getArcs().size(),
-                dataService.getActiveGraph().getConnections().size());
+                dataService.getModel().getArcs().size(),
+                dataService.getGraph().getConnections().size());
     }
 
     @Test
@@ -64,11 +64,11 @@ public class DaoTests extends TestFXBase {
 
         Assert.assertEquals(
                 places.size() * transitions.size() * 2,
-                dataService.getActiveModel().getArcs().size(),
-                dataService.getActiveGraph().getConnections().size());
+                dataService.getModel().getArcs().size(),
+                dataService.getGraph().getConnections().size());
         
         IGraphArc arc;
-        for (IGravisConnection connection : dataService.getActiveGraph().getConnections()) {
+        for (IGravisConnection connection : dataService.getGraph().getConnections()) {
             arc = (IGraphArc) connection;
             Assert.assertEquals(true, arc.getSource().getConnections().contains(arc));
             Assert.assertEquals(true, arc.getTarget().getConnections().contains(arc));
@@ -118,21 +118,23 @@ public class DaoTests extends TestFXBase {
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
         ConnectNodes(places, transitions);
 
+        List<IGravisNode> nodesCopy;
         IGraphNode node;
         IDataNode nodeData;
         
-        while (!dataService.getActiveGraph().getNodes().isEmpty()) {
+        while (!dataService.getGraph().getNodes().isEmpty()) {
+            
+            nodesCopy = copyNodes(dataService.getGraph().getNodes());
 
-            node = (IGraphNode) dataService.getActiveGraph()
-                    .getNodesCopy()
-                    .remove(getRandomIndex(dataService.getActiveGraph().getNodesCopy()));
+            node = (IGraphNode) nodesCopy.remove(getRandomIndex(nodesCopy));
             nodeData = node.getDataElement();
+            
             RemoveNode(node);
 
-            Assert.assertEquals(false, dataService.getActiveGraph().contains(node));
-            Assert.assertEquals(false, dataService.getActiveModel().getPlaces().contains(nodeData));
-            Assert.assertEquals(false, dataService.getActiveModel().getTransitions().contains(nodeData));
-            Assert.assertEquals(false, dataService.getActiveModel().contains(nodeData.getId()));
+            Assert.assertEquals(false, dataService.getGraph().contains(node));
+            Assert.assertEquals(false, dataService.getModel().getPlaces().contains(nodeData));
+            Assert.assertEquals(false, dataService.getModel().getTransitions().contains(nodeData));
+            Assert.assertEquals(false, dataService.getModel().contains(nodeData.getId()));
             
             // removed node can neither be parent nor child of any other node
             for (IGravisNode parent : node.getParents()) {
@@ -143,12 +145,12 @@ public class DaoTests extends TestFXBase {
             }
 
             // no connection to the removed node is to be found!
-            Collection<IGravisConnection> connections = dataService.getActiveGraph().getConnections();
+            Collection<IGravisConnection> connections = dataService.getGraph().getConnections();
             for (IGravisConnection connection : connections) {
                 Assert.assertNotEquals(node, connection.getSource());
                 Assert.assertNotEquals(node, connection.getTarget());
             }
-            Collection<Arc> arcs = dataService.getActiveModel().getArcs();
+            Collection<Arc> arcs = dataService.getModel().getArcs();
             for (Arc arc : arcs) {
                 Assert.assertNotEquals(nodeData, arc.getSource());
                 Assert.assertNotEquals(nodeData, arc.getTarget());
@@ -164,19 +166,21 @@ public class DaoTests extends TestFXBase {
         
         ConnectNodes(places, transitions);
         
+        List<IGravisConnection> arcsCopy;
         IGraphArc arc;
-        DataArc arcData;
+        IDataArc arcData;
         
-        while (!dataService.getActiveGraph().getConnections().isEmpty()) {
+        while (!dataService.getGraph().getConnections().isEmpty()) {
             
-            arc = (IGraphArc) dataService.getActiveGraph()
-                    .getConnectionsCopy()
-                    .remove(getRandomIndex(dataService.getActiveGraph().getConnectionsCopy()));
+            arcsCopy = copyConnections(dataService.getGraph().getConnections());
+            
+            arc = (IGraphArc) arcsCopy.remove(getRandomIndex(arcsCopy));
             arcData = arc.getDataElement();
+            
             RemoveArc(arc);
 
-            Assert.assertEquals(false, dataService.getActiveGraph().contains(arc));
-            Assert.assertEquals(false, dataService.getActiveModel().getArcs().contains(arcData));
+            Assert.assertEquals(false, dataService.getGraph().contains(arc));
+            Assert.assertEquals(false, dataService.getModel().getArcs().contains(arcData));
             
             Assert.assertEquals(false, arc.getSource().getConnections().contains(arc));
             Assert.assertEquals(false, arc.getTarget().getConnections().contains(arc));
@@ -200,26 +204,26 @@ public class DaoTests extends TestFXBase {
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
         ConnectNodes(places, transitions);
         
-        nodesBeforeClustering = dataService.getActiveGraph().getNodesCopy();
-        connectionsBeforeCluster = dataService.getActiveGraph().getConnectionsCopy();
+        nodesBeforeClustering = copyNodes(dataService.getGraph().getNodes());
+        connectionsBeforeCluster = copyConnections(dataService.getGraph().getConnections());
         
-        arcsBeforeClustering = dataService.getActiveModel().getArcsCopy();
-        placesBeforeClustering = dataService.getActiveModel().getPlacesCopy();
-        transitionsBeforeClustering = dataService.getActiveModel().getTransitionsCopy();
+        arcsBeforeClustering = dataService.getModel().getArcsCopy();
+        placesBeforeClustering = dataService.getModel().getPlacesCopy();
+        transitionsBeforeClustering = dataService.getModel().getTransitionsCopy();
         
         /**
          * Creating cluster.
          */
-        GraphCluster cluster = ClusterNodes(places, transitions, nodesInCluster);
+        IGraphCluster cluster = ClusterNodes(places, transitions, nodesInCluster);
         
-        nodesAfterClustering = dataService.getActiveGraph().getNodes();
-        connectionsAfterCluster = dataService.getActiveGraph().getConnections();
+        nodesAfterClustering = dataService.getGraph().getNodes();
+        connectionsAfterCluster = dataService.getGraph().getConnections();
         
-        arcsAfterClustering = dataService.getActiveModel().getArcs();
-        placesAfterClustering = dataService.getActiveModel().getPlaces();
-        transitionsAfterClustering = dataService.getActiveModel().getTransitions();
+        arcsAfterClustering = dataService.getModel().getArcs();
+        placesAfterClustering = dataService.getModel().getPlaces();
+        transitionsAfterClustering = dataService.getModel().getTransitions();
         
-        Assert.assertEquals(dataService.getActiveGraph().getNodes().size() - 1 + cluster.getDataElement().getClusteredNodes().size(), nodesBeforeClustering.size());
+        Assert.assertEquals(dataService.getGraph().getNodes().size() - 1 + cluster.getDataElement().getClusteredNodesInside().size(), nodesBeforeClustering.size());
         Assert.assertNotEquals(nodesBeforeClustering, nodesAfterClustering);
         Assert.assertNotEquals(connectionsBeforeCluster, connectionsAfterCluster);
         
@@ -242,12 +246,12 @@ public class DaoTests extends TestFXBase {
          */
         UngroupCluster(cluster);
         
-        nodesAfterClustering = dataService.getActiveGraph().getNodes();
-        connectionsAfterCluster = dataService.getActiveGraph().getConnections();
+        nodesAfterClustering = dataService.getGraph().getNodes();
+        connectionsAfterCluster = dataService.getGraph().getConnections();
         
-        arcsAfterClustering = dataService.getActiveModel().getArcs();
-        placesAfterClustering = dataService.getActiveModel().getPlaces();
-        transitionsAfterClustering = dataService.getActiveModel().getTransitions();
+        arcsAfterClustering = dataService.getModel().getArcs();
+        placesAfterClustering = dataService.getModel().getPlaces();
+        transitionsAfterClustering = dataService.getModel().getTransitions();
         
         // all nodes have to be found
         Assert.assertEquals(nodesBeforeClustering.size(), nodesAfterClustering.size());

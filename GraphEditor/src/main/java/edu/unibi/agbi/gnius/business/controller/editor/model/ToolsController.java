@@ -3,13 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.modelpanel;
+package edu.unibi.agbi.gnius.business.controller.editor.model;
 
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Component;
 public class ToolsController implements Initializable
 {
     @Autowired private MouseEventHandler mouseEventHandler;
+    @Autowired private HierarchyService hierarchyService;
     @Autowired private DataService dataService;
     @Autowired private SelectionService selectionService;
     @Autowired private MessengerService messengerService;
@@ -54,14 +56,14 @@ public class ToolsController implements Initializable
     
     private void CreateCluster() {
         try {
-            dataService.group(selectionService.getSelectedElements());
+            hierarchyService.cluster(selectionService.getSelectedElements());
         } catch (DataServiceException ex) {
             messengerService.addException(ex);
         }
     }
     
     private void RemoveCluster() {
-        dataService.ungroup(selectionService.getSelectedElements());
+        hierarchyService.restore(selectionService.getSelectedElements());
     }
     
     private void RemoveSelected() {

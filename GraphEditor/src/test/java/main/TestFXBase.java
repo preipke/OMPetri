@@ -1,13 +1,16 @@
 package main;
 
 import edu.unibi.agbi.gnius.Main;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +43,7 @@ public class TestFXBase extends ApplicationTest {
     private final static boolean HEADLESS = true;
     
     @Autowired protected DataService dataService;
+    @Autowired protected HierarchyService hierarchyService;
     @Autowired protected SelectionService selectionService;
 
     @BeforeClass
@@ -57,7 +61,7 @@ public class TestFXBase extends ApplicationTest {
     @Before
     public void setUpClass() throws Exception {
         ApplicationTest.launch(Main.class); // verifies that MainApp is a JavaFX application (extends Application)
-        dataService.setActiveDataDao(dataService.createDao());
+        dataService.setDao(dataService.createDao());
     }
 
     @Override
@@ -85,6 +89,22 @@ public class TestFXBase extends ApplicationTest {
         } catch (InterruptedException ex) {
             System.out.println(ex);
         }
+    }
+
+    protected List<IGravisConnection> copyConnections(Collection<IGravisConnection> connections) {
+        List<IGravisConnection> listCopy = new ArrayList();
+        for (IGravisConnection connection : connections) {
+            listCopy.add(connection);
+        }
+        return listCopy;
+    }
+
+    protected List<IGravisNode> copyNodes(Collection<IGravisNode> nodes) {
+        List<IGravisNode> listCopy = new ArrayList();
+        for (IGravisNode node : nodes) {
+            listCopy.add(node);
+        }
+        return listCopy;
     }
 
     /**
@@ -160,7 +180,7 @@ public class TestFXBase extends ApplicationTest {
         return transitions;
     }
     
-    protected GraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataServiceException {
+    protected IGraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataServiceException {
         
         List<IGraphElement> elements = new ArrayList();
         
@@ -176,12 +196,12 @@ public class TestFXBase extends ApplicationTest {
             }
         }
         
-        final List<GraphCluster> cluster = new ArrayList();
+        final List<IGraphCluster> cluster = new ArrayList();
         
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                cluster.add(dataService.group(elements));
+                cluster.add(hierarchyService.cluster(elements));
             } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -193,14 +213,14 @@ public class TestFXBase extends ApplicationTest {
         return cluster.get(0);
     }
     
-    protected void UngroupCluster(GraphCluster cluster) {
+    protected void UngroupCluster(IGraphCluster cluster) {
         
         final List<IGraphElement> clusters = new ArrayList();
         clusters.add(cluster);
         
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
-            dataService.ungroup(clusters);
+            hierarchyService.restore(clusters);
             isFinished.set(true);
         });
         waitForFxThread(isFinished);

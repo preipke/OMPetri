@@ -20,7 +20,7 @@ public final class GraphScene extends SubScene
 
         super(null, 0, 0);
 
-        graphPane = new GraphPane(graph.getTopLayer());
+        graphPane = new GraphPane(graph);
 
         setRoot(graphPane);
         graphPane.maxHeightProperty().bind(heightProperty());

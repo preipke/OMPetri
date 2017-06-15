@@ -9,7 +9,7 @@
 
 <TitledPane animated="false" text="Tools" 
             xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="edu.unibi.agbi.gnius.business.controller.editor.modelpanel.ToolsController">
+            fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.ToolsController">
     <content>
         <AnchorPane>
             <children>

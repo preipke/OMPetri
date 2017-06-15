@@ -6,9 +6,10 @@
 package edu.unibi.agbi.gnius.business.controller;
 
 import edu.unibi.agbi.gnius.business.controller.editor.TabsController;
-import edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ParameterController;
-import edu.unibi.agbi.gnius.business.controller.editor.elementpanel.ElementController;
-import edu.unibi.agbi.gnius.business.controller.editor.modelpanel.ModelController;
+import edu.unibi.agbi.gnius.business.controller.editor.element.ParameterController;
+import edu.unibi.agbi.gnius.business.controller.editor.element.ElementController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.ModelController;
 import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -42,16 +43,18 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class MainController implements Initializable
 {
-    @Autowired private DataService dataService;
     @Autowired private Calculator calculator;
+    @Autowired private DataService dataService;
 
     @Autowired private ElementController elementController;
     @Autowired private FileMenuController fileMenuController;
+    @Autowired private HierarchyController hierarchyController;
     @Autowired private ModelController modelController;
     @Autowired private ParameterController parameterController;
     @Autowired private TabsController tabsController;
 
     @FXML private HBox zoomFrame;
+    @FXML private VBox hierarchyFrame;
     @FXML private VBox modelFrame;
     @FXML private VBox elementFrame;
     @FXML private VBox parameterFrame;
@@ -75,8 +78,8 @@ public class MainController implements Initializable
         double startX, startY, endX, endY;
         double translateX, translateY;
 
-        startX = zoomOffsetX - graphPane.getTopLayer().translateXProperty().get();
-        startY = zoomOffsetY - graphPane.getTopLayer().translateYProperty().get();
+        startX = zoomOffsetX - graphPane.getGraph().translateXProperty().get();
+        startY = zoomOffsetY - graphPane.getGraph().translateYProperty().get();
 
         endX = startX * zoomFactor;
         endY = startY * zoomFactor;
@@ -84,8 +87,8 @@ public class MainController implements Initializable
         translateX = startX - endX;
         translateY = startY - endY;
 
-        graphPane.getTopLayer().setTranslateX(graphPane.getTopLayer().translateXProperty().get() + translateX);
-        graphPane.getTopLayer().setTranslateY(graphPane.getTopLayer().translateYProperty().get() + translateY);
+        graphPane.getGraph().setTranslateX(graphPane.getGraph().translateXProperty().get() + translateX);
+        graphPane.getGraph().setTranslateY(graphPane.getGraph().translateYProperty().get() + translateY);
     }
 
     public Stage getStage() {
@@ -104,6 +107,7 @@ public class MainController implements Initializable
     public void HideModelPanel() {
         zoomFrame.setVisible(false);
         modelFrame.setVisible(false);
+        hierarchyFrame.setVisible(false);
     }
 
     public void ShowDialogExit(Event event) {
@@ -150,7 +154,7 @@ public class MainController implements Initializable
     }
 
     public void ShowElementDetails(IGraphElement element) {
-        if (tabsController.getActiveGraphPane() == null) {
+        if (tabsController.getGraphPane() == null) {
             return;
         }
         parameterFrame.setVisible(false);
@@ -159,7 +163,7 @@ public class MainController implements Initializable
     }
 
     public void ShowElementParameters(IDataElement element) {
-        if (tabsController.getActiveGraphPane() == null) {
+        if (tabsController.getGraphPane() == null) {
             return;
         }
         elementFrame.setVisible(false);
@@ -170,7 +174,9 @@ public class MainController implements Initializable
     public void ShowModelPanel(DataDao dataDao) {
         zoomFrame.setVisible(true);
         modelFrame.setVisible(true);
-        modelController.setModel(dataDao);
+        hierarchyFrame.setVisible(true);
+        modelController.setDao(dataDao);
+        hierarchyController.setDao(dataDao);
     }
     
     @FXML
@@ -179,31 +185,31 @@ public class MainController implements Initializable
         Point2D centerTarget;
         double scaleTarget, scaleCurrent, adjustedOffsetX, adjustedOffsetY;
         
-        tabsController.getActiveGraphPane().getTopLayer().setTranslateX(0);
-        tabsController.getActiveGraphPane().getTopLayer().setTranslateY(0);
+        tabsController.getGraphPane().getGraph().setTranslateX(0);
+        tabsController.getGraphPane().getGraph().setTranslateY(0);
         
-        centerTarget = calculator.getNodeCenter(dataService.getActiveGraph().getNodes());
+        centerTarget = calculator.getNodeCenter(dataService.getGraph().getNodes());
         
-        adjustedOffsetX = centerTarget.getX() - (tabsController.getActiveGraphPane().getWidth() / 2) / tabsController.getActiveGraphPane().getTopLayer().getScale().getX();
-        adjustedOffsetY = centerTarget.getY() - (tabsController.getActiveGraphPane().getHeight() / 2) / tabsController.getActiveGraphPane().getTopLayer().getScale().getX();
+        adjustedOffsetX = centerTarget.getX() - (tabsController.getGraphPane().getWidth() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
+        adjustedOffsetY = centerTarget.getY() - (tabsController.getGraphPane().getHeight() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
         
-        dataService.getActiveGraph().getNodes().forEach(node -> {
+        dataService.getGraph().getNodes().forEach(node -> {
             node.translateXProperty().set(node.translateXProperty().get() - adjustedOffsetX);
             node.translateYProperty().set(node.translateYProperty().get() - adjustedOffsetY);
         });
         
-        scaleTarget = calculator.getScaleDifference(dataService.getActiveGraph(), tabsController.getActiveGraphPane());
-        scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower());
+        scaleTarget = calculator.getScaleDifference(tabsController.getGraphPane());
+        scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
         
         if (scaleTarget > scaleCurrent) {
             while (scaleCurrent < scaleMax && scaleCurrent < scaleTarget) {
                 ZoomIn();
-                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower() + 1);
+                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() + 1);
             }
         } else {
             while (scaleCurrent > scaleMin && scaleCurrent > scaleTarget) {
                 ZoomOut();
-                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower() - 1);
+                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() - 1);
             }
         }
     }
@@ -211,21 +217,21 @@ public class MainController implements Initializable
     @FXML
     public void ZoomIn() {
         
-        double scale_t0 = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower());
-        double scale_t1 = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower() + 1);
+        double scale_t0 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
+        double scale_t1 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() + 1);
         
         if (scale_t1 > scaleMax) {
             return;
         }
-        dataService.getActiveDao().setScalePower(dataService.getActiveDao().getScalePower() + 1);
+        dataService.getDao().setScalePower(dataService.getDao().getScalePower() + 1);
         
-        tabsController.getActiveGraphPane().getTopLayer().getScale().setX(scale_t1);
-        tabsController.getActiveGraphPane().getTopLayer().getScale().setY(scale_t1);
+        tabsController.getGraphPane().getGraph().getScale().setX(scale_t1);
+        tabsController.getGraphPane().getGraph().getScale().setY(scale_t1);
         
         ApplyZoomOffset(
-                tabsController.getActiveGraphPane(), 
-                tabsController.getActiveGraphPane().getWidth() / 2, 
-                tabsController.getActiveGraphPane().getHeight()/ 2, 
+                tabsController.getGraphPane(), 
+                tabsController.getGraphPane().getWidth() / 2, 
+                tabsController.getGraphPane().getHeight()/ 2, 
                 scale_t1 / scale_t0
         );
     }
@@ -233,21 +239,21 @@ public class MainController implements Initializable
     @FXML
     public void ZoomOut() {
         
-        double scale_t0 = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower());
-        double scale_t1 = scaleBase * Math.pow(scaleFactor, dataService.getActiveDao().getScalePower() - 1);
+        double scale_t0 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
+        double scale_t1 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() - 1);
         
         if (scale_t1 < scaleMin) {
             return;
         }
-        dataService.getActiveDao().setScalePower(dataService.getActiveDao().getScalePower() - 1);
+        dataService.getDao().setScalePower(dataService.getDao().getScalePower() - 1);
         
-        tabsController.getActiveGraphPane().getTopLayer().getScale().setX(scale_t1);
-        tabsController.getActiveGraphPane().getTopLayer().getScale().setY(scale_t1);
+        tabsController.getGraphPane().getGraph().getScale().setX(scale_t1);
+        tabsController.getGraphPane().getGraph().getScale().setY(scale_t1);
         
         ApplyZoomOffset(
-                tabsController.getActiveGraphPane(), 
-                tabsController.getActiveGraphPane().getWidth() / 2, 
-                tabsController.getActiveGraphPane().getHeight()/ 2, 
+                tabsController.getGraphPane(), 
+                tabsController.getGraphPane().getWidth() / 2, 
+                tabsController.getGraphPane().getHeight()/ 2, 
                 scale_t1 / scale_t0
         );
     }
@@ -255,6 +261,7 @@ public class MainController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         zoomFrame.setVisible(false);
+        hierarchyFrame.setVisible(false);
         modelFrame.setVisible(false);
         elementFrame.setVisible(false);
         parameterFrame.setVisible(false);
