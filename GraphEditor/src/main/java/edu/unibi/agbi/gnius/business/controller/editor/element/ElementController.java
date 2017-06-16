@@ -125,7 +125,7 @@ public class ElementController implements Initializable
         elementSelected = element.getDataElement();
 
         if (elementSelected.getElementType() == Element.Type.CLUSTERARC) {
-            elementSelected = ((DataClusterArc) elementSelected).getRelatedCluster(); // TODO 
+//            elementSelected = ((DataClusterArc) elementSelected).getRelatedCluster(); // TODO 
         }
 
         LoadGuiElements(elementSelected);

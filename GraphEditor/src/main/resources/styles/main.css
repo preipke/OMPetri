@@ -66,6 +66,13 @@
     -fx-padding: 5.0;
 }
 
+.tree-cell:hover {
+    -fx-font-weight: bold ;
+}
+.tree-cell:selected {
+    -fx-font-weight: bold ;
+}
+
 .tab:disabled {
     -fx-padding: 0.083333em 0em 0.0769em 0em; /* 1 0 0.99 0 */
     -fx-opacity: 1.0;

@@ -5,11 +5,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="hierarchyFrame" maxHeight="-Infinity" maxWidth="-Infinity" 
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" 
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController">
+      fx:id="hierarchyFrame" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController">
     <children>
-        <TitledPane animated="false" text="Hierarchy" HBox.hgrow="ALWAYS">
+        <TitledPane fx:id="hierarchyPane" animated="false" expanded="false" text="Hierarchy" HBox.hgrow="ALWAYS">
             <content>
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>

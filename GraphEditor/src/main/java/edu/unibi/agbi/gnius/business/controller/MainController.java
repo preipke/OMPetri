@@ -16,7 +16,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -188,7 +188,7 @@ public class MainController implements Initializable
         tabsController.getGraphPane().getGraph().setTranslateX(0);
         tabsController.getGraphPane().getGraph().setTranslateY(0);
         
-        centerTarget = calculator.getNodeCenter(dataService.getGraph().getNodes());
+        centerTarget = calculator.getCenter(dataService.getGraph().getNodes());
         
         adjustedOffsetX = centerTarget.getX() - (tabsController.getGraphPane().getWidth() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
         adjustedOffsetY = centerTarget.getY() - (tabsController.getGraphPane().getHeight() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();

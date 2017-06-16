@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.dao;
 
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import edu.unibi.agbi.petrinet.model.Model;
 import java.io.File;
 import java.time.LocalDateTime;
@@ -20,8 +20,8 @@ import javafx.beans.property.StringProperty;
 public class DataDao
 {
     private final Model model;
-    private final Graph graphParent;
-    private GraphPane graphPane;
+    private final Graph graphRoot;
+    private final GraphPane graphPane;
     
     private int scalePower = 0;
     
@@ -42,8 +42,9 @@ public class DataDao
     public DataDao() {
         name = new SimpleStringProperty();
         model = new Model();
-        graphParent = new Graph(null);
-        graphParent.nameProperty().bind(name);
+        graphRoot = new Graph(null);
+        graphRoot.nameProperty().bind(name);
+        graphPane = new GraphPane(graphRoot);
         nextClusterId = 1;
         nextNodeId = 1;
         nextPlaceId = 1;
@@ -51,7 +52,7 @@ public class DataDao
     }
     
     public void clear() {
-        graphParent.clear();
+        graphRoot.clear();
         model.clear();
         nextNodeId = 1;
         nextClusterId = 1;
@@ -64,15 +65,15 @@ public class DataDao
     }
     
     public Graph getGraphRoot() {
-        return graphParent;
+        return graphRoot;
+    }
+    
+    public Graph getGraph() {
+        return graphPane.getGraph();
     }
     
     public GraphPane getGraphPane() {
         return graphPane;
-    }
-    
-    public void setGraphPane(GraphPane graphPane) {
-        this.graphPane = graphPane;
     }
     
     public File getFile() {

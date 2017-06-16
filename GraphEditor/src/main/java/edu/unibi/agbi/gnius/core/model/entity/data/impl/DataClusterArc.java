@@ -5,7 +5,9 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
@@ -21,18 +23,22 @@ import java.util.Set;
 public final class DataClusterArc extends DataArc {
     
     private final Set<IGraphElement> shapes;
-    private final DataCluster dataCluster;
+//    private final DataCluster dataCluster;
     
-    public DataClusterArc(DataCluster dataCluster) {
-        super(dataCluster, dataCluster, null);
+//    public DataClusterArc(DataCluster dataCluster) {
+    public DataClusterArc(IDataNode source, IDataNode target) throws DataServiceException {
+        super(source, target, null);
+        if (source.getElementType() != Element.Type.CLUSTER && target.getElementType() != Element.Type.CLUSTER) {
+            throw new DataServiceException("Trying to create cluster arc without source or target being a cluster!");
+        }
         super.type = Element.Type.CLUSTERARC;
         this.shapes = new HashSet();
-        this.dataCluster = dataCluster;
+//        this.dataCluster = dataCluster;
     }
     
-    public DataCluster getRelatedCluster() {
-        return dataCluster;
-    }
+//    public DataCluster getRelatedCluster() {
+//        return dataCluster;
+//    }
     
     public List<IDataArc> getStoredDataArcs() {
         List<IDataArc> dataArcs = new ArrayList();

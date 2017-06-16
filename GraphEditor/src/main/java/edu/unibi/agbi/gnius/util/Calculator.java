@@ -9,9 +9,8 @@ import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import java.util.Collection;
-import java.util.List;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,13 +25,7 @@ public class Calculator
     @Autowired
     private MouseEventHandler mouseEventHandler;
 
-    /**
-     * Computes center.
-     *
-     * @param nodes
-     * @return
-     */
-    public Point2D getCenter(List<IGraphNode> nodes) {
+    public Point2D getCenter(Collection<IGravisNode> nodes) {
         double x = 0, y = 0;
         for (IGravisNode node : nodes) {
             x += node.translateXProperty().get();
@@ -43,13 +36,7 @@ public class Calculator
         return new Point2D(x, y);
     }
 
-    /**
-     * Computes center.
-     *
-     * @param nodes
-     * @return
-     */
-    public Point2D getNodeCenter(Collection<IGravisNode> nodes) {
+    public Point2D getCenterN(Collection<IGraphNode> nodes) {
         double x = 0, y = 0;
         for (IGravisNode node : nodes) {
             x += node.translateXProperty().get();

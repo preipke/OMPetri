@@ -52,6 +52,10 @@ public class Graph extends Group
     private final List<Graph> childGraphs;
     private Graph parentGraph;
 
+    public Graph() {
+        this(null);
+    }
+
     public Graph(Graph parentGraph) {
 
         this.name = new SimpleStringProperty();
@@ -178,7 +182,9 @@ public class Graph extends Group
      * @param parentGraph
      */
     public void setParentGraph(Graph parentGraph) {
-        this.parentGraph.getChildGraphs().remove(this);
+        if (this.parentGraph != null) {
+            this.parentGraph.getChildGraphs().remove(this);
+        }
         parentGraph.getChildGraphs().add(this);
         this.parentGraph = parentGraph;
     }

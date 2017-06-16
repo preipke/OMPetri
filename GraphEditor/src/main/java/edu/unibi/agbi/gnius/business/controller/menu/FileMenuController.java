@@ -171,7 +171,7 @@ public class FileMenuController implements Initializable
     
     @FXML
     public void New() {
-        editorTabsController.CreateTab(null);
+        editorTabsController.CreateTab();
     }
 
     @FXML

@@ -19,7 +19,7 @@ import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
+import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;

@@ -32,6 +32,6 @@ public class GraphCluster extends GravisCircle implements IGraphCluster {
 
     @Override
     public Graph getGraph() {
-        return dataCluster.getLayer();
+        return dataCluster.getGraph();
     }
 }

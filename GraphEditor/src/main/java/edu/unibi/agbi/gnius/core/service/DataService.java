@@ -115,7 +115,7 @@ public class DataService
                 dataDao.getModel().add(arc.getDataElement());
             }
         }
-        dataDao.getGraphRoot().add(arc);
+        dataDao.getGraph().add(arc);
         styleElement(arc);
         return arc;
     }
@@ -135,9 +135,8 @@ public class DataService
                 }
                 dataDao.getModel().add(node.getDataElement());
             }
-//            node.getDataElement().getShapes().add(node);
         }
-        dataDao.getGraphRoot().add(node);
+        dataDao.getGraph().add(node);
         styleElement(node);
         return node;
     }
@@ -262,7 +261,7 @@ public class DataService
             default:
                 throw new DataServiceException("Cannot create element of undefined type!");
         }
-        Point2D pos = calculator.getCorrectedMousePosition(dataDao.getGraphRoot(), posX, posY);
+        Point2D pos = calculator.getCorrectedMousePosition(dataDao.getGraph(), posX, posY);
         shape.translateXProperty().set(pos.getX() - shape.getCenterOffsetX());
         shape.translateYProperty().set(pos.getY() - shape.getCenterOffsetY());
         shape = add(shape);
@@ -315,7 +314,7 @@ public class DataService
         });
         edge.setArrowHeadVisible(true);
         edge.setCircleHeadVisible(false);
-        dataDao.getGraphRoot().add(edge);
+        dataDao.getGraph().add(edge);
         return edge;
     }
 
@@ -353,12 +352,7 @@ public class DataService
      * @throws DataServiceException
      */
     public synchronized IGraphArc remove(IGraphArc arc) throws DataServiceException {
-
-        try {
-            validateRemoval(arc);
-        } catch (ParameterServiceException ex) {
-            throw new DataServiceException(ex.getMessage());
-        }
+        validateRemoval(arc);
         removeShape(arc);
         removeData(arc.getDataElement());
         dataDao.setHasChanges(true);
@@ -376,12 +370,9 @@ public class DataService
      */
     public synchronized IGraphNode remove(IGraphNode node) throws DataServiceException {
 
+        validateRemoval(node);
+        
         IGraphArc arc;
-        try {
-            validateRemoval(node);
-        } catch (ParameterServiceException ex) {
-            throw new DataServiceException(ex.getMessage());
-        }
         while (!node.getConnections().isEmpty()) {
             arc = (IGraphArc) node.getConnections().get(0);
             removeShape(arc);
@@ -426,8 +417,8 @@ public class DataService
      */
     public synchronized List<IGraphNode> paste(List<IGraphNode> nodes, boolean cut) throws DataServiceException {
 
-        Point2D center = calculator.getCenter(nodes);
-        Point2D position = calculator.getCorrectedMousePositionLatest(dataDao.getGraphRoot());
+        Point2D center = calculator.getCenterN(nodes);
+        Point2D position = calculator.getCorrectedMousePositionLatest(dataDao.getGraph());
 
         List<IGraphNode> shapes = new ArrayList();
         IGraphNode shape;
@@ -471,6 +462,7 @@ public class DataService
                 break;
             case CLUSTERARC:
                 setElementStyle(element.getDataElement(), styleClusterArc, styleClusterArc);
+                ((IGraphArc) element).setCircleHeadVisible(false);
                 break;
             case PLACE:
                 stylePlace((DataPlace) element.getDataElement());
@@ -602,7 +594,7 @@ public class DataService
      */
     private IGraphArc removeShape(IGraphArc arc) throws DataServiceException {
 
-        dataDao.getGraphRoot().remove(arc);
+        dataDao.getGraph().remove(arc);
         if (arc.getDataElement() != null) {
             arc.getDataElement().getShapes().remove(arc);
         }
@@ -625,7 +617,7 @@ public class DataService
      * @throws DataServiceException
      */
     private IGraphNode removeShape(IGraphNode node) throws DataServiceException {
-        dataDao.getGraphRoot().remove(node);
+        dataDao.getGraph().remove(node);
         if (node.getDataElement() != null) {
             node.getDataElement().getShapes().remove(node);
         }
@@ -870,11 +862,18 @@ public class DataService
      * @throws DataServiceException thrown in case the graph arc can not be
      *                              deleted
      */
-    private void validateRemoval(IGraphArc arc) throws ParameterServiceException {
+    private void validateRemoval(IGraphArc arc) throws DataServiceException {
         IDataArc data = arc.getDataElement();
         if (data != null) {
+            if (data.getElementType() == Element.Type.CLUSTERARC) {
+                throw new DataServiceException("Cannot delete an arc that connects to a cluster!");
+            }
             if (data.getShapes().size() <= 1) {
-                parameterService.ValidateRemoval(data);
+                try {
+                    parameterService.ValidateRemoval(data);
+                } catch (ParameterServiceException ex) {
+                    throw new DataServiceException(ex.getMessage());
+                }
             }
         }
     }
@@ -885,71 +884,55 @@ public class DataService
      * @param node
      * @throws DataServiceException
      */
-    private void validateRemoval(IGraphNode node) throws ParameterServiceException {
+    private void validateRemoval(IGraphNode node) throws DataServiceException {
+        IDataNode data = node.getDataElement();
+        if (data.getElementType() == Element.Type.CLUSTER) {
+            throw new DataServiceException("Cannot delete a cluster! Restore it first or delete nodes within.");
+        }
         for (IGravisConnection connection : node.getConnections()) {
             validateRemoval((IGraphArc) connection);
         }
-        IDataNode data = node.getDataElement();
         if (data != null) {
             if (data.getShapes().size() <= 1) {
-                parameterService.ValidateRemoval(data);
+                try {
+                    parameterService.ValidateRemoval(data);
+                } catch (ParameterServiceException ex) {
+                    throw new DataServiceException(ex.getMessage());
+                }
             }
         }
     }
 
     public synchronized String getClusterId() {
-        String id;
-        do {
-            id = PREFIX_ID_CLUSTER + dataDao.getNextClusterId();
-        } while (dataDao.getGraphRoot().contains(id));
-        return id;
+        return PREFIX_ID_CLUSTER + dataDao.getNextClusterId();
     }
 
     private String getGraphNodeId() {
-        String id;
-        do {
-            id = PREFIX_ID_GRAPHNODE + dataDao.getNextNodeId();
-        } while (dataDao.getGraphRoot().contains(id));
-        return id;
+        return PREFIX_ID_GRAPHNODE + dataDao.getNextNodeId();
     }
 
     private String getPlaceId() {
-        String id;
-        do {
-            id = PREFIX_ID_PLACE + dataDao.getNextPlaceId();
-        } while (dataDao.getModel().contains(id));
-        return id;
+        return PREFIX_ID_PLACE + dataDao.getNextPlaceId();
     }
 
     private String getTransitionId() {
-        String id;
-        do {
-            id = PREFIX_ID_TRANSITION + dataDao.getNextTransitionId();
-        } while (dataDao.getModel().contains(id));
-        return id;
-    }
-
-    public synchronized void setDao(DataDao dataDao) {
-        if (!dataDaos.contains(dataDao)) {
-            dataDaos.add(dataDao);
-        }
-        this.dataDao = dataDao;
-    }
-
-    public synchronized DataDao getDao() {
-        return dataDao;
-    }
-
-    public ObservableList getDaos() {
-        return dataDaos;
+        return PREFIX_ID_TRANSITION + dataDao.getNextTransitionId();
     }
 
     public synchronized Graph getGraph() {
-        return dataDao.getGraphRoot();
+        return dataDao.getGraph();
+    }
+
+    public synchronized void setGraph(Graph graph) {
+        dataDao.getGraphPane().setGraph(graph);
     }
 
     public synchronized Model getModel() {
         return dataDao.getModel();
+    }
+
+    public ObservableList getDaos() {
+        return dataDaos;
     }
 
     public synchronized List<DataDao> getDataDaosWithChanges() {
@@ -960,6 +943,17 @@ public class DataService
             }
         }
         return daosWithChanges;
+    }
+
+    public synchronized DataDao getDao() {
+        return dataDao;
+    }
+
+    public synchronized void setDao(DataDao dataDao) {
+        if (!dataDaos.contains(dataDao)) {
+            dataDaos.add(dataDao);
+        }
+        this.dataDao = dataDao;
     }
 
     public synchronized void setArcWeight(DataArc arc, Weight weight) {

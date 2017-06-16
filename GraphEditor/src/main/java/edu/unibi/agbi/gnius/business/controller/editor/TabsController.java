@@ -15,8 +15,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.gravisfx.presentation.GraphPane;
-import edu.unibi.agbi.gravisfx.presentation.GraphScene;
+import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -25,6 +24,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.SubScene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -58,6 +58,10 @@ public class TabsController implements Initializable
     
     private GraphPane activePane;
     
+    public void CreateTab() {
+        CreateTab(null);
+    }
+    
     public void CreateTab(DataDao dataDao) {
         
         final DataDao dao;
@@ -81,11 +85,20 @@ public class TabsController implements Initializable
             });
         }
         
-        GraphScene scene = new GraphScene(dao.getGraphRoot());
+        SubScene scene = new SubScene(dao.getGraphPane(), 0, 0);
+        scene.setManaged(false);
         scene.widthProperty().bind(editorTabPane.widthProperty());
         scene.heightProperty().bind(editorTabPane.heightProperty());
-        scene.getGraphPane().getStyleClass().add(paneStyleClass);
-        dao.setGraphPane(scene.getGraphPane());
+        
+        dao.getGraphPane().maxHeightProperty().bind(scene.heightProperty());
+        dao.getGraphPane().maxWidthProperty().bind(scene.widthProperty());
+        dao.getGraphPane().getStyleClass().add(paneStyleClass);
+        
+//        GraphScene scene = new GraphScene(dao.getGraphRoot());
+//        scene.widthProperty().bind(editorTabPane.widthProperty());
+//        scene.heightProperty().bind(editorTabPane.heightProperty());
+//        scene.getGraphPane().getStyleClass().add(paneStyleClass);
+//        dao.setGraphPane(scene.getGraphPane());
         
         mouseEventHandler.registerTo(dao.getGraphPane());
         scrollEventHandler.registerTo(dao);
@@ -197,7 +210,7 @@ public class TabsController implements Initializable
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        buttonCreateTab.setOnAction(el -> CreateTab(null));
+        buttonCreateTab.setOnAction(el -> CreateTab());
         editorTabPane.getTabs().remove(0);
         editorTabPane.getTabs().addListener((Observable ll) -> {
             if (editorTabPane.getTabs().size() == 1) {
