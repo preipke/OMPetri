@@ -105,7 +105,7 @@ public class DataService
      */
     public synchronized IGraphArc add(IGraphArc arc) throws DataServiceException {
         
-        ConvertReverseArc(arc);
+        ValidateArcShape(arc);
 
         if (arc.getDataElement() != null) {
             if (arc.getDataElement().getElementType() == Element.Type.ARC) {
@@ -524,11 +524,10 @@ public class DataService
      * Converts the reverse arc for an arc. Converts the arcs for one-way or
      * two-way connected nodes to straight or curved arcs, respectively.
      *
-     * @param arcReverse
-     * @return
+     * @param arc
      * @throws DataServiceException
      */
-    private void ConvertReverseArc(IGraphArc arc) throws DataServiceException {
+    public synchronized void ValidateArcShape(IGraphArc arc) throws DataServiceException {
 
         IGraphNode source = arc.getSource();
         IGraphNode target = arc.getTarget();
@@ -546,7 +545,7 @@ public class DataService
             }
 
             if (arcReverse == null) {
-                throw new DataServiceException("Data integrity breached! Revert arc was not found!");
+                throw new DataServiceException("Data integrity breached! Reversely connecting arc was not found!");
             }
 
             // Temporarily remove parameters to allow conversion without failing validation
@@ -558,7 +557,6 @@ public class DataService
 
             // Convert
             remove(arcReverse);
-//            removeShape(arcReverse);
             String id = getConnectionId(target, source);
             if (arcReverse instanceof GraphEdge) {
                 arcReverse = new GraphCurve(id, target, source, arcReverse.getDataElement());
@@ -569,6 +567,8 @@ public class DataService
 
             // Restore parameters again
             arcReverse.getDataElement().getRelatedParameterIds().addAll(paramsTmp);
+            
+            
         }
     }
 
@@ -607,7 +607,7 @@ public class DataService
             return arc;
         }
         
-        ConvertReverseArc(arc);
+        ValidateArcShape(arc);
         
         return arc;
     }

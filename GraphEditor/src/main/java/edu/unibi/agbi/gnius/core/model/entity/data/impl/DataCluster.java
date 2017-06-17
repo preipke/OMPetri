@@ -7,7 +7,6 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
@@ -27,23 +26,12 @@ public class DataCluster extends Node implements IDataNode
     private final Set<IGraphElement> shapes;
     private final Graph graph;
 
-    private final Set<IGraphArc> arcs;
+    private final Set<IGraphArc> clusterArcs;
     private final Set<IGraphArc> arcsStored;
     private final List<IGraphNode> nodesStored;
 
     private String description = "";
 
-    /**
-     *
-     * @param id              the unique identifier for this node
-     * @param nodes           list of nodes that are inside the cluster
-     * @param arcsInside      list of arcs that connects nodes inside the
-     *                        cluster
-     * @param arcsToOutside   list of arcs that connect to target nodes outside
-     *                        the cluster
-     * @param arcsFromOutside list of arcs that connect from source nodes
-     *                        outside the cluster
-     */
     public DataCluster(String id) {
         super(id);
         super.type = Element.Type.CLUSTER;
@@ -52,7 +40,7 @@ public class DataCluster extends Node implements IDataNode
         this.shapes = new HashSet();
         this.graph = new Graph();
 
-        this.arcs = new HashSet();
+        this.clusterArcs = new HashSet();
         this.arcsStored = new HashSet();
         this.nodesStored = new ArrayList();
     }
@@ -61,11 +49,11 @@ public class DataCluster extends Node implements IDataNode
         return graph;
     }
 
-    public Set<IGraphArc> getArcs() {
-        return arcs;
+    public Set<IGraphArc> getClusterArcs() {
+        return clusterArcs;
     }
 
-    public List<IGraphNode> getNodes() {
+    public List<IGraphNode> getStoredNodes() {
         return nodesStored;
     }
 
