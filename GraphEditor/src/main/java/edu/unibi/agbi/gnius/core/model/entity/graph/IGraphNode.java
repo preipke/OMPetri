@@ -12,7 +12,7 @@ import edu.unibi.agbi.gravisfx.entity.IGravisNode;
  *
  * @author PR
  */
-public interface IGraphNode extends IGraphElement , IGravisNode
+public interface IGraphNode extends IGraphElement, IGravisNode
 {
     @Override public IDataNode getDataElement();
 }

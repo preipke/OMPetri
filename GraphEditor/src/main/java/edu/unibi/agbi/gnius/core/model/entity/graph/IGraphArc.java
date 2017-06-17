@@ -15,8 +15,6 @@ import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 public interface IGraphArc extends IGraphElement, IGravisConnection
 {
     @Override public DataArc getDataElement();
-
     @Override public IGraphNode getSource();
-
     @Override public IGraphNode getTarget();
 }

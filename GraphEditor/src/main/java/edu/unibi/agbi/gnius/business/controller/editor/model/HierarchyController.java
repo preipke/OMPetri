@@ -8,7 +8,6 @@ package edu.unibi.agbi.gnius.business.controller.editor.model;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
-import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import java.net.URL;
 import java.util.ResourceBundle;

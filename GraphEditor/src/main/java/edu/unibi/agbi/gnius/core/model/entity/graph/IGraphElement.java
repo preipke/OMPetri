@@ -13,7 +13,7 @@ import edu.unibi.agbi.gravisfx.entity.IGravisParent;
  *
  * @author PR
  */
-public interface IGraphElement extends IGravisElement,IGravisParent
+public interface IGraphElement extends IGravisElement, IGravisParent
 {
     public IDataElement getDataElement();
 }

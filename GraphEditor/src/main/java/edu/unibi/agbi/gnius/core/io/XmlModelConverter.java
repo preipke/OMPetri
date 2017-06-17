@@ -442,11 +442,13 @@ public class XmlModelConverter
 
                         if (curved) {
                             shape = new GraphCurve(
+                                    tmp.getAttribute(attrSource) + tmp.getAttribute(attrTarget),
                                     (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrSource)),
                                     (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrTarget)),
                                     arc);
                         } else {
                             shape = new GraphEdge(
+                                    tmp.getAttribute(attrSource) + tmp.getAttribute(attrTarget),
                                     (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrSource)),
                                     (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrTarget)),
                                     arc);

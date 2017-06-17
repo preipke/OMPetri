@@ -5,15 +5,11 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,31 +19,19 @@ import java.util.Set;
 public final class DataClusterArc extends DataArc {
     
     private final Set<IGraphElement> shapes;
-//    private final DataCluster dataCluster;
+    private final Set<IGraphArc> storedArcs;
     
-//    public DataClusterArc(DataCluster dataCluster) {
-    public DataClusterArc(IDataNode source, IDataNode target) throws DataServiceException {
+    private String description = "";
+    
+    public DataClusterArc(IDataNode source, IDataNode target) {
         super(source, target, null);
-        if (source.getElementType() != Element.Type.CLUSTER && target.getElementType() != Element.Type.CLUSTER) {
-            throw new DataServiceException("Trying to create cluster arc without source or target being a cluster!");
-        }
         super.type = Element.Type.CLUSTERARC;
         this.shapes = new HashSet();
-//        this.dataCluster = dataCluster;
+        this.storedArcs = new HashSet();
     }
     
-//    public DataCluster getRelatedCluster() {
-//        return dataCluster;
-//    }
-    
-    public List<IDataArc> getStoredDataArcs() {
-        List<IDataArc> dataArcs = new ArrayList();
-        for (IGraphElement elem : shapes) {
-            if (elem instanceof IGraphArc) {
-                dataArcs.add(((IGraphArc) elem).getDataElement());
-            }
-        }
-        return dataArcs;
+    public Set<IGraphArc> getStoredArcs() {
+        return storedArcs;
     }
 
     @Override
@@ -57,12 +41,12 @@ public final class DataClusterArc extends DataArc {
 
     @Override
     public String getDescription() {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+        return description;
     }
 
     @Override
     public void setDescription(String text) {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+        description = text;
     }
 
     @Override

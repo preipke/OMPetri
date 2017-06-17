@@ -8,6 +8,7 @@ package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisCurve;
 
 /**
@@ -18,8 +19,8 @@ public class GraphCurve extends GravisCurve implements IGraphArc
 {
     private final DataArc dataArc;
 
-    public GraphCurve(IGraphNode source , IGraphNode target , DataArc dataArc) {
-        super(source , target);
+    public GraphCurve(String id, IGraphNode source , IGraphNode target , DataArc dataArc) {
+        super(id, source , target, GravisType.CONNECTION);
         this.dataArc = dataArc;
         this.dataArc.getShapes().add(this);
     }

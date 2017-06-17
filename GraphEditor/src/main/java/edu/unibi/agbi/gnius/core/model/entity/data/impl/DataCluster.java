@@ -13,6 +13,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,11 +27,9 @@ public class DataCluster extends Node implements IDataNode
     private final Set<IGraphElement> shapes;
     private final Graph graph;
 
-    private final List<IGraphCluster> clusters;
-    private final List<IGraphNode> nodes;
-    private final Set<IGraphArc> arcsInside;
-    private final Set<IGraphArc> arcsToOutside;
-    private final Set<IGraphArc> arcsFromOutside;
+    private final Set<IGraphArc> arcs;
+    private final Set<IGraphArc> arcsStored;
+    private final List<IGraphNode> nodesStored;
 
     private String description = "";
 
@@ -45,7 +44,7 @@ public class DataCluster extends Node implements IDataNode
      * @param arcsFromOutside list of arcs that connect from source nodes
      *                        outside the cluster
      */
-    public DataCluster(String id, List<IGraphCluster> clusters, List<IGraphNode> nodes, Set<IGraphArc> arcsInside, Set<IGraphArc> arcsToOutside, Set<IGraphArc> arcsFromOutside) {
+    public DataCluster(String id) {
         super(id);
         super.type = Element.Type.CLUSTER;
         super.name = id;
@@ -53,35 +52,25 @@ public class DataCluster extends Node implements IDataNode
         this.shapes = new HashSet();
         this.graph = new Graph();
 
-        this.clusters = clusters;
-        this.nodes = nodes;
-        this.arcsInside = arcsInside;
-        this.arcsToOutside = arcsToOutside;
-        this.arcsFromOutside = arcsFromOutside;
+        this.arcs = new HashSet();
+        this.arcsStored = new HashSet();
+        this.nodesStored = new ArrayList();
     }
 
     public Graph getGraph() {
         return graph;
     }
 
-    public List<IGraphCluster> getClusters() {
-        return clusters;
+    public Set<IGraphArc> getArcs() {
+        return arcs;
     }
 
     public List<IGraphNode> getNodes() {
-        return nodes;
+        return nodesStored;
     }
 
-    public Set<IGraphArc> getArcsInside() {
-        return arcsInside;
-    }
-
-    public Set<IGraphArc> getArcsToOutside() {
-        return arcsToOutside;
-    }
-
-    public Set<IGraphArc> getArcsFromOutside() {
-        return arcsFromOutside;
+    public Set<IGraphArc> getStoredArcs() {
+        return arcsStored;
     }
 
     @Override

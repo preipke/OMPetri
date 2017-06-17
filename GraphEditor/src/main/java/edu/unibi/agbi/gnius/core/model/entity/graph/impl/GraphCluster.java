@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
+import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 
@@ -19,7 +20,7 @@ public class GraphCluster extends GravisCircle implements IGraphCluster {
     private final DataCluster dataCluster;
     
     public GraphCluster(String id, DataCluster dataCluster) {
-        super(id);
+        super(id, GravisType.CLUSTER);
         this.dataCluster = dataCluster;
         this.dataCluster.getShapes().add(this);
         this.setInnerCircleVisible(false);

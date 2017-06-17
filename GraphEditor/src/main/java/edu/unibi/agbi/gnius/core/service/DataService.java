@@ -290,10 +290,11 @@ public class DataService
         /**
          * Creating shape.
          */
+        String id = getConnectionId(source, target);
         if (source.getParents().contains(target) && target.getChildren().contains(source)) {
-            return new GraphCurve(source, target, dataArc);
+            return new GraphCurve(id, source, target, dataArc);
         } else {
-            return new GraphEdge(source, target, dataArc);
+            return new GraphEdge(id, source, target, dataArc);
         }
     }
 
@@ -305,7 +306,7 @@ public class DataService
      */
     public synchronized IGraphArc createConnectionTmp(IGraphNode source) {
         GraphEdge edge;
-        edge = new GraphEdge(source);
+        edge = new GraphEdge(source.getId() + "null", source);
         edge.getParentElementHandles().forEach(ele -> {
             ele.setActiveStyleClass(styleArcDefault);
         });
@@ -545,7 +546,7 @@ public class DataService
             }
 
             if (arcReverse == null) {
-                throw new DataServiceException("Integrity exception! Shape to transform cannot be null!");
+                throw new DataServiceException("Data integrity breached! Revert arc was not found!");
             }
 
             // Temporarily remove parameters to allow conversion without failing validation
@@ -557,10 +558,12 @@ public class DataService
 
             // Convert
             remove(arcReverse);
+//            removeShape(arcReverse);
+            String id = getConnectionId(target, source);
             if (arcReverse instanceof GraphEdge) {
-                arcReverse = new GraphCurve(arcReverse.getSource(), arcReverse.getTarget(), arcReverse.getDataElement());
+                arcReverse = new GraphCurve(id, target, source, arcReverse.getDataElement());
             } else {
-                arcReverse = new GraphEdge(arcReverse.getSource(), arcReverse.getTarget(), arcReverse.getDataElement());
+                arcReverse = new GraphEdge(id, target, source, arcReverse.getDataElement());
             }
             add(arcReverse);
 
@@ -901,6 +904,10 @@ public class DataService
                 }
             }
         }
+    }
+    
+    public synchronized String getConnectionId(IGraphNode source, IGraphNode target) {
+        return source.getId() + target.getId();
     }
 
     public synchronized String getClusterId() {

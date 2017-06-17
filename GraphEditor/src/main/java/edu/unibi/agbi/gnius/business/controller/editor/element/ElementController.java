@@ -150,6 +150,12 @@ public class ElementController implements Initializable
                 propertiesPane.setVisible(false);
                 break;
 
+            case CLUSTERARC:
+                System.out.println("TODO LoadGuiElements CLUSTERARC");
+                inputLabel.setDisable(true);
+                propertiesPane.setVisible(false);
+                break;
+
             default:
                 propertiesPane.setVisible(true);
                 propertiesBox.getChildren().clear();
