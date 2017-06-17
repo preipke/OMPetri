@@ -6,11 +6,13 @@
 package edu.unibi.agbi.gravisfx.entity.parent.connection;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
+import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,27 +33,30 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     private final DoubleProperty endXProperty;
     private final DoubleProperty endYProperty;
 
+    private final List<GravisShapeHandle> elementHandles = new ArrayList();
+    private final List<Shape> shapes = new ArrayList();
+
     private final IGravisNode source;
     private final IGravisNode target;
 
     private final GravisChildArrow arrow;
     private final GravisChildCircle circle;
-
-    private final List<GravisShapeHandle> elementHandles = new ArrayList();
-    private final List<Shape> shapes = new ArrayList();
+    
+    private final GravisType type;
 
     /**
-     *
+     * 
+     * @param id
      * @param source
+     * @param type 
      */
-    public GravisEdge(IGravisNode source) {
+    public GravisEdge(String id, IGravisNode source, GravisType type) {
 
         super();
-        
-        setId(source.getId() + "_null");
-
+        setId(id);
         this.source = source;
         this.target = null;
+        this.type = type;
 
         MoveTo mv = new MoveTo();
         mv.xProperty().bind(source.translateXProperty().add(source.getCenterOffsetX()));
@@ -86,15 +91,19 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     }
 
     /**
-     *
+     * 
+     * @param id
      * @param source
      * @param target
+     * @param type 
      */
-    public GravisEdge(IGravisNode source, IGravisNode target) {
+    public GravisEdge(String id, IGravisNode source, IGravisNode target, GravisType type) {
 
         super();
-        
-        setId(source.getId() + "_" + target.getId());
+        setId(id);
+        this.source = source;
+        this.target = target;
+        this.type = type;
 
         /**
          * Line's end X coordinate. Changes it's value on any coordinate changes
@@ -205,8 +214,6 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
             }
         };
 
-        this.source = source;
-        this.target = target;
 
         MoveTo mv = new MoveTo();
         mv.xProperty().bind(source.translateXProperty().add(source.getCenterOffsetX()));
@@ -360,5 +367,10 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
         handles.addAll(arrow.getElementHandles());
         handles.addAll(circle.getElementHandles());
         return handles;
+    }
+    
+    @Override 
+    public GravisType getType() {
+        return type;
     }
 }

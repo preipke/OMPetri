@@ -21,4 +21,6 @@ public interface IGravisParent {
     public void setId(String id);
     
     public String getId();
+    
+    public GravisType getType();
 }

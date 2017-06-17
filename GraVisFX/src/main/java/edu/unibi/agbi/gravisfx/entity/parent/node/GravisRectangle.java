@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gravisfx.entity.parent.node;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
+import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
@@ -32,18 +33,24 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     private final List<IGravisConnection> edges = new ArrayList();
 
     private final GravisChildLabel label;
-    
     private final GravisChildRectangle rectangle;
+    
+    private final GravisType type;
 
-    public GravisRectangle(String id) {
+    /**
+     * 
+     * @param id
+     * @param type 
+     */
+    public GravisRectangle(String id, GravisType type) {
 
         super();
-        
         setId(id);
         setWidth(GravisProperties.RECTANGLE_WIDTH);
         setHeight(GravisProperties.RECTANGLE_HEIGHT);
         setArcWidth(GravisProperties.RECTANGLE_ARC_WIDTH);
         setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
+        this.type = type;
 
         label = new GravisChildLabel(this);
         label.xProperty().bind(translateXProperty().add(getCenterOffsetX() + GravisProperties.LABEL_OFFSET_X));
@@ -113,16 +120,6 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
 
     @Override
-    public void setInnerCircleVisible(boolean value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void setInnerRectangleVisible(boolean value) {
-        this.rectangle.setVisible(value);
-    }
-
-    @Override
     public List<GravisShapeHandle> getParentElementHandles() {
         List<GravisShapeHandle> handles = new ArrayList();
         handles.add(shapeHandles.get(0));
@@ -132,5 +129,20 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     @Override
     public List<GravisShapeHandle> getChildElementHandles() {
         return rectangle.getElementHandles();
+    }
+    
+    @Override 
+    public GravisType getType() {
+        return type;
+    }
+
+    @Override
+    public void setInnerCircleVisible(boolean value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setInnerRectangleVisible(boolean value) {
+        this.rectangle.setVisible(value);
     }
 }

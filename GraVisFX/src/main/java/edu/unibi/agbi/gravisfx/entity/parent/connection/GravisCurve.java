@@ -6,11 +6,13 @@
 package edu.unibi.agbi.gravisfx.entity.parent.connection;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
+import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,15 +40,23 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
     
     private final GravisChildArrow arrow;
     private final GravisChildCircle circle;
+    
+    private final GravisType type;
 
-    public GravisCurve(IGravisNode source, IGravisNode target) {
+    /**
+     * 
+     * @param id
+     * @param source
+     * @param target
+     * @param type 
+     */
+    public GravisCurve(String id, IGravisNode source, IGravisNode target, GravisType type) {
 
         super();
-        
-        setId(source.getId() + "_" + target.getId());
-
+        setId(id);
         this.source = source;
         this.target = target;
+        this.type = type;
 
         /**
          * Control point X coordinate.
@@ -401,5 +411,10 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
         handles.addAll(arrow.getElementHandles());
         handles.addAll(circle.getElementHandles());
         return handles;
+    }
+    
+    @Override 
+    public GravisType getType() {
+        return type;
     }
 }

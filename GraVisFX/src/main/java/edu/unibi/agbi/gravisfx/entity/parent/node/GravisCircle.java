@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gravisfx.entity.parent.node;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
+import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
@@ -31,16 +32,22 @@ public class GravisCircle extends Circle implements IGravisNode
     private final List<IGravisConnection> connections = new ArrayList();
 
     private final GravisChildLabel label;
-    
     private final GravisChildCircle circle;
     private final GravisChildRectangle rectangle;
+    
+    private final GravisType type;
 
-    public GravisCircle(String id) {
+    /**
+     * 
+     * @param id
+     * @param type 
+     */
+    public GravisCircle(String id, GravisType type) {
 
         super();
-        
         setId(id);
         setRadius(GravisProperties.CIRCLE_RADIUS);
+        this.type = type;
 
         label = new GravisChildLabel(this);
         label.xProperty().bind(translateXProperty().add(GravisProperties.LABEL_OFFSET_X));
@@ -145,6 +152,11 @@ public class GravisCircle extends Circle implements IGravisNode
         handles.addAll(circle.getElementHandles());
         handles.addAll(rectangle.getElementHandles());
         return handles;
+    }
+    
+    @Override 
+    public GravisType getType() {
+        return type;
     }
 
     @Override

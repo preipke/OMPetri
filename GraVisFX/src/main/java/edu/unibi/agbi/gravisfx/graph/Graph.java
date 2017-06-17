@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
+import edu.unibi.agbi.gravisfx.entity.GravisType;
+import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.ConnectionLayer;
@@ -13,12 +15,12 @@ import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.transform.Scale;
@@ -39,6 +41,7 @@ import javafx.scene.transform.Scale;
  */
 public class Graph extends Group
 {
+    private final Set<IGravisCluster> clusters;
     private final Map<String, IGravisNode> nodes;
     private final Map<String, IGravisConnection> connections;
 
@@ -60,6 +63,7 @@ public class Graph extends Group
 
         this.name = new SimpleStringProperty();
         
+        this.clusters = new HashSet();
         this.nodes = new HashMap();
         this.connections = new HashMap();
 
@@ -82,6 +86,11 @@ public class Graph extends Group
         }
     }
     
+    public void add(IGravisCluster cluster) {
+        add((IGravisNode) cluster);
+        clusters.add((IGravisCluster) cluster);
+    }
+    
     public void add(IGravisNode node) {
         if (!nodes.containsKey(node.getId())) {
             nodes.put(node.getId(), node);
@@ -100,8 +109,6 @@ public class Graph extends Group
                 connection.getTarget().getParents().add(connection.getSource());
                 connection.getTarget().getConnections().add(connection);
             }
-        } else {
-            System.out.println("Connection ID already present! -> " + connection.getId());
         }
     }
 
@@ -111,6 +118,7 @@ public class Graph extends Group
         nodeLayer.getChildren().clear();
         connections.clear();
         nodes.clear();
+        clusters.clear();
     }
     
     public boolean contains(String id) {
@@ -132,6 +140,10 @@ public class Graph extends Group
     public Collection<IGravisConnection> getConnections() {
         return connections.values();
     }
+
+    public Collection<IGravisCluster> getClusters() {
+        return clusters;
+    }
     
     public IGravisNode getNode(String id) {
         return nodes.get(id);
@@ -139,6 +151,10 @@ public class Graph extends Group
 
     public Collection<IGravisNode> getNodes() {
         return nodes.values();
+    }
+    
+    public Collection<Node> getNodeLayerChildren() {
+        return nodeLayer.getChildren();
     }
 
     public IGravisNode remove(IGravisNode node) {
@@ -148,6 +164,9 @@ public class Graph extends Group
         labelLayer.getChildren().remove(node.getLabel());
         nodeLayer.getChildren().removeAll(node.getShapes());
         nodes.remove(node.getId());
+        if (node.getType() == GravisType.CLUSTER) {
+            clusters.remove(node);
+        }
         return node;
     }
 
@@ -189,33 +208,16 @@ public class Graph extends Group
         this.parentGraph = parentGraph;
     }
 
-    /**
-     *
-     * @return
-     */
     public Graph getParentGraph() {
         return parentGraph;
     }
 
-    /**
-     *
-     * @return
-     */
     public List<Graph> getChildGraphs() {
         return childGraphs;
     }
 
-    /**
-     * Gets the scale applied to the layer.
-     *
-     * @return
-     */
     public Scale getScale() {
         return scale;
-    }
-    
-    public Collection<Node> getNodeLayerChildren() {
-        return nodeLayer.getChildren();
     }
     
     @Override
