@@ -23,9 +23,10 @@ public final class DataClusterArc extends DataArc {
     
     private String description = "";
     
-    public DataClusterArc(IDataNode source, IDataNode target) {
-        super(source, target, null);
+    public DataClusterArc(String id, IDataNode source, IDataNode target) {
+        super(id, source, target, null);
         super.type = Element.Type.CLUSTERARC;
+        super.name = id;
         this.shapes = new HashSet();
         this.storedArcs = new HashSet();
     }

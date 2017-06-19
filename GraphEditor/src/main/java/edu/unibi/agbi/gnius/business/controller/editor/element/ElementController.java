@@ -16,6 +16,9 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.InputValidationException;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -40,12 +43,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -67,38 +72,34 @@ public class ElementController implements Initializable
     @Autowired private FunctionBuilder functionBuilder;
 
     // Container
+    @FXML private VBox elementFrame;
     @FXML private TitledPane identifierPane;
     @FXML private TitledPane propertiesPane;
+    @FXML private TitledPane clusterPane;
     @FXML private VBox propertiesBox;
 
     // Identifier
-    @FXML private TextField inputType;
+    @FXML private TextField inputSubType;
     @FXML private TextField inputId;
     @FXML private TextField inputName;
     @FXML private TextField inputLabel;
     @FXML private TextArea inputDescription;
 
-    // Property classes
+    // Properties
     @FXML private GridPane propertiesSubtype;
     @FXML private GridPane propertiesColor;
     @FXML private GridPane propertiesArc;
     @FXML private GridPane propertiesPlace;
     @FXML private VBox propertiesTransition;
 
-    // Subtype & Color
     @FXML private ChoiceBox choiceSubtype;
     @FXML private ChoiceBox choiceColour;
     @FXML private Button buttonColourCreate;
 
-    // Arc
     @FXML private TextField inputArcWeight;
-
-    // Place
     @FXML private TextField inputPlaceToken;
     @FXML private TextField inputPlaceTokenMin;
     @FXML private TextField inputPlaceTokenMax;
-
-    // Transition
     @FXML private TextField inputTransitionFunction;
     @FXML private SwingNode swingNodeTransitionFunctionImage;
 
@@ -109,6 +110,8 @@ public class ElementController implements Initializable
     @FXML private MenuItem menuItemParamEdit;
 
     @FXML private Label statusMessage;
+    
+    @FXML private ListView<ClusterElement> listClusteredElements;
 
     private IDataElement elementSelected;
     private String inputLatestValid;
@@ -124,10 +127,6 @@ public class ElementController implements Initializable
 
         elementSelected = element.getDataElement();
 
-        if (elementSelected.getElementType() == Element.Type.CLUSTERARC) {
-//            elementSelected = ((DataClusterArc) elementSelected).getRelatedCluster(); // TODO 
-        }
-
         LoadGuiElements(elementSelected);
         LoadElementInfo(elementSelected);
         LoadElementType(elementSelected);
@@ -141,42 +140,39 @@ public class ElementController implements Initializable
      */
     private void LoadGuiElements(IDataElement element) {
 
-        inputLabel.setDisable(false);
-        
-        switch (element.getElementType()) {
-
-            case CLUSTER:
-                System.out.println("TODO LoadGuiElements CLUSTER");
-                propertiesPane.setVisible(false);
-                break;
-
-            case CLUSTERARC:
-                System.out.println("TODO LoadGuiElements CLUSTERARC");
-                inputLabel.setDisable(true);
-                propertiesPane.setVisible(false);
-                break;
-
-            default:
-                propertiesPane.setVisible(true);
-                propertiesBox.getChildren().clear();
-                propertiesBox.getChildren().add(propertiesSubtype);
-                propertiesBox.getChildren().add(propertiesColor);
-                choiceSubtype.setStyle("");
-        }
+        elementFrame.getChildren().clear();
+        elementFrame.getChildren().add(identifierPane);
+        propertiesBox.getChildren().clear();
+        propertiesBox.getChildren().add(propertiesSubtype);
+        propertiesBox.getChildren().add(propertiesColor);
 
         switch (element.getElementType()) {
-
+            
             case ARC:
                 inputLabel.setDisable(true);
-                inputArcWeight.setStyle("");
+                elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(propertiesArc);
                 break;
 
+            case CLUSTER:
+                inputLabel.setDisable(false);
+                elementFrame.getChildren().add(clusterPane);
+                break;
+
+            case CLUSTERARC:
+                inputLabel.setDisable(true);
+                elementFrame.getChildren().add(clusterPane);
+                break;
+
             case PLACE:
+                inputLabel.setDisable(false);
+                elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(propertiesPlace);
                 break;
 
             case TRANSITION:
+                inputLabel.setDisable(false);
+                elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(propertiesTransition);
                 break;
         }
@@ -190,7 +186,7 @@ public class ElementController implements Initializable
      */
     private void LoadElementType(IDataElement element) {
 
-        inputType.setText(element.getElementType().toString());
+        inputSubType.setText(element.getElementType().toString());
         choiceSubtype.getItems().clear();
 
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
@@ -265,7 +261,7 @@ public class ElementController implements Initializable
 
         ObservableList<Colour> choicesColour = FXCollections.observableArrayList();
         Collection<Colour> colors = dataService.getModel().getColours();
-        
+
         choiceColour.setItems(choicesColour); // assign upfront, input listeners accesses on text change
 
         switch (element.getElementType()) {
@@ -284,7 +280,21 @@ public class ElementController implements Initializable
                 break;
 
             case CLUSTER:
-                System.out.println("TODO LoadElementDetails CLUSTER");
+                DataCluster cluster = (DataCluster) element;
+                listClusteredElements.getItems().clear();
+                cluster.getGraph().getNodes().forEach(n -> {
+                    ClusterElement ce = new ClusterElement((IGraphNode) n);
+                    listClusteredElements.getItems().add(ce);
+                });
+                break;
+
+            case CLUSTERARC:
+                DataClusterArc clusterArc = (DataClusterArc) element;
+                listClusteredElements.getItems().clear();
+                clusterArc.getStoredArcs().forEach(a -> {
+                    ClusterElement ce = new ClusterElement((IGraphArc) a);
+                    listClusteredElements.getItems().add(ce);
+                });
                 break;
 
             case PLACE:
@@ -447,9 +457,9 @@ public class ElementController implements Initializable
             menuParamGlobal.setDisable(true);
         }
     }
-    
+
     private void StoreElementType(IDataElement element) throws DataServiceException {
-        
+
         Object itemSelected = choiceSubtype.getSelectionModel().getSelectedItem();
         if (itemSelected == null) {
             return;
@@ -499,16 +509,16 @@ public class ElementController implements Initializable
         inputTransitionFunction.setText(function);
         inputLatestCaretPosition = inputLatestCaretPosition + value.length();
     }
-    
+
     private void ParseArcWeight() {
-        
+
         if (ValidateNumberInput(inputArcWeight)) {
-            
+
             if (elementSelected instanceof DataArc) {
 
                 DataArc arc = (DataArc) elementSelected;
                 Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
-                
+
                 try {
                     Weight weight = new Weight(colour);
                     if (!inputArcWeight.getText().isEmpty()) {
@@ -521,14 +531,14 @@ public class ElementController implements Initializable
             }
         }
     }
-    
+
     private void ParsePlaceToken() {
 
         if (elementSelected instanceof DataPlace) {
-            
+
             DataPlace place = (DataPlace) elementSelected;
             Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
-            
+
             try {
                 Token token = new Token(colour);
                 if (ValidateNumberInput(inputPlaceToken)) {
@@ -546,20 +556,20 @@ public class ElementController implements Initializable
             }
         }
     }
-    
+
     private void ParseTransitionFunction() {
 
         if (elementSelected instanceof DataTransition) {
-            
+
             DataTransition transition = (DataTransition) elementSelected;
-            
+
             try {
                 ParseInputToImage(inputTransitionFunction.getText().replace(",", "."));
                 setInputStatus(inputTransitionFunction, false);
             } catch (Exception ex) {
                 setInputStatus(inputTransitionFunction, true);
             }
-            
+
             try {
                 if (inputTransitionFunction.getText().isEmpty()) {
                     dataService.setTransitionFunction(transition, "1");
@@ -626,7 +636,7 @@ public class ElementController implements Initializable
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        
+
         choiceSubtype.valueProperty().addListener(cl -> {
             if (elementSelected != null) {
                 try {
@@ -638,7 +648,7 @@ public class ElementController implements Initializable
                 }
             }
         });
-        
+
         inputName.textProperty().addListener(cl -> {
             if (!inputName.isDisabled()) {
                 if (inputName.getText() != null) {
@@ -690,15 +700,44 @@ public class ElementController implements Initializable
                 }
             }
         });
-        inputTransitionFunction.setOnMouseClicked(e -> {
+        inputTransitionFunction.setOnMouseClicked(eh -> {
             inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
         });
-        inputTransitionFunction.setOnKeyReleased(e -> {
+        inputTransitionFunction.setOnKeyReleased(eh -> {
             inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
         });
 
         menuItemParamEdit.setOnAction(e -> {
             mainController.ShowElementParameters(elementSelected);
         });
+        
+        listClusteredElements.setOnMouseClicked(eh -> {
+            if (!listClusteredElements.getItems().isEmpty()) {
+                if (eh.getButton() == MouseButton.PRIMARY && eh.getClickCount() == 2) {
+                    ShowElementDetails(listClusteredElements.getSelectionModel().getSelectedItem().getElement());
+                }
+            }
+        });
+        
+        listClusteredElements.selectionModelProperty().addListener(cl -> {
+        });
+    }
+    
+    private class ClusterElement {
+        
+        private final IGraphElement element;
+        
+        private ClusterElement(IGraphElement element) {
+            this.element = element;
+        }
+        
+        private IGraphElement getElement() {
+            return element;
+        }
+        
+        @Override
+        public String toString() {
+            return element.getDataElement().getName() + " (" + element.getDataElement().getId() + ")";
+        }
     }
 }

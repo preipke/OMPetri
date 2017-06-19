@@ -278,19 +278,22 @@ public class DataService
      * @return
      */
     public IGraphArc createConnection(IGraphNode source, IGraphNode target, DataArc dataArc) {
+        
+        String id;
 
         /**
          * Create data.
          */
+        id = getArcId(source.getDataElement(), target.getDataElement());
         if (dataArc == null) {
-            dataArc = new DataArc(source.getDataElement(), target.getDataElement(), defaultArcType);
+            dataArc = new DataArc(id, source.getDataElement(), target.getDataElement(), defaultArcType);
             dataArc.addWeight(new Weight(DEFAULT_COLOUR));
         }
 
         /**
          * Creating shape.
          */
-        String id = getConnectionId(source, target);
+        id = getConnectionId(source, target);
         if (source.getParents().contains(target) && target.getChildren().contains(source)) {
             return new GraphCurve(id, source, target, dataArc);
         } else {
@@ -906,6 +909,10 @@ public class DataService
         }
     }
     
+    public synchronized String getArcId(IDataNode source, IDataNode target) {
+        return source.getId() + target.getId();
+    }
+    
     public synchronized String getConnectionId(IGraphNode source, IGraphNode target) {
         return source.getId() + target.getId();
     }
@@ -924,6 +931,10 @@ public class DataService
 
     private String getTransitionId() {
         return PREFIX_ID_TRANSITION + dataDao.getNextTransitionId();
+    }
+
+    public synchronized Graph getGraphRoot() {
+        return dataDao.getGraphRoot();
     }
 
     public synchronized Graph getGraph() {

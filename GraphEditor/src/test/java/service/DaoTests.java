@@ -223,7 +223,6 @@ public class DaoTests extends TestFXBase {
         placesAfterClustering = dataService.getModel().getPlaces();
         transitionsAfterClustering = dataService.getModel().getTransitions();
         
-        Assert.assertEquals(dataService.getGraph().getNodes().size() - 1 + cluster.getDataElement().getStoredNodes().size(), nodesBeforeClustering.size());
         Assert.assertNotEquals(nodesBeforeClustering, nodesAfterClustering);
         Assert.assertNotEquals(connectionsBeforeCluster, connectionsAfterCluster);
         

@@ -86,13 +86,11 @@ public class Graph extends Group
         }
     }
     
-    public void add(IGravisCluster cluster) {
-        add((IGravisNode) cluster);
-        clusters.add((IGravisCluster) cluster);
-    }
-    
     public void add(IGravisNode node) {
         if (!nodes.containsKey(node.getId())) {
+            if (node.getType() == GravisType.CLUSTER) {
+                clusters.add((IGravisCluster) node);
+            }
             nodes.put(node.getId(), node);
             nodeLayer.getChildren().addAll(node.getShapes());
             labelLayer.getChildren().add(node.getLabel());
@@ -101,13 +99,15 @@ public class Graph extends Group
 
     public void add(IGravisConnection connection) {
         if (!connections.containsKey(connection.getId())) {
-            connections.put(connection.getId(), connection);
-            connectionLayer.getChildren().addAll(connection.getShapes());
-            if (connection.getSource() != null && connection.getTarget() != null) {
-                connection.getSource().getChildren().add(connection.getTarget());
-                connection.getSource().getConnections().add(connection);
-                connection.getTarget().getParents().add(connection.getSource());
-                connection.getTarget().getConnections().add(connection);
+            if (connection.getSource() != null && nodes.containsKey(connection.getSource().getId())) {
+                connections.put(connection.getId(), connection);
+                connectionLayer.getChildren().addAll(connection.getShapes());
+                if (connection.getTarget() != null && nodes.containsKey(connection.getTarget().getId())) {
+                    connection.getSource().getChildren().add(connection.getTarget());
+                    connection.getSource().getConnections().add(connection);
+                    connection.getTarget().getParents().add(connection.getSource());
+                    connection.getTarget().getConnections().add(connection);
+                }
             }
         }
     }
@@ -165,7 +165,7 @@ public class Graph extends Group
         nodeLayer.getChildren().removeAll(node.getShapes());
         nodes.remove(node.getId());
         if (node.getType() == GravisType.CLUSTER) {
-            clusters.remove(node);
+            clusters.remove((IGravisCluster) node);
         }
         return node;
     }

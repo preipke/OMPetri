@@ -6,15 +6,12 @@
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -26,39 +23,18 @@ public class DataCluster extends Node implements IDataNode
     private final Set<IGraphElement> shapes;
     private final Graph graph;
 
-    private final Set<IGraphArc> clusterArcs;
-    private final Set<IGraphArc> arcsStored;
-    private final List<IGraphNode> nodesStored;
-
     private String description = "";
 
     public DataCluster(String id) {
         super(id);
         super.type = Element.Type.CLUSTER;
         super.name = id;
-
         this.shapes = new HashSet();
         this.graph = new Graph();
-
-        this.clusterArcs = new HashSet();
-        this.arcsStored = new HashSet();
-        this.nodesStored = new ArrayList();
     }
 
     public Graph getGraph() {
         return graph;
-    }
-
-    public Set<IGraphArc> getClusterArcs() {
-        return clusterArcs;
-    }
-
-    public List<IGraphNode> getStoredNodes() {
-        return nodesStored;
-    }
-
-    public Set<IGraphArc> getStoredArcs() {
-        return arcsStored;
     }
 
     @Override

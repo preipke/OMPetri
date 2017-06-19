@@ -34,15 +34,15 @@ public class HierarchyController implements Initializable
 {
     @Autowired private DataService dataService;
     @Autowired private HierarchyService hierarchyService;
-    
+
     @FXML private TitledPane hierarchyPane;
     @FXML private TreeView<HierarchyLevel> treeGraphHierarchy;
-    
+
     public void setDao(DataDao dataDao) {
         treeGraphHierarchy.setRoot(new TreeItem(new HierarchyLevel(dataDao.getGraphRoot())));
         update();
     }
-    
+
     public void update() {
         treeGraphHierarchy.getRoot().getChildren().clear();
         getItems(treeGraphHierarchy.getRoot());
@@ -52,11 +52,12 @@ public class HierarchyController implements Initializable
             hierarchyPane.setExpanded(false);
         }
     }
-    
+
     /**
-     * 
+     *
      * @param item
-     * @return indicates wether one of this item's child nodes is currently selected
+     * @return indicates wether one of this item's child nodes is currently
+     *         selected
      */
     private boolean getItems(TreeItem<HierarchyLevel> item) {
         Graph graph = item.getValue().getGraph();
@@ -74,61 +75,43 @@ public class HierarchyController implements Initializable
             return false;
         }
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
         treeGraphHierarchy.setEventDispatcher(new TreeMouseEventDispatcher(treeGraphHierarchy.getEventDispatcher()));
-
         treeGraphHierarchy.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ENTER) {
                 hierarchyService.show(treeGraphHierarchy.getSelectionModel().getSelectedItem().getValue().getGraph());
             }
         });
-
-//        treeGraphHierarchy.selectionModelProperty().addListener(cl -> {
-//            HierarchyLevel item = treeGraphHierarchy.getSelectionModel().getSelectedItem().getValue();
-//            if (item != null) {
-//                selectionService.select((IGraphElement) item.getValue());
-//                mainController.ShowElementDetails((IGraphElement) item.getValue());
-//            }
-//        });
-//        
-//        treeGraphHierarchy.focusModelProperty().addListener(cl -> {
-//            HierarchyLevel item = treeGraphHierarchy.getFocusModel().getFocusedItem().getValue();
-//            if (item != null) {
-//                selectionService.hover(null);
-//                selectionService.hover((IGraphElement) item.getValue());
-//            }
-//        });
     }
-    
-    private class HierarchyLevel {
-        
+
+    private class HierarchyLevel
+    {
         private final Graph graph;
-        
+
         public HierarchyLevel(Graph graph) {
             this.graph = graph;
         }
-        
+
         public Graph getGraph() {
             return graph;
         }
-        
+
         @Override
         public String toString() {
             return graph.getName();
         }
     }
-    
-    private class TreeMouseEventDispatcher implements EventDispatcher {
-        
+
+    private class TreeMouseEventDispatcher implements EventDispatcher
+    {
         private final EventDispatcher dispatcher;
-        
+
         private TreeMouseEventDispatcher(EventDispatcher dispatcher) {
             this.dispatcher = dispatcher;
         }
-        
+
         @Override
         public Event dispatchEvent(Event event, EventDispatchChain edc) {
             if (!event.isConsumed()) {

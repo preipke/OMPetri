@@ -22,13 +22,13 @@ public class DataArc extends Arc implements IDataArc
     
     private String description = "";
     
-    public DataArc(IDataNode source, Arc.Type arctype) {
-        super(source, arctype);
-        this.shapes = new HashSet();
+    public DataArc(String id, IDataNode source, Arc.Type arctype) {
+        this(id, source, null, arctype);
     }
     
-    public DataArc(IDataNode source, IDataNode target, Arc.Type arctype) {
-        super(source, target, arctype);
+    public DataArc(String id, IDataNode source, IDataNode target, Arc.Type arctype) {
+        super(id, source, target, arctype);
+        super.name = id;
         this.shapes = new HashSet();
     }
 

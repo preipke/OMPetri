@@ -116,6 +116,7 @@ public class XmlModelConverter
             DataArc data = (DataArc) a;
 
             Element arcElement = dom.createElement(tagArc);
+            arcElement.setAttribute(attrId, data.getId());
             arcElement.setAttribute(attrType, data.getArcType().toString());
             arcElement.setAttribute(attrSource, data.getSource().getId());
             arcElement.setAttribute(attrTarget, data.getTarget().getId());
@@ -398,8 +399,8 @@ public class XmlModelConverter
         Element tmp;
 
         DataArc arc = new DataArc(
-                source,
-                target,
+                elem.getAttribute(attrId),
+                source, target,
                 DataArc.Type.valueOf(elem.getAttribute(attrType))
         );
         arc.setDescription(elem.getAttribute(attrDescription));
