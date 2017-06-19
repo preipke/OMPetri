@@ -44,12 +44,14 @@ public class HierarchyController implements Initializable
     }
 
     public void update() {
-        treeGraphHierarchy.getRoot().getChildren().clear();
-        getItems(treeGraphHierarchy.getRoot());
-        if (treeGraphHierarchy.getRoot().getChildren().size() > 0) {
-            hierarchyPane.setExpanded(true);
-        } else {
-            hierarchyPane.setExpanded(false);
+        if (treeGraphHierarchy != null) { // for headless testing
+            treeGraphHierarchy.getRoot().getChildren().clear();
+            getItems(treeGraphHierarchy.getRoot());
+            if (treeGraphHierarchy.getRoot().getChildren().size() > 0) {
+                hierarchyPane.setExpanded(true);
+            } else {
+                hierarchyPane.setExpanded(false);
+            }
         }
     }
 
