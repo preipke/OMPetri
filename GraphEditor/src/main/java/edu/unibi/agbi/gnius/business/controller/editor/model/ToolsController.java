@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 public class ToolsController implements Initializable
 {
     @Autowired private MouseEventHandler mouseEventHandler;
+    @Autowired private HierarchyController hierarchyController;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private DataService dataService;
     @Autowired private SelectionService selectionService;
@@ -57,6 +58,7 @@ public class ToolsController implements Initializable
     private void CreateCluster() {
         try {
             hierarchyService.cluster(selectionService.getSelectedElements());
+            hierarchyController.update();
         } catch (DataServiceException ex) {
             messengerService.addException(ex);
         }
@@ -64,6 +66,7 @@ public class ToolsController implements Initializable
     
     private void RemoveCluster() {
         hierarchyService.restore(selectionService.getSelectedElements());
+        hierarchyController.update();
     }
     
     private void RemoveSelected() {

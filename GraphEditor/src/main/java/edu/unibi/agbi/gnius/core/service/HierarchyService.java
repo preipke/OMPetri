@@ -7,7 +7,6 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -150,8 +149,6 @@ public class HierarchyService
                 messengerService.addException("Cannot ungroup cluster!", ex);
             }
         }
-
-        hierarchyController.update();
     }
 
     /**
@@ -229,7 +226,9 @@ public class HierarchyService
             }
         }
         
-        arcs.forEach(a -> graphChild.add(a));
+        for (IGraphArc conn : arcs) {
+            graphChild.add(conn);
+        }
         
         for (IGraphArc conn : clusterArcs) {
             graph.add(conn);
@@ -336,11 +335,14 @@ public class HierarchyService
             }
         }
         
-        arcs.forEach(a -> graph.add(a));
+        for (IGraphArc a : arcs) {
+            graph.add(a);
+            dataService.styleElement(a);
+        }
         
-        for (IGraphArc conn : clusterArcs) {
-            graph.add(conn);
-            dataService.styleElement(conn);
+        for (IGraphArc a : clusterArcs) {
+            graph.add(a);
+            dataService.styleElement(a);
         }
     }
     
@@ -403,7 +405,6 @@ public class HierarchyService
                 arcs.remove(existingArc.get());
                 arcs.add(arcBackwards);
             }
-            
             arcs.add(arcForward);
         }
         

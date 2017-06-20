@@ -6,13 +6,12 @@
 package edu.unibi.agbi.gnius.business.controller.editor;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController;
 import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
@@ -43,6 +42,7 @@ import org.springframework.stereotype.Component;
 public class TabsController implements Initializable
 {
     @Autowired private DataService dataService;
+    @Autowired private HierarchyController hierarchyController;
     @Autowired private MessengerService messengerService;
     
     @Autowired private MainController mainController;
@@ -69,20 +69,6 @@ public class TabsController implements Initializable
             dao = dataService.createDao();
         } else {
             dao = dataDao;
-            dao.getGraphRoot().getNodes().forEach(node -> { // TODO style every level
-                try {
-                    dataService.styleElement((IGraphNode) node);
-                } catch (DataServiceException ex) {
-                    messengerService.addException("Failed to style nodes for existing model.", ex);
-                }
-            });
-            dao.getGraphRoot().getConnections().forEach(connection -> {
-                try {
-                    dataService.styleElement((IGraphArc) connection);
-                } catch (DataServiceException ex) {
-                    messengerService.addException("Failed to style arcs for existing model.", ex);
-                }
-            });
         }
         
         SubScene scene = new SubScene(dao.getGraphPane(), 0, 0);
@@ -93,12 +79,6 @@ public class TabsController implements Initializable
         dao.getGraphPane().maxHeightProperty().bind(scene.heightProperty());
         dao.getGraphPane().maxWidthProperty().bind(scene.widthProperty());
         dao.getGraphPane().getStyleClass().add(paneStyleClass);
-        
-//        GraphScene scene = new GraphScene(dao.getGraphRoot());
-//        scene.widthProperty().bind(editorTabPane.widthProperty());
-//        scene.heightProperty().bind(editorTabPane.heightProperty());
-//        scene.getGraphPane().getStyleClass().add(paneStyleClass);
-//        dao.setGraphPane(scene.getGraphPane());
         
         mouseEventHandler.registerTo(dao.getGraphPane());
         scrollEventHandler.registerTo(dao);

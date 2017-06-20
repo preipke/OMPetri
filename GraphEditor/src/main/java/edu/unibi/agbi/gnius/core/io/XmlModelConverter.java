@@ -5,22 +5,34 @@
  */
 package edu.unibi.agbi.gnius.core.io;
 
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCurve;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
+import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
+import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -28,8 +40,14 @@ import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -54,6 +72,7 @@ import org.w3c.dom.NodeList;
 public class XmlModelConverter
 {
     @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private DataService dataService;
 
     private final String formatDateTime = "yy-MM-dd HH:mm:ss";
     private final String dtdModelData = "model.dtd";
@@ -62,6 +81,7 @@ public class XmlModelConverter
     private final String attrColourId = "colourId";
     private final String attrCurved = "curved";
     private final String attrCreationDateTime = "creationDateTime";
+    private final String attrDataId = "dataId";
     private final String attrDescription = "description";
     private final String attrElementId = "elementId";
     private final String attrId = "id";
@@ -80,169 +100,35 @@ public class XmlModelConverter
     private final String attrUnit = "unit";
     private final String attrValue = "value";
 
-    private final String tagArcs = "Arcs";
     private final String tagArc = "Arc";
-    private final String tagColours = "Colours";
+    private final String tagArcs = "Arcs";
+    private final String tagCluster = "Cluster";
+    private final String tagClusters = "Clusters";
+    private final String tagClusterArc = "ClusterArc";
+    private final String tagClusterArcs = "ClusterArcs";
     private final String tagColour = "Colour";
+    private final String tagColours = "Colours";
     private final String tagConnection = "Connection";
+    private final String tagConnections = "Connections";
     private final String tagFunction = "Function";
+    private final String tagGraph = "Graph";
+//    private final String tagGraphRoot = "GraphRoot";
     private final String tagLabel = "Label";
     private final String tagModel = "Model";
     private final String tagNode = "Node";
-    private final String tagParameters = "Parameters";
+    private final String tagNodes = "Nodes";
     private final String tagParameter = "Parameter";
-    private final String tagPlaces = "Places";
+    private final String tagParameters = "Parameters";
     private final String tagPlace = "Place";
-    private final String tagRelatedParameters = "RelatedParameters";
+    private final String tagPlaces = "Places";
     private final String tagRelatedParameter = "RelatedParameter";
-    private final String tagTokens = "Tokens";
+    private final String tagRelatedParameters = "RelatedParameters";
     private final String tagToken = "Token";
-    private final String tagTransitons = "Transitions";
+    private final String tagTokens = "Tokens";
     private final String tagTransiton = "Transition";
-    private final String tagVisualisation = "Visualisation";
+    private final String tagTransitons = "Transitions";
     private final String tagWeights = "Weights";
     private final String tagWeight = "Weight";
-
-    public void exportXml(File file, DataDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
-
-        Element model, colourElements, parameterElements, arcElements, placeElements, transitionElements;
-
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document dom = db.newDocument();
-
-        arcElements = dom.createElement(tagArcs);
-        dataDao.getModel().getArcs().forEach(a -> {
-            DataArc data = (DataArc) a;
-
-            Element arcElement = dom.createElement(tagArc);
-            arcElement.setAttribute(attrId, data.getId());
-            arcElement.setAttribute(attrType, data.getArcType().toString());
-            arcElement.setAttribute(attrSource, data.getSource().getId());
-            arcElement.setAttribute(attrTarget, data.getTarget().getId());
-            if (data.getName() != null && !data.getName().isEmpty()) {
-                arcElement.setAttribute(attrName, data.getName());
-            }
-            if (data.getDescription() != null && !data.getDescription().isEmpty()) {
-                arcElement.setAttribute(attrDescription, data.getDescription());
-            }
-
-            arcElement.appendChild(getRelatedParameterIdsElement(dom, data));
-            arcElement.appendChild(getWeightsElement(dom, data));
-            arcElement.appendChild(getShapesForArcElement(dom, data));
-
-            arcElements.appendChild(arcElement);
-        });
-
-        placeElements = dom.createElement(tagPlaces);
-        dataDao.getModel().getPlaces().forEach(p -> {
-            DataPlace data = (DataPlace) p;
-
-            Element placeElement = dom.createElement(tagPlace);
-            placeElement.setAttribute(attrId, data.getId());
-            placeElement.setAttribute(attrType, data.getPlaceType().toString());
-            if (data.getName() != null && !data.getName().isEmpty()) {
-                placeElement.setAttribute(attrName, data.getName());
-            }
-            if (data.getLabelText() != null && !data.getLabelText().isEmpty()) {
-                placeElement.setAttribute(attrLabel, data.getLabelText());
-            }
-            if (data.getDescription() != null && !data.getDescription().isEmpty()) {
-                placeElement.setAttribute(attrDescription, data.getDescription());
-            }
-            
-            placeElement.appendChild(getRelatedParameterIdsElement(dom, data));
-            placeElement.appendChild(getTokensElement(dom, data));
-            placeElement.appendChild(getShapesForNodeElement(dom, data));
-
-            placeElements.appendChild(placeElement);
-        });
-
-        transitionElements = dom.createElement(tagTransitons);
-        dataDao.getModel().getTransitions().forEach(t -> {
-            DataTransition data = (DataTransition) t;
-
-            Element transitionElement = dom.createElement(tagTransiton);
-            transitionElement.setAttribute(attrId, data.getId());
-            transitionElement.setAttribute(attrType, data.getTransitionType().toString());
-            if (data.getName() != null && !data.getName().isEmpty()) {
-                transitionElement.setAttribute(attrName, data.getName());
-            }
-            if (data.getLabelText() != null && !data.getLabelText().isEmpty()) {
-                transitionElement.setAttribute(attrLabel, data.getLabelText());
-            }
-            if (data.getDescription() != null && !data.getDescription().isEmpty()) {
-                transitionElement.setAttribute(attrDescription, data.getDescription());
-            }
-
-            Element functionElement = dom.createElement(tagFunction);
-            if (!data.getFunction().getUnit().isEmpty()) {
-                functionElement.setAttribute(attrUnit, data.getFunction().getUnit());
-            }
-            functionElement.setTextContent(data.getFunction().toString());
-            transitionElement.appendChild(functionElement);
-            
-            transitionElement.appendChild(getRelatedParameterIdsElement(dom, data));
-            transitionElement.appendChild(getShapesForNodeElement(dom, data));
-
-            transitionElements.appendChild(transitionElement);
-        });
-
-        colourElements = dom.createElement(tagColours);
-        dataDao.getModel().getColours().forEach(colour -> {
-            Element colourElement = dom.createElement(tagColour);
-            colourElement.setAttribute(attrId, colour.getId());
-            if (colour.getDescription() != null && !colour.getDescription().isEmpty()) {
-                colourElement.setAttribute(attrDescription, colour.getDescription());
-            }
-
-            colourElements.appendChild(colourElement);
-        });
-
-        parameterElements = dom.createElement(tagParameters);
-        dataDao.getModel().getParameters().forEach(param -> {
-            Element parameterElement = dom.createElement(tagParameter);
-            parameterElement.setAttribute(attrId, param.getId());
-            if (param.getNote() != null && !param.getNote().isEmpty()) {
-                parameterElement.setAttribute(attrNote, param.getNote());
-            }
-            parameterElement.setAttribute(attrType, param.getType().toString());
-            parameterElement.setTextContent(param.getValue());
-            parameterElement.setAttribute(attrElementId, param.getRelatedElementId());
-
-            parameterElements.appendChild(parameterElement);
-        });
-
-        model = dom.createElement(tagModel); // create the root element
-
-        model.setAttribute(attrAuthor, dataDao.getAuthor());
-        model.setAttribute(attrCreationDateTime, dataDao.getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
-        model.setAttribute(attrDescription, dataDao.getModelDescription());
-        model.setAttribute(attrId, dataDao.getDaoId());
-        model.setAttribute(attrName, dataDao.getModelName());
-
-        model.appendChild(arcElements);
-        model.appendChild(placeElements);
-        model.appendChild(transitionElements);
-        model.appendChild(colourElements);
-        model.appendChild(parameterElements);
-
-        dom.appendChild(model);
-        dom.normalize();
-
-        Transformer tr = TransformerFactory.newInstance().newTransformer();
-        tr.setOutputProperty(OutputKeys.INDENT, "yes");
-        tr.setOutputProperty(OutputKeys.METHOD, "xml");
-        tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-//        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, dtdModelData);
-        tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-        // send DOM to file
-        tr.transform(
-                new DOMSource(dom),
-                new StreamResult(new FileOutputStream(file))
-        );
-    }
 
     public DataDao importXml(File file) throws Exception {
 
@@ -251,17 +137,17 @@ public class XmlModelConverter
         Document doc = dBuilder.parse(file);
 //        doc.getDocumentElement().normalize();
 
-        NodeList nodes;
+        NodeList n;
         Element root, elem;
         DataDao dataDao;
 
         /**
          * Model.
          */
-        nodes = doc.getElementsByTagName(tagModel);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                root = (Element) nodes.item(0);
+        n = doc.getElementsByTagName(tagModel);
+        if (n.getLength() == 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                root = (Element) n.item(0);
                 dataDao = getDataDao(root);
             } else {
                 throw new Exception("File import failed. Malformed 'Model' element.");
@@ -273,16 +159,16 @@ public class XmlModelConverter
         /**
          * Colours.
          */
-        nodes = root.getElementsByTagName(tagColours);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
+        n = root.getElementsByTagName(tagColours);
+        if (n.getLength() == 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
 
-                elem = (Element) nodes.item(0);
-                nodes = elem.getElementsByTagName(tagColour);
+                elem = (Element) n.item(0);
+                n = elem.getElementsByTagName(tagColour);
 
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        dataDao.getModel().add(getColour((Element) nodes.item(i)));
+                for (int i = 0; i < n.getLength(); i++) {
+                    if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        dataDao.getModel().add(getColour((Element) n.item(i)));
                     }
                 }
             }
@@ -291,16 +177,16 @@ public class XmlModelConverter
         /**
          * Parameters.
          */
-        nodes = root.getElementsByTagName(tagParameters);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
+        n = root.getElementsByTagName(tagParameters);
+        if (n.getLength() == 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
 
-                elem = (Element) nodes.item(0);
-                nodes = elem.getElementsByTagName(tagParameter);
+                elem = (Element) n.item(0);
+                n = elem.getElementsByTagName(tagParameter);
 
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        dataDao.getModel().add(getParameter((Element) nodes.item(i)));
+                for (int i = 0; i < n.getLength(); i++) {
+                    if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        dataDao.getModel().add(getParameter((Element) n.item(i)));
                     }
                 }
             }
@@ -309,17 +195,17 @@ public class XmlModelConverter
         /**
          * Places.
          */
-        nodes = root.getElementsByTagName(tagPlaces);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
+        n = root.getElementsByTagName(tagPlaces);
+        if (n.getLength() == 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
 
-                elem = (Element) nodes.item(0);
-                nodes = elem.getElementsByTagName(tagPlace);
+                elem = (Element) n.item(0);
+                n = elem.getElementsByTagName(tagPlace);
 
                 // Each place
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        DataPlace place = getDataPlace((Element) nodes.item(i));
+                for (int i = 0; i < n.getLength(); i++) {
+                    if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        DataPlace place = getPlace((Element) n.item(i));
                         dataDao.getModel().add(place);
                         for (IGraphElement shape : place.getShapes()) {
                             dataDao.getGraphRoot().add((IGraphNode) shape);
@@ -332,17 +218,17 @@ public class XmlModelConverter
         /**
          * Transitions.
          */
-        nodes = root.getElementsByTagName(tagTransitons);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
+        n = root.getElementsByTagName(tagTransitons);
+        if (n.getLength() == 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
 
-                elem = (Element) nodes.item(0);
-                nodes = elem.getElementsByTagName(tagTransiton);
+                elem = (Element) n.item(0);
+                n = elem.getElementsByTagName(tagTransiton);
 
                 // Each transition
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        DataTransition transition = getDataTransition((Element) nodes.item(i));
+                for (int i = 0; i < n.getLength(); i++) {
+                    if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        DataTransition transition = getTransition((Element) n.item(i));
                         transition.getFunction().getParameterIds().forEach(id -> {
                             dataDao.getModel().getParameter(id).getUsingElements().add(transition);
                         });
@@ -358,25 +244,21 @@ public class XmlModelConverter
         /**
          * Arcs.
          */
-        nodes = root.getElementsByTagName(tagArcs);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
+        n = root.getElementsByTagName(tagArcs);
+        if (n.getLength() == 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
 
-                elem = (Element) nodes.item(0);
-                nodes = elem.getElementsByTagName(tagArc);
+                elem = (Element) n.item(0);
+                n = elem.getElementsByTagName(tagArc);
 
                 // Each arc
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                for (int i = 0; i < n.getLength(); i++) {
+                    if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
 
-                        elem = (Element) nodes.item(i);
+                        elem = (Element) n.item(i);
 
-                        for (int j = 0; j < elem.getAttributes().getLength(); j++) {
-                            System.out.println(elem.getAttributes().item(j).getNodeName() + " = " + elem.getAttributes().item(j).getTextContent());
-                        }
-
-                        DataArc arc = getDataArc(
-                                (Element) nodes.item(i),
+                        DataArc arc = getArc(
+                                elem,
                                 (IDataNode) dataDao.getModel().getElement(elem.getAttribute(attrSource)),
                                 (IDataNode) dataDao.getModel().getElement(elem.getAttribute(attrTarget)),
                                 dataDao
@@ -389,13 +271,277 @@ public class XmlModelConverter
                 }
             }
         }
+        
+        /**
+         * Graph root.
+         */
+        n = root.getElementsByTagName(tagGraph);
+        if (n.getLength() >= 1) {
+            if (n.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                elem = (Element) n.item(0);
+                Map nodeMaps = new HashMap();
+                nodeMaps = fillGraph(elem, dataDao.getModel(), dataDao.getGraphRoot(), nodeMaps);
+                fillGraphConnections(elem, dataDao.getModel(), dataDao.getGraphRoot(), nodeMaps);
+            }
+        }
 
         return dataDao;
     }
 
-    private DataArc getDataArc(final Element elem, IDataNode source, IDataNode target, DataDao dataDao) {
+    private DataDao getDataDao(Element elem) {
+        DataDao dao = new DataDao();
+        dao.setAuthor(elem.getAttribute(attrAuthor));
+        dao.setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
+        dao.setModelDescription(elem.getAttribute(attrDescription));
+        dao.setDaoId(elem.getAttribute(attrId));
+        dao.setModelName(elem.getAttribute(attrName));
+        return dao;
+    }
+    
+    private Map fillGraph(Element elem, Model model, Graph graph, Map<String, IGraphNode> nodes) throws IOException {
+        
+        List<IGraphArc> arcs;
+        NodeList nl;
+        Element tmp, nodesElement = null, connectionsElement = null, clustersElement = null;
+        
+        nl = elem.getChildNodes();
+        
+        for (int i = 0; i < nl.getLength(); i++) {
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                tmp = (Element) nl.item(i);
+                
+                if (tmp.getNodeName().contentEquals(tagNodes)) {
+                    nodesElement = tmp;
+                } else if (tmp.getNodeName().contentEquals(tagConnections)) {
+                    connectionsElement = tmp;
+                } else if (tmp.getNodeName().contentEquals(tagClusters)) {
+                    clustersElement = tmp;
+                }
+            }
+        }
 
-        NodeList nodes;
+        // Nodes
+        if (nodesElement != null) {
+            addNodes(nodesElement.getElementsByTagName(tagNode), model, graph, nodes);
+        }
+
+        // Connections
+        if (connectionsElement != null) {
+            arcs = getConnections(connectionsElement.getElementsByTagName(tagConnection), model, nodes);
+            arcs.forEach(arc -> graph.add(arc));
+        }
+
+        // Clusters
+        if (clustersElement != null) {
+            addClusters(clustersElement.getChildNodes(), model, graph, nodes);
+        }
+        
+        return nodes;
+    }
+    
+    private void addClusters(final NodeList nl, Model model, Graph graph, Map<String,IGraphNode> nodes) throws IOException {
+        
+        IGraphCluster cluster;
+        Graph childGraph;
+        NodeList inl;
+        Element tmp, graphElement = null;
+        
+        // Iterate all clusters
+        for (int i = 0; i < nl.getLength(); i++) {
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                
+                final Element elem = (Element) nl.item(i);
+                if (elem.getNodeName().contentEquals(tagCluster)) {
+                    inl = elem.getChildNodes();
+                    cluster = (IGraphCluster) graph.getNode(elem.getAttribute(attrId));
+                    
+                    for (int j = 0; j < inl.getLength(); j++) {
+                        if (inl.item(j).getNodeType() == Node.ELEMENT_NODE) {
+                            tmp = (Element) inl.item(j);
+                            if (tmp.getNodeName().contentEquals(tagGraph)) {
+                                graphElement = tmp;
+                                break;
+                            }
+                        }
+                    }
+
+                    // Get child graph
+                    if (graphElement != null) {
+                        childGraph = cluster.getGraph();
+                        childGraph.setParentGraph(graph);
+                        fillGraph(graphElement, model, childGraph, nodes);
+                    }
+                }
+            }
+        }
+    }
+    
+    private Graph fillGraphConnections(Element elem, Model model, Graph graph, Map<String, IGraphNode> nodes) throws IOException {
+        
+        NodeList nl;
+        Element tmp;
+        
+        nl = elem.getChildNodes();
+        
+        for (int i = 0; i < nl.getLength(); i++) {
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                tmp = (Element) nl.item(i);
+                if (tmp.getNodeName().contentEquals(tagClusters)) {
+                    addClusterArcs(tmp.getChildNodes(), model, graph, nodes);
+                    break;
+                }
+            }
+        }
+        
+        return graph;
+    }
+    
+    private void addClusterArcs(final NodeList nl, Model model, Graph graph, Map<String,IGraphNode> nodes) throws IOException {
+        
+        IGraphCluster cluster;
+        Graph childGraph;
+        NodeList inl;
+        Element tmp, graphElement = null, clusterArcElement = null;
+        
+        // Iterate all clusters
+        for (int i = 0; i < nl.getLength(); i++) {
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                
+                final Element elem = (Element) nl.item(i);
+                if (elem.getNodeName().contentEquals(tagCluster)) {
+                    inl = elem.getChildNodes();
+                    cluster = (IGraphCluster) graph.getNode(elem.getAttribute(attrId));
+                    
+                    for (int j = 0; j < inl.getLength(); j++) {
+                        if (inl.item(j).getNodeType() == Node.ELEMENT_NODE) {
+                            tmp = (Element) inl.item(j);
+                            if (tmp.getNodeName().contentEquals(tagGraph)) {
+                                graphElement = tmp;
+                            } else if (tmp.getNodeName().contentEquals(tagClusterArcs)) {
+                                clusterArcElement = tmp;
+                            }
+                        }
+                    }
+
+                    // Get child graph
+                    if (graphElement != null) {
+                        childGraph = cluster.getGraph();
+                        fillGraphConnections(graphElement, model, childGraph, nodes);
+                    }
+
+                    // Create cluster arcs
+                    if (clusterArcElement != null) {
+                        addClusterConnections(clusterArcElement.getElementsByTagName(tagClusterArc), model, graph, nodes);
+                    }
+                }
+            }
+        }
+    }
+    
+    private void addNodes(NodeList nl, Model model, Graph graph, Map<String,IGraphNode> nodes) throws IOException {
+        
+        IGraphNode shape;
+        IElement data;
+        Element elem;
+        
+        try {
+            for (int i = 0; i < nl.getLength(); i++) {
+                if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    elem = (Element) nl.item(i);
+
+                    data = model.getElement(elem.getAttribute(attrDataId));
+                    if (data == null) {
+                        data = new DataCluster(elem.getAttribute(attrDataId));
+                    }
+                    switch (data.getElementType()) {
+                        case CLUSTER:
+                            shape = new GraphCluster(elem.getAttribute(attrId), (DataCluster) data);
+                            break;
+                        case PLACE:
+                            shape = new GraphPlace(elem.getAttribute(attrId), (DataPlace) data);
+                            break;
+                        case TRANSITION:
+                            shape = new GraphTransition(elem.getAttribute(attrId), (DataTransition) data);
+                            break;
+                        default:
+                            throw new IOException("Malformed node detected! Cannot create node shape for data type " + data.getElementType() + "!");
+                    }
+                    shape.getLabel().setText(elem.getAttribute(attrLabel));
+                    graph.add(shape);
+                    dataService.styleElement(shape);
+                    setShapePos(elem, shape);
+                    nodes.put(shape.getId(), shape);
+                }
+            }
+        } catch (DataServiceException ex) {
+            throw new IOException(ex);
+        }
+    }
+    
+    private void addClusterConnections(final NodeList nl, Model model, Graph graph, Map<String, IGraphNode> nodes) throws IOException {
+        
+        IGraphArc arc;
+        DataClusterArc data;
+        Element elem;
+        
+        for (int i = 0; i < nl.getLength(); i++) {
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                elem = (Element) nl.item(i);
+                
+                arc = (IGraphArc) graph.getConnection(elem.getAttribute(attrId));
+                data = (DataClusterArc) arc.getDataElement();
+                
+                arc.getDataElement().getShapes().add(arc);
+
+                for (IGraphArc a : getConnections(elem.getElementsByTagName(tagConnection), model, nodes)) {
+                    data.getStoredArcs().add(a);
+                    a.getDataElement().getShapes().clear();
+                    a.getDataElement().getShapes().add(arc);
+                }
+                graph.add(arc);
+            }
+        }
+    }
+    
+    private List<IGraphArc> getConnections(NodeList nl, Model model, Map<String, IGraphNode> nodes) throws IOException {
+        
+        IGraphNode source, target;
+        IGraphArc arc;
+        DataArc data;
+        Element elem;
+        List<IGraphArc> arcs = new ArrayList();
+        
+        try {
+            for (int i = 0; i < nl.getLength(); i++) {
+                if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                    elem = (Element) nl.item(i);
+
+                    source = nodes.get(elem.getAttribute(attrSource));
+                    target = nodes.get(elem.getAttribute(attrTarget));
+                    data = (DataArc) model.getElement(elem.getAttribute(attrDataId));
+                    if (data == null) {
+                        data = new DataClusterArc(elem.getAttribute(attrDataId), source.getDataElement(), target.getDataElement());
+                    }
+
+                    if (Boolean.parseBoolean(elem.getAttribute(attrCurved))) {
+                        arc = new GraphCurve(elem.getAttribute(attrId), source, target, data);
+                    } else {
+                        arc = new GraphEdge(elem.getAttribute(attrId), source, target, data);
+                    }
+                    arc.getDataElement().getShapes().add(arc);
+                    dataService.styleElement(arc);
+                    arcs.add(arc);
+                }
+            }
+        } catch (DataServiceException ex) {
+            throw new IOException(ex);
+        }
+        return arcs;
+    }
+
+    private DataArc getArc(final Element elem, IDataNode source, IDataNode target, DataDao dataDao) {
+
+        NodeList nl;
         Element tmp;
 
         DataArc arc = new DataArc(
@@ -403,67 +549,30 @@ public class XmlModelConverter
                 source, target,
                 DataArc.Type.valueOf(elem.getAttribute(attrType))
         );
-        arc.setDescription(elem.getAttribute(attrDescription));
-        arc.setName(elem.getAttribute(attrName));
-        
-        // Related parameter
         setRelatedParameterIds(elem, arc);
 
         // Weights
-        nodes = elem.getElementsByTagName(tagWeights);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
+        nl = elem.getElementsByTagName(tagWeights);
+        if (nl.getLength() == 1) {
+            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
 
-                tmp = (Element) nodes.item(0);
-                nodes = tmp.getElementsByTagName(tagWeight);
+                tmp = (Element) nl.item(0);
+                nl = tmp.getElementsByTagName(tagWeight);
 
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        arc.addWeight(getWeight((Element) nodes.item(i), dataDao));
+                for (int i = 0; i < nl.getLength(); i++) {
+                    if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        arc.addWeight(getWeight((Element) nl.item(i), dataDao));
                     }
                 }
             }
         }
-
-        // Shapes
-        nodes = elem.getElementsByTagName(tagVisualisation);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
-
-                tmp = (Element) nodes.item(0);
-                nodes = tmp.getElementsByTagName(tagConnection);
-
-                IGraphArc shape;
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-
-                        tmp = (Element) nodes.item(i);
-
-                        boolean curved = Boolean.parseBoolean(tmp.getAttribute(attrCurved));
-
-                        if (curved) {
-                            shape = new GraphCurve(
-                                    tmp.getAttribute(attrSource) + tmp.getAttribute(attrTarget),
-                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrSource)),
-                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrTarget)),
-                                    arc);
-                        } else {
-                            shape = new GraphEdge(
-                                    tmp.getAttribute(attrSource) + tmp.getAttribute(attrTarget),
-                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrSource)),
-                                    (IGraphNode) dataDao.getGraphRoot().getNode(tmp.getAttribute(attrTarget)),
-                                    arc);
-                        }
-//                        arc.getShapes().add(shape);
-                    }
-                }
-            }
-        }
+        arc.setDescription(elem.getAttribute(attrDescription));
+        arc.setName(elem.getAttribute(attrName));
 
         return arc;
     }
 
-    private DataPlace getDataPlace(final Element elem) {
+    private DataPlace getPlace(final Element elem) {
 
         NodeList nodes;
         Element tmp;
@@ -472,8 +581,6 @@ public class XmlModelConverter
                 elem.getAttribute(attrId),
                 DataPlace.Type.valueOf(elem.getAttribute(attrType))
         );
-        
-        // Related parameter
         setRelatedParameterIds(elem, place);
 
         // Token
@@ -491,67 +598,24 @@ public class XmlModelConverter
                 }
             }
         }
-
-        // Shapes
-        nodes = elem.getElementsByTagName(tagVisualisation);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
-
-                tmp = (Element) nodes.item(0);
-                nodes = tmp.getElementsByTagName(tagNode);
-
-                GraphPlace shape;
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        shape = new GraphPlace(null, place);
-                        setShapePos((Element) nodes.item(i), shape);
-                    }
-                }
-            }
-        }
-
         place.setDescription(elem.getAttribute(attrDescription));
-        place.setLabelText(elem.getAttribute(attrLabel));
         place.setName(elem.getAttribute(attrName));
 
         return place;
     }
 
-    private DataTransition getDataTransition(final Element elem) throws Exception {
-
-        NodeList nodes;
-        Element tmp;
+    private DataTransition getTransition(final Element elem) throws Exception {
 
         DataTransition transition = new DataTransition(
                 elem.getAttribute(attrId),
                 DataTransition.Type.valueOf(elem.getAttribute(attrType))
         );
-        
-        // Related parameter
         setRelatedParameterIds(elem, transition);
 
-        // Shapes
-        nodes = elem.getElementsByTagName(tagVisualisation);
-        if (nodes.getLength() == 1) {
-            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
-
-                tmp = (Element) nodes.item(0);
-                nodes = tmp.getElementsByTagName(tagNode);
-
-                GraphTransition shape;
-                for (int i = 0; i < nodes.getLength(); i++) {
-                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        shape = new GraphTransition(null, transition);
-                        setShapePos((Element) nodes.item(i), shape);
-                    }
-                }
-            }
-        }
-
-        transition.setDescription(elem.getAttribute(attrDescription));
-        transition.setLabelText(elem.getAttribute(attrLabel));
-        transition.setName(elem.getAttribute(attrName));
         transition.setFunction(getFunction(elem));
+        
+        transition.setDescription(elem.getAttribute(attrDescription));
+        transition.setName(elem.getAttribute(attrName));
 
         return transition;
     }
@@ -575,16 +639,6 @@ public class XmlModelConverter
         return functionBuilder.build("1");
     }
 
-    private DataDao getDataDao(Element elem) {
-        DataDao dao = new DataDao();
-        dao.setAuthor(elem.getAttribute(attrAuthor));
-        dao.setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
-        dao.setModelDescription(elem.getAttribute(attrDescription));
-        dao.setDaoId(elem.getAttribute(attrId));
-        dao.setModelName(elem.getAttribute(attrName));
-        return dao;
-    }
-
     private IGraphNode setShapePos(Element elem, IGraphNode node) {
         node.setId(elem.getAttribute(attrId));
         node.translateXProperty().set(Double.parseDouble(elem.getAttribute(attrPosX)));
@@ -598,46 +652,6 @@ public class XmlModelConverter
             }
         }
         return node;
-    }
-    
-    private Element getShapesForArcElement(Document dom, IDataArc data) {
-        Element shapes = dom.createElement(tagVisualisation);
-        data.getShapes().forEach(c -> {
-            IGraphArc connection = (IGraphArc) c;
-            Element connectionElement = dom.createElement(tagConnection);
-            connectionElement.setAttribute(attrSource, String.valueOf(connection.getSource().getId()));
-            connectionElement.setAttribute(attrTarget, String.valueOf(connection.getTarget().getId()));
-            if (connection instanceof GraphCurve) {
-                connectionElement.setAttribute(attrCurved, "true");
-            } else {
-                connectionElement.setAttribute(attrCurved, "false");
-            }
-            shapes.appendChild(connectionElement);
-        });
-        return shapes;
-    }
-    
-    private Element getShapesForNodeElement(Document dom, IDataNode data) {
-
-        Element shapes = dom.createElement(tagVisualisation);
-        data.getShapes().forEach(e -> {
-
-            IGraphNode n = (IGraphNode) e;
-
-            Element nodeElement = dom.createElement(tagNode);
-            nodeElement.setAttribute(attrPosX, String.valueOf(n.getShape().getTranslateX()));
-            nodeElement.setAttribute(attrPosY, String.valueOf(n.getShape().getTranslateY()));
-            nodeElement.setAttribute(attrId, String.valueOf(n.getId()));
-
-            Element labelElement = dom.createElement(tagLabel);
-            labelElement.setAttribute(attrPosX, String.valueOf(n.getLabel().getTranslateX()));
-            labelElement.setAttribute(attrPosY, String.valueOf(n.getLabel().getShape().getTranslateY()));
-            labelElement.setTextContent(n.getLabel().getText());
-            nodeElement.appendChild(labelElement);
-
-            shapes.appendChild(nodeElement);
-        });
-        return shapes;
     }
 
     private Parameter getParameter(Element elem) {
@@ -668,6 +682,264 @@ public class XmlModelConverter
             }
         }
     }
+
+    private Token getToken(Element elem) {
+        Token token = new Token(new Colour(elem.getAttribute(attrColourId), ""));
+        token.setValueStart(Double.parseDouble(elem.getAttribute(attrStart)));
+        token.setValueMin(Double.parseDouble(elem.getAttribute(attrMin)));
+        token.setValueMax(Double.parseDouble(elem.getAttribute(attrMax)));
+        return token;
+    }
+
+    private Weight getWeight(Element elem, DataDao dataDao) {
+        dataDao.getModel().getColours();
+        Weight weight = new Weight(new Colour(elem.getAttribute(attrColourId), ""));
+        weight.setValue(elem.getAttribute(attrValue));
+        return weight;
+    }
+    
+    // <editor-fold defaultstate="collapsed" desc="File export and related methods">
+
+    public void exportXml(File file, DataDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document dom = db.newDocument();
+        
+        Element model;
+        model = dom.createElement(tagModel); // create the root element
+        model.setAttribute(attrAuthor, dataDao.getAuthor());
+        model.setAttribute(attrCreationDateTime, dataDao.getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
+        model.setAttribute(attrDescription, dataDao.getModelDescription());
+        model.setAttribute(attrId, dataDao.getDaoId());
+        model.setAttribute(attrName, dataDao.getModelName());
+        model.appendChild(getArcsElement(dom, dataDao.getModel().getArcs()));
+        model.appendChild(getPlacesElement(dom, dataDao.getModel().getPlaces()));
+        model.appendChild(getTransitionsElement(dom, dataDao.getModel().getTransitions()));
+        model.appendChild(getColorsElement(dom, dataDao.getModel().getColours()));
+        model.appendChild(getParametersElement(dom, dataDao.getModel().getParameters()));
+        model.appendChild(getGraphElement(dom, dataDao.getGraphRoot()));
+
+        dom.appendChild(model);
+        dom.normalize();
+
+        Transformer tr = TransformerFactory.newInstance().newTransformer();
+        tr.setOutputProperty(OutputKeys.INDENT, "yes");
+        tr.setOutputProperty(OutputKeys.METHOD, "xml");
+        tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+//        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, dtdModelData);
+        tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+
+        // send DOM to file
+        tr.transform(
+                new DOMSource(dom),
+                new StreamResult(new FileOutputStream(file))
+        );
+    }
+    
+    private Element getArcsElement(Document dom, Collection arcs) {
+        Element elements = dom.createElement(tagArcs);
+        arcs.forEach(arc -> {
+            DataArc data = (DataArc) arc;
+            
+            Element a = dom.createElement(tagArc);
+            a.setAttribute(attrId, data.getId());
+            a.setAttribute(attrType, data.getArcType().toString());
+            a.setAttribute(attrSource, data.getSource().getId());
+            a.setAttribute(attrTarget, data.getTarget().getId());
+            if (data.getName() != null && !data.getName().isEmpty()) {
+                a.setAttribute(attrName, data.getName());
+            }
+            if (data.getDescription() != null && !data.getDescription().isEmpty()) {
+                a.setAttribute(attrDescription, data.getDescription());
+            }
+            a.appendChild(getRelatedParameterIdsElement(dom, data));
+            a.appendChild(getWeightsElement(dom, data));
+
+            elements.appendChild(a);
+        });
+        return elements;
+    }
+    
+    public Element getPlacesElement(Document dom, Collection places) {
+        Element elements = dom.createElement(tagPlaces);
+        places.forEach(place -> {
+            DataPlace data = (DataPlace) place;
+            
+            Element p = dom.createElement(tagPlace);
+            p.setAttribute(attrId, data.getId());
+            p.setAttribute(attrType, data.getPlaceType().toString());
+            if (data.getName() != null && !data.getName().isEmpty()) {
+                p.setAttribute(attrName, data.getName());
+            }
+            if (data.getLabelText() != null && !data.getLabelText().isEmpty()) {
+                p.setAttribute(attrLabel, data.getLabelText());
+            }
+            if (data.getDescription() != null && !data.getDescription().isEmpty()) {
+                p.setAttribute(attrDescription, data.getDescription());
+            }
+            p.appendChild(getRelatedParameterIdsElement(dom, data));
+            p.appendChild(getTokensElement(dom, data));
+
+            elements.appendChild(p);
+        });
+        return elements;
+    }
+    
+    private Element getTransitionsElement(Document dom, Collection transitions) {
+        Element elements = dom.createElement(tagTransitons);
+        transitions.forEach(transition -> {
+            DataTransition data = (DataTransition) transition;
+            
+            Element t = dom.createElement(tagTransiton);
+            t.setAttribute(attrId, data.getId());
+            t.setAttribute(attrType, data.getTransitionType().toString());
+            if (data.getName() != null && !data.getName().isEmpty()) {
+                t.setAttribute(attrName, data.getName());
+            }
+            if (data.getLabelText() != null && !data.getLabelText().isEmpty()) {
+                t.setAttribute(attrLabel, data.getLabelText());
+            }
+            if (data.getDescription() != null && !data.getDescription().isEmpty()) {
+                t.setAttribute(attrDescription, data.getDescription());
+            }
+            t.appendChild(getRelatedParameterIdsElement(dom, data));
+
+            Element f = dom.createElement(tagFunction);
+            if (!data.getFunction().getUnit().isEmpty()) {
+                f.setAttribute(attrUnit, data.getFunction().getUnit());
+            }
+            f.setTextContent(data.getFunction().toString());
+            t.appendChild(f);
+
+            elements.appendChild(t);
+        });
+        return elements;
+    }
+    
+    private Element getColorsElement(Document dom, Collection<Colour> colors) {
+        Element elements = dom.createElement(tagColours);
+        colors.forEach(colour -> {
+            Element c = dom.createElement(tagColour);
+            c.setAttribute(attrId, colour.getId());
+            if (colour.getDescription() != null && !colour.getDescription().isEmpty()) {
+                c.setAttribute(attrDescription, colour.getDescription());
+            }
+            elements.appendChild(c);
+        });
+        return elements;
+    }
+    
+    private Element getParametersElement(Document dom, Collection<Parameter> parameters) {
+        Element elements = dom.createElement(tagParameters);
+        parameters.forEach(param -> {
+            
+            Element p = dom.createElement(tagParameter);
+            p.setAttribute(attrId, param.getId());
+            if (param.getNote() != null && !param.getNote().isEmpty()) {
+                p.setAttribute(attrNote, param.getNote());
+            }
+            p.setAttribute(attrType, param.getType().toString());
+            p.setTextContent(param.getValue());
+            p.setAttribute(attrElementId, param.getRelatedElementId());
+
+            elements.appendChild(p);
+        });
+        return elements;
+    }
+    
+    private Element getGraphElement(Document dom, Graph graph) {
+        Element elements = dom.createElement(tagGraph);
+        elements.appendChild(getNodesElement(dom, graph.getNodes()));
+        elements.appendChild(getConnectionsElement(dom, graph.getConnections()));
+        elements.appendChild(getClustersElement(dom, graph.getClusters()));
+        return elements;
+    }
+    
+    private Element getClustersElement(Document dom, Collection<IGravisCluster> clusters) {
+        Element elements = dom.createElement(tagClusters);
+        clusters.forEach(cluster -> {
+            
+            Element c = dom.createElement(tagCluster);
+            c.setAttribute(attrId, cluster.getId());
+            c.appendChild(getClusterArcsElement(dom, cluster.getConnections()));
+            c.appendChild(getGraphElement(dom, cluster.getGraph()));
+            
+            elements.appendChild(c);
+        });
+        return elements;
+    }
+    
+    private Element getClusterArcsElement(Document dom, Collection<IGravisConnection> connections) {
+        
+        Element elements = dom.createElement(tagClusterArcs);
+        connections.forEach(clusterArc -> {
+            DataClusterArc data = (DataClusterArc) ((IGraphArc) clusterArc).getDataElement();
+            
+            Element a = dom.createElement(tagClusterArc);
+            a.setAttribute(attrId, clusterArc.getId());
+            
+            data.getStoredArcs().forEach(storedArc -> {
+                Element sa = dom.createElement(tagConnection);
+                sa.setAttribute(attrId, storedArc.getId());
+                sa.setAttribute(attrDataId, ((IGraphArc) storedArc).getDataElement().getId());
+                sa.setAttribute(attrSource, String.valueOf(storedArc.getSource().getId()));
+                sa.setAttribute(attrTarget, String.valueOf(storedArc.getTarget().getId()));
+                if (storedArc instanceof GraphCurve) {
+                    sa.setAttribute(attrCurved, "true");
+                } else {
+                    sa.setAttribute(attrCurved, "false");
+                }
+                
+                a.appendChild(sa);
+            });
+            elements.appendChild(a);
+        });
+        return elements;
+    }
+    
+    private Element getConnectionsElement(Document dom, Collection<IGravisConnection> connections) {
+        Element elements = dom.createElement(tagConnections);
+        connections.forEach(connection -> {
+            
+            Element c = dom.createElement(tagConnection);
+            c.setAttribute(attrId, connection.getId());
+            c.setAttribute(attrDataId, ((IGraphArc) connection).getDataElement().getId());
+            c.setAttribute(attrSource, String.valueOf(connection.getSource().getId()));
+            c.setAttribute(attrTarget, String.valueOf(connection.getTarget().getId()));
+            if (connection instanceof GraphCurve) {
+                c.setAttribute(attrCurved, "true");
+            } else {
+                c.setAttribute(attrCurved, "false");
+            }
+            
+            elements.appendChild(c);
+        });
+        return elements;
+    }
+    
+    private Element getNodesElement(Document dom, Collection<IGravisNode> nodes) {
+        Element elements = dom.createElement(tagNodes);
+        nodes.forEach(node -> {
+            
+            Element n = dom.createElement(tagNode);
+            n.setAttribute(attrId, node.getId());
+            n.setAttribute(attrDataId, ((IGraphNode) node).getDataElement().getId());
+            n.setAttribute(attrPosX, String.valueOf(node.getShape().getTranslateX()));
+            n.setAttribute(attrPosY, String.valueOf(node.getShape().getTranslateY()));
+            
+            Element l = dom.createElement(tagLabel);
+            l.setAttribute(attrLabel, node.getLabel().getText());
+            l.setAttribute(attrPosX, String.valueOf(node.getLabel().getTranslateX()));
+            l.setAttribute(attrPosY, String.valueOf(node.getLabel().getShape().getTranslateY()));
+            l.setTextContent(node.getLabel().getText());
+            
+            n.appendChild(l);
+            
+            elements.appendChild(n);
+        });
+        return elements;
+    }
     
     private Element getRelatedParameterIdsElement(Document dom, IDataElement data) {
         Element elem = dom.createElement(tagRelatedParameters);
@@ -678,33 +950,18 @@ public class XmlModelConverter
         });
         return elem;
     }
-
-    private Token getToken(Element elem) {
-        Token token = new Token(new Colour(elem.getAttribute(attrColourId), ""));
-        token.setValueStart(Double.parseDouble(elem.getAttribute(attrStart)));
-        token.setValueMin(Double.parseDouble(elem.getAttribute(attrMin)));
-        token.setValueMax(Double.parseDouble(elem.getAttribute(attrMax)));
-        return token;
-    }
     
     private Element getTokensElement(Document dom, DataPlace data) {
-        Element tokens = dom.createElement(tagTokens);
+        Element elements = dom.createElement(tagTokens);
         data.getTokens().forEach(token -> {
             Element t = dom.createElement(tagToken);
             t.setAttribute(attrColourId, token.getColour().getId());
             t.setAttribute(attrStart, String.valueOf(token.getValueStart()));
             t.setAttribute(attrMin, String.valueOf(token.getValueMin()));
             t.setAttribute(attrMax, String.valueOf(token.getValueMax()));
-            tokens.appendChild(t);
+            elements.appendChild(t);
         });
-        return tokens;
-    }
-
-    private Weight getWeight(Element elem, DataDao dataDao) {
-        dataDao.getModel().getColours();
-        Weight weight = new Weight(new Colour(elem.getAttribute(attrColourId), ""));
-        weight.setValue(elem.getAttribute(attrValue));
-        return weight;
+        return elements;
     }
     
     private Element getWeightsElement(Document dom, IDataArc data) {
@@ -717,4 +974,6 @@ public class XmlModelConverter
         });
         return weights;
     }
+    
+    // </editor-fold>
 }

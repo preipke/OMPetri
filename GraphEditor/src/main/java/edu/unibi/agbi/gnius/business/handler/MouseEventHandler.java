@@ -317,8 +317,16 @@ public class MouseEventHandler {
                 } else {
                     mainController.HideElementPanel();
                 }
+                
+                if (isInNodeCreationMode.get()) {
 
-                if (event.isShiftDown()) {
+                    // Creating node at event location.
+                    try {
+                        dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
+                    } catch (DataServiceException ex) {
+                        messengerService.addException("Cannot create node!", ex);
+                    }
+                } else {
 
                     disableMode(isInNodeCreationMode);
 
@@ -342,14 +350,6 @@ public class MouseEventHandler {
 
                     pane.getGraph().getChildren().add(selectionFrame);
 
-                } else if (isInNodeCreationMode.get()) {
-
-                    // Creating node at event location.
-                    try {
-                        dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
-                    } catch (DataServiceException ex) {
-                        messengerService.addException("Cannot create node!", ex);
-                    }
                 }
             }
         }
