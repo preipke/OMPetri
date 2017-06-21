@@ -22,6 +22,7 @@ public class GraphTransition extends GravisRectangle implements IGraphNode {
         super(id, GravisType.NODE);
         this.dataTransition = dataTransition;
         this.dataTransition.getShapes().add(this);
+        this.setInnerCircleVisible(false);
     }
     
     @Override

@@ -114,8 +114,6 @@ public class HierarchyService
         IGraphCluster cluster = create(nodes, clusters);
         dataService.getDao().setHasChanges(true);
 
-        hierarchyController.update();
-
         return cluster;
     }
 

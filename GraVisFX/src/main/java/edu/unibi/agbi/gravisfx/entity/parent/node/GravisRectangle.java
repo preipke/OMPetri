@@ -9,6 +9,7 @@ import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 
@@ -33,6 +34,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     private final List<IGravisConnection> edges = new ArrayList();
 
     private final GravisChildLabel label;
+    private final GravisChildCircle circle;
     private final GravisChildRectangle rectangle;
     
     private final GravisType type;
@@ -56,6 +58,11 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         label.xProperty().bind(translateXProperty().add(getCenterOffsetX() + GravisProperties.LABEL_OFFSET_X));
         label.yProperty().bind(translateYProperty().add(getCenterOffsetY() + GravisProperties.LABEL_OFFSET_Y));
         
+        circle = new GravisChildCircle(this);
+        circle.setRadius(GravisProperties.CIRCLE_RADIUS - GravisProperties.BASE_INNER_DISTANCE);
+        circle.translateXProperty().bind(translateXProperty());
+        circle.translateYProperty().bind(translateYProperty());
+        
         rectangle = new GravisChildRectangle(this);
         rectangle.setWidth(GravisProperties.RECTANGLE_WIDTH - GravisProperties.BASE_INNER_DISTANCE * 2);
         rectangle.setHeight(GravisProperties.RECTANGLE_HEIGHT - GravisProperties.BASE_INNER_DISTANCE * 2);
@@ -63,10 +70,20 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         rectangle.translateYProperty().bind(translateYProperty().add(GravisProperties.BASE_INNER_DISTANCE));
         
         shapes.add(this);
+        shapes.add(circle);
         shapes.add(rectangle);
 
         shapeHandles.add(new GravisShapeHandle(this));
+        shapeHandles.addAll(circle.getElementHandles());
         shapeHandles.addAll(rectangle.getElementHandles());
+    }
+    
+    public GravisChildCircle getCircle() {
+        return circle;
+    }
+    
+    public GravisChildRectangle getRectangle() {
+        return rectangle;
     }
 
     @Override
@@ -128,7 +145,10 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 
     @Override
     public List<GravisShapeHandle> getChildElementHandles() {
-        return rectangle.getElementHandles();
+        List<GravisShapeHandle> handles = new ArrayList();
+        handles.addAll(circle.getElementHandles());
+        handles.addAll(rectangle.getElementHandles());
+        return handles;
     }
     
     @Override 
@@ -138,7 +158,7 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 
     @Override
     public void setInnerCircleVisible(boolean value) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.circle.setVisible(value);
     }
 
     @Override
