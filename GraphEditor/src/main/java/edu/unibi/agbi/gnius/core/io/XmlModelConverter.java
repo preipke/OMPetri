@@ -368,6 +368,7 @@ public class XmlModelConverter
                     // Get child graph
                     if (graphElement != null) {
                         childGraph = cluster.getGraph();
+                        childGraph.nameProperty().set(cluster.getId());
                         childGraph.setParentGraph(graph);
                         fillGraph(graphElement, model, childGraph, nodes);
                     }

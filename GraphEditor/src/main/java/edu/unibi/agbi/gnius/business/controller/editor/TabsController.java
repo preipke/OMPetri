@@ -6,11 +6,9 @@
 package edu.unibi.agbi.gnius.business.controller.editor;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
-import edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController;
 import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
@@ -42,7 +40,6 @@ import org.springframework.stereotype.Component;
 public class TabsController implements Initializable
 {
     @Autowired private DataService dataService;
-    @Autowired private HierarchyController hierarchyController;
     @Autowired private MessengerService messengerService;
     
     @Autowired private MainController mainController;
