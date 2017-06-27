@@ -79,6 +79,10 @@ public class XmlModelConverter
 
     private final String attrAuthor = "author";
     private final String attrColourId = "colourId";
+    private final String attrCurrentClusterId = "currentClusterId";
+    private final String attrCurrentNodeId = "currentNodeId";
+    private final String attrCurrentPlaceId = "currentPlaceId";
+    private final String attrCurrentTransitionId = "currentTransitionId";
     private final String attrCurved = "curved";
     private final String attrCreationDateTime = "creationDateTime";
     private final String attrDataId = "dataId";
@@ -112,7 +116,6 @@ public class XmlModelConverter
     private final String tagConnections = "Connections";
     private final String tagFunction = "Function";
     private final String tagGraph = "Graph";
-//    private final String tagGraphRoot = "GraphRoot";
     private final String tagLabel = "Label";
     private final String tagModel = "Model";
     private final String tagNode = "Node";
@@ -129,6 +132,8 @@ public class XmlModelConverter
     private final String tagTransitons = "Transitions";
     private final String tagWeights = "Weights";
     private final String tagWeight = "Weight";
+    
+    // <editor-fold defaultstate="collapsed" desc="File import and related methods">
 
     public DataDao importXml(File file) throws Exception {
 
@@ -295,6 +300,10 @@ public class XmlModelConverter
         dao.setModelDescription(elem.getAttribute(attrDescription));
         dao.setDaoId(elem.getAttribute(attrId));
         dao.setModelName(elem.getAttribute(attrName));
+        dao.setNextClusterId(Integer.parseInt(elem.getAttribute(attrCurrentNodeId)));
+        dao.setNextNodeId(Integer.parseInt(elem.getAttribute(attrCurrentClusterId)));
+        dao.setNextPlaceId(Integer.parseInt(elem.getAttribute(attrCurrentPlaceId)));
+        dao.setNextTransitionId(Integer.parseInt(elem.getAttribute(attrCurrentTransitionId)));
         return dao;
     }
     
@@ -699,6 +708,8 @@ public class XmlModelConverter
         return weight;
     }
     
+    // </editor-fold>
+    
     // <editor-fold defaultstate="collapsed" desc="File export and related methods">
 
     public void exportXml(File file, DataDao dataDao) throws ParserConfigurationException, TransformerException, FileNotFoundException {
@@ -714,6 +725,14 @@ public class XmlModelConverter
         model.setAttribute(attrDescription, dataDao.getModelDescription());
         model.setAttribute(attrId, dataDao.getDaoId());
         model.setAttribute(attrName, dataDao.getModelName());
+        model.setAttribute(attrCurrentNodeId, Integer.toString(dataDao.getNextNodeId()));
+        model.setAttribute(attrCurrentClusterId, Integer.toString(dataDao.getNextClusterId()));
+        model.setAttribute(attrCurrentPlaceId, Integer.toString(dataDao.getNextPlaceId()));
+        model.setAttribute(attrCurrentTransitionId, Integer.toString(dataDao.getNextTransitionId()));
+        dataDao.setNextClusterId(dataDao.getNextClusterId() - 2); // revoke iteration
+        dataDao.setNextNodeId(dataDao.getNextNodeId() - 2);
+        dataDao.setNextPlaceId(dataDao.getNextPlaceId() - 2);
+        dataDao.setNextTransitionId(dataDao.getNextTransitionId() - 2);
         model.appendChild(getArcsElement(dom, dataDao.getModel().getArcs()));
         model.appendChild(getPlacesElement(dom, dataDao.getModel().getPlaces()));
         model.appendChild(getTransitionsElement(dom, dataDao.getModel().getTransitions()));
