@@ -65,4 +65,14 @@ public class GravisChildRectangle extends Rectangle implements IGravisChild
         shapes.add(this);
         return shapes;
     }
+
+    @Override
+    public final double getCenterOffsetX() {
+        return getWidth() / 2;
+    }
+
+    @Override
+    public final double getCenterOffsetY() {
+        return getHeight() / 2;
+    }
 }

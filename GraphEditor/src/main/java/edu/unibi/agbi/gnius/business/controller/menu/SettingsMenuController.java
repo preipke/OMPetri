@@ -15,8 +15,10 @@ import org.springframework.stereotype.Controller;
  * @author PR
  */
 @Controller
-public class HelpMenuController implements Initializable
+public class SettingsMenuController implements Initializable
 {
+    
+    
     @Override
     public void initialize(URL location , ResourceBundle resources) {
     }

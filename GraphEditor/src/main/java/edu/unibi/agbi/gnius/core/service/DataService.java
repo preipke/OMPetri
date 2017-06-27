@@ -12,11 +12,9 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
@@ -25,9 +23,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
@@ -40,6 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
@@ -85,6 +83,8 @@ public class DataService
 
     private final ObservableList<DataDao> dataDaos = FXCollections.observableArrayList();
     private DataDao dataDao;
+    
+    private final BooleanProperty isGridEnabled = new SimpleBooleanProperty(true);
 
     /**
      * Adds a colour.
@@ -266,6 +266,9 @@ public class DataService
                 throw new DataServiceException("Cannot create element of undefined type!");
         }
         Point2D pos = calculator.getCorrectedMousePosition(dataDao.getGraph(), posX, posY);
+        if (isGridEnabled()) {
+            pos = calculator.getPositionInGrid(pos, getGraph().getScale());
+        }
         shape.translateXProperty().set(pos.getX() - shape.getCenterOffsetX());
         shape.translateYProperty().set(pos.getY() - shape.getCenterOffsetY());
         shape = add(shape);
@@ -425,11 +428,16 @@ public class DataService
      */
     public synchronized List<IGraphNode> paste(List<IGraphNode> nodes, boolean cut) throws DataServiceException {
 
-        Point2D center = calculator.getCenterN(nodes);
-        Point2D position = calculator.getCorrectedMousePositionLatest(dataDao.getGraph());
-
         List<IGraphNode> shapes = new ArrayList();
         IGraphNode shape;
+
+        Point2D center = calculator.getCenterN(nodes);
+        Point2D position = calculator.getCorrectedMousePositionLatest(dataDao.getGraph());
+        
+        if (isGridEnabled()) {
+            center = calculator.getPositionInGrid(center, getGraph().getScale());
+            position = calculator.getPositionInGrid(position, getGraph().getScale());
+        }
 
         for (int i = 0; i < nodes.size(); i++) {
 
@@ -1003,5 +1011,13 @@ public class DataService
 
     public void setTransitionTypeDefault(DataTransition.Type type) {
         defaultTransitionType = type;
+    }
+    
+    public boolean isGridEnabled() {
+        return isGridEnabled.get();
+    }
+    
+    public BooleanProperty isGridEnabledProperty() {
+        return isGridEnabled;
     }
 }

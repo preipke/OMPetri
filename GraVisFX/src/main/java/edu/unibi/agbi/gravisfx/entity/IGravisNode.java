@@ -16,10 +16,6 @@ import java.util.List;
  */
 public interface IGravisNode extends IGravisElement, IGravisParent
 {
-    public double getCenterOffsetX();
-
-    public double getCenterOffsetY();
-
     public List<IGravisNode> getParents();
 
     public List<IGravisNode> getChildren();

@@ -38,4 +38,8 @@ public interface IGravisElement
     public DoubleProperty translateXProperty();
 
     public DoubleProperty translateYProperty();
+    
+    public double getCenterOffsetX();
+
+    public double getCenterOffsetY();
 }

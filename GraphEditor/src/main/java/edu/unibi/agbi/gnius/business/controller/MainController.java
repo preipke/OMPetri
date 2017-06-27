@@ -189,6 +189,9 @@ public class MainController implements Initializable
         tabsController.getGraphPane().getGraph().setTranslateY(0);
         
         centerTarget = calculator.getCenter(dataService.getGraph().getNodes());
+        if (dataService.isGridEnabled()) {
+            centerTarget = calculator.getPositionInGrid(centerTarget, dataService.getGraph().getScale());
+        }
         
         adjustedOffsetX = centerTarget.getX() - (tabsController.getGraphPane().getWidth() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
         adjustedOffsetY = centerTarget.getY() - (tabsController.getGraphPane().getHeight() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
@@ -198,7 +201,7 @@ public class MainController implements Initializable
             node.translateYProperty().set(node.translateYProperty().get() - adjustedOffsetY);
         });
         
-        scaleTarget = calculator.getScaleDifference(tabsController.getGraphPane());
+        scaleTarget = calculator.getOptimalScale(tabsController.getGraphPane());
         scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
         
         if (scaleTarget > scaleCurrent) {

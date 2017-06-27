@@ -190,21 +190,31 @@ public class MouseEventHandler {
                 }
 
                 if (eventTarget instanceof IGraphNode) {
-
-                    Point2D pos_t0
-                            = calculator.getCorrectedMousePosition(
-                                    dataService.getGraph(),
-                                    mouseEventMovedPrevious.getX(), 
-                                    mouseEventMovedPrevious.getY());
-                    Point2D pos_t1
-                            = calculator.getCorrectedMousePosition(
+                    
+                    Point2D elemPos, mousePos;
+                    double translateX, translateY;
+                    
+                    mousePos = calculator.getCorrectedMousePosition(
                                     dataService.getGraph(),
                                     mouseEventMovedLatest.getX(),
                                     mouseEventMovedLatest.getY());
-
+                    
                     for (IGraphElement element : selectionService.getSelectedElements()) {
-                        element.translateXProperty().set(element.translateXProperty().get() + pos_t1.getX() - pos_t0.getX());
-                        element.translateYProperty().set(element.translateYProperty().get() + pos_t1.getY() - pos_t0.getY());
+                        
+                        translateX = mousePos.getX() - element.translateXProperty().get();
+                        translateY = mousePos.getY() - element.translateYProperty().get();
+
+                        elemPos = new Point2D(
+                                element.translateXProperty().get() - element.getCenterOffsetX() + translateX,
+                                element.translateYProperty().get() - element.getCenterOffsetY() + translateY
+                        );
+
+                        if (dataService.isGridEnabled()) {
+                            elemPos = calculator.getPositionInGrid(elemPos, dataService.getGraph().getScale());
+                        }
+                        
+                        element.translateXProperty().set(elemPos.getX());
+                        element.translateYProperty().set(elemPos.getY());
                     }
                 }
             }
@@ -343,6 +353,9 @@ public class MouseEventHandler {
                             dataService.getGraph(),
                             mouseEventPressed.getX(), 
                             mouseEventPressed.getY());
+                    if (dataService.isGridEnabled()) {
+                        pos = calculator.getPositionInGrid(pos, dataService.getGraph().getScale());
+                    }
                     selectionFrame.setX(pos.getX());
                     selectionFrame.setY(pos.getY());
                     selectionFrame.setWidth(0);

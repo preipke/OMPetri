@@ -58,4 +58,14 @@ public class GravisChildCircle extends Circle implements IGravisChild
         shapes.add(this);
         return shapes;
     }
+
+    @Override
+    public final double getCenterOffsetX() {
+        return 0;
+    }
+
+    @Override
+    public final double getCenterOffsetY() {
+        return 0;
+    }
 }

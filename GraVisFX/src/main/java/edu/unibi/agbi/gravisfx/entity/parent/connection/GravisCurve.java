@@ -417,4 +417,14 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
     public GravisType getType() {
         return type;
     }
+
+    @Override
+    public final double getCenterOffsetX() {
+        return 0;
+    }
+
+    @Override
+    public final double getCenterOffsetY() {
+        return 0;
+    }
 }

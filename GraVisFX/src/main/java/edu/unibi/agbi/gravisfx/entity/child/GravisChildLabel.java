@@ -58,4 +58,14 @@ public class GravisChildLabel extends Text implements IGravisChild
         shapes.add(this);
         return shapes;
     }
+
+    @Override
+    public final double getCenterOffsetX() {
+        return 0;
+    }
+
+    @Override
+    public final double getCenterOffsetY() {
+        return 0;
+    }
 }
