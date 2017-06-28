@@ -9,7 +9,9 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -19,7 +21,7 @@ import java.util.Set;
 public final class DataClusterArc extends DataArc {
     
     private final Set<IGraphElement> shapes;
-    private final Set<IGraphArc> storedArcs;
+    private final Map<String,IGraphArc> storedArcs;
     
     private String description = "";
     
@@ -28,10 +30,10 @@ public final class DataClusterArc extends DataArc {
         super.type = Element.Type.CLUSTERARC;
         super.name = id;
         this.shapes = new HashSet();
-        this.storedArcs = new HashSet();
+        this.storedArcs = new HashMap();
     }
     
-    public Set<IGraphArc> getStoredArcs() {
+    public Map<String,IGraphArc> getStoredArcs() {
         return storedArcs;
     }
 

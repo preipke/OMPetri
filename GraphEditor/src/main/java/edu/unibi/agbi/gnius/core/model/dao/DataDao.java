@@ -108,6 +108,22 @@ public class DataDao
         return nextTransitionId++;
     }
     
+    public void setNextClusterId(int nextClusterId) {
+        this.nextClusterId = nextClusterId;
+    }
+    
+    public void setNextNodeId(int nextNodeId) {
+        this.nextNodeId = nextNodeId++;
+    }
+    
+    public void setNextPlaceId(int nextPlaceId) {
+        this.nextPlaceId = nextPlaceId++;
+    }
+    
+    public void setNextTransitionId(int nextTransitionId) {
+        this.nextTransitionId = nextTransitionId++;
+    }
+    
     public int getScalePower() {
         return scalePower;
     }

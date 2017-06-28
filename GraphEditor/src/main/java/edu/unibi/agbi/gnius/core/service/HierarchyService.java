@@ -314,7 +314,7 @@ public class HierarchyService
              */
             dca = (DataClusterArc) ((IGraphArc) clusterArc).getDataElement();
             
-            for (IGraphArc storedArc : dca.getStoredArcs()) {
+            for (IGraphArc storedArc : dca.getStoredArcs().values()) {
                 
                 if (!graph.contains(storedArc.getSource()) || !graph.contains(storedArc.getTarget())) {
                     if (isSourceRemaining) {
@@ -353,7 +353,7 @@ public class HierarchyService
     private void addClusterArcs(Collection<IGraphArc> arcs, IGraphNode source, IGraphNode target, IGraphArc arcRelated) throws DataServiceException {
         
         final IGraphArc arcForward, arcBackwards;
-        final DataClusterArc dataForward, dataBackwards;
+        final DataClusterArc dataForward, dataBackwards, dca;
         Optional<IGraphArc> existingArc;
         IGraphArc arc;
         
@@ -401,7 +401,7 @@ public class HierarchyService
 
                 dataBackwards.getShapes().clear();
                 dataBackwards.getShapes().add(arcBackwards);
-                dataBackwards.getStoredArcs().forEach(storedArc -> {
+                dataBackwards.getStoredArcs().values().forEach(storedArc -> {
                     storedArc.getDataElement().getShapes().clear();
                     storedArc.getDataElement().getShapes().add(arcBackwards);
                 });
@@ -417,15 +417,18 @@ public class HierarchyService
          * all stored arcs to the new cluster arc.
          */
         if (arcRelated.getDataElement().getElementType() == Element.Type.CLUSTERARC) {
-            dataForward.getStoredArcs().addAll(((DataClusterArc) arcRelated.getDataElement()).getStoredArcs());
-            ((DataClusterArc) arcRelated.getDataElement()).getStoredArcs().clear();
+            dca = (DataClusterArc) arcRelated.getDataElement();
+            dca.getStoredArcs().values().forEach(storedArc -> {
+                dataForward.getStoredArcs().put(storedArc.getId(), storedArc);
+            });
+            dca.getStoredArcs().clear();
         } else {
-            dataForward.getStoredArcs().add(arcRelated);
+            dataForward.getStoredArcs().put(arcRelated.getId(), arcRelated);
         }
         
         dataForward.getShapes().clear();
         dataForward.getShapes().add(arcForward);
-        dataForward.getStoredArcs().forEach(storedArc -> {
+        dataForward.getStoredArcs().values().forEach(storedArc -> {
             storedArc.getDataElement().getShapes().clear();
             storedArc.getDataElement().getShapes().add(arcForward);
         });

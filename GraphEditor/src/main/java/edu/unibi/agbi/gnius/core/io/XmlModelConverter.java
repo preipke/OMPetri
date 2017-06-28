@@ -504,7 +504,7 @@ public class XmlModelConverter
                 arc.getDataElement().getShapes().add(arc);
 
                 for (IGraphArc a : getConnections(elem.getElementsByTagName(tagConnection), model, nodes)) {
-                    data.getStoredArcs().add(a);
+                    data.getStoredArcs().put(a.getId(), a);
                     a.getDataElement().getShapes().clear();
                     a.getDataElement().getShapes().add(arc);
                 }
@@ -899,7 +899,7 @@ public class XmlModelConverter
             Element a = dom.createElement(tagClusterArc);
             a.setAttribute(attrId, clusterArc.getId());
             
-            data.getStoredArcs().forEach(storedArc -> {
+            data.getStoredArcs().values().forEach(storedArc -> {
                 Element sa = dom.createElement(tagConnection);
                 sa.setAttribute(attrId, storedArc.getId());
                 sa.setAttribute(attrDataId, ((IGraphArc) storedArc).getDataElement().getId());

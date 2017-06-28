@@ -291,7 +291,7 @@ public class ElementController implements Initializable
             case CLUSTERARC:
                 DataClusterArc clusterArc = (DataClusterArc) element;
                 listClusteredElements.getItems().clear();
-                clusterArc.getStoredArcs().forEach(a -> {
+                clusterArc.getStoredArcs().values().forEach(a -> {
                     ClusterElement ce = new ClusterElement((IGraphArc) a);
                     listClusteredElements.getItems().add(ce);
                 });
