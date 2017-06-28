@@ -11,8 +11,6 @@ import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.function.Consumer;
-import javafx.scene.chart.XYChart.Data;
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
@@ -33,12 +31,14 @@ public class XmlResultsConverter
     private final String attrAuthor = "author";
     private final String attrDateTime = "dateTime";
     private final String attrId = "id";
-    private final String attrModel = "model";
     private final String attrName = "name";
     private final String attrTime = "time";
+    
     private final String tagData = "Data";
     private final String tagElement = "Element";
     private final String tagElements = "Elements";
+    private final String tagModel = "Model";
+    private final String tagModels = "Models";
     private final String tagSimulations = "Simulations";
     private final String tagSimulation = "Simulation";
     private final String tagResults = "Variable";
@@ -51,51 +51,75 @@ public class XmlResultsConverter
         // ...
     }
 
-    public void exportXml(File file, List<SimulationData> simulationData) throws Exception {
+    public void exportXml(File file, List<SimulationData> simulationDataList) throws Exception {
 
         Document dom;
         NamedNodeMap attributes;
-        Element simulations, simulation, elements, element, variables;
+        Element models, model, simulations, simulation, elements, element, data;
 
-        String dateTime, model, author, id, name;
+        String modelAuthor, modelName, modelId, simulationDateTime, elementId, elementName, variableName;
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); // instance of a DocumentBuilderFactory
         DocumentBuilder db = dbf.newDocumentBuilder(); // use factory to get an instance of document builder
         dom = db.newDocument(); // create instance of DOM
-        simulations = dom.createElement(tagSimulations); // create the root element
-
-        for (SimulationData data : simulationData) {
+        
+        models = dom.createElement(tagModels); // root element
+        
+        for (SimulationData simulationData : simulationDataList) {
             
+            model = null;
+            simulations = null;
             simulation = null;
             elements = null; 
             element = null;
-            variables = null;
+            data = null;
 
-            dateTime = data.getSimulation().getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
-            model = data.getSimulation().getModelName();
-            author = data.getSimulation().getAuthorName();
+            modelAuthor = simulationData.getSimulation().getAuthorName();
+            modelId = simulationData.getSimulation().getModelId();
+            modelName = simulationData.getSimulation().getModelName();
+            simulationDateTime = simulationData.getSimulation().getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
+            elementId = simulationData.getElementId();
+            elementName = simulationData.getElementName();
+            variableName = simulationData.getVariable();
+            
+            /**
+             * check if model element exists
+             */
+            for (int i = 0; i < models.getChildNodes().getLength(); i++) {
+                attributes = models.getChildNodes().item(i).getAttributes();
+                if (attributes.getNamedItem(attrName).getNodeValue().matches(modelName)) {
+                    if (attributes.getNamedItem(attrAuthor).getNodeValue().matches(modelAuthor)) {
+                        model = (Element) models.getChildNodes().item(i);
+                        simulations = (Element) models.getElementsByTagName(tagSimulations).item(0);
+                        break;
+                    }
+                }
+            }
+            if (model == null) {
+                model = dom.createElement(tagModel);
+                model.setAttribute(attrAuthor, modelAuthor);
+                model.setAttribute(attrId, modelId);
+                model.setAttribute(attrName, modelName);
+            }
+            if (simulations == null) {
+                simulations = dom.createElement(tagSimulations);
+                model.appendChild(simulations);
+            }
 
             /**
              * check if simulation element exists
              */
             for (int i = 0; i < simulations.getChildNodes().getLength(); i++) {
                 attributes = simulations.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(attrDateTime).getNodeValue().matches(dateTime)) {
-                    if (attributes.getNamedItem(attrModel).getNodeValue().matches(model)) {
-                        if (attributes.getNamedItem(attrAuthor).getNodeValue().matches(author)) {
-                            simulation = (Element) simulations.getChildNodes().item(i);
-                            elements = (Element) simulation.getElementsByTagName(tagElements).item(0);
-                            break;
-                        }
-                    }
+                if (attributes.getNamedItem(attrDateTime).getNodeValue().matches(simulationDateTime)) {
+                    simulation = (Element) simulations.getChildNodes().item(i);
+                    elements = (Element) simulation.getElementsByTagName(tagElements).item(0);
+                    break;
                 }
             }
-
             if (simulation == null) {
                 simulation = dom.createElement(tagSimulation);
-                simulation.setAttribute(attrDateTime, dateTime);
-                simulation.setAttribute(attrModel, model);
-                simulation.setAttribute(attrAuthor, author);
+                simulation.setAttribute(attrDateTime, simulationDateTime);
                 simulations.appendChild(simulation);
             }
             if (elements == null) {
@@ -106,54 +130,67 @@ public class XmlResultsConverter
             /**
              * check if element element exists
              */
-            id = data.getElementId();
-            name = data.getElementName();
 
             for (int i = 0; i < elements.getChildNodes().getLength(); i++) {
                 attributes = elements.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(attrId).getNodeValue().matches(id)) {
+                if (attributes.getNamedItem(attrId).getNodeValue().matches(elementId)) {
                     element = (Element) elements.getChildNodes().item(i);
-                    variables = (Element) element.getElementsByTagName(tagData).item(0);
+                    data = (Element) element.getElementsByTagName(tagData).item(0);
                     break;
                 }
             }
 
             if (element == null) {
                 element = dom.createElement(tagElement);
-                element.setAttribute(attrId, id);
-                element.setAttribute(attrName, name);
+                element.setAttribute(attrId, elementId);
+                element.setAttribute(attrName, elementName);
                 elements.appendChild(element);
             }
-            if (variables == null) {
-                variables = dom.createElement(tagData);
-                element.appendChild(variables);
+            if (data == null) {
+                data = dom.createElement(tagData);
+                element.appendChild(data);
             }
 
             /**
              * parse data
              */
             final Element variable = dom.createElement(tagResults);
-            variable.setAttribute(attrId, data.getVariable());
-            variables.appendChild(variable);
-
-            data.getSeries().getData().forEach(new Consumer<Data>() {
-                @Override
-                public void accept(Data d) {
-                    Element datapoint = dom.createElement(tagValue);
-                    datapoint.setAttribute(attrTime, d.getXValue().toString());
-                    datapoint.setTextContent(d.getYValue().toString());
-                    variable.appendChild(datapoint);
+            variable.setAttribute(attrId, variableName);
+            data.appendChild(variable);
+            
+            int index = 0;
+            boolean found = false;
+            for (String var : simulationData.getSimulation().getVariables()) {
+                if (var.contentEquals(variableName)) {
+                    found = true;
+                    break;
                 }
-            });
+                index++;
+            }
+            
+            if (!found) {
+                throw new Exception("Variable not found in results data set!");
+            }
+            
+            List<Object> timePoints = simulationData.getSimulation().getResults()[0];
+            List<Object> dataPoints = simulationData.getSimulation().getResults()[index];
+            Element datapoint;
+            
+            for (int i = 0; i < timePoints.size(); i++) {
+                datapoint = dom.createElement(tagValue);
+                datapoint.setAttribute(attrTime, timePoints.get(i).toString());
+                datapoint.setTextContent(dataPoints.get(i).toString());
+                variable.appendChild(datapoint);
+            }
         }
 
-        dom.appendChild(simulations);
+        dom.appendChild(models);
 
         Transformer tr = TransformerFactory.newInstance().newTransformer();
         tr.setOutputProperty(OutputKeys.INDENT, "yes");
         tr.setOutputProperty(OutputKeys.METHOD, "xml");
         tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, dtdResultsData);
+//        tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, dtdResultsData);
         tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
         // send DOM to file

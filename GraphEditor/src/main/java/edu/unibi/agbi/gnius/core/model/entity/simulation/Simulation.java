@@ -146,7 +146,7 @@ public class Simulation
 
     @Override
     public String toString() {
-        return simulationTime.format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + " " + getModelName();
+        return simulationTime.format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss"));
     }
     
     public String toStringShort() {

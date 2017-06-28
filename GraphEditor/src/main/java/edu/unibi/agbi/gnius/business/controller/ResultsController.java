@@ -18,8 +18,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -69,15 +72,17 @@ public class ResultsController implements Initializable
     @Autowired private ResultsService resultsService;
     @Autowired private XmlResultsConverter xmlResultsConverter;
 
-    @FXML private ChoiceBox<Simulation> simulationChoices;
-    @FXML private ChoiceBox<IElement> elementChoices;
-    @FXML private ChoiceBox<ValueChoice> valueChoices;
-    @FXML private TextField simulationFilterInput;
-    @FXML private TextField elementFilterInput;
-    @FXML private TextField valueFilterInput;
+    @FXML private ChoiceBox choicesModel;
+    @FXML private ChoiceBox choicesSimulation;
+    @FXML private ChoiceBox choicesElement;
+    @FXML private ChoiceBox choicesValue;
+    @FXML private TextField inputModelFilter;
+    @FXML private TextField inputSimulationFilter;
+    @FXML private TextField inputElementFilter;
+    @FXML private TextField inputValueFilter;
     @FXML private Button buttonAddSelected;
-    @FXML private CheckBox checkboxAutoAddSelected;
     @FXML private Button buttonClearFilter;
+    @FXML private CheckBox checkboxAutoAddSelected;
     @FXML private Label statusMessageLabel;
 
     @FXML private Button buttonExportData;
@@ -131,30 +136,6 @@ public class ResultsController implements Initializable
         fileChooser.getExtensionFilters().add(new ExtensionFilter("XML file(s) (*.xml)", "*.xml", "*.XML"));
     }
 
-    public LineChart getLineChart() {
-        return lineChart;
-    }
-
-    public TableView<SimulationData> getTableView() {
-        return tableView;
-    }
-    
-    public ChoiceBox getElementChoices() {
-        return elementChoices;
-    }
-    
-    public ChoiceBox getSimulationChoices() {
-        return simulationChoices;
-    }
-    
-    public ChoiceBox getValueChoices() {
-        return valueChoices;
-    }
-
-    public void setStage(Stage stage) {
-        this.stage = stage;
-    }
-
     public void OpenWindow() {
         
         ResultsController controller = new ResultsController();
@@ -188,123 +169,338 @@ public class ResultsController implements Initializable
         controller.setStage(stg);
     }
 
-    public synchronized void RefreshSimulationChoices() {
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
-        int index = simulationChoices.getSelectionModel().getSelectedIndex();
+    public synchronized void RefreshModelChoices() {
 
-        ObservableList<Simulation> choices = FXCollections.observableArrayList();
-        resultsService.getSimulations().forEach(simulation -> {
-            choices.add(simulation);
+        String modelChoicePrev = getModelChoice();
+        int index = 0;
+        boolean found = false;
+
+        ObservableList choices = FXCollections.observableArrayList();
+        resultsService.getSimulations().forEach(sim -> {
+            if (!choices.contains(sim.getModelName())) {
+                choices.add(sim.getModelName());
+            }
         });
+        choices.sort(Comparator.naturalOrder());
+        
+        if (modelChoicePrev != null) {
+            for (Object n : choices) {
+                if (n.toString().contentEquals(modelChoicePrev)) {
+                    found = true;
+                    break;
+                }
+                index++;
+            }
+        }
+        choicesModel.setItems(choices);
+        if (found) {
+            choicesModel.getSelectionModel().select(index);
+        }
 
-        simulationChoices.setItems(choices);
-        simulationChoices.getSelectionModel().select(index);
+        FilterChoices(choicesModel, inputModelFilter.getText());
+    }
+    
+    private String getModelChoice() {
+        return (String) choicesModel.getSelectionModel().getSelectedItem();
+    }
+    
+    private Simulation getSimulationChoice() {
+        if (choicesSimulation.getSelectionModel().getSelectedItem() != null) {
+            return (Simulation) choicesSimulation.getSelectionModel().getSelectedItem();
+        } else {
+            return null;
+        }
+    }
+    
+    private Choice getElementChoice() {
+        if (choicesElement.getSelectionModel().getSelectedItem() != null) {
+            return (Choice) choicesElement.getSelectionModel().getSelectedItem();
+        } else {
+            return null;
+        }
+    }
+    
+    private Choice getValueChoice() {
+        if (choicesValue.getSelectionModel().getSelectedItem() != null) {
+            return (Choice) choicesValue.getSelectionModel().getSelectedItem();
+        } else {
+            return null;
+        }
+    }
 
-        FilterChoices(simulationChoices, simulationFilterInput.getText());
+    public synchronized void RefreshSimulationChoices() {
+        
+        ObservableList choices = FXCollections.observableArrayList();
+        boolean found = false;
+        int index = 0;
+
+        String modelNameChoice = getModelChoice();
+        Simulation simulationChoicePrev;
+        
+        if (modelNameChoice != null) {
+
+            resultsService.getSimulations().stream()
+                    .filter(sim -> (sim.getModelName().contentEquals(modelNameChoice)))
+                    .forEach(sim -> {
+                        choices.add(sim);
+                    });
+            choices.sort(Comparator.comparing(Simulation::toString));
+            
+            simulationChoicePrev = getSimulationChoice();
+            if (simulationChoicePrev != null) {
+                for (Object s : choices) {
+                    if (s.equals(simulationChoicePrev)) {
+                        found = true;
+                        break;
+                    }
+                    index++;
+                }
+            }
+        }
+        choicesSimulation.setItems(choices);
+        if (found) {
+            choicesElement.getSelectionModel().select(index);
+        }
+        FilterChoices(choicesSimulation, inputSimulationFilter.getText());
     }
 
     private synchronized void RefreshElementChoices() {
+        
+        ObservableList choices = FXCollections.observableArrayList();
+        boolean found = false;
+        int index = 0;
 
-        Simulation simulationChoice = simulationChoices.getSelectionModel().getSelectedItem();
+        Simulation simulationChoice = getSimulationChoice();
+        Choice elementChoicePrev;
+        
         if (simulationChoice != null) {
-
-            int index = elementChoices.getSelectionModel().getSelectedIndex();
-            int oldSize = elementChoices.getItems().size();
             
-            Set<IElement> elements = simulationChoice.getElementFilterReferences().keySet();
-            ObservableList<IElement> choices = FXCollections.observableArrayList();
-            elements.stream()
-                    .filter(element -> (element.getElementType() != Element.Type.ARC))
-                    .forEach((element) -> {
-                        choices.add(element);
+            List<Object> places = new ArrayList();
+            List<Object> transitions = new ArrayList();
+            
+            simulationChoice.getElementFilterReferences()
+                    .keySet().stream()
+                    .filter(elem -> (elem.getElementType() != Element.Type.ARC))
+                    .forEach(elem -> {
+                        if (elem.getElementType() == Element.Type.PLACE) {
+                            places.add(elem);
+                        } else {
+                            transitions.add(elem);
+                        }
+                        Choice choice = new Choice(elem.toString());
+                        choice.getValues().add(elem);
+                        choices.add(choice);
                     });
-            choices.sort(Comparator.comparing(IElement::toString));
-
-            elementChoices.getItems().clear();
-            elementChoices.getItems().addAll(choices);
-            if (oldSize == choices.size()) {
-                elementChoices.getSelectionModel().select(index);
+            choices.sort(Comparator.comparing(Choice::toString));
+            choices.add(0, new Choice("<ALL PLACES>", places));
+            choices.add(1, new Choice("<ALL TRANSITIONS>", transitions));
+            
+            elementChoicePrev = getElementChoice();
+            if (elementChoicePrev != null) {
+                for (Object e : choices) {
+                    if (e.toString().contentEquals(elementChoicePrev.toString())) {
+                        found = true;
+                        break;
+                    }
+                    index++;
+                }
             }
         }
-        FilterChoices(elementChoices, elementFilterInput.getText());
+        choicesElement.setItems(choices);
+        if (found) {
+            choicesElement.getSelectionModel().select(index);
+        }
+        FilterChoices(choicesElement, inputElementFilter.getText());
+    }
+    
+    private List<String> getValueChoices(Simulation simulation, IElement element) {
+        return simulation.getElementFilterReferences().get(element);
+    }
+    
+    private Map<String,List<String>> getSharedValueChoices(Simulation simulation, List<IElement> elements) {
+        
+        Map<String,List<String>> valuesTmp, valuesShared = null;
+        
+        List<String> values, valuesRemoved;
+        String name;
+        
+        for (IElement element : elements) {
+            
+            values = simulation.getElementFilterReferences().get(element);
+            valuesTmp = new HashMap();
+            
+            for (String value : values) {
+                
+                name = getValueName(value, simulation);
+                
+                if (!valuesTmp.containsKey(name)) {
+                    valuesTmp.put(name, new ArrayList());
+                }
+                valuesTmp.get(name).add(value);
+            }
+            
+            if (valuesShared == null) {
+                
+                valuesShared = valuesTmp;
+                
+            } else {
+                
+                valuesRemoved = new ArrayList();
+                
+                for (String key : valuesShared.keySet()) {
+                    if (valuesTmp.containsKey(key)) {
+                        valuesShared.get(key).addAll(valuesTmp.get(key));
+                    } else {
+                        valuesRemoved.add(key);
+                    }
+                }
+                
+                for (String key : valuesRemoved) {
+                    valuesShared.remove(key);
+                }
+            }
+        }
+        
+        return valuesShared;
     }
 
     private synchronized void RefreshValueChoices() {
 
-        Simulation simulationChoice = simulationChoices.getSelectionModel().getSelectedItem();
-        IElement elementChoice = elementChoices.getSelectionModel().getSelectedItem();
+        ObservableList choices = FXCollections.observableArrayList();
+        boolean found = false;
+        int index = 0;
+        
+        Simulation simulationChoice = getSimulationChoice();
+        Choice elementChoice = getElementChoice();
+        Choice valueChoicePrev;
+        
         if (simulationChoice != null && elementChoice != null) {
-
-            int index = valueChoices.getSelectionModel().getSelectedIndex();
-            int oldSize = valueChoices.getItems().size();
-
-            List<String> values = simulationChoice.getElementFilterReferences().get(elementChoice);
-            ObservableList<ValueChoice> choices = FXCollections.observableArrayList();
-            ValueChoice choice;
+            
             String name;
+            Choice choice;
+            
+            if (elementChoice.getValues().size() == 1) {
 
-            for (String value : values) {
-                name = getValueName(value, simulationChoice);
-                if (name == null) {
-                    messengerService.addWarning("Unhandled value choice will not be available for displaying: '" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "'");
-                    continue;
+                List<String> values = getValueChoices(simulationChoice, (IElement) elementChoice.getValues().get(0));
+
+                for (String value : values) {
+                    name = getValueName(value, simulationChoice);
+                    if (name == null) {
+                        messengerService.addWarning("Unhandled value choice will not be available for displaying: '" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "'");
+                        continue;
+                    }
+                    choice = new Choice(name);
+                    choice.getValues().add(value);
+                    choices.add(choice);
                 }
-                choice = new ValueChoice(name, value);
-                choices.add(choice);
+                
+            } else {
+                
+                Map<String,List<String>> valuesMap = getSharedValueChoices(simulationChoice, elementChoice.getValues());
+                
+                for (String key : valuesMap.keySet()) {
+                    name = "<ALL> " + key;
+                    choice = new Choice(name);
+                    choice.getValues().addAll(valuesMap.get(key));
+                    choices.add(choice);
+                }
             }
-            choices.sort(Comparator.comparing(ValueChoice::toString));
 
-            valueChoices.getItems().clear();
-            valueChoices.getItems().addAll(choices);
-            if (oldSize == choices.size()) {
-                valueChoices.getSelectionModel().select(index);
+            choices.sort(Comparator.comparing(Choice::toString));
+
+            valueChoicePrev = getValueChoice();
+            if (valueChoicePrev != null) {
+                for (Object vc : choices) {
+                    if (vc.toString().contentEquals(valueChoicePrev.toString())) {
+                        found = true;
+                        break;
+                    }
+                    index++;
+                }
             }
         }
-        FilterChoices(valueChoices, valueFilterInput.getText());
+        choicesValue.setItems(choices);
+        if (found) {
+            choicesValue.getSelectionModel().select(index);
+        }
+        FilterChoices(choicesValue, inputValueFilter.getText());
     }
 
     private void addSelectedChoiceToChart() {
 
-        Simulation simulationChoice = simulationChoices.getSelectionModel().getSelectedItem();
-        IElement elementChoice = elementChoices.getSelectionModel().getSelectedItem();
-        ValueChoice valueChoice = (ValueChoice) valueChoices.getSelectionModel().getSelectedItem();
+        Simulation simulationChoice = getSimulationChoice();
+        Choice elementChoice = getElementChoice();
+        Choice valueChoice = getValueChoice();
 
         if (simulationChoice == null) {
-            setStatus("Select a simulation before adding!", true);
+            setStatus("Select a simulation before adding!", Status.WARNING);
             return;
         } else if (elementChoice == null) {
-            setStatus("Select an element before adding!", true);
+            setStatus("Select an element before adding!", Status.WARNING);
             return;
         } else if (valueChoice == null) {
-            setStatus("Select a value before adding!", true);
+            setStatus("Select a value before adding!", Status.WARNING);
             return;
         }
-
-        SimulationData data = new SimulationData(simulationChoice, elementChoice, valueChoice.getValue());
-
-        try {
-            resultsService.add(lineChart, data);
-            try {
-                resultsService.show(lineChart, data);
-            } catch (ResultsServiceException ex) {
-                setStatus("Adding data to chart failed!", true);
-                messengerService.addException("Adding data to chart failed!", ex);
-                return;
-            }
-            setStatus("The selected data has been added!", false);
-        } catch (ResultsServiceException ex) {
-            setStatus("The selected data has already been added! Please check the table below.", true);
+        
+        List<SimulationData> dataList = new ArrayList();
+        String variable;
+        IElement element;
+        
+        for (Object var : valueChoice.getValues()) {
+            
+            variable = (String) var;
+            element = simulationChoice.getFilterElementReferences().get(variable);
+            
+            dataList.add(new SimulationData(simulationChoice, element, variable));
         }
         
-        if (checkboxAutoAddSelected.isSelected()) {
-            resultsService.addForAutoAdding(lineChart, data);
+        boolean exceptions = false;
+        boolean duplicates = false;
+        boolean success = false;
+        
+        for (SimulationData data : dataList) {
+            
+            try {
+                resultsService.add(lineChart, data);
+                try {
+                    resultsService.show(lineChart, data);
+                } catch (ResultsServiceException ex) {
+                    exceptions = true;
+                    messengerService.addException("Adding data to chart failed!", ex);
+                    continue;
+                }
+                success = true;
+            } catch (ResultsServiceException ex) {
+                duplicates = true;
+            }
+            
+            if (checkboxAutoAddSelected.isSelected()) {
+                resultsService.addForAutoAdding(lineChart, data);
+            }
         }
-    }
-
-    private void clearFilterInputs() {
-        simulationFilterInput.clear();
-        elementFilterInput.clear();
-        valueFilterInput.clear();
+        
+        if (exceptions) {
+            if (success) {
+                setStatus("Failed to add some data to the chart!", Status.WARNING);
+            } else {
+                setStatus("Adding data to chart failed!", Status.FAILURE);
+            }
+        } else if (duplicates) {
+            if (success) {
+                setStatus("Added data but skipped duplicates!", Status.WARNING);
+            } else {
+                setStatus("The selected data has already been added! Please check the table below.", Status.WARNING);
+            }
+        } else if (success) {
+            setStatus("The selected data has been added!", Status.SUCCESS);
+        } else {
+            setStatus("No action performed!", Status.WARNING);
+        }
     }
 
     private void FilterChoices(ChoiceBox choiceBox, String text) {
@@ -338,31 +534,6 @@ public class ResultsController implements Initializable
             choiceBox.getSelectionModel().select(selectedIndex);
         }
     }
-
-    private void setStatus(String msg, boolean isError) {
-        if (isError) {
-            statusMessageLabel.setTextFill(Color.RED);
-        } else {
-            statusMessageLabel.setTextFill(Color.GREEN);
-        }
-        statusMessageLabel.setText("[" + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME) + "] " + msg);
-    }
-
-    private void exportData() {
-        try {
-            xmlResultsConverter.exportXml(
-                    fileChooser.showSaveDialog(stage), 
-                    resultsService.getChartData(lineChart)
-            );
-            setStatus("Data successfully exported!", false);
-        } catch (Exception ex) {
-            setStatus("Export to XML file failed!", true);
-        }
-    }
-
-    private void importData() {
-        System.out.println("TODO!");
-    }
     
     private String getValueName(String value, Simulation simulation) {
         if (value.matches(valueChoiceFire)) {
@@ -373,23 +544,57 @@ public class ResultsController implements Initializable
             return "Token";
         } else if (value.matches(valueChoiceTokenInActual)) {
             DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "[ACTUAL] Incoming from "
-                    + arc.getSource().toString();
+            return "Incoming from " + arc.getSource().toString() + " [ACTUAL]";
         } else if (value.matches(valueChoiceTokenInTotal)) {
             DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "[TOTAL] Incoming from "
-                    + arc.getSource().toString();
+            return "Incoming from " + arc.getSource().toString() + " [TOTAL]";
         } else if (value.matches(valueChoiceTokenOutActual)) {
             DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "[ACTUAL] Outgoing to "
-                    + arc.getTarget().toString();
+            return "Outgoing to " + arc.getTarget().toString() + " [ACTUAL]";
         } else if (value.matches(valueChoiceTokenOutTotal)) {
             DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "[TOTAL] Outgoing to "
-                    + arc.getTarget().toString();
+            return "Outgoing to " + arc.getTarget().toString() + " [TOTAL]";
         } else {
             return null;
         }
+    }
+
+    private void setStatus(String msg, Status type) {
+        switch (type) {
+            case SUCCESS:
+                statusMessageLabel.setTextFill(Color.GREEN);
+                break;
+            case WARNING:
+                statusMessageLabel.setTextFill(Color.ORANGE);
+                break;
+            case FAILURE:
+                statusMessageLabel.setTextFill(Color.RED);
+                break;
+        }
+        statusMessageLabel.setText("[" + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME) + "] " + msg);
+    }
+
+    private void clearFilterInputs() {
+        inputModelFilter.clear();
+        inputSimulationFilter.clear();
+        inputElementFilter.clear();
+        inputValueFilter.clear();
+    }
+
+    private void exportData() {
+        try {
+            xmlResultsConverter.exportXml(
+                    fileChooser.showSaveDialog(stage), 
+                    resultsService.getChartData(lineChart)
+            );
+            setStatus("Data successfully exported!", Status.SUCCESS);
+        } catch (Exception ex) {
+            setStatus("Export to XML file failed!", Status.FAILURE);
+        }
+    }
+
+    private void importData() {
+        System.out.println("TODO!");
     }
 
     private String getStartValueString(List<Data> data) {
@@ -481,7 +686,7 @@ public class ResultsController implements Initializable
             try {
                 resultsService.show(getLineChart(), data);
             } catch (ResultsServiceException ex) {
-                setStatus("Failed enabling item(s)!", true);
+                setStatus("Failed enabling item(s)!", Status.FAILURE);
                 messengerService.addException("Adding data to chart failed!", ex);
             }
         });
@@ -498,31 +703,44 @@ public class ResultsController implements Initializable
         {
             @Override
             public void onChanged(ListChangeListener.Change change) {
-                RefreshSimulationChoices();
+                RefreshModelChoices();
                 change.next();
                 if (change.wasAdded()) {
-                    setStatus("New simulation(s) added!", false);
+                    setStatus("New simulation(s) added!", Status.SUCCESS);
                 }
             }
         });
-        simulationFilterInput.setOnKeyReleased(e -> {
+        
+        inputModelFilter.setOnKeyReleased(e -> {
+            RefreshModelChoices();
+            getModelChoices().show();
+            getSimulationChoices().hide();
+            getElementChoices().hide();
+            getValueChoices().hide();
+        });
+        
+        choicesModel.valueProperty().addListener(cl -> RefreshSimulationChoices());
+        inputSimulationFilter.setOnKeyReleased(e -> {
             RefreshSimulationChoices();
+            getModelChoices().hide();
             getSimulationChoices().show();
             getElementChoices().hide();
             getValueChoices().hide();
         });
 
-        simulationChoices.valueProperty().addListener(cl -> RefreshElementChoices());
-        elementFilterInput.setOnKeyReleased(e -> {
+        choicesSimulation.valueProperty().addListener(cl -> RefreshElementChoices());
+        inputElementFilter.setOnKeyReleased(e -> {
             RefreshElementChoices();
+            getModelChoices().hide();
             getSimulationChoices().hide();
             getElementChoices().show();
             getValueChoices().hide();
         });
 
-        elementChoices.valueProperty().addListener(cl -> RefreshValueChoices());
-        valueFilterInput.setOnKeyReleased(e -> {
+        choicesElement.valueProperty().addListener(cl -> RefreshValueChoices());
+        inputValueFilter.setOnKeyReleased(e -> {
             RefreshValueChoices();
+            getModelChoices().hide();
             getSimulationChoices().hide();
             getElementChoices().hide();
             getValueChoices().show();
@@ -640,7 +858,7 @@ public class ResultsController implements Initializable
             cb.setIndeterminate(true);
             cb.setOnAction(e -> {
                 resultsService.drop(getLineChart(), cellData.getValue());
-                setStatus("Data has been dropped!", false);
+                setStatus("Data has been dropped!", Status.SUCCESS);
             });
             return new ReadOnlyObjectWrapper(cb);
         });
@@ -652,26 +870,58 @@ public class ResultsController implements Initializable
             return cell;
         });
         
-        RefreshSimulationChoices();
+        RefreshModelChoices();
     }
 
-    private class ValueChoice
+    public LineChart getLineChart() {
+        return lineChart;
+    }
+
+    public TableView<SimulationData> getTableView() {
+        return tableView;
+    }
+    
+    public ChoiceBox getElementChoices() {
+        return choicesElement;
+    }
+    
+    public ChoiceBox getModelChoices() {
+        return choicesModel;
+    }
+    
+    public ChoiceBox getSimulationChoices() {
+        return choicesSimulation;
+    }
+    
+    public ChoiceBox getValueChoices() {
+        return choicesValue;
+    }
+
+    private class Choice
     {
         private final String name;
-        private final String value;
+        private final List values;
 
-        private ValueChoice(String name, String value) {
-            this.name = name;
-            this.value = value;
+        private Choice(String name) {
+            this(name, new ArrayList());
         }
 
-        private String getValue() {
-            return value;
+        private Choice(String name, List values) {
+            this.name = name;
+            this.values = values;
+        }
+
+        private List getValues() {
+            return values;
         }
 
         @Override
         public String toString() {
             return name;
         }
+    }
+    
+    private enum Status {
+        SUCCESS, WARNING, FAILURE;
     }
 }

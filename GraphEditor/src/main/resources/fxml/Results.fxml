@@ -11,17 +11,20 @@
    <children>
       <GridPane hgap="10.0" vgap="5.0">
          <children>
-            <Label text="Simulation:" />
-            <Label text="Element:" GridPane.columnIndex="1" />
-            <Label text="Value:" GridPane.columnIndex="2" />
-            <ChoiceBox fx:id="simulationChoices" GridPane.rowIndex="2" />
-            <ChoiceBox fx:id="elementChoices" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <ChoiceBox fx:id="valueChoices" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <TextField fx:id="simulationFilterInput" promptText="Filter simulations..." GridPane.rowIndex="1" />
-            <TextField fx:id="elementFilterInput" promptText="Filter elements..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <TextField fx:id="valueFilterInput" promptText="Filter values..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Button fx:id="buttonClearFilter" mnemonicParsing="false" text="Clear" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+            <Label text="Model" />
+            <Label text="Simulation:" GridPane.columnIndex="1" />
+            <Label text="Element:" GridPane.columnIndex="2" />
+            <Label text="Value:" GridPane.columnIndex="3" />
+            <ChoiceBox fx:id="choicesModel" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="choicesSimulation" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="choicesElement" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="choicesValue" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <TextField fx:id="inputModelFilter" promptText="Filter models..." GridPane.rowIndex="1" />
+            <TextField fx:id="inputSimulationFilter" promptText="Filter simulations..." GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <TextField fx:id="inputElementFilter" promptText="Filter elements..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <TextField fx:id="inputValueFilter" promptText="Filter values..." GridPane.columnIndex="3" GridPane.rowIndex="1" />
+            <Button fx:id="buttonClearFilter" mnemonicParsing="false" text="Clear" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+            <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="4" GridPane.rowIndex="2">
                <children>
                   <Button fx:id="buttonAddSelected" mnemonicParsing="false" text="Add" />
                   <CheckBox fx:id="checkboxAutoAddSelected" mnemonicParsing="false" text="Auto add following results for this selection" />
@@ -29,6 +32,7 @@
             </HBox>
          </children>
          <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
