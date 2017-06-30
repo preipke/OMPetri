@@ -33,7 +33,6 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  *
@@ -51,8 +50,6 @@ public class MouseEventHandler {
     @Autowired private ToolsController editorToolsController;
 
     @Autowired private Calculator calculator;
-    
-    @Value("${timing.doubleclick.delay}") private double doubleClickDelay;
 
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
@@ -62,15 +59,13 @@ public class MouseEventHandler {
     private final BooleanProperty isInFreeMode = new SimpleBooleanProperty(true);
 
     private final Rectangle selectionFrame;
-    private PauseTransition pauseTransition;
+    private final PauseTransition pauseTransition = new PauseTransition(Duration.seconds(0.35));
 
-    private boolean isInitialized = false;
     private boolean isPrimaryButtonDown = false;
 
-    private MouseEvent mouseEventMovedLatest;
-    private MouseEvent mouseEventMovedPrevious;
-    private MouseEvent mouseEventPressed;
-    private MouseEvent mouseEventPressedPrevious;
+    private MouseEvent eventMouseMoved;
+    private MouseEvent eventMouseMovedPrevious;
+    private MouseEvent eventMousePressed;
 
     private IGraphArc arcTemp;
     
@@ -98,14 +93,7 @@ public class MouseEventHandler {
 
     private void onMouseMoved(MouseEvent event, GraphPane pane) {
 
-        mouseEventMovedLatest = event;
-
-        if (!isInitialized) {
-            mouseEventPressed = event; // to avoid null-pointer on dragged
-            mouseEventPressedPrevious = event;
-            pauseTransition = new PauseTransition(Duration.seconds(doubleClickDelay));
-            isInitialized = true;
-        }
+        eventMouseMoved = event;
 
         if (!isPrimaryButtonDown) {
             if (event.getTarget() instanceof IGravisElement) {
@@ -116,130 +104,15 @@ public class MouseEventHandler {
         }
     }
 
-    private void onMouseDragged(MouseEvent event, GraphPane pane) {
-
-        mouseEventPressed.consume(); // for PauseTransition
-        mouseEventPressedPrevious.consume();
-        mouseEventMovedLatest = event;
-
-        if (event.isPrimaryButtonDown()) {
-
-            if (isInSelectionFrameMode.get()) {
-
-                /**
-                 * Selection Frame Mode. Resizes the selection rectangle.
-                 */
-                Point2D pos_t0
-                        = calculator.getCorrectedMousePosition(
-                                dataService.getGraph(),
-                                mouseEventPressed.getX(),
-                                mouseEventPressed.getY());
-                Point2D pos_t1
-                        = calculator.getCorrectedMousePosition(
-                                dataService.getGraph(),
-                                mouseEventMovedLatest.getX(),
-                                mouseEventMovedLatest.getY());
-
-                double offsetX = pos_t1.getX() - pos_t0.getX();
-                double offsetY = pos_t1.getY() - pos_t0.getY();
-
-                if (offsetX > 0) {
-                    selectionFrame.setWidth(offsetX);
-                } else {
-                    selectionFrame.setX(pos_t1.getX());
-                    selectionFrame.setWidth(pos_t0.getX() - selectionFrame.getX());
-                }
-
-                if (offsetY > 0) {
-                    selectionFrame.setHeight(offsetY);
-                } else {
-                    selectionFrame.setY(pos_t1.getY());
-                    selectionFrame.setHeight(pos_t0.getY() - selectionFrame.getY());
-                }
-
-            } else if (isInArcCreationMode.get()) {
-
-                /**
-                 * Arc Creation Mode. Binds arc end (target) to mouse pointer.
-                 */
-                Point2D correctedMousePos
-                        = calculator.getCorrectedMousePosition(
-                                dataService.getGraph(),
-                                event.getX(),
-                                event.getY());
-
-                arcTemp.endXProperty().set(correctedMousePos.getX());
-                arcTemp.endYProperty().set(correctedMousePos.getY());
-
-            } else if (!isInNodeCreationMode.get()) {
-
-                /**
-                 * Dragging Mode. Drags selected node(s).
-                 */
-                try {
-                    setEditorMode(isInDraggingMode);
-                    mainController.HideElementPanel();
-                } catch (Exception ex) {
-                    messengerService.addException("Cannot switch to node dragging mode!", ex);
-                }
-
-                Object eventTarget = event.getTarget();
-
-                if (eventTarget instanceof IGravisChild) {
-                    eventTarget = ((IGravisChild) eventTarget).getParentShape();
-                }
-
-                if (eventTarget instanceof IGraphNode) {
-                    
-                    Point2D elemPos, mousePos;
-                    double translateX, translateY;
-                    
-                    mousePos = calculator.getCorrectedMousePosition(
-                                    dataService.getGraph(),
-                                    mouseEventMovedLatest.getX(),
-                                    mouseEventMovedLatest.getY());
-                    
-                    for (IGraphElement element : selectionService.getSelectedElements()) {
-                        
-                        translateX = mousePos.getX() - element.translateXProperty().get();
-                        translateY = mousePos.getY() - element.translateYProperty().get();
-
-                        elemPos = new Point2D(
-                                element.translateXProperty().get() - element.getCenterOffsetX() + translateX,
-                                element.translateYProperty().get() - element.getCenterOffsetY() + translateY
-                        );
-
-                        if (dataService.isGridEnabled()) {
-                            elemPos = calculator.getPositionInGrid(elemPos, dataService.getGraph().getScale());
-                        }
-                        
-                        element.translateXProperty().set(elemPos.getX());
-                        element.translateYProperty().set(elemPos.getY());
-                    }
-                }
-            }
-        } else if (event.isSecondaryButtonDown()) {
-
-            /**
-             * Dragging the entire graph.
-             */
-            pane.getGraph().setTranslateX((mouseEventMovedLatest.getX() - mouseEventMovedPrevious.getX() + pane.getGraph().translateXProperty().get()));
-            pane.getGraph().setTranslateY((mouseEventMovedLatest.getY() - mouseEventMovedPrevious.getY() + pane.getGraph().translateYProperty().get()));
-        }
-
-        mouseEventMovedPrevious = event;
-    }
-
     private void onMousePressed(final MouseEvent event, GraphPane pane) {
-
-        mainController.HideElementPanel();
-
+        
         isPrimaryButtonDown = false;
-
-        mouseEventMovedPrevious = event; // used for dragging to avoid initial null pointer
-        mouseEventPressed.consume(); // avoids multiple pause transitions
-        mouseEventPressedPrevious = mouseEventPressed;
-        mouseEventPressed = event;
+        
+        eventMouseMovedPrevious = event; // used for dragging to avoid initial null pointer
+        if (eventMousePressed != null) {
+            eventMousePressed.consume(); // avoids multiple pause transitions
+        }
+        eventMousePressed = event;
 
         /**
          * Left clicking.
@@ -253,7 +126,7 @@ public class MouseEventHandler {
              */
             if (event.getTarget() instanceof IGravisElement) {
 
-                disableMode(isInNodeCreationMode);
+                UnlockEditorMode();
 
                 IGravisElement element;
                 final IGraphNode node;
@@ -284,36 +157,33 @@ public class MouseEventHandler {
                         }
                     }
 
-                    if (isInFreeMode.get()) {
-                        
-                        /**
-                         * Double click.
-                         */
-                        if (event.getClickCount() == 2) {
-                            if (node instanceof GraphCluster) {
-                                hierarchyService.open((GraphCluster) node);
-                                return;
+                    /**
+                     * Double click.
+                     */
+                    if (event.getClickCount() == 2) {
+                        if (node instanceof GraphCluster) {
+                            hierarchyService.open((GraphCluster) node);
+                            return;
+                        }
+                    }
+
+                    /**
+                     * Arc Creation Mode. Creates a new arc after a certain time
+                     * if event is not consumed.
+                     */
+                    pauseTransition.setOnFinished(e -> {
+                        if (!event.isConsumed()) {
+                            try {
+                                selectionService.unselectAll();
+                                selectionService.highlight(node);
+                                arcTemp = dataService.createConnectionTmp(node);
+                                setEditorMode(isInArcCreationMode);
+                            } catch (Exception ex) {
+                                messengerService.addException("Cannot switch to arc creation mode!", ex);
                             }
                         }
-
-                        /**
-                         * Arc Creation Mode. Creates a new arc after a certain
-                         * time if event is not consumed.
-                         */
-                        pauseTransition.setOnFinished(e -> {
-                            if (!event.isConsumed()) {
-                                try {
-                                    selectionService.unselectAll();
-                                    selectionService.highlight(node);
-                                    arcTemp = dataService.createConnectionTmp(node);
-                                    setEditorMode(isInArcCreationMode);
-                                } catch (Exception ex) {
-                                    messengerService.addException("Cannot switch to arc creation mode!", ex);
-                                }
-                            }
-                        });
-                        pauseTransition.playFromStart();
-                    }
+                    });
+                    pauseTransition.playFromStart();
                 }
 
             } else {
@@ -321,51 +191,153 @@ public class MouseEventHandler {
                 /**
                  * Clicking the pane.
                  */
-
                 if (!event.isControlDown()) {
                     selectionService.unselectAll(); // Clearing current selection.
+                }
+            }
+            
+        } else {
+            UnlockEditorMode();
+        }
+    }
+
+    private void onMouseDragged(MouseEvent event, GraphPane pane) {
+
+        eventMousePressed.consume(); // for PauseTransition
+        eventMouseMoved = event;
+
+        if (event.isPrimaryButtonDown()) {
+
+            if (isInSelectionFrameMode.get()) {
+
+                /**
+                 * Selection Frame Mode. Resizes the selection rectangle.
+                 */
+                Point2D pos_t0
+                        = calculator.getCorrectedPosition(
+                                dataService.getGraph(),
+                                eventMousePressed.getX(),
+                                eventMousePressed.getY());
+                Point2D pos_t1
+                        = calculator.getCorrectedPosition(
+                                dataService.getGraph(),
+                                eventMouseMoved.getX(),
+                                eventMouseMoved.getY());
+
+                double offsetX = pos_t1.getX() - pos_t0.getX();
+                double offsetY = pos_t1.getY() - pos_t0.getY();
+
+                if (offsetX > 0) {
+                    selectionFrame.setWidth(offsetX);
                 } else {
-                    mainController.HideElementPanel();
+                    selectionFrame.setX(pos_t1.getX());
+                    selectionFrame.setWidth(pos_t0.getX() - selectionFrame.getX());
+                }
+
+                if (offsetY > 0) {
+                    selectionFrame.setHeight(offsetY);
+                } else {
+                    selectionFrame.setY(pos_t1.getY());
+                    selectionFrame.setHeight(pos_t0.getY() - selectionFrame.getY());
+                }
+
+            } else if (isInArcCreationMode.get()) {
+
+                /**
+                 * Arc Creation Mode. Binds arc end (target) to mouse pointer.
+                 */
+                Point2D correctedMousePos
+                        = calculator.getCorrectedPosition(
+                                dataService.getGraph(),
+                                event.getX(),
+                                event.getY());
+
+                arcTemp.endXProperty().set(correctedMousePos.getX());
+                arcTemp.endYProperty().set(correctedMousePos.getY());
+
+            } else if (isInDraggingMode.get()) {
+
+                /**
+                 * Dragging Mode. Drags selected node(s).
+                 */
+
+                Object eventTarget = event.getTarget();
+
+                if (eventTarget instanceof IGravisChild) {
+                    eventTarget = ((IGravisChild) eventTarget).getParentShape();
+                }
+
+                if (eventTarget instanceof IGraphNode) {
+                    
+                    Point2D pos_t0, pos_t1;
+
+                    pos_t0 = calculator.getCorrectedPosition(dataService.getGraph(), eventMouseMovedPrevious.getX(), eventMouseMovedPrevious.getY());
+                    pos_t1 = calculator.getCorrectedPosition(dataService.getGraph(), eventMouseMoved.getX(), eventMouseMoved.getY());
+
+                    for (IGraphElement element : selectionService.getSelectedElements()) {
+                        element.translateXProperty().set(element.translateXProperty().get() + pos_t1.getX() - pos_t0.getX());
+                        element.translateYProperty().set(element.translateYProperty().get() + pos_t1.getY() - pos_t0.getY());
+                    }
                 }
                 
-                if (isInNodeCreationMode.get()) {
+            } else {
+                
 
-                    // Creating node at event location.
+                Object eventTarget = event.getTarget();
+
+                if (eventTarget instanceof IGravisChild) {
+                    eventTarget = ((IGravisChild) eventTarget).getParentShape();
+                }
+
+                if ((eventTarget instanceof IGraphNode)) {
+
+                    /**
+                     * Dragging Mode. Activate node dragging.
+                     */
                     try {
-                        dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
-                    } catch (DataServiceException ex) {
-                        messengerService.addException("Cannot create node!", ex);
+                        UnlockEditorMode();
+                        setEditorMode(isInDraggingMode);
+                    } catch (Exception ex) {
+                        messengerService.addException("Cannot switch to node dragging mode!", ex);
                     }
-                } else {
 
-                    disableMode(isInNodeCreationMode);
+                } else {
 
                     /**
                      * Selection Frame Mode. Creating the rectangle.
                      */
                     try {
+                        UnlockEditorMode();
                         setEditorMode(isInSelectionFrameMode);
                     } catch (Exception ex) {
                         messengerService.addException("Cannot switch to selection frame mode!", ex);
+                        return;
                     }
 
-                    Point2D pos = calculator.getCorrectedMousePosition(
+                    Point2D pos = calculator.getCorrectedPosition(
                             dataService.getGraph(),
-                            mouseEventPressed.getX(), 
-                            mouseEventPressed.getY());
-                    if (dataService.isGridEnabled()) {
-                        pos = calculator.getPositionInGrid(pos, dataService.getGraph().getScale());
-                    }
+                            eventMousePressed.getX(),
+                            eventMousePressed.getY());
+
                     selectionFrame.setX(pos.getX());
                     selectionFrame.setY(pos.getY());
                     selectionFrame.setWidth(0);
                     selectionFrame.setHeight(0);
 
                     pane.getGraph().getChildren().add(selectionFrame);
-
                 }
             }
+            
+        } else if (event.isSecondaryButtonDown()) {
+
+            /**
+             * Dragging the entire graph.
+             */
+            pane.getGraph().setTranslateX((eventMouseMoved.getX() - eventMouseMovedPrevious.getX() + pane.getGraph().translateXProperty().get()));
+            pane.getGraph().setTranslateY((eventMouseMoved.getY() - eventMouseMovedPrevious.getY() + pane.getGraph().translateYProperty().get()));
         }
+
+        eventMouseMovedPrevious = event;
     }
 
     private void onMouseReleased(MouseEvent event, GraphPane pane) {
@@ -385,6 +357,7 @@ public class MouseEventHandler {
                 }
             }
             pane.getGraph().getChildren().remove(selectionFrame);
+            
             disableMode(isInSelectionFrameMode);
 
         } else if (isInArcCreationMode.get()) {
@@ -415,9 +388,42 @@ public class MouseEventHandler {
 
             disableMode(isInArcCreationMode);
 
+        } else if (isInNodeCreationMode.get()) {
+
+            /**
+             * Node Creation Mode. Create node at target location.
+             */
+            if (isPrimaryButtonDown) {
+                try {
+                    dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
+                } catch (DataServiceException ex) {
+                    messengerService.addException("Cannot create node!", ex);
+                }
+            }
+            
+        } else if (isInDraggingMode.get()) {
+            
+            /**
+             * Dragging Mode. Align dragged nodes to grid if enabled.
+             */
+            if (dataService.isGridEnabled()) {
+                
+                Point2D pos;
+                for (IGraphElement elem : selectionService.getSelectedElements()) {
+
+                    pos = new Point2D(elem.translateXProperty().get(), elem.translateYProperty().get());
+                    pos = calculator.getPositionInGrid(pos, dataService.getGraph());
+
+                    elem.translateXProperty().set(pos.getX());
+                    elem.translateYProperty().set(pos.getY());
+                }
+            }
+            
+            disableMode(isInDraggingMode);
+            
         } else {
 
-            if (isPrimaryButtonDown && !isInDraggingMode.get()) {
+            if (isPrimaryButtonDown) {
 
                 /**
                  * Selecting elements by clicking.
@@ -456,23 +462,22 @@ public class MouseEventHandler {
 
     private void onMouseClicked(MouseEvent event) {
 
-        mouseEventPressed.consume();
+        eventMousePressed.consume();
         event.consume();
 
         isPrimaryButtonDown = false;
-        disableMode(isInDraggingMode);
     }
 
     public MouseEvent getMouseMovedEventLatest() {
-        return mouseEventMovedLatest;
+        return eventMouseMoved;
     }
 
     public MouseEvent geMouseMovedEventPrevious() {
-        return mouseEventMovedPrevious;
+        return eventMouseMovedPrevious;
     }
 
     public MouseEvent getMousePressedEvent() {
-        return mouseEventPressed;
+        return eventMousePressed;
     }
 
     /**

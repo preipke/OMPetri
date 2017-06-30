@@ -196,7 +196,7 @@ public class HierarchyService
 
         Point2D pos = calculator.getCenterN(nodes);
         if (dataService.isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, dataService.getGraph().getScale());
+            pos = calculator.getPositionInGrid(pos, dataService.getGraph());
         }
         cluster.setTranslateX(pos.getX());
         cluster.setTranslateY(pos.getY());
@@ -260,7 +260,7 @@ public class HierarchyService
          */
         Point2D pos = calculator.getCenter(graphChild.getNodes());
         if (dataService.isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, dataService.getGraph().getScale());
+            pos = calculator.getPositionInGrid(pos, dataService.getGraph());
         }
         double translateX = cluster.getShape().getTranslateX() - pos.getX();
         double translateY = cluster.getShape().getTranslateY() - pos.getY();

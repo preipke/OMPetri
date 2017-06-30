@@ -6,13 +6,13 @@
 package edu.unibi.agbi.gnius.util;
 
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import java.util.Collection;
 import javafx.geometry.Point2D;
-import javafx.scene.transform.Scale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,31 +25,31 @@ public class Calculator
 {
     @Autowired private MouseEventHandler mouseEventHandler;
 
-    private final int gridSize = 10;
+    private final double gridSize = 10;
     
-    public Point2D getPositionInGrid(Point2D point, Scale scale) {
+    public Point2D getPositionInGrid(Point2D pos, Graph graph) {
         
-        double x, y;
+        double posFinalX, posFinalY, marginX, marginY;
         
-        x = point.getX() * scale.getX();
-        y = point.getY() * scale.getY();
+        posFinalX = pos.getX();
+        posFinalY = pos.getY();
         
-        if (x % gridSize / gridSize > 0.5) {
-            x = x - x % gridSize + gridSize;
+        marginX = posFinalX % gridSize;
+        marginY = posFinalY % gridSize;
+        
+        if (marginX / gridSize > 0.5) {
+            posFinalX = posFinalX - marginX + gridSize;
         } else {
-            x = x - x % gridSize;
+            posFinalX = posFinalX - marginX;
+        }
+
+        if (marginY / gridSize > 0.5) {
+            posFinalY = posFinalY - marginY + gridSize;
+        } else {
+            posFinalY = posFinalY - marginY;
         }
         
-        if (y % gridSize / gridSize > 0.5) {
-            y = y - y % gridSize + gridSize;
-        } else {
-            y = y - y % gridSize;
-        }
-        
-        x = x / scale.getX();
-        y = y / scale.getY();
-        
-        return new Point2D(x, y);
+        return new Point2D(posFinalX, posFinalY);
     }
 
     public Point2D getCenter(Collection<IGravisNode> nodes) {
@@ -74,7 +74,18 @@ public class Calculator
         return new Point2D(x, y);
     }
 
-    public Point2D getCorrectedMousePosition(Graph graph, double posX, double posY) {
+    public Point2D getCenterE(Collection<IGraphElement> elements) {
+        double x = 0, y = 0;
+        for (IGraphElement elem : elements) {
+            x += elem.translateXProperty().get();
+            y += elem.translateYProperty().get();
+        }
+        x = x / elements.size();
+        y = y / elements.size();
+        return new Point2D(x, y);
+    }
+
+    public Point2D getCorrectedPosition(Graph graph, double posX, double posY) {
         double x, y;
         x = (posX - graph.translateXProperty().get()) / graph.getScale().getX();
         y = (posY - graph.translateYProperty().get()) / graph.getScale().getY();
@@ -82,7 +93,7 @@ public class Calculator
     }
 
     public Point2D getCorrectedMousePositionLatest(Graph graph) {
-        return getCorrectedMousePosition(
+        return getCorrectedPosition(
                 graph,
                 mouseEventHandler.getMouseMovedEventLatest().getX(),
                 mouseEventHandler.getMouseMovedEventLatest().getY()

@@ -59,19 +59,20 @@ public class MainController implements Initializable
     @FXML private VBox elementFrame;
     @FXML private VBox parameterFrame;
     @FXML private Label statusTop;
-    
+
     @Value("${zoom.scale.base}") private double scaleBase;
     @Value("${zoom.scale.factor}") private double scaleFactor;
     @Value("${zoom.scale.max}") private double scaleMax;
     @Value("${zoom.scale.min}") private double scaleMin;
-    
+
     /**
-     * Applies an offset for a given zoom factor to a graph pane. 
-     * 
+     * Applies an offset in translation to keep the focus for a given zoom
+     * factor to a graph pane.
+     *
      * @param graphPane
      * @param zoomOffsetX
      * @param zoomOffsetY
-     * @param zoomFactor 
+     * @param zoomFactor
      */
     public void ApplyZoomOffset(GraphPane graphPane, double zoomOffsetX, double zoomOffsetY, double zoomFactor) {
 
@@ -94,7 +95,7 @@ public class MainController implements Initializable
     public Stage getStage() {
         return (Stage) elementFrame.getScene().getWindow();
     }
-    
+
     public Label getStatusTop() {
         return statusTop;
     }
@@ -178,32 +179,32 @@ public class MainController implements Initializable
         modelController.setDao(dataDao);
         hierarchyController.setDao(dataDao);
     }
-    
+
     @FXML
     public void CenterNodes() {
 
-        Point2D centerTarget;
+        Point2D center;
         double scaleTarget, scaleCurrent, adjustedOffsetX, adjustedOffsetY;
-        
+
         tabsController.getGraphPane().getGraph().setTranslateX(0);
         tabsController.getGraphPane().getGraph().setTranslateY(0);
-        
-        centerTarget = calculator.getCenter(dataService.getGraph().getNodes());
+
+        center = calculator.getCenter(dataService.getGraph().getNodes());
         if (dataService.isGridEnabled()) {
-            centerTarget = calculator.getPositionInGrid(centerTarget, dataService.getGraph().getScale());
+            center = calculator.getPositionInGrid(center, dataService.getGraph());
         }
-        
-        adjustedOffsetX = centerTarget.getX() - (tabsController.getGraphPane().getWidth() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
-        adjustedOffsetY = centerTarget.getY() - (tabsController.getGraphPane().getHeight() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
-        
+
+        adjustedOffsetX = center.getX() - (tabsController.getGraphPane().getWidth() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
+        adjustedOffsetY = center.getY() - (tabsController.getGraphPane().getHeight() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
+
         dataService.getGraph().getNodes().forEach(node -> {
             node.translateXProperty().set(node.translateXProperty().get() - adjustedOffsetX);
             node.translateYProperty().set(node.translateYProperty().get() - adjustedOffsetY);
         });
-        
+
         scaleTarget = calculator.getOptimalScale(tabsController.getGraphPane());
         scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
-        
+
         if (scaleTarget > scaleCurrent) {
             while (scaleCurrent < scaleMax && scaleCurrent < scaleTarget) {
                 ZoomIn();
@@ -216,47 +217,47 @@ public class MainController implements Initializable
             }
         }
     }
-    
+
     @FXML
     public void ZoomIn() {
-        
+
         double scale_t0 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
         double scale_t1 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() + 1);
-        
+
         if (scale_t1 > scaleMax) {
             return;
         }
         dataService.getDao().setScalePower(dataService.getDao().getScalePower() + 1);
-        
+
         tabsController.getGraphPane().getGraph().getScale().setX(scale_t1);
         tabsController.getGraphPane().getGraph().getScale().setY(scale_t1);
-        
+
         ApplyZoomOffset(
-                tabsController.getGraphPane(), 
-                tabsController.getGraphPane().getWidth() / 2, 
-                tabsController.getGraphPane().getHeight()/ 2, 
+                tabsController.getGraphPane(),
+                tabsController.getGraphPane().getWidth() / 2,
+                tabsController.getGraphPane().getHeight() / 2,
                 scale_t1 / scale_t0
         );
     }
-    
+
     @FXML
     public void ZoomOut() {
-        
+
         double scale_t0 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
         double scale_t1 = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() - 1);
-        
+
         if (scale_t1 < scaleMin) {
             return;
         }
         dataService.getDao().setScalePower(dataService.getDao().getScalePower() - 1);
-        
+
         tabsController.getGraphPane().getGraph().getScale().setX(scale_t1);
         tabsController.getGraphPane().getGraph().getScale().setY(scale_t1);
-        
+
         ApplyZoomOffset(
-                tabsController.getGraphPane(), 
-                tabsController.getGraphPane().getWidth() / 2, 
-                tabsController.getGraphPane().getHeight()/ 2, 
+                tabsController.getGraphPane(),
+                tabsController.getGraphPane().getWidth() / 2,
+                tabsController.getGraphPane().getHeight() / 2,
                 scale_t1 / scale_t0
         );
     }

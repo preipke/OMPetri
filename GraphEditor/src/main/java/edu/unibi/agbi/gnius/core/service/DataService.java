@@ -265,9 +265,9 @@ public class DataService
             default:
                 throw new DataServiceException("Cannot create element of undefined type!");
         }
-        Point2D pos = calculator.getCorrectedMousePosition(dataDao.getGraph(), posX, posY);
+        Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
         if (isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, getGraph().getScale());
+            pos = calculator.getPositionInGrid(pos, getGraph());
         }
         shape.translateXProperty().set(pos.getX() - shape.getCenterOffsetX());
         shape.translateYProperty().set(pos.getY() - shape.getCenterOffsetY());
@@ -431,13 +431,8 @@ public class DataService
         List<IGraphNode> shapes = new ArrayList();
         IGraphNode shape;
 
-        Point2D center = calculator.getCenterN(nodes);
-        Point2D position = calculator.getCorrectedMousePositionLatest(dataDao.getGraph());
-        
-        if (isGridEnabled()) {
-            center = calculator.getPositionInGrid(center, getGraph().getScale());
-            position = calculator.getPositionInGrid(position, getGraph().getScale());
-        }
+        Point2D posCenter = calculator.getCenterN(nodes);
+        Point2D posMouse = calculator.getCorrectedMousePositionLatest(dataDao.getGraph());
 
         for (int i = 0; i < nodes.size(); i++) {
 
@@ -452,11 +447,25 @@ public class DataService
                 add(shape);
             }
 
-            shape.translateXProperty().set(nodes.get(i).translateXProperty().get() - center.getX() + position.getX() - shape.getCenterOffsetX());
-            shape.translateYProperty().set(nodes.get(i).translateYProperty().get() - center.getY() + position.getY() - shape.getCenterOffsetY());
+            shape.translateXProperty().set(nodes.get(i).translateXProperty().get() - posCenter.getX() + posMouse.getX() - shape.getCenterOffsetX());
+            shape.translateYProperty().set(nodes.get(i).translateYProperty().get() - posCenter.getY() + posMouse.getY() - shape.getCenterOffsetY());
 
             shapes.add(shape);
         }
+        
+        if (isGridEnabled()) {
+
+            Point2D pos;
+            for (IGraphNode node : shapes) {
+                
+                pos = new Point2D(node.translateXProperty().get(), node.translateYProperty().get());
+                pos = calculator.getPositionInGrid(pos, getGraph());
+                
+                node.translateXProperty().set(pos.getX());
+                node.translateYProperty().set(pos.getY());
+            }
+        }
+        
         dataDao.setHasChanges(true);
         return shapes;
     }
