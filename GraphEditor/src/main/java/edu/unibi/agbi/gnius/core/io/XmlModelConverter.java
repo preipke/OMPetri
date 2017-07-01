@@ -20,7 +20,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCurve;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
@@ -83,7 +82,6 @@ public class XmlModelConverter
     private final String attrCurrentNodeId = "currentNodeId";
     private final String attrCurrentPlaceId = "currentPlaceId";
     private final String attrCurrentTransitionId = "currentTransitionId";
-    private final String attrCurved = "curved";
     private final String attrCreationDateTime = "creationDateTime";
     private final String attrDataId = "dataId";
     private final String attrDescription = "description";
@@ -528,16 +526,13 @@ public class XmlModelConverter
 
                     source = nodes.get(elem.getAttribute(attrSource));
                     target = nodes.get(elem.getAttribute(attrTarget));
+                    
                     data = (DataArc) model.getElement(elem.getAttribute(attrDataId));
                     if (data == null) {
                         data = new DataClusterArc(elem.getAttribute(attrDataId), source.getDataElement(), target.getDataElement());
                     }
 
-                    if (Boolean.parseBoolean(elem.getAttribute(attrCurved))) {
-                        arc = new GraphCurve(elem.getAttribute(attrId), source, target, data);
-                    } else {
-                        arc = new GraphEdge(elem.getAttribute(attrId), source, target, data);
-                    }
+                    arc = new GraphEdge(elem.getAttribute(attrId), source, target, data);
                     arc.getDataElement().getShapes().add(arc);
                     dataService.styleElement(arc);
                     arcs.add(arc);
@@ -905,11 +900,6 @@ public class XmlModelConverter
                 sa.setAttribute(attrDataId, ((IGraphArc) storedArc).getDataElement().getId());
                 sa.setAttribute(attrSource, String.valueOf(storedArc.getSource().getId()));
                 sa.setAttribute(attrTarget, String.valueOf(storedArc.getTarget().getId()));
-                if (storedArc instanceof GraphCurve) {
-                    sa.setAttribute(attrCurved, "true");
-                } else {
-                    sa.setAttribute(attrCurved, "false");
-                }
                 
                 a.appendChild(sa);
             });
@@ -927,11 +917,6 @@ public class XmlModelConverter
             c.setAttribute(attrDataId, ((IGraphArc) connection).getDataElement().getId());
             c.setAttribute(attrSource, String.valueOf(connection.getSource().getId()));
             c.setAttribute(attrTarget, String.valueOf(connection.getTarget().getId()));
-            if (connection instanceof GraphCurve) {
-                c.setAttribute(attrCurved, "true");
-            } else {
-                c.setAttribute(attrCurved, "false");
-            }
             
             elements.appendChild(c);
         });

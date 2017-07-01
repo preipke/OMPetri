@@ -18,7 +18,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCurve;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
@@ -34,8 +33,6 @@ import edu.unibi.agbi.petrinet.model.Weight;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -108,9 +105,6 @@ public class DataService
      * @throws DataServiceException
      */
     public synchronized IGraphArc add(IGraphArc arc) throws DataServiceException {
-        
-        ValidateArcShape(arc);
-
         if (arc.getDataElement() != null) {
             if (arc.getDataElement().getElementType() == Element.Type.ARC) {
                 if (dataDao.getModel().containsAndNotEqual(arc.getDataElement())) {
@@ -301,11 +295,7 @@ public class DataService
          * Creating shape.
          */
         id = getConnectionId(source, target);
-        if (source.getParents().contains(target) && target.getChildren().contains(source)) {
-            return new GraphCurve(id, source, target, dataArc);
-        } else {
-            return new GraphEdge(id, source, target, dataArc);
-        }
+        return new GraphEdge(id, source, target, dataArc);
     }
 
     /**
@@ -545,58 +535,6 @@ public class DataService
     }
 
     /**
-     * Converts the reverse arc for an arc. Converts the arcs for one-way or
-     * two-way connected nodes to straight or curved arcs, respectively.
-     *
-     * @param arc
-     * @throws DataServiceException
-     */
-    public synchronized void ValidateArcShape(IGraphArc arc) throws DataServiceException {
-
-        IGraphNode source = arc.getSource();
-        IGraphNode target = arc.getTarget();
-
-        // Find and convert double linked arc
-        if (target.getChildren().contains(source)) {
-
-            IGraphArc arcReverse = null;
-
-            for (int i = 0; i < target.getConnections().size(); i++) {
-                if (target.getConnections().get(i).getTarget().equals(source)) {
-                    arcReverse = (IGraphArc) target.getConnections().get(i);
-                    break;
-                }
-            }
-
-            if (arcReverse == null) {
-                throw new DataServiceException("Data integrity breached! Reversely connecting arc was not found!");
-            }
-
-            // Temporarily remove parameters to allow conversion without failing validation
-            Set<String> paramsTmp = new TreeSet();
-            for (String key : arcReverse.getDataElement().getRelatedParameterIds()) {
-                paramsTmp.add(key);
-            }
-            arcReverse.getDataElement().getRelatedParameterIds().clear();
-
-            // Convert
-            remove(arcReverse);
-            String id = getConnectionId(target, source);
-            if (arcReverse instanceof GraphEdge) {
-                arcReverse = new GraphCurve(id, target, source, arcReverse.getDataElement());
-            } else {
-                arcReverse = new GraphEdge(id, target, source, arcReverse.getDataElement());
-            }
-            add(arcReverse);
-
-            // Restore parameters again
-            arcReverse.getDataElement().getRelatedParameterIds().addAll(paramsTmp);
-            
-            
-        }
-    }
-
-    /**
      * Removes an element. Also removes all related parameters.
      *
      * @param node
@@ -630,8 +568,6 @@ public class DataService
         if (arc.getTarget() == null) {
             return arc;
         }
-        
-        ValidateArcShape(arc);
         
         return arc;
     }

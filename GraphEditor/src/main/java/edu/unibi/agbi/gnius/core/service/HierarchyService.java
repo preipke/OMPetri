@@ -14,7 +14,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCurve;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
@@ -379,36 +378,8 @@ public class HierarchyService
         } else {
 
             dataForward = new DataClusterArc(idData, source.getDataElement(), target.getDataElement());
+            arcForward = new GraphEdge(idShape, source, target, dataForward);
 
-            // Check if reverse connection already exists. If so, any related cluster should store it.
-            existingArc = arcs.stream()
-                    .filter(a -> a.getSource().equals(target) && a.getTarget().equals(source))
-                    .findFirst();
-
-            if (!existingArc.isPresent()) {
-
-                arcForward = new GraphEdge(idShape, source, target, dataForward);
-
-            } else {
-
-                arcForward = new GraphCurve(idShape, source, target, dataForward);
-
-                // Convert the reverse connection from edge to curve.
-                arc = existingArc.get();
-                
-                dataBackwards = (DataClusterArc) arc.getDataElement();
-                arcBackwards = new GraphCurve(arc.getId(), target, source, dataBackwards);
-
-                dataBackwards.getShapes().clear();
-                dataBackwards.getShapes().add(arcBackwards);
-                dataBackwards.getStoredArcs().values().forEach(storedArc -> {
-                    storedArc.getDataElement().getShapes().clear();
-                    storedArc.getDataElement().getShapes().add(arcBackwards);
-                });
-
-                arcs.remove(existingArc.get());
-                arcs.add(arcBackwards);
-            }
             arcs.add(arcForward);
         }
         

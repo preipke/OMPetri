@@ -9,13 +9,13 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisEdge;
+import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisFlexEdge;
 
 /**
  *
  * @author PR
  */
-public class GraphEdge extends GravisEdge implements IGraphArc
+public class GraphEdge extends GravisFlexEdge implements IGraphArc
 {
     private final DataArc dataArc;
     

@@ -14,7 +14,7 @@ public class GravisProperties
     public static final double BASE_SIZE = 8.0d;
     public static final double BASE_INNER_DISTANCE = BASE_SIZE / 2.0d;
 
-    public static final double ARC_GAP = BASE_SIZE * 5.0d;
+    public static final double ARC_GAP = BASE_SIZE;
 
     public static final double ARROW_TARGET_DISTANCE = BASE_SIZE * 4.0d;
     public static final double ARROW_BASE = BASE_SIZE * 0.125d;
