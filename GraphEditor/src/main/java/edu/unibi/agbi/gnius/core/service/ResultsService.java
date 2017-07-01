@@ -9,7 +9,10 @@ import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +22,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableView;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,6 +35,14 @@ public class ResultsService
     private final ResultsDao resultsDao;
 
     @Autowired private MessengerService messengerService;
+    
+    @Value("${regex.value.fire}") private String valueChoiceFire;
+    @Value("${regex.value.speed}") private String valueChoiceSpeed;
+    @Value("${regex.value.token}") private String valueChoiceToken;
+    @Value("${regex.value.tokenIn.actual}") private String valueChoiceTokenInActual;
+    @Value("${regex.value.tokenIn.total}") private String valueChoiceTokenInTotal;
+    @Value("${regex.value.tokenOut.actual}") private String valueChoiceTokenOutActual;
+    @Value("${regex.value.tokenOut.total}") private String valueChoiceTokenOutTotal;
 
     @Autowired
     public ResultsService(ResultsDao resultsDao) {
@@ -151,6 +163,144 @@ public class ResultsService
             throw new ResultsServiceException("No chart data available");
         }
     }
+    
+    public synchronized void addForAutoAdding(LineChart lineChart, SimulationData data) {
+        resultsDao.addForAutoAdding(lineChart, data);
+    }
+    
+    public synchronized boolean containsForAutoAdding(LineChart lineChart, SimulationData data) {
+        return resultsDao.containsForAutoAdding(lineChart, data);
+    }
+    
+    public synchronized void removeFromAutoAdding(LineChart lineChart, SimulationData data) {
+        resultsDao.removeFromAutoAdding(lineChart, data);
+    }
+    
+    public synchronized void UpdateAutoAddedData() throws ResultsServiceException {
+        for (LineChart lineChart : resultsDao.getLineChartsWithAutoAdding()) {
+            for (SimulationData data : resultsDao.getChartTable(lineChart).getItems()) {
+                updateSeries(data);
+            }
+            resultsDao.getChartTable(lineChart).refresh();
+        }
+    }
+    
+    public String getValueName(String value, Simulation simulation) {
+        if (value.matches(valueChoiceFire)) {
+            return "Firing";
+        } else if (value.matches(valueChoiceSpeed)) {
+            return "Speed";
+        } else if (value.matches(valueChoiceToken)) {
+            return "Token";
+        } else if (value.matches(valueChoiceTokenInActual)) {
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "Incoming from " + arc.getSource().toString() + " [ACTUAL]";
+        } else if (value.matches(valueChoiceTokenInTotal)) {
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "Incoming from " + arc.getSource().toString() + " [TOTAL]";
+        } else if (value.matches(valueChoiceTokenOutActual)) {
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "Outgoing to " + arc.getTarget().toString() + " [ACTUAL]";
+        } else if (value.matches(valueChoiceTokenOutTotal)) {
+            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
+            return "Outgoing to " + arc.getTarget().toString() + " [TOTAL]";
+        } else {
+            return null;
+        }
+    }
+    
+    public Map<String,List<String>> getSharedValues(Simulation simulation, List<IElement> elements) {
+        
+        Map<String,List<String>> valuesTmp, valuesShared = null;
+        
+        List<String> values, valuesRemoved;
+        String name;
+        
+        for (IElement element : elements) {
+            
+            values = simulation.getElementFilterReferences().get(element);
+            valuesTmp = new HashMap();
+            
+            for (String value : values) {
+                
+                name = getValueName(value, simulation);
+                
+                if (!valuesTmp.containsKey(name)) {
+                    valuesTmp.put(name, new ArrayList());
+                }
+                valuesTmp.get(name).add(value);
+            }
+            
+            if (valuesShared == null) {
+                
+                valuesShared = valuesTmp;
+                
+            } else {
+                
+                valuesRemoved = new ArrayList();
+                
+                for (String key : valuesShared.keySet()) {
+                    if (valuesTmp.containsKey(key)) {
+                        valuesShared.get(key).addAll(valuesTmp.get(key));
+                    } else {
+                        valuesRemoved.add(key);
+                    }
+                }
+                for (String key : valuesRemoved) {
+                    valuesShared.remove(key);
+                }
+            }
+        }
+        return valuesShared;
+    }
+    
+    private synchronized void AutoAddData(Simulation simulation) throws ResultsServiceException {
+
+        Map<String, Map<IElement, Set<String>>> modelsToAutoAdd;
+        Map<IElement, Set<String>> elementsToAutoAdd;
+        Set<String> valuesToAutoAdd;
+        SimulationData data;
+
+        // validate all active charts
+        for (LineChart lineChart : resultsDao.getLineChartsWithAutoAdding()) {
+
+            modelsToAutoAdd = resultsDao.getDataAutoAdd(lineChart);
+            
+            if (modelsToAutoAdd != null) {
+
+                elementsToAutoAdd = modelsToAutoAdd.get(simulation.getModelId());
+
+                if (elementsToAutoAdd != null) {
+                    
+                    // validate elements chosen for auto adding to be available
+                    for (IElement elem : elementsToAutoAdd.keySet()) {
+
+                        valuesToAutoAdd = elementsToAutoAdd.get(elem);
+
+                        if (valuesToAutoAdd != null) {
+
+                            // validate values chosen for auto adding to be available
+                            for (String valueToAutoAdd : valuesToAutoAdd) {
+
+                                if (simulation.getFilterElementReferences().containsKey(valueToAutoAdd)) {
+
+                                    // create and add data to chart
+                                    data = new SimulationData(simulation, elem, valueToAutoAdd);
+
+                                    try {
+                                        add(lineChart, data);
+                                    } catch (ResultsServiceException ex) {
+                                        System.out.println("Duplicate results entry");
+                                    }
+                                    show(lineChart, data);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Updates the series for the given data object. Loads data from the
@@ -205,75 +355,6 @@ public class ResultsService
                 }
             }
             data.setSeries(seriesNew);
-        }
-    }
-    
-    public synchronized void addForAutoAdding(LineChart lineChart, SimulationData data) {
-        resultsDao.addForAutoAdding(lineChart, data);
-    }
-    
-    public synchronized boolean containsForAutoAdding(LineChart lineChart, SimulationData data) {
-        return resultsDao.containsForAutoAdding(lineChart, data);
-    }
-    
-    public synchronized void removeFromAutoAdding(LineChart lineChart, SimulationData data) {
-        resultsDao.removeFromAutoAdding(lineChart, data);
-    }
-    
-    private synchronized void AutoAddData(Simulation simulation) throws ResultsServiceException {
-
-        Map<String, Map<IElement, Set<String>>> modelsToAutoAdd;
-        Map<IElement, Set<String>> elementsToAutoAdd;
-        Set<String> valuesToAutoAdd;
-        SimulationData data;
-
-        // validate all active charts
-        for (LineChart lineChart : resultsDao.getLineChartsWithAutoAdding()) {
-
-            modelsToAutoAdd = resultsDao.getDataAutoAdd(lineChart);
-            
-            if (modelsToAutoAdd != null) {
-
-                elementsToAutoAdd = modelsToAutoAdd.get(simulation.getModelId());
-
-                if (elementsToAutoAdd != null) {
-                    
-                    // validate elements chosen for auto adding to be available
-                    for (IElement elem : elementsToAutoAdd.keySet()) {
-
-                        valuesToAutoAdd = elementsToAutoAdd.get(elem);
-
-                        if (valuesToAutoAdd != null) {
-
-                            // validate values chosen for auto adding to be available
-                            for (String valueToAutoAdd : valuesToAutoAdd) {
-
-                                if (simulation.getFilterElementReferences().containsKey(valueToAutoAdd)) {
-
-                                    // create and add data to chart
-                                    data = new SimulationData(simulation, elem, valueToAutoAdd);
-
-                                    try {
-                                        add(lineChart, data);
-                                    } catch (ResultsServiceException ex) {
-                                        System.out.println("Duplicate results entry");
-                                    }
-                                    show(lineChart, data);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    public synchronized void UpdateAutoAddedData() throws ResultsServiceException {
-        for (LineChart lineChart : resultsDao.getLineChartsWithAutoAdding()) {
-            for (SimulationData data : resultsDao.getChartTable(lineChart).getItems()) {
-                updateSeries(data);
-            }
-            resultsDao.getChartTable(lineChart).refresh();
         }
     }
 }

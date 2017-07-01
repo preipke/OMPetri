@@ -89,7 +89,7 @@ public class ResultsController implements Initializable
     @FXML private Button buttonImportData;
     @FXML private Button buttonEnableAll;
     @FXML private Button buttonDisableAll;
-    @FXML private Button buttonClearAll;
+    @FXML private Button buttonDropAll;
     @FXML private Button buttonRefresh;
 
     @FXML private TableView<SimulationData> tableView;
@@ -117,14 +117,6 @@ public class ResultsController implements Initializable
     @Value("${results.linechart.default.title}") private String defaultTitle;
     @Value("${results.linechart.default.xlabel}") private String defaultXLabel;
     @Value("${results.linechart.default.ylabel}") private String defaultYLabel;
-    
-    @Value("${regex.value.fire}") private String valueChoiceFire;
-    @Value("${regex.value.speed}") private String valueChoiceSpeed;
-    @Value("${regex.value.token}") private String valueChoiceToken;
-    @Value("${regex.value.tokenIn.actual}") private String valueChoiceTokenInActual;
-    @Value("${regex.value.tokenIn.total}") private String valueChoiceTokenInTotal;
-    @Value("${regex.value.tokenOut.actual}") private String valueChoiceTokenOutActual;
-    @Value("${regex.value.tokenOut.total}") private String valueChoiceTokenOutTotal;
 
     private final FileChooser fileChooser;
     private Stage stage;
@@ -202,34 +194,6 @@ public class ResultsController implements Initializable
         }
 
         FilterChoices(choicesModel, inputModelFilter.getText());
-    }
-    
-    private String getModelChoice() {
-        return (String) choicesModel.getSelectionModel().getSelectedItem();
-    }
-    
-    private Simulation getSimulationChoice() {
-        if (choicesSimulation.getSelectionModel().getSelectedItem() != null) {
-            return (Simulation) choicesSimulation.getSelectionModel().getSelectedItem();
-        } else {
-            return null;
-        }
-    }
-    
-    private Choice getElementChoice() {
-        if (choicesElement.getSelectionModel().getSelectedItem() != null) {
-            return (Choice) choicesElement.getSelectionModel().getSelectedItem();
-        } else {
-            return null;
-        }
-    }
-    
-    private Choice getValueChoice() {
-        if (choicesValue.getSelectionModel().getSelectedItem() != null) {
-            return (Choice) choicesValue.getSelectionModel().getSelectedItem();
-        } else {
-            return null;
-        }
     }
 
     public synchronized void RefreshSimulationChoices() {
@@ -316,57 +280,6 @@ public class ResultsController implements Initializable
         }
         FilterChoices(choicesElement, inputElementFilter.getText());
     }
-    
-    private List<String> getValueChoices(Simulation simulation, IElement element) {
-        return simulation.getElementFilterReferences().get(element);
-    }
-    
-    private Map<String,List<String>> getSharedValueChoices(Simulation simulation, List<IElement> elements) {
-        
-        Map<String,List<String>> valuesTmp, valuesShared = null;
-        
-        List<String> values, valuesRemoved;
-        String name;
-        
-        for (IElement element : elements) {
-            
-            values = simulation.getElementFilterReferences().get(element);
-            valuesTmp = new HashMap();
-            
-            for (String value : values) {
-                
-                name = getValueName(value, simulation);
-                
-                if (!valuesTmp.containsKey(name)) {
-                    valuesTmp.put(name, new ArrayList());
-                }
-                valuesTmp.get(name).add(value);
-            }
-            
-            if (valuesShared == null) {
-                
-                valuesShared = valuesTmp;
-                
-            } else {
-                
-                valuesRemoved = new ArrayList();
-                
-                for (String key : valuesShared.keySet()) {
-                    if (valuesTmp.containsKey(key)) {
-                        valuesShared.get(key).addAll(valuesTmp.get(key));
-                    } else {
-                        valuesRemoved.add(key);
-                    }
-                }
-                
-                for (String key : valuesRemoved) {
-                    valuesShared.remove(key);
-                }
-            }
-        }
-        
-        return valuesShared;
-    }
 
     private synchronized void RefreshValueChoices() {
 
@@ -385,10 +298,10 @@ public class ResultsController implements Initializable
             
             if (elementChoice.getValues().size() == 1) {
 
-                List<String> values = getValueChoices(simulationChoice, (IElement) elementChoice.getValues().get(0));
-
+                List<String> values = simulationChoice.getElementFilterReferences().get((IElement) elementChoice.getValues().get(0));
+                
                 for (String value : values) {
-                    name = getValueName(value, simulationChoice);
+                    name = resultsService.getValueName(value, simulationChoice);
                     if (name == null) {
                         messengerService.addWarning("Unhandled value choice will not be available for displaying: '" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "'");
                         continue;
@@ -400,7 +313,7 @@ public class ResultsController implements Initializable
                 
             } else {
                 
-                Map<String,List<String>> valuesMap = getSharedValueChoices(simulationChoice, elementChoice.getValues());
+                Map<String,List<String>> valuesMap = resultsService.getSharedValues(simulationChoice, elementChoice.getValues());
                 
                 for (String key : valuesMap.keySet()) {
                     name = "<ALL> " + key;
@@ -428,6 +341,34 @@ public class ResultsController implements Initializable
             choicesValue.getSelectionModel().select(index);
         }
         FilterChoices(choicesValue, inputValueFilter.getText());
+    }
+    
+    private String getModelChoice() {
+        return (String) choicesModel.getSelectionModel().getSelectedItem();
+    }
+    
+    private Simulation getSimulationChoice() {
+        if (choicesSimulation.getSelectionModel().getSelectedItem() != null) {
+            return (Simulation) choicesSimulation.getSelectionModel().getSelectedItem();
+        } else {
+            return null;
+        }
+    }
+    
+    private Choice getElementChoice() {
+        if (choicesElement.getSelectionModel().getSelectedItem() != null) {
+            return (Choice) choicesElement.getSelectionModel().getSelectedItem();
+        } else {
+            return null;
+        }
+    }
+    
+    private Choice getValueChoice() {
+        if (choicesValue.getSelectionModel().getSelectedItem() != null) {
+            return (Choice) choicesValue.getSelectionModel().getSelectedItem();
+        } else {
+            return null;
+        }
     }
 
     private void addSelectedChoiceToChart() {
@@ -532,30 +473,6 @@ public class ResultsController implements Initializable
         choiceBox.setItems(choicesFiltered);
         if (selectedIndex != -1) {
             choiceBox.getSelectionModel().select(selectedIndex);
-        }
-    }
-    
-    private String getValueName(String value, Simulation simulation) {
-        if (value.matches(valueChoiceFire)) {
-            return "Firing";
-        } else if (value.matches(valueChoiceSpeed)) {
-            return "Speed";
-        } else if (value.matches(valueChoiceToken)) {
-            return "Token";
-        } else if (value.matches(valueChoiceTokenInActual)) {
-            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "Incoming from " + arc.getSource().toString() + " [ACTUAL]";
-        } else if (value.matches(valueChoiceTokenInTotal)) {
-            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "Incoming from " + arc.getSource().toString() + " [TOTAL]";
-        } else if (value.matches(valueChoiceTokenOutActual)) {
-            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "Outgoing to " + arc.getTarget().toString() + " [ACTUAL]";
-        } else if (value.matches(valueChoiceTokenOutTotal)) {
-            DataArc arc = (DataArc) simulation.getFilterElementReferences().get(value);
-            return "Outgoing to " + arc.getTarget().toString() + " [TOTAL]";
-        } else {
-            return null;
         }
     }
 
@@ -757,7 +674,7 @@ public class ResultsController implements Initializable
         
         buttonEnableAll.setOnAction(e -> EnableAllItems());
         buttonDisableAll.setOnAction(e -> DisableAllItems());
-        buttonClearAll.setOnAction(e -> ClearAllItems());
+        buttonDropAll.setOnAction(e -> ClearAllItems());
         buttonRefresh.setOnAction(e -> getTableView().refresh());
 
         /**
@@ -804,13 +721,12 @@ public class ResultsController implements Initializable
             cell.setTooltip(tooltip);
             return cell;
         });
-                
-                
+        
         columnDateTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDateTime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss"))));
         columnModel.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getModelName()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementId()));
         columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementName()));
-        columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getValueName(cellData.getValue().getVariable(), cellData.getValue().getSimulation())));
+        columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(resultsService.getValueName(cellData.getValue().getVariable(), cellData.getValue().getSimulation())));
         columnValueStart.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getStartValueString(cellData.getValue().getSeries().getData())));
         columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getEndValueString(cellData.getValue().getSeries().getData())));
         columnValueMin.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getMinValueString(cellData.getValue().getSeries().getData())));
