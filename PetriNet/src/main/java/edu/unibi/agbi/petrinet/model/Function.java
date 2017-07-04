@@ -6,26 +6,38 @@
 package edu.unibi.agbi.petrinet.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * An implementation used to represent mathematical functions.
- * The list design has been chosen to easily access and replace specific
- * elements within the function without having to make certain that any
- * similar element is replaced or changed.
+ * A class used to represent mathematical functions.
  * 
  * @author preipke
  */
 public class Function
 {
-    private final ArrayList<FunctionElement> functionElements;
-    private final HashSet<String> parameterIds;
+    private final ArrayList<Function> elements;
 
-    private String unit = "";
-
-    public Function() {
-        functionElements = new ArrayList();
-        parameterIds = new HashSet();
+    private final Type type;
+    private String value;
+    private String unit;
+    
+    public Function(Type type) {
+        this(null, type);
+    }
+    
+    public Function(String value, Type type) {
+        this.value = value;
+        this.type = type;
+        this.elements = new ArrayList();
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
+    }
+    
+    public String getValue() {
+        return value;
     }
 
     public void setUnit(String unit) {
@@ -36,30 +48,62 @@ public class Function
         return unit;
     }
     
-    /**
-     * Gets the list of elements that represents this function.
-     * 
-     * @return 
-     */
-    public ArrayList<FunctionElement> getElements() {
-        return functionElements;
+    public void addElement(Function element) {
+        elements.add(element);
+    }
+    
+    public void addElement(int index, Function element) {
+        elements.add(0, element);
+    }
+    
+    public Collection<Function> getElements() {
+        ArrayList<Function> elementsRecursive = new ArrayList();
+        for (Function elem : elements) {
+            if (elem.getType() == Type.FUNCTION) {
+                elementsRecursive.addAll(elem.getElements());
+            } else {
+                elementsRecursive.add(elem);
+            }
+        }
+        return elementsRecursive;
     }
 
     /**
-     * Gets the set of parameters used inside this function.
+     * Gets the set of parameters used within this function.
      *
      * @return
      */
     public HashSet<String> getParameterIds() {
+        HashSet<String> parameterIds = new HashSet();
+        for (Function elem : elements) {
+            if (elem.getType() == Type.FUNCTION) {
+                parameterIds.addAll(elem.getParameterIds());
+            } else if (elem.getType() == Type.PARAMETER) {
+                parameterIds.add(elem.getValue());
+            }
+        }
         return parameterIds;
     }
 
     @Override
     public String toString() {
         String function = "";
-        for (FunctionElement elem : functionElements) {
-            function = function + elem.get();
+        for (Function elem : elements) {
+            if (elem.getType() == Type.FUNCTION) {
+                function += elem.toString() + " ";
+            } else {
+                function += elem.getValue() + " ";
+            }
         }
-        return function;
+        return function.trim();
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public static enum Type
+    {
+        FUNCTION, NUMBER, OPERATOR, PARAMETER;
     }
 }

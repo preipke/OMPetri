@@ -75,6 +75,10 @@ public class Model
         transitions.clear();
     }
     
+    public boolean contains(Parameter param) {
+        return parameters.containsKey(param.getId());
+    }
+    
     public boolean contains(String nodeId) {
         return nodeIds.contains(nodeId);
     }

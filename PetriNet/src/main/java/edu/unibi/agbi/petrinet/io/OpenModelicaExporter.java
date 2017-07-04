@@ -12,7 +12,6 @@ import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.FunctionElement;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -24,6 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Properties;
 
 /**
@@ -102,12 +102,25 @@ public class OpenModelicaExporter
          * Places.
          */
         boolean isFirst, isInnerFirst;
-        String functionType, functionString, tokenType, tmp1, tmp2, tmp3;
+        String functionType, tokenType, tmp1, tmp2, tmp3;
         Function function;
         Token token;
         Weight weight;
+        
+        Place place;
+        Iterator<Place> itPlaces
+                = places.stream()
+                        .sorted((p1, p2) -> p1.getId().toLowerCase().compareTo(p2.getId().toLowerCase()))
+                        .iterator();
 
-        for (Place place : places) {
+        Transition transition;
+        Iterator<Transition> itTransitions
+                = transitions.stream()
+                        .sorted((p1, p2) -> p1.getId().toLowerCase().compareTo(p2.getId().toLowerCase()))
+                        .iterator();
+
+        while (itPlaces.hasNext()) {
+            place = itPlaces.next();
 
             tmp1 = "";
             tmp2 = "";
@@ -212,7 +225,8 @@ public class OpenModelicaExporter
         /**
          * Transitions.
          */
-        for (Transition transition : transitions) {
+        while (itTransitions.hasNext()) {
+            transition = itTransitions.next();
 
             writer.append(INDENT);
             switch (transition.getTransitionType()) {
@@ -255,21 +269,12 @@ public class OpenModelicaExporter
             writer.append(",nOut=" + transition.getArcsOut().size());
             writer.append("," + functionType);
 
+            // Function and parameters
             function = transition.getFunction();
-            if (!function.getUnit().isEmpty()) {
+            if (function.getUnit() != null) {
                 writer.append("(final unit=\"" + function.getUnit() + "\")");
             }
-
-            // Function and parameters
-            functionString = "";
-            for (FunctionElement element : function.getElements()) {
-                if (element.getType() == FunctionElement.Type.PARAMETER) {
-                    functionString += model.getParameter(element.get()).getValue();
-                } else {
-                    functionString += element.get();
-                }
-            }
-            writer.append("=" + functionString);
+            writer.append("=" + getFunctionString(model, transition, function));
 
             /**
              * Weights, incoming
@@ -461,6 +466,36 @@ public class OpenModelicaExporter
         writer.close();
 
         return file;
+    }
+    
+    /**
+     * Gets the string representing a transition's function. In creation, local
+     * parameters will be prioritized over global parameters.
+     * 
+     * @param model
+     * @param function
+     * @return 
+     */
+    private String getFunctionString(Model model, Transition transition, Function function) {
+        String functionString = "";
+        for (Function element : function.getElements()) {
+            switch (element.getType()) {
+                case PARAMETER:
+                    if (transition.getParameter(element.getValue()) != null) {
+                        functionString += transition.getParameter(element.getValue()).getValue();
+                    } else {
+                        functionString += model.getParameter(element.getValue()).getValue();
+                    }
+                    break;
+                case FUNCTION:
+                    functionString += getFunctionString(model, transition, element);
+                    break;
+                default:
+                    functionString += element.getValue();
+                    break;
+            }
+        }
+        return functionString;
     }
 
     private String getConnectionNormal(IArc arc) throws IOException {

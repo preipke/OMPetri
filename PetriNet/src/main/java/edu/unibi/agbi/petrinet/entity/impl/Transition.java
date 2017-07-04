@@ -8,7 +8,9 @@ package edu.unibi.agbi.petrinet.entity.impl;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.FunctionElement;
+import edu.unibi.agbi.petrinet.model.Parameter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -16,15 +18,24 @@ import edu.unibi.agbi.petrinet.model.FunctionElement;
  */
 public class Transition extends Node
 {
-    private Function function;
-
+    private final Map<String,Parameter> parameters;
     private Type transitionType;
+    private Function function;
 
     public Transition(String id) {
         super(id);
-        this.type = Element.Type.TRANSITION;
-        this.function = new Function();
-        this.function.getElements().add(new FunctionElement("1", FunctionElement.Type.NUMBER));
+        super.type = Element.Type.TRANSITION;
+        this.function = new Function(Function.Type.FUNCTION);
+        this.function.addElement(new Function("1", Function.Type.NUMBER));
+        this.parameters = new HashMap();
+    }
+    
+    public Map<String,Parameter> getParameters() {
+        return parameters;
+    }
+    
+    public Parameter getParameter(String id) {
+        return parameters.get(id);
     }
 
     public final void setFunction(Function function) {
