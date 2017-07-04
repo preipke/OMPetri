@@ -564,7 +564,7 @@ public class ElementController implements Initializable
             DataTransition transition = (DataTransition) elementSelected;
 
             try {
-                ParseInputToImage(inputTransitionFunction.getText().replace(",", "."));
+                ParseInputToImage(inputTransitionFunction.getText());
                 setInputStatus(inputTransitionFunction, false);
             } catch (Exception ex) {
                 setInputStatus(inputTransitionFunction, true);
@@ -693,7 +693,7 @@ public class ElementController implements Initializable
         });
         inputTransitionFunction.setOnKeyTyped(eh -> {
             try {
-                PrettyFormulaParser.parseToImage(inputTransitionFunction.getText().replace(",", "."));
+                PrettyFormulaParser.parseToImage(inputTransitionFunction.getText());
             } catch (DetailedParseCancellationException ex) {
                 if (eh != null && eh.getCode() != KeyCode.RIGHT && eh.getCode() != KeyCode.LEFT && eh.getCode() != KeyCode.UNDERSCORE) {
 //                    inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());

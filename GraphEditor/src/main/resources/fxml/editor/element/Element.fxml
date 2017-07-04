@@ -136,7 +136,7 @@
                                         <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
                                             <children>
                                                 <Label text="Function" />
-                                                <ScrollPane fitToHeight="true">
+                                                <ScrollPane fitToHeight="true" maxWidth="400.0">
                                                     <content>
                                                         <AnchorPane>
                                                             <children>

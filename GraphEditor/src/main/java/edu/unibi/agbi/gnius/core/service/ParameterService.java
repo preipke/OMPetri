@@ -12,6 +12,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.util.ArrayList;
@@ -36,8 +37,6 @@ public class ParameterService
     @Value("${regex.param.ident.flowIn.total}") private String regexParamPlaceFlowInTotal;
     @Value("${regex.param.ident.flowOut.actual}") private String regexParamPlaceFlowOutNow;
     @Value("${regex.param.ident.flowOut.total}") private String regexParamPlaceFlowOutTotal;
-    @Value("${regex.param.ident.token}") private String regexParamToken;
-    @Value("${regex.param.ident.speed}") private String regexTransitionSpeed;
 
     /**
      * Attempts to add a parameter.
@@ -47,14 +46,26 @@ public class ParameterService
      * @throws ParameterServiceException
      */
     public void add(Parameter param, IElement element) throws ParameterServiceException {
+        add(dataService.getModel(), param, element);
+    }
+
+    /**
+     * Attempts to add a parameter.
+     *
+     * @param model
+     * @param element
+     * @param param
+     * @throws ParameterServiceException
+     */
+    public void add(Model model, Parameter param, IElement element) throws ParameterServiceException {
         if (Parameter.Type.GLOBAL == param.getType()) {
-            add(param);
+            add(model, param);
         } else {
             if (element != null) {
-                if (dataService.getModel().containsAndNotEqual(param)) {
+                if (model.containsAndNotEqual(param)) {
                     throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
                 }
-                dataService.getModel().add(param);
+                model.add(param);
                 element.getRelatedParameterIds().add(param.getId());
             } else {
                 throw new ParameterServiceException("A reference element is required for storing non global parameters!");
@@ -65,17 +76,18 @@ public class ParameterService
     /**
      * Attempts to add a parameter to the dao.
      *
+     * @param model
      * @param param
      * @throws ParameterServiceException
      */
-    private void add(Parameter param) throws ParameterServiceException {
+    private void add(Model model, Parameter param) throws ParameterServiceException {
         if (Parameter.Type.GLOBAL != param.getType()) {
             throw new ParameterServiceException("Wrong method for adding non global parameters! Reference element required.");
         }
-        if (dataService.getModel().containsAndNotEqual(param)) {
+        if (model.containsAndNotEqual(param)) {
             throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
         }
-        dataService.getModel().add(param);
+        model.add(param);
     }
 
     /**
@@ -89,7 +101,7 @@ public class ParameterService
     public void setTransitionFunction(DataTransition transition, String functionString) throws Exception {
         clearTransitionFunctionParameterReferences(transition);
         try {
-            transition.setFunction(functionBuilder.build(functionString));
+            transition.setFunction(functionBuilder.build(functionString, false));
         } finally {
             setTransitionFunctionParameterReferences(transition);
 //            removeUnusedReferencingParameter();
@@ -139,89 +151,6 @@ public class ParameterService
             }
         });
         paramsUnused.forEach(param -> dataService.getModel().remove(param));
-    }
-
-    /**
-     * Creates referencing parameters for an element.
-     *
-     * @param element
-     * @throws ParameterServiceException
-     */
-    public void CreateReferencingParameters(IElement element) throws ParameterServiceException {
-        switch (element.getElementType()) {
-            case PLACE:
-                CreateReferencingParameters((DataPlace) element);
-                break;
-
-            case TRANSITION:
-                CreateReferencingParameters((DataTransition) element);
-                break;
-
-            default:
-                throw new ParameterServiceException("There are no referencing parameters to create for elements of type '" + element.getElementType().toString() + "'");
-        }
-    }
-
-    /**
-     * Creates referencing parameters for a place.
-     *
-     * @param place
-     * @throws ParameterServiceException
-     */
-    private void CreateReferencingParameters(DataPlace place) throws ParameterServiceException {
-
-        String ident, value;
-        int index;
-
-        index = 1;
-        for (IArc arc : place.getArcsIn()) {
-
-            ident = arc.getTarget().getId() + arc.getSource().getId();
-            value = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
-
-            CreateReferencingParameter(ident + "_total", value, arc);
-            CreateReferencingParameter(ident + "_now", "der(" + value + ")", arc);
-
-            index++;
-        }
-
-        index = 1;
-        for (IArc arc : place.getArcsOut()) {
-
-            ident = arc.getSource().getId() + arc.getTarget().getId();
-            value = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
-
-            CreateReferencingParameter(ident + "_total", value, arc);
-            CreateReferencingParameter(ident + "_now", "der(" + value + ")", arc);
-
-            index++;
-        }
-
-        CreateReferencingParameter(place.getId(), "'" + place.getId() + "'.t", place);
-    }
-
-    /**
-     * Creates referencing parameters for a transition.
-     *
-     * @param transition
-     * @throws ParameterServiceException
-     */
-    private void CreateReferencingParameters(DataTransition transition) throws ParameterServiceException {
-        CreateReferencingParameter(transition.getId(), "'" + transition.getId() + "'.actualSpeed", transition);
-    }
-
-    /**
-     * Creates a parameter that references an element.
-     *
-     * @param id
-     * @param value
-     * @param element
-     * @throws ParameterServiceException
-     */
-    private Parameter CreateReferencingParameter(String id, String value, IElement element) throws ParameterServiceException {
-        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE, element.getId());
-        add(param, element);
-        return param;
     }
 
     /**
@@ -287,30 +216,32 @@ public class ParameterService
     public Set<String> getParameterIds() {
         return dataService.getModel().getParameterIds();
     }
-    
+
     /**
      * Attempts to get a referencing parameter for a given candidate identifier.
-     * 
+     *
+     * @param model
      * @param candidate
      * @return
-     * @throws ParameterServiceException 
+     * @throws ParameterServiceException
      */
-    private Parameter getReferencingParameter(String candidate) throws ParameterServiceException {
+    private Parameter getReferencingParameter(Model model, String candidate) throws ParameterServiceException {
 
         IElement element;
+        int index;
 
         if (candidate.matches(regexParamPlaceFlowInNow)) {
 
-            int index = candidate.indexOf("P");
+            index = candidate.indexOf("P");
 
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getModel().getElement(idSource + "_" + idTarget);
+            element = model.getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
-                
+
                 index = 1;
                 for (IArc a : arc.getSource().getArcsIn()) {
                     if (a.equals(arc)) {
@@ -318,20 +249,21 @@ public class ParameterService
                     }
                     index++;
                 }
-                return CreateReferencingParameter(candidate, "'" + idTarget + "'.tokenFlow.inflow[" + index + "]", arc);
+                return CreateReferencingParameter(model, candidate, "'" + idTarget + "'.tokenFlow.inflow[" + index + "]", arc);
             }
+
         } else if (candidate.matches(regexParamPlaceFlowInTotal)) {
 
-            int index = candidate.indexOf("P");
+            index = candidate.indexOf("P");
 
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getModel().getElement(idSource + "_" + idTarget);
+            element = model.getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
-                
+
                 index = 1;
                 for (IArc a : arc.getSource().getArcsIn()) {
                     if (a.equals(arc)) {
@@ -339,20 +271,21 @@ public class ParameterService
                     }
                     index++;
                 }
-                return CreateReferencingParameter(candidate, "'" + idTarget + "'.tokenFlow.inflow[" + index + "]", arc);
+                return CreateReferencingParameter(model, candidate, "'" + idTarget + "'.tokenFlow.inflow[" + index + "]", arc);
             }
+
         } else if (candidate.matches(regexParamPlaceFlowOutNow)) {
 
-            int index = candidate.indexOf("T");
+            index = candidate.indexOf("T");
 
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getModel().getElement(idSource + "_" + idTarget);
+            element = model.getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
-                
+
                 index = 1;
                 for (IArc a : arc.getSource().getArcsOut()) {
                     if (a.equals(arc)) {
@@ -360,20 +293,21 @@ public class ParameterService
                     }
                     index++;
                 }
-                return CreateReferencingParameter(candidate, "der('" + idSource + "'.tokenFlow.outflow[" + index + "])", arc);
+                return CreateReferencingParameter(model, candidate, "der('" + idSource + "'.tokenFlow.outflow[" + index + "])", arc);
             }
+
         } else if (candidate.matches(regexParamPlaceFlowOutTotal)) {
 
-            int index = candidate.indexOf("T");
+            index = candidate.indexOf("T");
 
             String idSource = candidate.substring(0, index);
             String idTarget = candidate.substring(index, candidate.indexOf("_"));
 
-            element = dataService.getModel().getElement(idSource + "_" + idTarget);
+            element = model.getElement(idSource + "_" + idTarget);
             if (element != null && element.getElementType() == Element.Type.ARC) {
 
                 IArc arc = (IArc) element;
-                
+
                 index = 1;
                 for (IArc a : arc.getSource().getArcsOut()) {
                     if (a.equals(arc)) {
@@ -381,25 +315,38 @@ public class ParameterService
                     }
                     index++;
                 }
-                return CreateReferencingParameter(candidate, "'" + idSource + "'.tokenFlow.outflow[" + index + "]", arc);
+                return CreateReferencingParameter(model, candidate, "'" + idSource + "'.tokenFlow.outflow[" + index + "]", arc);
             }
-        } else if (candidate.matches(regexParamToken)) {
 
-            element = dataService.getModel().getElement(candidate);
-            if (element != null && element.getElementType() == Element.Type.PLACE) {
-                
-                return CreateReferencingParameter(candidate, "'" + element.getId() + "'.t", element);
-            }
-        } else if (candidate.matches(regexTransitionSpeed)) {
+        } else {
 
-            element = dataService.getModel().getElement(candidate);
-            if (element != null && element.getElementType() == Element.Type.TRANSITION) {
-                
-                return CreateReferencingParameter(candidate, "'" + element.getId() + "'.actualSpeed", element);
+            element = model.getElement(candidate);
+            if (element != null) {
+                switch (element.getElementType()) {
+                    case PLACE:
+                        return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.t", element);
+                    case TRANSITION:
+                        return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.actualSpeed", element);
+                }
             }
         }
 
         return null;
+    }
+
+    /**
+     * Creates a parameter that references an element.
+     *
+     * @param model
+     * @param id
+     * @param value
+     * @param element
+     * @throws ParameterServiceException
+     */
+    private Parameter CreateReferencingParameter(Model model, String id, String value, IElement element) throws ParameterServiceException {
+        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE, element.getId());
+        add(model, param, element);
+        return param;
     }
 
     /**
@@ -423,24 +370,40 @@ public class ParameterService
      * @throws ParameterServiceException
      */
     public void ValidateFunction(String function, DataTransition element) throws ParameterServiceException {
+        ValidateFunction(dataService.getModel(), function, element);
+    }
 
-        String[] candidates = function.split(functionBuilder.getOperatorRegex());
+    /**
+     * Validates a function in relation to a given transition. Ensures that all
+     * used parameters exist and that their access is not restricted (i.e.
+     * access to LOCAL parameters of a different element).
+     *
+     * @param model
+     * @param function
+     * @param transition
+     * @throws ParameterServiceException
+     */
+    public void ValidateFunction(Model model, String function, DataTransition transition) throws ParameterServiceException {
+
         Parameter param;
+        String[] candidates;
+        
+        function = function.replace(" ", "");
+        candidates = function.split(functionBuilder.getOperatorExtRegex());
 
         for (String candidate : candidates) {
-            if (!candidate.matches(functionBuilder.getNumberRegex())) { // candidate is NaN
+            if (!candidate.matches("")) {
+                if (!candidate.matches(functionBuilder.getNumberRegex())) { // candidate is NaN
 
-                param = getParameter(candidate);
-                if (param == null) {
-                    param = getReferencingParameter(candidate);
+                    param = transition.getParameter(candidate);
+                    if (param == null) {
+                        param = model.getParameter(candidate);
+                    }
+                    if (param == null) {
+                        param = getReferencingParameter(model, candidate);
+                    }
                     if (param == null) {
                         throw new ParameterServiceException("Parameter '" + candidate + "' does not exist");
-                    }
-                } else {
-                    if (param.getType() == Parameter.Type.LOCAL) {
-                        if (!element.getRelatedParameterIds().contains(candidate)) {
-                            throw new ParameterServiceException("'" + candidate + "' is a LOCAL parameter for a different element");
-                        }
                     }
                 }
             }

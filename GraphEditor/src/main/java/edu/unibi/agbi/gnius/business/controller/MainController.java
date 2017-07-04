@@ -184,36 +184,45 @@ public class MainController implements Initializable
     public void CenterNodes() {
 
         Point2D center;
-        double scaleTarget, scaleCurrent, adjustedOffsetX, adjustedOffsetY;
+        double scaleDistance, scaleTarget, scaleCurrent, adjustedOffsetX, adjustedOffsetY;
 
         tabsController.getGraphPane().getGraph().setTranslateX(0);
         tabsController.getGraphPane().getGraph().setTranslateY(0);
 
         center = calculator.getCenter(dataService.getGraph().getNodes());
-        if (dataService.isGridEnabled()) {
-            center = calculator.getPositionInGrid(center, dataService.getGraph());
-        }
 
         adjustedOffsetX = center.getX() - (tabsController.getGraphPane().getWidth() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
         adjustedOffsetY = center.getY() - (tabsController.getGraphPane().getHeight() / 2) / tabsController.getGraphPane().getGraph().getScale().getX();
 
         dataService.getGraph().getNodes().forEach(node -> {
-            node.translateXProperty().set(node.translateXProperty().get() - adjustedOffsetX);
-            node.translateYProperty().set(node.translateYProperty().get() - adjustedOffsetY);
+            Point2D pos = new Point2D(
+                    node.translateXProperty().get() - adjustedOffsetX, 
+                    node.translateYProperty().get() - adjustedOffsetY
+            );
+            if (dataService.isGridEnabled()) {
+                pos = calculator.getPositionInGrid(pos, dataService.getGraph());
+            }
+            node.translateXProperty().set(pos.getX());
+            node.translateYProperty().set(pos.getY());
         });
 
         scaleTarget = calculator.getOptimalScale(tabsController.getGraphPane());
         scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
+        scaleDistance = Math.abs(scaleTarget - scaleCurrent);
 
         if (scaleTarget > scaleCurrent) {
             while (scaleCurrent < scaleMax && scaleCurrent < scaleTarget) {
-                ZoomIn();
                 scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() + 1);
+                if (scaleDistance > (scaleDistance = Math.abs(scaleTarget - scaleCurrent))) {
+                    ZoomIn();
+                }
             }
-        } else {
+        } else if (scaleTarget < scaleCurrent) {
             while (scaleCurrent > scaleMin && scaleCurrent > scaleTarget) {
-                ZoomOut();
                 scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() - 1);
+                if (scaleDistance > (scaleDistance = Math.abs(scaleTarget - scaleCurrent))) {
+                    ZoomOut();
+                }
             }
         }
     }

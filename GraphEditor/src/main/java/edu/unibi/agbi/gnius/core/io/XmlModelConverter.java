@@ -638,10 +638,10 @@ public class XmlModelConverter
         if (nodes.getLength() > 0) {
             if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) nodes.item(0);
-                return functionBuilder.build(elem.getTextContent());
+                return functionBuilder.build(elem.getTextContent(), false);
             }
         }
-        return functionBuilder.build("1");
+        return functionBuilder.build("1", false);
     }
 
     private IGraphNode setShapePos(Element elem, IGraphNode node) {
@@ -697,7 +697,6 @@ public class XmlModelConverter
     }
 
     private Weight getWeight(Element elem, DataDao dataDao) {
-        dataDao.getModel().getColours();
         Weight weight = new Weight(new Colour(elem.getAttribute(attrColourId), ""));
         weight.setValue(elem.getAttribute(attrValue));
         return weight;

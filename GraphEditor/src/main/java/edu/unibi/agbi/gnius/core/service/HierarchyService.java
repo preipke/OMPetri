@@ -173,7 +173,7 @@ public class HierarchyService
         /**
          * Create cluster data and shape.
          */
-        dataCluster = new DataCluster(dataService.getClusterId());
+        dataCluster = new DataCluster(dataService.getClusterId(dataService.getDao()));
         cluster = new GraphCluster(dataCluster.getId(), dataCluster);
         clusterArcs = new ArrayList();
         arcs = new ArrayList();

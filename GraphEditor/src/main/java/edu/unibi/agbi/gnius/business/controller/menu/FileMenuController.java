@@ -7,11 +7,12 @@ package edu.unibi.agbi.gnius.business.controller.menu;
 
 import edu.unibi.agbi.gnius.business.controller.editor.TabsController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.core.io.SbmlModelConverter;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.petrinet.io.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -44,8 +45,9 @@ public class FileMenuController implements Initializable
     @Autowired private MainController mainController;
     @Autowired private TabsController editorTabsController;
 
-    @Autowired private XmlModelConverter xmlModelConverter;
     @Autowired private OpenModelicaExporter omExporter;
+    @Autowired private SbmlModelConverter sbmlModelConverter;
+    @Autowired private XmlModelConverter xmlModelConverter;
 
     @FXML private Menu menuOpenRecent;
     @FXML private MenuItem menuItemSave;
@@ -54,7 +56,7 @@ public class FileMenuController implements Initializable
     private final ExtensionFilter typeAll;
     private final ExtensionFilter typeXml;
     private final ExtensionFilter typeSbml;
-    private final ExtensionFilter typeOm;
+//    private final ExtensionFilter typeOm;
 
     private final FileChooser fileChooser;
     private final ObservableList<File> latestFiles;
@@ -65,7 +67,7 @@ public class FileMenuController implements Initializable
         typeAll = new ExtensionFilter("All files", "*");
         typeXml = new ExtensionFilter("XML file(s) (*.xml)", "*.xml", "*.XML");
         typeSbml = new ExtensionFilter("SBML file(s) (*.sbml)", "*.sbml", "*.SBML");
-        typeOm = new ExtensionFilter("OpenModelica file(s) (*.om)", "*.om", "*.OM");
+//        typeOm = new ExtensionFilter("OpenModelica file(s) (*.om)", "*.om", "*.OM");
 
         fileChooser = new FileChooser();
 
@@ -74,7 +76,20 @@ public class FileMenuController implements Initializable
 
     private void Open(File file) throws Exception {
 
-        DataDao dataDao = xmlModelConverter.importXml(file);
+        DataDao dataDao; 
+        String[] tmp;
+        String fileExtension;
+        
+        tmp = file.getName().split("\\.");
+        fileExtension = tmp[tmp.length-1].toLowerCase();
+        
+        if (fileExtension.contentEquals("xml")) {
+            dataDao = xmlModelConverter.importXml(file);
+        } else if (fileExtension.contentEquals("sbml")) {
+            dataDao = sbmlModelConverter.importSbml(file);
+        } else {
+            throw new IOException("Unrecognized file extension.");
+        }
         dataDao.setFile(file);
         editorTabsController.CreateTab(dataDao);
         
@@ -95,10 +110,10 @@ public class FileMenuController implements Initializable
         }
         if (typeXml == filter) {
             return SaveXml(dao, file);
-        } else if (typeSbml == filter) {
-            return SaveSbml(dao, file);
-        } else if (typeOm == filter) {
-            return SaveOm(dao, file);
+//        } else if (typeSbml == filter) {
+//            return SaveSbml(dao, file);
+//        } else if (typeOm == filter) {
+//            return SaveOm(dao, file);
         } else {
             return false;
         }
@@ -144,7 +159,7 @@ public class FileMenuController implements Initializable
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(typeXml);
 //        fileChooser.getExtensionFilters().add(typeSbml);
-        fileChooser.getExtensionFilters().add(typeOm);
+//        fileChooser.getExtensionFilters().add(typeOm);
         fileChooser.setTitle("Save model '" + dao.getModelName() + "'");
         
         if (dao.getFile() != null) {
@@ -165,6 +180,7 @@ public class FileMenuController implements Initializable
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(typeAll);
         fileChooser.getExtensionFilters().add(typeXml);
+        fileChooser.getExtensionFilters().add(typeSbml);
         fileChooser.setTitle("Open model");
         return fileChooser.showOpenDialog(mainController.getStage());
     }

@@ -245,15 +245,15 @@ public class DataService
         switch (type) {
             case PLACE:
                 DataPlace place;
-                place = new DataPlace(getPlaceId(), defaultPlaceType);
+                place = new DataPlace(getPlaceId(dataDao), defaultPlaceType);
                 place.addToken(new Token(DEFAULT_COLOUR));
-                shape = new GraphPlace(getGraphNodeId(), place);
+                shape = new GraphPlace(getGraphNodeId(dataDao), place);
                 break;
 
             case TRANSITION:
                 DataTransition transition;
-                transition = new DataTransition(getTransitionId(), defaultTransitionType);
-                shape = new GraphTransition(getGraphNodeId(), transition);
+                transition = new DataTransition(getTransitionId(dataDao), defaultTransitionType);
+                shape = new GraphTransition(getGraphNodeId(dataDao), transition);
                 break;
 
             default:
@@ -328,7 +328,6 @@ public class DataService
         DataDao dao = new DataDao();
         dao.setAuthor(System.getProperty("user.name"));
         dao.setCreationDateTime(LocalDateTime.now());
-        dao.setModelDescription("New model.");
         dao.setDaoId(String.valueOf(System.nanoTime()));
         dao.setModelName("Untitled");
         dao.getModel().add(DEFAULT_COLOUR);
@@ -502,9 +501,9 @@ public class DataService
         IDataNode node = target.getDataElement();
         switch (node.getElementType()) {
             case PLACE:
-                return new GraphPlace(getGraphNodeId(), (DataPlace) node);
+                return new GraphPlace(getGraphNodeId(dataDao), (DataPlace) node);
             case TRANSITION:
-                return new GraphTransition(getGraphNodeId(), (DataTransition) node);
+                return new GraphTransition(getGraphNodeId(dataDao), (DataTransition) node);
             default:
                 throw new DataServiceException("Cannot clone the given type of element! [" + node.getElementType() + "]");
         }
@@ -522,13 +521,13 @@ public class DataService
         switch (node.getElementType()) {
             case PLACE:
                 DataPlace place;
-                place = new DataPlace(getPlaceId(), ((DataPlace) node).getPlaceType());
+                place = new DataPlace(getPlaceId(dataDao), ((DataPlace) node).getPlaceType());
                 place.addToken(new Token(DEFAULT_COLOUR));
-                return new GraphPlace(getGraphNodeId(), place);
+                return new GraphPlace(getGraphNodeId(dataDao), place);
             case TRANSITION:
                 DataTransition transition;
-                transition = new DataTransition(getTransitionId(), ((DataTransition) node).getTransitionType());
-                return new GraphTransition(getGraphNodeId(), transition);
+                transition = new DataTransition(getTransitionId(dataDao), ((DataTransition) node).getTransitionType());
+                return new GraphTransition(getGraphNodeId(dataDao), transition);
             default:
                 return null;
         }
@@ -855,13 +854,11 @@ public class DataService
         for (IGravisConnection connection : node.getConnections()) {
             validateRemoval((IGraphArc) connection);
         }
-        if (data != null) {
-            if (data.getShapes().size() <= 1) {
-                try {
-                    parameterService.ValidateRemoval(data);
-                } catch (ParameterServiceException ex) {
-                    throw new DataServiceException(ex.getMessage());
-                }
+        if (data.getShapes().size() <= 1) {
+            try {
+                parameterService.ValidateRemoval(data);
+            } catch (ParameterServiceException ex) {
+                throw new DataServiceException(ex.getMessage());
             }
         }
     }
@@ -874,20 +871,20 @@ public class DataService
         return source.getId() + target.getId();
     }
 
-    public synchronized String getClusterId() {
-        return PREFIX_ID_CLUSTER + dataDao.getNextClusterId();
+    public synchronized String getClusterId(DataDao dao) {
+        return PREFIX_ID_CLUSTER + dao.getNextClusterId();
     }
 
-    private String getGraphNodeId() {
-        return PREFIX_ID_GRAPHNODE + dataDao.getNextNodeId();
+    public String getGraphNodeId(DataDao dao) {
+        return PREFIX_ID_GRAPHNODE + dao.getNextNodeId();
     }
 
-    private String getPlaceId() {
-        return PREFIX_ID_PLACE + dataDao.getNextPlaceId();
+    public String getPlaceId(DataDao dao) {
+        return PREFIX_ID_PLACE + dao.getNextPlaceId();
     }
 
-    private String getTransitionId() {
-        return PREFIX_ID_TRANSITION + dataDao.getNextTransitionId();
+    public String getTransitionId(DataDao dao) {
+        return PREFIX_ID_TRANSITION + dao.getNextTransitionId();
     }
 
     public synchronized Graph getGraphRoot() {
@@ -948,6 +945,10 @@ public class DataService
         } catch (Exception ex) {
             throw new DataServiceException("Cannot build function from input '" + functionString + "'! [" + ex.getMessage() + "]");
         }
+    }
+    
+    public Colour getColourDefault() {
+        return DEFAULT_COLOUR;
     }
 
     public void setPlaceTypeDefault(DataPlace.Type type) {

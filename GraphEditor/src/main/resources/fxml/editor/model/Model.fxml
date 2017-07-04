@@ -4,9 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<TitledPane animated="false" text="Model" 
-            xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-            fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.ModelController">
+<TitledPane animated="false" text="Model" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.model.ModelController">
    <content>
       <BorderPane>
          <top>
@@ -28,8 +26,7 @@
                   <TextField fx:id="inputName" GridPane.columnIndex="1" />
                   <Label text="Author" GridPane.rowIndex="1" />
                   <TextField fx:id="inputAuthor" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label text="Description" GridPane.rowIndex="2" />
-                  <TextArea fx:id="inputDescription" prefHeight="75.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                  <TextArea fx:id="inputDescription" prefHeight="75.0" promptText="Enter a description here..." GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
                </children>
             </GridPane>
          </center>

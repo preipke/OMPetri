@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.io;
+package edu.unibi.agbi.petrinet.util;
 
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.INode;
@@ -572,17 +572,12 @@ public class OpenModelicaExporter
         FileWriter fstream = new FileWriter(fileMOS);
         BufferedWriter out = new BufferedWriter(fstream);
 
-        out.write("cd(\"" + workDirectory.getPath().replace('\\', '/') + "/\"); ");
-        out.write("getErrorString();\r\n");
-        out.write("loadModel(" + properties.getProperty("openmodelica.library") + ");");
-        out.write("getErrorString();\r\n");
-        out.write("loadFile(\"" + fileMO.getPath().replace('\\', '/') + "\"); ");
-        out.write("getErrorString();\r\n");
-        out.write("setCommandLineOptions(\"--preOptModules+=unitChecking\");");
-        out.write("getErrorString();\r\n");
-        out.write("buildModel('" + name + "', " + allFilter + "); ");
-//        out.write("buildModel('" + model.getName() + "'); ");
-        out.write("getErrorString();\r\n");
+        out.write("cd(\"" + workDirectory.getPath().replace('\\', '/') + "/\"); getErrorString();\r\n");
+        out.write("loadModel(" + properties.getProperty("openmodelica.library") + "); getErrorString();\r\n");
+        out.write("loadFile(\"" + fileMO.getPath().replace('\\', '/') + "\"); getErrorString();\r\n");
+        out.write("setCommandLineOptions(\"--preOptModules+=unitChecking\"); getErrorString();\r\n");
+        out.write("buildModel('" + name + "', " + allFilter + "); getErrorString();\r\n");
+//        out.write("buildModel('" + name + "'); getErrorString();\r\n");
 
         out.close();
 
