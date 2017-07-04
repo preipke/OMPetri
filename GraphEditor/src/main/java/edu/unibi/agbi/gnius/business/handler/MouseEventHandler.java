@@ -120,12 +120,21 @@ public class MouseEventHandler {
         if (event.isPrimaryButtonDown()) {
 
             isPrimaryButtonDown = true;
+            
+            if (event.isShiftDown()) {
 
-            /**
-             * Clicking graph elements.
-             */
-            if (event.getTarget() instanceof IGravisElement) {
+                /**
+                 * Holding shift. Will open selection rectangle.
+                 */
+                if (!event.isControlDown()) {
+                    selectionService.unselectAll(); // Clearing current selection.
+                }
+                
+            } else if (event.getTarget() instanceof IGravisElement) {
 
+                /**
+                 * Clicking graph elements.
+                 */
                 UnlockEditorMode();
 
                 IGravisElement element;
@@ -281,18 +290,50 @@ public class MouseEventHandler {
                 }
                 
             } else {
-                
 
                 Object eventTarget = event.getTarget();
 
                 if (eventTarget instanceof IGravisChild) {
                     eventTarget = ((IGravisChild) eventTarget).getParentShape();
                 }
+                
+                if (event.isShiftDown() || !(eventTarget instanceof IGraphNode)) {
+                    
+                    double distance
+                            = Math.sqrt(Math.pow(event.getX() - eventMousePressed.getX(), 2)
+                                    + Math.pow(event.getY() - eventMousePressed.getY(), 2));
+                    
+                    if (event.isShiftDown() || distance > 5) {
 
-                if ((eventTarget instanceof IGraphNode)) {
+                        /**
+                         * Selection Frame Mode. Creating the rectangle.
+                         */
+                        try {
+                            UnlockEditorMode();
+                            setEditorMode(isInSelectionFrameMode);
+                        } catch (Exception ex) {
+                            messengerService.addException("Cannot switch to selection frame mode!", ex);
+                            return;
+                        }
+
+                        Point2D pos = calculator.getCorrectedPosition(
+                                dataService.getGraph(),
+                                eventMousePressed.getX(),
+                                eventMousePressed.getY());
+
+                        selectionFrame.setX(pos.getX());
+                        selectionFrame.setY(pos.getY());
+                        selectionFrame.setWidth(0);
+                        selectionFrame.setHeight(0);
+
+                        pane.getGraph().getChildren().add(selectionFrame);
+                        
+                    }
+                    
+                } else {
 
                     /**
-                     * Dragging Mode. Activate node dragging.
+                     * Dragging Nodes Mode. Activate node dragging.
                      */
                     try {
                         UnlockEditorMode();
@@ -300,31 +341,7 @@ public class MouseEventHandler {
                     } catch (Exception ex) {
                         messengerService.addException("Cannot switch to node dragging mode!", ex);
                     }
-
-                } else {
-
-                    /**
-                     * Selection Frame Mode. Creating the rectangle.
-                     */
-                    try {
-                        UnlockEditorMode();
-                        setEditorMode(isInSelectionFrameMode);
-                    } catch (Exception ex) {
-                        messengerService.addException("Cannot switch to selection frame mode!", ex);
-                        return;
-                    }
-
-                    Point2D pos = calculator.getCorrectedPosition(
-                            dataService.getGraph(),
-                            eventMousePressed.getX(),
-                            eventMousePressed.getY());
-
-                    selectionFrame.setX(pos.getX());
-                    selectionFrame.setY(pos.getY());
-                    selectionFrame.setWidth(0);
-                    selectionFrame.setHeight(0);
-
-                    pane.getGraph().getChildren().add(selectionFrame);
+                    
                 }
             }
             
