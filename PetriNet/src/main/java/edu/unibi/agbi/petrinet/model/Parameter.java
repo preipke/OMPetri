@@ -20,7 +20,7 @@ public class Parameter
 {
     private final String id;
     private final StringProperty value;
-    private final StringProperty note;
+    private final StringProperty unit;
     private final Type type;
 
     private final String elementIdRelated;
@@ -30,15 +30,15 @@ public class Parameter
      * Default constructor.
      *
      * @param id               identifier for this parameter
-     * @param note             an optional note
+     * @param unit             an optional note
      * @param value            the parameter value
      * @param type             the type or scope of this parameter
      * @param elementIdRelated the ID of the related element in case this is
      *                         parameter is of type reference
      */
-    public Parameter(String id, String note, String value, Type type, String elementIdRelated) {
+    public Parameter(String id, String unit, String value, Type type, String elementIdRelated) {
         this.id = id;
-        this.note = new SimpleStringProperty(note);
+        this.unit = new SimpleStringProperty(unit);
         this.value = new SimpleStringProperty(value);
         this.type = type;
         this.elementIdRelated = elementIdRelated;
@@ -55,21 +55,21 @@ public class Parameter
     }
 
     /**
-     * Sets the note for this parameter.
+     * Sets the unit for this parameter.
      *
      * @param note
      */
-    public void setNote(String note) {
-        this.note.set(note);
+    public void setUnit(String note) {
+        this.unit.set(note);
     }
 
     /**
-     * Gets the note for this parameter.
+     * Gets the unit for this parameter.
      *
      * @return
      */
-    public String getNote() {
-        return note.get();
+    public String getUnit() {
+        return unit.get();
     }
 
     /**
@@ -77,8 +77,8 @@ public class Parameter
      *
      * @return
      */
-    public StringProperty getNoteProperty() {
-        return note;
+    public StringProperty getUnitProperty() {
+        return unit;
     }
 
     /**

@@ -339,59 +339,59 @@ public class ElementController implements Initializable
                 .filter(place -> place.getId().toLowerCase().contains(filter) || place.getName().toLowerCase().contains(filter))
                 .forEach(place -> {
 
-                    final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
-                    if (place.getArcsIn().size() > 0) {
+//                    final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
+//                    if (place.getArcsIn().size() > 0) {
+//
+//                        place.getArcsIn().forEach(arc -> {
+//
+//                            String ident = arc.getSource().getId() + arc.getTarget().getId();
+//
+//                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
+//                            itemArcFlowDer.setOnAction(e -> {
+//                                InsertToFunctionInput(ident + "_now");
+//                            });
+//
+//                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
+//                            itemArcFlow.setOnAction(e -> {
+//                                InsertToFunctionInput(ident + "_total");
+//                            });
+//
+//                            Menu menuArc = new Menu("Token Flow from " + arc.getSource().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
+//                            menuArc.getItems().add(itemArcFlowDer);
+//                            menuArc.getItems().add(itemArcFlow);
+//
+//                            menuPlaceArcsIn.getItems().add(menuArc);
+//                        });
+//                    } else {
+//                        menuPlaceArcsIn.setDisable(true);
+//                    }
 
-                        place.getArcsIn().forEach(arc -> {
-
-                            String ident = arc.getSource().getId() + arc.getTarget().getId();
-
-                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
-                            itemArcFlowDer.setOnAction(e -> {
-                                InsertToFunctionInput(ident + "_now");
-                            });
-
-                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
-                            itemArcFlow.setOnAction(e -> {
-                                InsertToFunctionInput(ident + "_total");
-                            });
-
-                            Menu menuArc = new Menu("Token Flow from " + arc.getSource().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
-                            menuArc.getItems().add(itemArcFlowDer);
-                            menuArc.getItems().add(itemArcFlow);
-
-                            menuPlaceArcsIn.getItems().add(menuArc);
-                        });
-                    } else {
-                        menuPlaceArcsIn.setDisable(true);
-                    }
-
-                    final Menu menuPlaceArcsOut = new Menu("Outgoing Arcs");
-                    if (place.getArcsOut().size() > 0) {
-
-                        place.getArcsOut().forEach(arc -> {
-
-                            String ident = arc.getSource().getId() + arc.getTarget().getId();
-
-                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
-                            itemArcFlowDer.setOnAction(e -> {
-                                InsertToFunctionInput(ident + "_now");
-                            });
-
-                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
-                            itemArcFlow.setOnAction(e -> {
-                                InsertToFunctionInput(ident + "_total");
-                            });
-
-                            Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
-                            menuArc.getItems().add(itemArcFlowDer);
-                            menuArc.getItems().add(itemArcFlow);
-
-                            menuPlaceArcsOut.getItems().add(menuArc);
-                        });
-                    } else {
-                        menuPlaceArcsOut.setDisable(true);
-                    }
+//                    final Menu menuPlaceArcsOut = new Menu("Outgoing Arcs");
+//                    if (place.getArcsOut().size() > 0) {
+//
+//                        place.getArcsOut().forEach(arc -> {
+//
+//                            String ident = arc.getSource().getId() + arc.getTarget().getId();
+//
+//                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
+//                            itemArcFlowDer.setOnAction(e -> {
+//                                InsertToFunctionInput(ident + "_now");
+//                            });
+//
+//                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
+//                            itemArcFlow.setOnAction(e -> {
+//                                InsertToFunctionInput(ident + "_total");
+//                            });
+//
+//                            Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
+//                            menuArc.getItems().add(itemArcFlowDer);
+//                            menuArc.getItems().add(itemArcFlow);
+//
+//                            menuPlaceArcsOut.getItems().add(menuArc);
+//                        });
+//                    } else {
+//                        menuPlaceArcsOut.setDisable(true);
+//                    }
 
                     MenuItem itemPlaceToken = new MenuItem("Token");
                     itemPlaceToken.setOnAction(e -> {
@@ -400,8 +400,8 @@ public class ElementController implements Initializable
 
                     Menu menuPlace = new Menu("(" + place.getId() + ") " + place.getName());
                     menuPlace.getItems().add(itemPlaceToken);
-                    menuPlace.getItems().add(menuPlaceArcsIn);
-                    menuPlace.getItems().add(menuPlaceArcsOut);
+//                    menuPlace.getItems().add(menuPlaceArcsIn);
+//                    menuPlace.getItems().add(menuPlaceArcsOut);
 
                     menuRefPlaces.getItems().add(menuPlace);
                 });

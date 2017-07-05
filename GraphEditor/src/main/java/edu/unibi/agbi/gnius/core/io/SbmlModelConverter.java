@@ -61,6 +61,7 @@ public class SbmlModelConverter
     private final String tagConnectionTargets = "listOfProducts";
     private final String tagCoordinateX = "x_Coordinate";
     private final String tagCoordinateY = "y_Coordinate";
+    private final String tagDisabled = "knockedOut";
     private final String tagFunction = "maximumSpeed";
     private final String tagLabel = "label";
     private final String tagModel = "model";
@@ -68,7 +69,6 @@ public class SbmlModelConverter
     private final String tagNodes = "listOfSpecies";
     private final String tagNode = "species";
     private final String tagParameter = "Parameter";
-    private final String tagParameterId = "Name";
     private final String tagRefAvailable = "hasRef";
     private final String tagRefId = "RefID";
     private final String tagTokenMax = "tokenMax";
@@ -82,11 +82,12 @@ public class SbmlModelConverter
     private final String attrConnectionNodeId = "species";
     private final String attrCoordinateX = "x_Coordinate";
     private final String attrCoordinateY = "y_Coordinate";
+    private final String attrDisabled = "knockedOut";
     private final String attrFunction = "maximumSpeed";
     private final String attrId = "id";
     private final String attrLabel = "label";
     private final String attrName = "name";
-    private final String attrParameterId = "Name";
+    private final String attrNameParameter = "Name";
     private final String attrRefAvailable = "hasRef";
     private final String attrRefId = "RefID";
     private final String attrTokenMax = "tokenMax";
@@ -197,6 +198,8 @@ public class SbmlModelConverter
                 transition.getFunction().getParameterIds().forEach(paramId -> {
                     if (dao.getModel().getParameter(paramId) != null) {
                         dao.getModel().getParameter(paramId).getUsingElements().add(transition);
+                    } else if (transition.getParameter(paramId) != null) {
+                        transition.getParameter(paramId).getUsingElements().add(transition);
                     } else {
                         System.out.println("Unavailable parameter '" + paramId + "' requested.");
                     }
@@ -232,8 +235,8 @@ public class SbmlModelConverter
                     for (int j = 0; j < nl.getLength(); j++) {
                         if (nl.item(j).getNodeType() == Node.ELEMENT_NODE) {
                             final Element e = (Element) nl.item(j);
-                            if (e.getNodeName().contentEquals(tagParameterId)) {
-                                id = e.getAttribute(attrParameterId);
+                            if (e.getNodeName().contentEquals(tagName)) {
+                                id = e.getAttribute(attrNameParameter);
                             } else if (e.getNodeName().contentEquals(tagValue)) {
                                 value = e.getAttribute(attrValue);
                             } else if (e.getNodeName().contentEquals(tagUnit)) {
@@ -244,31 +247,37 @@ public class SbmlModelConverter
                     param = new Parameter(id, unit, value, Parameter.Type.GLOBAL, null);
 
                     /**
-                     * If param id is same as an existing node, store param only
+                     * If param id is same as an existing node, store param
                      * locally.
                      */
+//                    if (transition.getParameter(id) == null) {
+//                        transition.getParameters().put(id, param);
+//                    } else {
+//                        throw new IOException("Parameter '" + param.getId() + "' already exists for element '" + transition.getId() + "'.");
+//                    }
                     if (dao.getModel().contains(id)) {
                         if (transition.getParameter(id) == null) {
-                            System.out.println("Parameter '" + param.getId() + "' already exists! Storing locally.");
+                            System.out.println("Parameter '" + param.getId() + "' already exists as a reference! Storing locally.");
                             transition.getParameters().put(id, param);
                         } else {
-                            throw new IOException("Parameter '" + param.getId() + "' already exists on global and local scale!");
+                            throw new IOException("Parameter '" + param.getId() + "' already exists as a reference and on local scale.");
                         }
                     } else {
-                        if (!dao.getModel().contains(param)) {
-                            dao.getModel().add(param);
-                        } else {
-                            if (!dao.getModel().getParameter(id).getValue().contentEquals(value)) {
+//                        if (!dao.getModel().contains(param)) {
+//                            dao.getModel().add(param);
+//                        } else {
+//                            if (!dao.getModel().getParameter(id).getValue().contentEquals(value)) {
                                 if (transition.getParameter(id) == null) {
-                                    System.out.println("Parameter '" + param.getId() + "' already exists! Storing locally.");
+//                                    System.out.println("Parameter '" + param.getId() + "' already exists! Storing locally.");
                                     transition.getParameters().put(id, param);
                                 } else {
-                                    throw new IOException("Parameter '" + param.getId() + "' already exists on global and local scale!");
+                                    throw new IOException("Parameter '" + param.getId() + "' already exists on local scale!");
+//                                    throw new IOException("Parameter '" + param.getId() + "' already exists on global and local scale!");
                                 }
-                            } else {
-                                System.out.println("Parameter '" + param.getId() + "' already exists but equals!");
-                            }
-                        }
+//                            } else {
+//                                System.out.println("Parameter '" + param.getId() + "' already exists but equals!");
+//                            }
+//                        }
                     }
                 }
             }
@@ -365,6 +374,14 @@ public class SbmlModelConverter
 
             default:
                 throw new IOException("Unhandled node type: '" + type + "'");
+        }
+
+        nl = elem.getElementsByTagName(tagDisabled);
+        if (nl.getLength() == 1) {
+            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                tmp = (Element) nl.item(0);
+                data.setDisabled(Boolean.valueOf(tmp.getAttribute(attrDisabled)));
+            }
         }
 
         dao.getGraphRoot().add(node);
@@ -515,6 +532,9 @@ public class SbmlModelConverter
                 arcType
         );
 
+        if (source.getDataElement().isDisabled() || target.getDataElement().isDisabled()) {
+            data.setDisabled(true);
+        }
         data.setName(elem.getAttribute(attrName));
 
         nl = elem.getElementsByTagName(tagWeight);
@@ -581,22 +601,4 @@ public class SbmlModelConverter
         weight.setValue(elem.getAttribute(attrWeight));
         return weight;
     }
-
-//    private void setRelatedParameterIds(Element elem, IDataElement data) {
-//        
-//        NodeList nodes = elem.getElementsByTagName(tagRelatedParameters);
-//        if (nodes.getLength() == 1) {
-//            if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
-//
-//                elem = (Element) nodes.item(0);
-//                nodes = elem.getElementsByTagName(tagRelatedParameter);
-//
-//                for (int i = 0; i < nodes.getLength(); i++) {
-//                    if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-//                        data.getRelatedParameterIds().add(((Element) nodes.item(i)).getAttribute(attrParameterId));
-//                    }
-//                }
-//            }
-//        }
-//    }
 }

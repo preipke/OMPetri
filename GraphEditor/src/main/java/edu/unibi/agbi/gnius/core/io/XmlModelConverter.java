@@ -850,8 +850,8 @@ public class XmlModelConverter
             
             Element p = dom.createElement(tagParameter);
             p.setAttribute(attrId, param.getId());
-            if (param.getNote() != null && !param.getNote().isEmpty()) {
-                p.setAttribute(attrNote, param.getNote());
+            if (param.getUnit() != null && !param.getUnit().isEmpty()) {
+                p.setAttribute(attrNote, param.getUnit());
             }
             p.setAttribute(attrType, param.getType().toString());
             p.setTextContent(param.getValue());

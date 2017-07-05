@@ -31,7 +31,7 @@ public interface IElement
      */
     public Set<String> getRelatedParameterIds();
 
-    public boolean isEnabled();
+    public boolean isDisabled();
 
-    public void setEnabled(boolean value);
+    public void setDisabled(boolean value);
 }

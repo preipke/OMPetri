@@ -13,6 +13,7 @@ import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -23,7 +24,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -64,6 +68,7 @@ public class OpenModelicaExporter
         Collection<Colour> colors = model.getColours();
         Collection<Place> places = model.getPlaces();
         Collection<Transition> transitions = model.getTransitions();
+        Map<String,Parameter> parameters = new HashMap();
 
         boolean isColoredPn = colors.size() != 1;
 
@@ -97,12 +102,33 @@ public class OpenModelicaExporter
         writer.append(" settings(showTokenFlow = true)");
         writer.append(";");
         writer.println();
+        
+        /**
+         * Parameters.
+         */
+        model.getParameters().forEach(param -> {
+            parameters.put("_" + param.getId(), param);
+        });
+        for (Transition transition : transitions) {
+            transition.getParameters().values().forEach(param -> {
+                parameters.put("_" + transition.getId() + "_" + param.getId(), param);
+            });
+        }
+        parameters.keySet().stream()
+                .sorted((k1, k2) -> k1.toLowerCase().compareTo(k2.toLowerCase()))
+                .filter(key -> parameters.get(key).getType() != Parameter.Type.REFERENCE)
+                .forEach(key -> {
+                    writer.append(INDENT + "parameter Real '" + key + "'");
+//                    writer.append("(final unit=\"" + parameters.get(key).getUnit() + "\")");
+                    writer.append(" = " + parameters.get(key).getValue() + ";");
+                    writer.println();
+                });
 
         /**
          * Places.
          */
         boolean isFirst, isInnerFirst;
-        String functionType, tokenType, tmp1, tmp2, tmp3;
+        String functionType, tokenType, tmp1, tmp2, tmp3, unit;
         Function function;
         Token token;
         Weight weight;
@@ -121,10 +147,6 @@ public class OpenModelicaExporter
 
         while (itPlaces.hasNext()) {
             place = itPlaces.next();
-
-            tmp1 = "";
-            tmp2 = "";
-            tmp3 = "";
 
             writer.append(INDENT);
             switch (place.getPlaceType()) {
@@ -160,6 +182,11 @@ public class OpenModelicaExporter
             /**
              * Token
              */
+            tmp1 = "";
+            tmp2 = "";
+            tmp3 = "";
+            unit = "";
+            
             for (Colour color : colors) {
 
                 token = place.getToken(color);
@@ -192,6 +219,10 @@ public class OpenModelicaExporter
 
                 } else {
 
+                    if (token == null) {
+                        throw new IOException("No token for default colour '" + color.getId() + "' available.");
+                    }
+                    
                     if (place.getPlaceType() == Place.Type.CONTINUOUS) {
                         tmp1 += token.getValueStart();
                         tmp2 += token.getValueMin();
@@ -201,6 +232,7 @@ public class OpenModelicaExporter
                         tmp2 += (int) token.getValueMin();
                         tmp3 += (int) token.getValueMax();
                     }
+                    unit = token.getUnit();
                 }
 
             }
@@ -215,7 +247,9 @@ public class OpenModelicaExporter
             writer.append(",min" + tokenType + "=" + tmp2);
             writer.append(",max" + tokenType + "=" + tmp3);
 
-//            writer.append(",t(final unit=\"custom unit\")");
+            if (!isColoredPn) {
+//                writer.append(",t(final unit=\"" + unit + "\")");
+            }
             writer.append(")");
 //            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
@@ -271,10 +305,14 @@ public class OpenModelicaExporter
 
             // Function and parameters
             function = transition.getFunction();
-            if (function.getUnit() != null) {
+            if (function.getUnit() != null && !function.getUnit().matches("")) {
                 writer.append("(final unit=\"" + function.getUnit() + "\")");
             }
-            writer.append("=" + getFunctionString(model, transition, function));
+            if (transition.isDisabled()) {
+                writer.append("=0/*" + getFunctionString(model, transition, function) + "*/");
+            } else {
+                writer.append("=" + getFunctionString(model, transition, function));
+            }
 
             /**
              * Weights, incoming
@@ -305,14 +343,20 @@ public class OpenModelicaExporter
 
                     if (isColoredPn) {
 
-                        if (weight != null) {
+                        if (weight != null && !transition.isDisabled()) {
                             tmp3 += weight.getValue();
                         } else {
                             tmp3 += "0";
                         }
 
                     } else {
-                        tmp1 += weight.getValue();
+                        
+                        if (transition.isDisabled()) {
+                            tmp1 += "0";
+                        } else {
+                            tmp1 += weight.getValue();
+                        }
+                        
                     }
 
                 }
@@ -352,14 +396,20 @@ public class OpenModelicaExporter
 
                     if (isColoredPn) {
 
-                        if (weight != null) {
+                        if (weight != null && !transition.isDisabled()) {
                             tmp3 += weight.getValue();
                         } else {
                             tmp3 += "0";
                         }
 
                     } else {
-                        tmp2 += weight.getValue();
+                        
+                        if (transition.isDisabled()) {
+                            tmp2 += "0";
+                        } else {
+                            tmp2 += weight.getValue();
+                        }
+                        
                     }
 
                 }
@@ -478,17 +528,22 @@ public class OpenModelicaExporter
      */
     private String getFunctionString(Model model, Transition transition, Function function) {
         String functionString = "";
+        Parameter parameter;
         for (Function element : function.getElements()) {
             switch (element.getType()) {
-                case PARAMETER:
-                    if (transition.getParameter(element.getValue()) != null) {
-                        functionString += transition.getParameter(element.getValue()).getValue();
-                    } else {
-                        functionString += model.getParameter(element.getValue()).getValue();
-                    }
-                    break;
                 case FUNCTION:
                     functionString += getFunctionString(model, transition, element);
+                    break;
+                case PARAMETER:
+                    if ((parameter = model.getParameter(element.getValue())) != null) {
+                        if (parameter.getType() == Parameter.Type.REFERENCE) {
+                            functionString += parameter.getValue();
+                        } else {
+                            functionString += "'_" + parameter.getId() + "'";
+                        }
+                    } else {
+                        functionString += "'_" + transition.getId() + "_" + element.getValue() + "'";
+                    }
                     break;
                 default:
                     functionString += element.getValue();

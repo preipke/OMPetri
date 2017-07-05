@@ -16,6 +16,7 @@ import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
@@ -115,8 +116,11 @@ public class ParameterService
      */
     private void setTransitionFunctionParameterReferences(DataTransition transition) {
         transition.getFunction().getParameterIds().forEach(id -> {
-            getParameter(id)
-                    .getUsingElements()
+            Parameter param = transition.getParameter(id);
+            if (param == null) {
+                param = getParameter(id);
+            }
+            param.getUsingElements()
                     .add(transition);
         });
     }
@@ -129,8 +133,11 @@ public class ParameterService
      */
     private void clearTransitionFunctionParameterReferences(DataTransition transition) {
         transition.getFunction().getParameterIds().forEach(id -> {
-            getParameter(id)
-                    .getUsingElements()
+            Parameter param = transition.getParameter(id);
+            if (param == null) {
+                param = getParameter(id);
+            }
+            param.getUsingElements()
                     .remove(transition);
         });
     }
@@ -140,7 +147,7 @@ public class ParameterService
      */
     private void removeUnusedReferencingParameter() {
         List<Parameter> paramsUnused = new ArrayList();
-        dataService.getModel().getParameters().forEach(param -> {
+        getParameters().forEach(param -> {
             if (param.getType() == Parameter.Type.REFERENCE) {
                 if (param.getUsingElements().isEmpty()) {
                     dataService.getModel()
@@ -161,7 +168,7 @@ public class ParameterService
      */
     public List<Parameter> getGlobalParameters() {
         List<Parameter> parameters = new ArrayList();
-        for (Parameter param : dataService.getModel().getParameters()) {
+        for (Parameter param : getParameters()) {
             if (param.getType() == Parameter.Type.GLOBAL) {
                 parameters.add(param);
             }
@@ -188,7 +195,7 @@ public class ParameterService
                 }
             }
         } else {
-            dataService.getModel().getParameters().forEach(p -> {
+            getParameters().forEach(p -> {
                 if (p.getType() == Parameter.Type.LOCAL) {
                     parameters.add(p);
                 }
@@ -199,7 +206,7 @@ public class ParameterService
     }
 
     /**
-     * Gets the parameter with the given id.
+     * Gets the parameter with the given id from the current dao.
      *
      * @param id
      * @return
@@ -209,12 +216,20 @@ public class ParameterService
     }
 
     /**
-     * Gets the list of currently used parameter ids.
+     * Gets the set of IDs representing all parameters from the current dao.
      *
      * @return
      */
     public Set<String> getParameterIds() {
         return dataService.getModel().getParameterIds();
+    }
+    
+    /**
+     * Gets a collection of all parameters for the current dao.
+     * @return 
+     */
+    public Collection<Parameter> getParameters() {
+        return dataService.getModel().getParameters();
     }
 
     /**

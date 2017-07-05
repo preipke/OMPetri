@@ -297,12 +297,12 @@ public class ParameterController implements Initializable
                 setStatus(null, statusParamLocal, "Value changed!");
             }
         });
-        paramNoteLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getNote()));
+        paramNoteLocal.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getUnit()));
         paramNoteLocal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramNoteLocal.setOnEditCommit(
                 (CellEditEvent<Parameter, String> t) -> {
                     ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))
-                            .setNote(t.getNewValue());
+                            .setUnit(t.getNewValue());
                 });
         paramDeleteLocal.setCellValueFactory(cellData -> {
             CheckBox cb = new CheckBox();
@@ -345,12 +345,12 @@ public class ParameterController implements Initializable
                 setStatus(null, statusParamGlobal, "Value changed!");
             }
         });
-        paramNoteGlobal.setCellValueFactory(new PropertyValueFactory("note"));
+        paramNoteGlobal.setCellValueFactory(new PropertyValueFactory("unit"));
         paramNoteGlobal.setCellFactory(TextFieldTableCell.<Parameter>forTableColumn());
         paramNoteGlobal.setOnEditCommit(
                 (CellEditEvent<Parameter, String> t) -> {
                     ((Parameter) t.getTableView().getItems().get(t.getTablePosition().getRow()))
-                            .setNote(t.getNewValue());
+                            .setUnit(t.getNewValue());
                 });
         paramReferencesGlobal.setCellValueFactory(cellData -> new ReadOnlyIntegerWrapper(cellData.getValue().getUsingElements().size()));
         paramReferencesGlobalCellFactory = paramReferencesGlobal.getCellFactory();
