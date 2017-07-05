@@ -31,12 +31,12 @@ import org.springframework.stereotype.Service;
 public class SimulationService
 {
     private final ResultsDao resultsDao;
-    private final List<Thread> threads;
+    private final List<SimulationThread> threads;
 
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private ResultsService resultsService;
-    @Autowired private SimulationController simulationControlsController;
+    @Autowired private SimulationController simulationController;
     @Autowired private SimulationCompiler simulationCompiler;
 
     @Autowired
@@ -56,8 +56,8 @@ public class SimulationService
         /**
          * Monitor previous threads. 
          */
-        List<Thread> threadsFinished = new ArrayList();
-        for (Thread t : threads) {
+        List<SimulationThread> threadsFinished = new ArrayList();
+        for (SimulationThread t : threads) {
             if (!t.isAlive()) {
                 threadsFinished.add(t);
             }
@@ -69,7 +69,39 @@ public class SimulationService
         Platform.runLater(() -> {
             messengerService.printMessage("Starting simulation...");
         });
-        Thread thread = new Thread(() -> {
+        SimulationThread thread = new SimulationThread();
+        thread.start();
+        threads.add(thread);
+    }
+
+    public void StopSimulation() {
+        threads.stream()
+                .filter((t) -> (t.isAlive()))
+                .forEach(t -> {
+                    System.out.println("Interrupting simulation thread!");
+                    t.interrupt();
+                });
+    }
+    
+    private class SimulationThread extends Thread {
+        
+        private SimulationServer simulationServer;
+        private SimulationExecuter simulationExecuter;
+
+        @Override
+        public void interrupt() {
+            if (simulationServer != null) {
+                simulationServer.terminate();
+            }
+            if (simulationExecuter != null) {
+                simulationExecuter.interrupt();
+            }
+            super.interrupt();
+            System.out.println("Interrupted simulation!");
+        }
+        
+        @Override
+        public void run() {
 
             DataDao data = dataService.getDao();
             
@@ -80,7 +112,7 @@ public class SimulationService
                 References simulationReferences;
                 try {
                     Platform.runLater(() -> {
-                        simulationControlsController.setSimulationProgress(-1);
+                        simulationController.setSimulationProgress(-1);
                     });
                     simulationReferences = simulationCompiler.compile(data);
                 } catch (SimulationServiceException ex) {
@@ -90,7 +122,7 @@ public class SimulationService
                 /**
                  * Start server.
                  */
-                SimulationServer simulationServer = new SimulationServer();
+                simulationServer = new SimulationServer();
                 simulationServer.start();
                 synchronized (simulationServer) {
                     try {
@@ -111,10 +143,10 @@ public class SimulationService
                  * Start simulation.
                  */
                 BufferedReader simulationExecuterOutputReader;
-                SimulationExecuter simulationExecuter = new SimulationExecuter(simulationReferences, simulationCompiler, simulationServer);
-                simulationExecuter.setSimulationStopTime(simulationControlsController.getSimulationStopTime());
-                simulationExecuter.setSimulationIntervals(simulationControlsController.getSimulationIntervals());
-                simulationExecuter.setSimulationIntegrator(simulationControlsController.getSimulationIntegrator());
+                simulationExecuter = new SimulationExecuter(simulationReferences, simulationCompiler, simulationServer);
+                simulationExecuter.setSimulationStopTime(simulationController.getSimulationStopTime());
+                simulationExecuter.setSimulationIntervals(simulationController.getSimulationIntervals());
+                simulationExecuter.setSimulationIntegrator(simulationController.getSimulationIntegrator());
                 simulationExecuter.start();
                 synchronized (simulationExecuter) {
                     if (simulationExecuter.getSimulationOutputReader() == null) {
@@ -166,8 +198,8 @@ public class SimulationService
                     synchronized (this) {
                         while (simulationServer.isRunning()) {
                             Platform.runLater(() -> {
-                                simulationControlsController.setSimulationProgress(
-                                                simulationServer.getSimulationIterationCount() / simulationControlsController.getSimulationIntervals()
+                                simulationController.setSimulationProgress(
+                                                simulationServer.getSimulationIterationCount() / simulationController.getSimulationIntervals()
                                 );
                             });
                             this.wait(250);
@@ -191,9 +223,14 @@ public class SimulationService
                                     messengerService.addMessage(line);
                                 }
                             }
-                            simulationExecuterOutputReader.close();
                         } catch (IOException e) {
                             e.printStackTrace();
+                        } finally {
+                            try {
+                                simulationExecuterOutputReader.close();
+                            } catch (IOException ex) {
+                                
+                            }
                         }
                     }
                     
@@ -215,21 +252,10 @@ public class SimulationService
                 });
             } finally {
                 Platform.runLater(() -> {
-                    simulationControlsController.setSimulationProgress(1);
-                    simulationControlsController.Unlock();
+                    simulationController.setSimulationProgress(1);
+                    simulationController.Unlock();
                 });
             }
-        });
-        thread.start();
-        threads.add(thread);
-    }
-
-    public void StopSimulation() {
-        threads.stream()
-                .filter((t) -> (t.isAlive()))
-                .forEach(t -> {
-                    System.out.println("Interrupting simulation thread!");
-                    t.interrupt();
-                });
+        }
     }
 }

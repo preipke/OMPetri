@@ -31,6 +31,7 @@ public class SimulationExecuter extends Thread
     private int simIntervals;
     private String simIntegrator;
 
+    private Process simulationProcess;
     private BufferedReader simulationOutputReader;
 
     public SimulationExecuter(References simulationReferences, SimulationCompiler simulationCompiler, SimulationServer simulationServer) {
@@ -67,7 +68,6 @@ public class SimulationExecuter extends Thread
     @Override
     public void run() {
 
-        Process simulationProcess;
         ProcessBuilder pb;
 
         isFailed = false;
@@ -139,5 +139,13 @@ public class SimulationExecuter extends Thread
                 this.notifyAll();
             }
         }
+    }
+    
+    @Override
+    public void interrupt() {
+        if (simulationProcess != null) {
+            simulationProcess.destroyForcibly();
+        }
+        super.interrupt();
     }
 }

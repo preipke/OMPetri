@@ -15,6 +15,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.SimulationService;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import java.net.URL;
@@ -45,6 +46,7 @@ public class MainController implements Initializable
 {
     @Autowired private Calculator calculator;
     @Autowired private DataService dataService;
+    @Autowired private SimulationService simulationService;
 
     @Autowired private ElementController elementController;
     @Autowired private FileMenuController fileMenuController;
@@ -115,9 +117,9 @@ public class MainController implements Initializable
 
         List<DataDao> daos = dataService.getDataDaosWithChanges();
 
+        ButtonType buttonCancel = new ButtonType("Cancel");
         ButtonType buttonSave = new ButtonType("Save");
         ButtonType buttonQuit = new ButtonType("Exit");
-        ButtonType buttonCancel = new ButtonType("Cancel");
 
         Alert alert = new Alert(AlertType.CONFIRMATION);
         alert.setTitle("Confirm exit");
@@ -125,11 +127,11 @@ public class MainController implements Initializable
         if (daos.isEmpty()) {
             alert.setHeaderText("Close the application");
             alert.setContentText("Are you sure you want to close the application?");
-            alert.getButtonTypes().setAll(buttonQuit, buttonCancel);
+            alert.getButtonTypes().setAll(buttonCancel, buttonQuit);
         } else {
             alert.setHeaderText("Close the application and discard latest changes");
             alert.setContentText("You made changes to your model(s). Are you sure you want to close the application and discard any changes?");
-            alert.getButtonTypes().setAll(buttonSave, buttonQuit, buttonCancel);
+            alert.getButtonTypes().setAll(buttonCancel, buttonSave, buttonQuit);
         }
 
         Optional<ButtonType> result = alert.showAndWait();
@@ -142,6 +144,7 @@ public class MainController implements Initializable
             }
         } else if (result.get() == buttonQuit) {
             try {
+                simulationService.StopSimulation();
                 System.out.println("Closing application...");
                 System.exit(0);
             } catch (Exception ex) {

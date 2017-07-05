@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.util.Utility;
 import edu.unibi.agbi.petrinet.model.References;
-import edu.unibi.agbi.petrinet.io.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -110,7 +110,7 @@ public final class SimulationCompiler
         output = parseInput(process.getInputStream());
         output = parseSimulationExecutablePath(output);
         simulationReferences.setSimulationExecutablePath(output);
-
+        
         return simulationReferences;
     }
 

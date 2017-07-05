@@ -108,8 +108,9 @@ public class TabsController implements Initializable
             dao.clear();
         });
         
-        editorTabPane.getTabs().add(0, tab);
-        editorTabPane.getSelectionModel().select(0);
+        editorTabPane.getTabs().add(editorTabPane.getTabs().size() - 1, tab);
+        editorTabPane.getSelectionModel().select(editorTabPane.getTabs().size() - 2);
+        mainController.CenterNodes();
         
         messengerService.printMessage("New model created!");
     }
@@ -125,7 +126,9 @@ public class TabsController implements Initializable
     
     private String getTabName(Tab tab, String modelName) {
 
-        String prefix = null;
+        String prefix;
+        int count = 0, index;
+        
         for (Tab t : editorTabPane.getTabs()) {
 
             if (t.equals(tab)) {
@@ -135,27 +138,28 @@ public class TabsController implements Initializable
             // models with similar name
             if (t.getText() != null && t.getText().contains(modelName)) {
 
-                int indexStart = t.getText().indexOf(modelName);
-                prefix = t.getText().substring(indexStart);
+                index = t.getText().indexOf(modelName);
+                prefix = t.getText().substring(index);
 
                 // models have exact same name
                 if (prefix.contentEquals(modelName)) {
-                    prefix = t.getText().substring(0, indexStart).trim();
+                    prefix = t.getText().substring(0, index).trim();
 
                     // generate prefix
                     if (prefix.matches("\\([0-9]+\\)")) {
                         prefix = prefix.replace("(", "").replace(")", "");
-                        prefix = "(" + (Integer.parseInt(prefix) + 1) + ") ";
-                        break;
+                        count = Integer.parseInt(prefix) + 1;
                     } else if (prefix.isEmpty()) {
-                        prefix = "(1) ";
-                        break;
+                        count = 1;
                     }
                 }
             }
-            prefix = "";
         }
-        return prefix + modelName;
+        if (count == 0) {
+            return modelName;
+        } else {
+            return "(" + count + ") " + modelName;
+        }
     }
     
     private void ShowConfirmationDialog(Event event) {

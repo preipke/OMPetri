@@ -24,8 +24,10 @@ public class SimulationServer extends Thread {
 
     private final int SIZE_OF_INT; // size of modelica int;
 
-    private ServerSocket serverSocket;
     private int serverPort = 17015;
+    private ServerSocket serverSocket;
+    private Socket client;
+    private DataInputStream inputStream;
 
     private boolean isRunning; // indicates wether the server is up and running
     private boolean isFailed; // indicates wether the server has been terminated
@@ -73,13 +75,17 @@ public class SimulationServer extends Thread {
     public void terminate() {
         isRunning = false;
         isFailed = false;
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (IOException ex) {
+                
+            }
+        }
     }
 
     @Override
     public void run() {
-
-        Socket client;
-        DataInputStream inputStream;
 
         isFailed = false;
         isRunning = true;
