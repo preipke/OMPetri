@@ -20,7 +20,7 @@ public abstract class Element implements IElement
     protected String id;
     protected String name;
 
-    protected boolean isDisabeld = true;
+    protected boolean isDisabled = false;
 
     protected final Set<String> parameter;
 
@@ -55,12 +55,12 @@ public abstract class Element implements IElement
 
     @Override
     public void setDisabled(boolean isDisabled) {
-        this.isDisabeld = isDisabled;
+        this.isDisabled = isDisabled;
     }
 
     @Override
     public boolean isDisabled() {
-        return isDisabeld;
+        return isDisabled;
     }
     
     @Override
