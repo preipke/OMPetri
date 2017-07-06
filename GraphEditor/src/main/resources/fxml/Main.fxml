@@ -21,47 +21,12 @@
         </MenuBar>
         <StackPane VBox.vgrow="ALWAYS">
             <children>
-                <fx:include StackPane.alignment="CENTER" source="editor/Tabs.fxml" fx:id="editorTabPane" />
+                <fx:include StackPane.alignment="CENTER" source="editor/Graph.fxml" />
                 <Label StackPane.alignment="TOP_CENTER" id="statusTop" fx:id="statusTop" visible="false" >
                     <StackPane.margin>
                         <Insets top="30.0" />
                     </StackPane.margin>
                 </Label>
-                <HBox StackPane.alignment="BOTTOM_CENTER" spacing="5.0" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="zoomFrame">
-                    <children>
-                        <Button id="buttonCenter" onAction="#CenterNodes" mnemonicParsing="false">
-                            <tooltip>
-                                <Tooltip text="Center nodes"/>
-                            </tooltip>
-                        </Button>
-                        <Button id="buttonZoomOut" onAction="#ZoomOut" mnemonicParsing="false">
-                            <tooltip>
-                                <Tooltip text="Zoom out"/>
-                            </tooltip>
-                        </Button>
-                        <Button id="buttonZoomIn" onAction="#ZoomIn" mnemonicParsing="false">
-                            <tooltip>
-                                <Tooltip text="Zoom in"/>
-                            </tooltip>
-                        </Button>
-                    </children>
-                    <StackPane.margin>
-                        <Insets bottom="5.0" />
-                    </StackPane.margin>
-                </HBox>
-                <VBox StackPane.alignment="TOP_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" fx:id="modelFrame">
-                    <children>
-                        <fx:include source="editor/model/Model.fxml" />
-                        <fx:include source="editor/model/Tools.fxml" />
-                        <fx:include source="editor/model/Simulation.fxml" />
-                    </children>
-                    <StackPane.margin>
-                        <Insets top="30.0" />
-                    </StackPane.margin>
-                </VBox>
-                <fx:include StackPane.alignment="BOTTOM_LEFT" source="editor/model/Hierarchy.fxml" fx:id="hierarchyFrame" />
-                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/element/Element.fxml" fx:id="elementFrame" />
-                <fx:include StackPane.alignment="TOP_RIGHT" source="editor/element/Parameter.fxml" fx:id="parameterFrame" />
             </children>
         </StackPane>
         <HBox alignment="CENTER_LEFT" spacing="5.0" HBox.hgrow="ALWAYS">

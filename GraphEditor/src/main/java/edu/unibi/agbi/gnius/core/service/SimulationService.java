@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.editor.model.SimulationController;
+import edu.unibi.agbi.gnius.business.controller.editor.graph.SimulationController;
 import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;

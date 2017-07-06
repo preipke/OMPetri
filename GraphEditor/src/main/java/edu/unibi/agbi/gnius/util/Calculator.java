@@ -108,6 +108,10 @@ public class Calculator
      * @return
      */
     public synchronized double getOptimalScale(GraphPane pane) {
+        
+        if (pane.getGraph().getNodes().isEmpty()) {
+            return 1;
+        }
 
         double max_X = Double.MIN_VALUE;
         double min_X = Double.MAX_VALUE;
@@ -127,6 +131,12 @@ public class Calculator
             if (min_Y > node.translateYProperty().get()) {
                 min_Y = node.translateYProperty().get();
             }
+        }
+        
+        if (max_X - min_X == 0) {
+            return 1;
+        } else if (max_Y - min_Y == 0) {
+            return 1;
         }
 
         double scaleX = pane.getWidth() * 2 / 3 / (max_X - min_X); // adjusted pane size divided by required nodes space

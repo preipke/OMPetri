@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox maxHeight="-Infinity" maxWidth="-Infinity" spacing="5.0" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController" >
+    <children>
+        <Button id="buttonCenter" onAction="#CenterNodes" mnemonicParsing="false">
+            <tooltip>
+                <Tooltip text="Center nodes"/>
+            </tooltip>
+        </Button>
+        <Button id="buttonZoomOut" onAction="#ZoomOut" mnemonicParsing="false">
+            <tooltip>
+                <Tooltip text="Zoom out"/>
+            </tooltip>
+        </Button>
+        <Button id="buttonZoomIn" onAction="#ZoomIn" mnemonicParsing="false">
+            <tooltip>
+                <Tooltip text="Zoom in"/>
+            </tooltip>
+        </Button>
+    </children>
+</HBox>

@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.editor.model.HierarchyController;
+import edu.unibi.agbi.gnius.business.controller.editor.graph.HierarchyController;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
@@ -197,8 +197,8 @@ public class HierarchyService
         if (dataService.isGridEnabled()) {
             pos = calculator.getPositionInGrid(pos, dataService.getGraph());
         }
-        cluster.setTranslateX(pos.getX());
-        cluster.setTranslateY(pos.getY());
+        cluster.setTranslateX(pos.getX() - cluster.getCenterOffsetX());
+        cluster.setTranslateY(pos.getY() - cluster.getCenterOffsetY());
 
         /**
          * Move nodes and determine wether node is connected to nodes in or 
@@ -261,8 +261,8 @@ public class HierarchyService
         if (dataService.isGridEnabled()) {
             pos = calculator.getPositionInGrid(pos, dataService.getGraph());
         }
-        double translateX = cluster.getShape().getTranslateX() - pos.getX();
-        double translateY = cluster.getShape().getTranslateY() - pos.getY();
+        double translateX = cluster.getShape().getTranslateX() + cluster.getCenterOffsetX() - pos.getX();
+        double translateY = cluster.getShape().getTranslateY() + cluster.getCenterOffsetY() - pos.getY();
 
         for (IGravisNode n : graphChild.getNodes()) {
             graph.add(n);

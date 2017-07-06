@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.editor.model.ToolsController;
-import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.business.controller.editor.graph.ToolsController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -46,7 +46,7 @@ public class MouseEventHandler {
     @Autowired private MessengerService messengerService;
     @Autowired private SelectionService selectionService;
 
-    @Autowired private MainController mainController;
+    @Autowired private GraphController graphController;
     @Autowired private ToolsController editorToolsController;
 
     @Autowired private Calculator calculator;
@@ -464,12 +464,12 @@ public class MouseEventHandler {
                             selectionService.select(node);
                             selectionService.highlightRelated(node);
                         }
-                        mainController.HideElementPanel();
+                        graphController.HideElementPane();
                     } else {
                         selectionService.unselectAll();
                         selectionService.select(node);
                         selectionService.highlightRelated(node);
-                        mainController.ShowElementDetails(node);
+                        graphController.ShowElementPane(node);
                     }
                 }
             }

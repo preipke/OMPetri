@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.element;
+package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
@@ -65,7 +66,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ElementController implements Initializable
 {
-    @Autowired private MainController mainController;
+    @Autowired private GraphController graphController;
     @Autowired private MessengerService messengerService;
     @Autowired private DataService dataService;
     @Autowired private ParameterService parameterService;
@@ -708,7 +709,7 @@ public class ElementController implements Initializable
         });
 
         menuItemParamEdit.setOnAction(e -> {
-            mainController.ShowElementParameters(elementSelected);
+            graphController.ShowParameterPane(elementSelected);
         });
         
         listClusteredElements.setOnMouseClicked(eh -> {

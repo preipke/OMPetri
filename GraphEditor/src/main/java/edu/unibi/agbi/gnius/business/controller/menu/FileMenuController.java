@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.menu;
 
-import edu.unibi.agbi.gnius.business.controller.editor.TabsController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.io.SbmlModelConverter;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
@@ -27,6 +27,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.stage.Stage;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,19 +40,22 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class FileMenuController implements Initializable
 {
-    @Autowired private MessengerService messengerService;
     @Autowired private DataService dataService;
+    @Autowired private MessengerService messengerService;
     
+    @Autowired private GraphController graphController;
     @Autowired private MainController mainController;
-    @Autowired private TabsController editorTabsController;
 
     @Autowired private OpenModelicaExporter omExporter;
     @Autowired private SbmlModelConverter sbmlModelConverter;
     @Autowired private XmlModelConverter xmlModelConverter;
 
-    @FXML private Menu menuOpenRecent;
-    @FXML private MenuItem menuItemSave;
-    @FXML private MenuItem menuItemSaveAs;
+    @FXML private Menu menuLatestFiles;
+    @FXML private MenuItem buttonNew;
+    @FXML private MenuItem buttonOpen;
+    @FXML private MenuItem buttonQuit;
+    @FXML private MenuItem buttonSave;
+    @FXML private MenuItem buttonSaveAs;
 
     private final ExtensionFilter typeAll;
     private final ExtensionFilter typeXml;
@@ -91,14 +95,14 @@ public class FileMenuController implements Initializable
             throw new IOException("Unrecognized file extension.");
         }
         dataDao.setFile(file);
-        editorTabsController.CreateTab(dataDao);
+        graphController.CreateTab(dataDao);
         
         if (latestFiles.contains(file)) {
-            menuOpenRecent.getItems().remove(latestFiles.indexOf(file));
+            menuLatestFiles.getItems().remove(latestFiles.indexOf(file));
             latestFiles.remove(latestFiles.indexOf(file));
         }
         if (latestFiles.size() == 5) {
-            menuOpenRecent.getItems().remove(4);
+            menuLatestFiles.getItems().remove(4);
             latestFiles.remove(4);
         }
         latestFiles.add(0, file);
@@ -150,7 +154,7 @@ public class FileMenuController implements Initializable
         return false;
     }
     
-    public File ShowSaveFile(DataDao dao) {
+    public File ShowSaveFile(Stage stage, DataDao dao) {
         
         if (dao == null) {
             return null;
@@ -169,30 +173,24 @@ public class FileMenuController implements Initializable
             fileChooser.setInitialFileName(dao.getModelName());
         }
         
-        File file =  fileChooser.showSaveDialog(mainController.getStage());
+        File file =  fileChooser.showSaveDialog(stage);
         if (file != null) {
             latestFilter = fileChooser.getSelectedExtensionFilter();
         }
         return file;
     }
     
-    public File ShowOpenFile() {
+    public File ShowOpenFile(Stage stage) {
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(typeAll);
         fileChooser.getExtensionFilters().add(typeXml);
         fileChooser.getExtensionFilters().add(typeSbml);
         fileChooser.setTitle("Open model");
-        return fileChooser.showOpenDialog(mainController.getStage());
-    }
-    
-    @FXML
-    public void New() {
-        editorTabsController.CreateTab();
+        return fileChooser.showOpenDialog(stage);
     }
 
-    @FXML
-    public void Open() {
-        File file = ShowOpenFile();
+    public void Open(Stage stage) {
+        File file = ShowOpenFile(stage);
         if (file != null) {
             try {
                 Open(file);
@@ -203,16 +201,11 @@ public class FileMenuController implements Initializable
             }
         }
     }
-    
-    @FXML
-    public void Quit() {
-        mainController.ShowDialogExit(null);
-    }
 
-    @FXML
-    public void Save() {
+    public void Save(Stage stage) {
         
-        File file = dataService.getDao().getFile();
+        DataDao dao = dataService.getDao();
+        File file = dao.getFile();
         ExtensionFilter filter = null;
         
         if (file != null) {
@@ -233,30 +226,36 @@ public class FileMenuController implements Initializable
         }
         
         if (filter != null) {
-            SaveFile(dataService.getDao(), file, filter);
+            SaveFile(dao, file, filter);
         } else {
-            SaveAs();
+            SaveAs(stage, dao);
         }
     }
     
     /**
      * 
+     * @param stage
      * @param dao
      * @return indicates wether the model has been saved or not
      */
-    public boolean SaveAs(DataDao dao) {
-        File file = ShowSaveFile(dao);
+    public boolean SaveAs(Stage stage, DataDao dao) {
+        File file = ShowSaveFile(stage, dao);
         return SaveFile(dao, file, latestFilter);
-    }
-
-    @FXML
-    public void SaveAs() {
-        File file = ShowSaveFile(dataService.getDao());
-        SaveFile(dataService.getDao(), file, latestFilter);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+        buttonNew.setOnAction(eh -> graphController.CreateTab());
+        buttonQuit.setOnAction(eh -> mainController.ShowDialogExit(null));
+        buttonOpen.setOnAction(eh -> Open(mainController.getStage()));
+        buttonSave.setOnAction(eh -> Save(mainController.getStage()));
+        buttonSaveAs.setOnAction(eh -> SaveAs(mainController.getStage(), dataService.getDao()));
+        
+        buttonSave.setDisable(true);
+        buttonSaveAs.setDisable(true);
+        
+        menuLatestFiles.setDisable(true);
         latestFiles.addListener(new ListChangeListener()
         {
             @Override
@@ -273,27 +272,25 @@ public class FileMenuController implements Initializable
                                 messengerService.setStatusAndAddExceptionToLog("Importing data from '" + file.getName() + "' failed!", ex);
                             }
                         });
-                        menuOpenRecent.getItems().add(0, item);
-                        menuOpenRecent.setDisable(false);
+                        menuLatestFiles.getItems().add(0, item);
+                        menuLatestFiles.setDisable(false);
                     });
                 }
             }
         });
+//        graphController
         dataService.getDaos().addListener(new ListChangeListener()
         {
             @Override
             public void onChanged(ListChangeListener.Change change) {
                 if (dataService.getDaos().size() > 0) {
-                    menuItemSave.setDisable(false);
-                    menuItemSaveAs.setDisable(false);
+                    buttonSave.setDisable(false);
+                    buttonSaveAs.setDisable(false);
                 } else {
-                    menuItemSave.setDisable(true);
-                    menuItemSaveAs.setDisable(true);
+                    buttonSave.setDisable(true);
+                    buttonSaveAs.setDisable(true);
                 }
             }
         });
-        menuOpenRecent.setDisable(true);
-        menuItemSave.setDisable(true);
-        menuItemSaveAs.setDisable(true);
     }
 }

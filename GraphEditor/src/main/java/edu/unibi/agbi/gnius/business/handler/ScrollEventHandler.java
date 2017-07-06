@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.MainController;
+import edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import javafx.scene.input.ScrollEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScrollEventHandler
 {
-    @Autowired private MainController mainController;
+    @Autowired private ZoomController zoomController;
     
     @Value("${zoom.scale.base}") private double scaleBase;
     @Value("${zoom.scale.factor}") private double scaleFactor;
@@ -51,7 +51,7 @@ public class ScrollEventHandler
             dao.getGraphPane().getGraph().getScale().setX(scale_t1);
             dao.getGraphPane().getGraph().getScale().setY(scale_t1);
             
-            mainController.ApplyZoomOffset(
+            zoomController.ApplyZoomOffset(
                     dao.getGraphPane(), 
                     event.getX(), 
                     event.getY(), 

@@ -8,15 +8,17 @@
 <?import javafx.scene.paint.*?>
 <?import javafx.scene.text.*?>
 
-<Menu fx:id="fileMenu" mnemonicParsing="false" text="File" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.FileMenuController">
+<Menu mnemonicParsing="false" text="File" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:id="fileMenu" fx:controller="edu.unibi.agbi.gnius.business.controller.menu.FileMenuController">
     <items>
-        <MenuItem mnemonicParsing="false" onAction="#New" text="New" />
-        <MenuItem mnemonicParsing="false" onAction="#Open" text="Open…" />
-        <Menu fx:id="menuOpenRecent" mnemonicParsing="false" text="Open Recent" />
+        <MenuItem mnemonicParsing="false" fx:id="buttonNew" text="New" />
+        <MenuItem mnemonicParsing="false" fx:id="buttonOpen" text="Open…" />
+        <Menu fx:id="menuLatestFiles" mnemonicParsing="false" text="Open Recent" />
         <SeparatorMenuItem mnemonicParsing="false" />
-        <MenuItem mnemonicParsing="false" onAction="#Save" text="Save" fx:id="menuItemSave" />
-        <MenuItem mnemonicParsing="false" onAction="#SaveAs" text="Save As…" fx:id="menuItemSaveAs"  />
+        <MenuItem mnemonicParsing="false" fx:id="buttonSave" text="Save" />
+        <MenuItem mnemonicParsing="false" fx:id="buttonSaveAs" text="Save As…" />
         <SeparatorMenuItem mnemonicParsing="false" />
-        <MenuItem mnemonicParsing="false" onAction="#Quit" text="Quit" />
+        <MenuItem mnemonicParsing="false" fx:id="buttonQuit" text="Quit" />
     </items>
 </Menu>
