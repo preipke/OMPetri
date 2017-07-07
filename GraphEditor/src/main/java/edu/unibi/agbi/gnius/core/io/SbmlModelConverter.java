@@ -120,6 +120,7 @@ public class SbmlModelConverter
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 model = (Element) nl.item(0);
                 dao = dataService.createDao();
+                dao.setAuthor("");
                 dao.setModelName(model.getAttribute(attrId));
             } else {
                 throw new Exception("File import failed. Malformed 'Model' element.");
@@ -162,6 +163,16 @@ public class SbmlModelConverter
                 elem = (Element) nl.item(i);
                 addConnection(elem, dao);
             }
+        }
+        for (Element e : elems) { // disable connections for referencing nodes
+            dao.getGraph()
+                    .getNode(e.getAttribute(attrId))
+                    .getConnections()
+                    .forEach(conn -> {
+                        IGraphArc arc = (IGraphArc) conn;
+                        arc.getDataElement().setDisabled(true);
+                        arc.getElementHandles().forEach(handle -> handle.setDisabled(true));
+                    });
         }
 
         /**
@@ -244,7 +255,7 @@ public class SbmlModelConverter
                             }
                         }
                     }
-                    param = new Parameter(id, unit, value, Parameter.Type.GLOBAL, null);
+                    param = new Parameter(id, value, unit, Parameter.Type.LOCAL, null);
 
                     /**
                      * If param id is same as an existing node, store param
@@ -255,21 +266,21 @@ public class SbmlModelConverter
 //                    } else {
 //                        throw new IOException("Parameter '" + param.getId() + "' already exists for element '" + transition.getId() + "'.");
 //                    }
-                    if (dao.getModel().contains(id)) {
-                        if (transition.getParameter(id) == null) {
-                            System.out.println("Parameter '" + param.getId() + "' already exists as a reference! Storing locally.");
-                            transition.getParameters().put(id, param);
-                        } else {
-                            throw new IOException("Parameter '" + param.getId() + "' already exists as a reference and on local scale.");
-                        }
-                    } else {
+//                    if (dao.getModel().contains(id)) {
+//                        if (transition.getParameter(id) == null) {
+//                            System.out.println("Parameter '" + param.getId() + "' already exists as a reference! Storing locally.");
+//                            transition.addParameter(param);
+//                        } else {
+//                            throw new IOException("Parameter '" + param.getId() + "' already exists as a reference and on local scale.");
+//                        }
+//                    } else {
 //                        if (!dao.getModel().contains(param)) {
 //                            dao.getModel().add(param);
 //                        } else {
 //                            if (!dao.getModel().getParameter(id).getValue().contentEquals(value)) {
                                 if (transition.getParameter(id) == null) {
 //                                    System.out.println("Parameter '" + param.getId() + "' already exists! Storing locally.");
-                                    transition.getParameters().put(id, param);
+                                    transition.addParameter(param);
                                 } else {
                                     throw new IOException("Parameter '" + param.getId() + "' already exists on local scale!");
 //                                    throw new IOException("Parameter '" + param.getId() + "' already exists on global and local scale!");
@@ -278,7 +289,7 @@ public class SbmlModelConverter
 //                                System.out.println("Parameter '" + param.getId() + "' already exists but equals!");
 //                            }
 //                        }
-                    }
+//                    }
                 }
             }
         }
@@ -299,6 +310,7 @@ public class SbmlModelConverter
         String typeStrings[] = null;
         String dataId, nodeId, label = null;
         double posX = 0, posY = 0;
+        boolean disabled;
 
         edu.unibi.agbi.petrinet.entity.abstr.Element.Type type = null;
         IDataNode data = null;
@@ -380,7 +392,9 @@ public class SbmlModelConverter
         if (nl.getLength() == 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 tmp = (Element) nl.item(0);
-                data.setDisabled(Boolean.valueOf(tmp.getAttribute(attrDisabled)));
+                disabled = Boolean.valueOf(tmp.getAttribute(attrDisabled));
+                data.setDisabled(disabled);
+                node.getElementHandles().forEach(handle -> handle.setDisabled(disabled));
             }
         }
 

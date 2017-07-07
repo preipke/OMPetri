@@ -9,6 +9,7 @@ import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Parameter;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,8 +31,12 @@ public class Transition extends Node
         this.parameters = new HashMap();
     }
     
-    public Map<String,Parameter> getParameters() {
-        return parameters;
+    public void addParameter(Parameter param) {
+        parameters.put(param.getId(), param);
+    }
+    
+    public Collection<Parameter> getParameters() {
+        return parameters.values();
     }
     
     public Parameter getParameter(String id) {

@@ -864,11 +864,11 @@ public class DataService
     }
     
     public synchronized String getArcId(IDataNode source, IDataNode target) {
-        return source.getId() + target.getId();
+        return source.getId() + "_" + target.getId();
     }
     
     public synchronized String getConnectionId(IGraphNode source, IGraphNode target) {
-        return source.getId() + target.getId();
+        return source.getId() + "_" + target.getId();
     }
 
     public synchronized String getClusterId(DataDao dao) {

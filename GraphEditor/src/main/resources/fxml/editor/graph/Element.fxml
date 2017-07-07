@@ -187,7 +187,4 @@
             </content>
         </TitledPane>
     </children>
-    <StackPane.margin>
-        <Insets top="30.0" />
-    </StackPane.margin>
 </VBox>

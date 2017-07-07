@@ -65,12 +65,12 @@ public class OpenModelicaExporter
         PrintWriter writer = new PrintWriter(file);
 
         Collection<Arc> arcs = model.getArcs();
-        Collection<Colour> colors = model.getColours();
+        Collection<Colour> colours = model.getColours();
         Collection<Place> places = model.getPlaces();
         Collection<Transition> transitions = model.getTransitions();
         Map<String,Parameter> parameters = new HashMap();
 
-        boolean isColoredPn = colors.size() != 1;
+        boolean isColoredPn = colours.size() != 1;
 
         /**
          * Model name.
@@ -110,7 +110,7 @@ public class OpenModelicaExporter
             parameters.put("_" + param.getId(), param);
         });
         for (Transition transition : transitions) {
-            transition.getParameters().values().forEach(param -> {
+            transition.getParameters().forEach(param -> {
                 parameters.put("_" + transition.getId() + "_" + param.getId(), param);
             });
         }
@@ -127,11 +127,10 @@ public class OpenModelicaExporter
         /**
          * Places.
          */
-        boolean isFirst, isInnerFirst;
+        boolean isFirst;
         String functionType, tokenType, tmp1, tmp2, tmp3, unit;
         Function function;
         Token token;
-        Weight weight;
         
         Place place;
         Iterator<Place> itPlaces
@@ -187,7 +186,7 @@ public class OpenModelicaExporter
             tmp3 = "";
             unit = "";
             
-            for (Colour color : colors) {
+            for (Colour color : colours) {
 
                 token = place.getToken(color);
 
@@ -315,113 +314,11 @@ public class OpenModelicaExporter
             }
 
             /**
-             * Weights, incoming
+             * Weights.
              */
-            tmp1 = "";
-            isFirst = true;
-
-            for (IArc arc : transition.getArcsIn()) {
-
-                if (isFirst) {
-                    isFirst = false;
-                } else {
-                    tmp1 += ",";
-                }
-
-                tmp3 = "";
-                isInnerFirst = true;
-
-                for (Colour color : colors) {
-
-                    weight = arc.getWeight(color);
-
-                    if (isInnerFirst) {
-                        isInnerFirst = false;
-                    } else {
-                        tmp3 += ",";
-                    }
-
-                    if (isColoredPn) {
-
-                        if (weight != null && !transition.isDisabled()) {
-                            tmp3 += weight.getValue();
-                        } else {
-                            tmp3 += "0";
-                        }
-
-                    } else {
-                        
-                        if (transition.isDisabled()) {
-                            tmp1 += "0";
-                        } else {
-                            tmp1 += weight.getValue();
-                        }
-                        
-                    }
-
-                }
-
-                if (isColoredPn) {
-                    tmp1 += "{" + tmp3 + "}/*" + arc.getSource().getId() + "*/";
-                }
-
-            }
-
-            /**
-             * Weights, outgoing
-             */
-            tmp2 = "";
-            isFirst = true;
-
-            for (IArc arc : transition.getArcsOut()) {
-
-                if (isFirst) {
-                    isFirst = false;
-                } else {
-                    tmp2 += ",";
-                }
-
-                tmp3 = "";
-                isInnerFirst = true;
-
-                for (Colour color : colors) {
-
-                    weight = arc.getWeight(color);
-
-                    if (isInnerFirst) {
-                        isInnerFirst = false;
-                    } else {
-                        tmp3 += ",";
-                    }
-
-                    if (isColoredPn) {
-
-                        if (weight != null && !transition.isDisabled()) {
-                            tmp3 += weight.getValue();
-                        } else {
-                            tmp3 += "0";
-                        }
-
-                    } else {
-                        
-                        if (transition.isDisabled()) {
-                            tmp2 += "0";
-                        } else {
-                            tmp2 += weight.getValue();
-                        }
-                        
-                    }
-
-                }
-
-                if (isColoredPn) {
-                    tmp2 += "{" + tmp3 + "}/*" + arc.getSource().getId() + "*/";
-                }
-
-            }
-
-            writer.append(",arcWeightIn={" + tmp1 + "}");
-            writer.append(",arcWeightOut={" + tmp2 + "}");
+            writer.append(",arcWeightIn={" + getWeightString(transition.getArcsIn(), colours) + "}");
+            writer.append(",arcWeightOut={" + getWeightString(transition.getArcsOut(), colours) + "}");
+            
             writer.append(")");
 //            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
@@ -516,6 +413,48 @@ public class OpenModelicaExporter
         writer.close();
 
         return file;
+    }
+    
+    private String getWeightString(Collection<IArc> arcs, Collection<Colour> colours) {
+        
+        boolean isFirstColour, isFirst = true;
+        boolean isColoredPn = colours.size() != 1;
+        String weight = "", tmp;
+
+        for (IArc arc : arcs) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                weight += ",";
+            }
+            tmp = "";
+            isFirstColour = true;
+            for (Colour color : colours) {
+                if (isFirstColour) {
+                    isFirstColour = false;
+                } else {
+                    tmp += ",";
+                }
+                if (isColoredPn) {
+                    tmp += getWeightString(arc, color);
+                } else {
+                    weight += getWeightString(arc, color);
+                }
+            }
+            if (isColoredPn) {
+                weight += "{" + tmp + "}/*" + arc.getSource().getId() + "*/";
+            }
+        }
+        return weight;
+    }
+    
+    private String getWeightString(IArc arc, Colour colour) {
+        Weight weight = arc.getWeight(colour);
+        if (arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled() || weight == null) {
+            return "0";
+        } else {
+            return weight.getValue();
+        }
     }
     
     /**

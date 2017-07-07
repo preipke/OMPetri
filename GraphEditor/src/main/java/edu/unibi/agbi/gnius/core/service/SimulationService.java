@@ -103,13 +103,15 @@ public class SimulationService
         @Override
         public void run() {
 
+            BufferedReader simulationExecuterOutputReader;
+            References simulationReferences;
             DataDao data = dataService.getDao();
+            double stopTime = simulationController.getSimulationStopTime();
             
             try {
                 /**
                  * Execute compiler.
                  */
-                References simulationReferences;
                 try {
                     Platform.runLater(() -> {
                         simulationController.setSimulationProgress(-1);
@@ -142,7 +144,6 @@ public class SimulationService
                 /**
                  * Start simulation.
                  */
-                BufferedReader simulationExecuterOutputReader;
                 simulationExecuter = new SimulationExecuter(simulationReferences, simulationCompiler, simulationServer);
                 simulationExecuter.setSimulationStopTime(simulationController.getSimulationStopTime());
                 simulationExecuter.setSimulationIntervals(simulationController.getSimulationIntervals());
@@ -197,50 +198,52 @@ public class SimulationService
                 try {
                     synchronized (this) {
                         while (simulationServer.isRunning()) {
+                            double progress = simulationServer.getSimulationTime() / stopTime;
                             Platform.runLater(() -> {
-                                simulationController.setSimulationProgress(
-                                                simulationServer.getSimulationIterationCount() / simulationController.getSimulationIntervals()
-                                );
+                                simulationController.setSimulationProgress(progress);
                             });
-                            this.wait(250);
+                            this.wait(125);
                         }
                     }
                     simulationExecuter.join();
+                    simulationExecuter = null;
                     simulationServer.join();
+                    simulationServer = null;
                 } catch (InterruptedException ex) {
                     throw new SimulationServiceException("The simulation has been interrupted.");
+                } finally {
+                    Platform.runLater(() -> { // Simulation output.
+                        if (simulationExecuterOutputReader != null) {
+                            try {
+                                messengerService.addMessage("Simulation output: ");
+                                String line;
+                                while ((line = simulationExecuterOutputReader.readLine()) != null) {
+                                    if (line.length() > 0) {
+                                        messengerService.addMessage(line);
+                                    }
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            } finally {
+                                try {
+                                    simulationExecuterOutputReader.close();
+                                } catch (IOException ex) {
+
+                                }
+                            }
+                        }
+                        try {
+                            resultsService.UpdateAutoAddedData();
+                        } catch (ResultsServiceException ex) {
+                            messengerService.addException("Failed to update auto added data series!", ex);
+                        }
+                    });
                 }
                 
                 Platform.runLater(() -> {
-                    
-                    // Simulation output.
-                    if (simulationExecuterOutputReader != null) {
-                        try {
-                            messengerService.addMessage("--- Simulation output ---");
-                            String line;
-                            while ((line = simulationExecuterOutputReader.readLine()) != null) {
-                                if (line.length() > 0) {
-                                    messengerService.addMessage(line);
-                                }
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        } finally {
-                            try {
-                                simulationExecuterOutputReader.close();
-                            } catch (IOException ex) {
-                                
-                            }
-                        }
-                    }
-                    
-                    messengerService.printMessage("Simulating '" + data.getModelName() + "' finished!");
-                    try {
-                        resultsService.UpdateAutoAddedData();
-                    } catch (ResultsServiceException ex) {
-                        messengerService.addException("Failed to update auto added data series!", ex);
-                    }
+                    messengerService.printMessage("Simulation for '" + data.getModelName() + "' finished!");
                 });
+
             } catch (SimulationServiceException ex) {
                 Platform.runLater(() -> {
                     messengerService.printMessage("Simulation for '" + data.getModelName() + "' stopped!");
@@ -251,6 +254,12 @@ public class SimulationService
                     }
                 });
             } finally {
+                if (simulationExecuter != null) {
+                    simulationExecuter.interrupt();
+                }
+                if (simulationServer != null) {
+                    simulationServer.terminate();
+                }
                 Platform.runLater(() -> {
                     simulationController.setSimulationProgress(1);
                     simulationController.Unlock();

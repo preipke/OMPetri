@@ -73,6 +73,7 @@ public class GraphController implements Initializable
     
     private final String fxmlElement = "/fxml/editor/graph/Element.fxml";
     private final String fxmlHierarchy = "/fxml/editor/graph/Hierarchy.fxml";
+    private final String fxmlNode = "/fxml/editor/Node.fxml";
     private final String fxmlPanel = "/fxml/editor/graph/Panel.fxml";
     private final String fxmlParameter = "/fxml/editor/graph/Parameter.fxml";
     private final String fxmlZoom = "/fxml/editor/graph/Zoom.fxml";
@@ -80,6 +81,7 @@ public class GraphController implements Initializable
     private Parent paneLeft;
     private Parent paneElement;
     private Parent paneHierarchy;
+    private Parent paneNode;
     private Parent paneParameter;
     private Parent paneZoom;
     
@@ -279,6 +281,11 @@ public class GraphController implements Initializable
             fxmlLoader.setControllerFactory(springContext::getBean);
             fxmlLoader.setLocation(getClass().getResource(fxmlPanel));
             paneLeft = fxmlLoader.load();
+
+            fxmlLoader = new FXMLLoader();
+            fxmlLoader.setControllerFactory(springContext::getBean);
+            fxmlLoader.setLocation(getClass().getResource(fxmlNode));
+            paneNode = fxmlLoader.load();
 
             fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(springContext::getBean);

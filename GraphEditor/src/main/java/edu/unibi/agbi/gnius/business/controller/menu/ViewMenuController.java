@@ -28,7 +28,7 @@ public class ViewMenuController implements Initializable
     
     @FXML
     public void ShowParams() {
-        graphController.ShowElementPane(null);
+        graphController.ShowParameterPane(null);
     }
     
     @FXML

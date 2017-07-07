@@ -36,7 +36,7 @@ public class Parameter
      * @param elementIdRelated the ID of the related element in case this is
      *                         parameter is of type reference
      */
-    public Parameter(String id, String unit, String value, Type type, String elementIdRelated) {
+    public Parameter(String id, String value, String unit, Type type, String elementIdRelated) {
         this.id = id;
         this.unit = new SimpleStringProperty(unit);
         this.value = new SimpleStringProperty(value);

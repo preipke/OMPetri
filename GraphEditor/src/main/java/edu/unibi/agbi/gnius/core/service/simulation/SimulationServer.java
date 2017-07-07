@@ -64,8 +64,11 @@ public class SimulationServer extends Thread {
         return simulationVariables;
     }
 
-    public double getSimulationIterationCount() {
-        return simulation.getResults()[0].size();
+    public double getSimulationTime() {
+        if (simulation == null) {
+            return 0;
+        }
+        return (double) simulation.getResults()[0].get(simulation.getResults()[0].size()-1);
     }
 
     public void setSimulation(Simulation simulation) {

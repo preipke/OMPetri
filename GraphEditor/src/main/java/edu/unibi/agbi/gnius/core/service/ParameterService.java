@@ -7,10 +7,12 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
@@ -34,10 +36,8 @@ public class ParameterService
     @Autowired private DataService dataService;
     @Autowired private FunctionBuilder functionBuilder;
 
-    @Value("${regex.param.ident.flowIn.actual}") private String regexParamPlaceFlowInNow;
-    @Value("${regex.param.ident.flowIn.total}") private String regexParamPlaceFlowInTotal;
-    @Value("${regex.param.ident.flowOut.actual}") private String regexParamPlaceFlowOutNow;
-    @Value("${regex.param.ident.flowOut.total}") private String regexParamPlaceFlowOutTotal;
+    @Value("${regex.param.ident.flow.actual}") private String regexParamPlaceFlowNow;
+    @Value("${regex.param.ident.flow.total}") private String regexParamPlaceFlowTotal;
 
     /**
      * Attempts to add a parameter.
@@ -223,10 +223,11 @@ public class ParameterService
     public Set<String> getParameterIds() {
         return dataService.getModel().getParameterIds();
     }
-    
+
     /**
      * Gets a collection of all parameters for the current dao.
-     * @return 
+     *
+     * @return
      */
     public Collection<Parameter> getParameters() {
         return dataService.getModel().getParameters();
@@ -243,105 +244,75 @@ public class ParameterService
     private Parameter getReferencingParameter(Model model, String candidate) throws ParameterServiceException {
 
         IElement element;
-        int index;
+        
+        if ((element = model.getElement(candidate)) != null) {
+            switch (element.getElementType()) {
+                case PLACE:
+                    return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.t", element);
+                case TRANSITION:
+                    return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.actualSpeed", element);
+            }
+            
+        } else if (candidate.matches(regexParamPlaceFlowNow) || candidate.matches(regexParamPlaceFlowTotal)) {
 
-        if (candidate.matches(regexParamPlaceFlowInNow)) {
+            String[] tmp = candidate.split("_");
+            IElement source, target, arc;
+            String idSource, idTarget, value;
+            int index, arcIndex;
 
-            index = candidate.indexOf("P");
-
-            String idSource = candidate.substring(0, index);
-            String idTarget = candidate.substring(index, candidate.indexOf("_"));
-
-            element = model.getElement(idSource + "_" + idTarget);
-            if (element != null && element.getElementType() == Element.Type.ARC) {
-
-                IArc arc = (IArc) element;
-
-                index = 1;
-                for (IArc a : arc.getSource().getArcsIn()) {
-                    if (a.equals(arc)) {
-                        break;
-                    }
-                    index++;
-                }
-                return CreateReferencingParameter(model, candidate, "'" + idTarget + "'.tokenFlow.inflow[" + index + "]", arc);
+            idSource = tmp[0];
+            index = 1;
+            while (((source = model.getElement(idSource)) == null && source instanceof INode) && index < tmp.length) {
+                idSource = idSource + "_" + tmp[index];
+                index++;
             }
 
-        } else if (candidate.matches(regexParamPlaceFlowInTotal)) {
+            if (source != null && index < tmp.length - 2) {
 
-            index = candidate.indexOf("P");
-
-            String idSource = candidate.substring(0, index);
-            String idTarget = candidate.substring(index, candidate.indexOf("_"));
-
-            element = model.getElement(idSource + "_" + idTarget);
-            if (element != null && element.getElementType() == Element.Type.ARC) {
-
-                IArc arc = (IArc) element;
-
-                index = 1;
-                for (IArc a : arc.getSource().getArcsIn()) {
-                    if (a.equals(arc)) {
-                        break;
-                    }
+                idTarget = tmp[index];
+                while (((target = model.getElement(idTarget)) == null && target instanceof INode) && index < tmp.length) {
+                    idTarget = idTarget + "_" + tmp[index];
                     index++;
                 }
-                return CreateReferencingParameter(model, candidate, "'" + idTarget + "'.tokenFlow.inflow[" + index + "]", arc);
-            }
 
-        } else if (candidate.matches(regexParamPlaceFlowOutNow)) {
+                if (target != null && index == tmp.length - 1) {
+                    
+                    arc = model.getElement(dataService.getArcId((IDataNode) source, (IDataNode) target));
+                    if (arc != null && arc instanceof IArc) {
 
-            index = candidate.indexOf("T");
+                        arcIndex = 1;
+                        switch (source.getElementType()) {
 
-            String idSource = candidate.substring(0, index);
-            String idTarget = candidate.substring(index, candidate.indexOf("_"));
+                            case PLACE:
+                                for (IArc a : ((IArc) arc).getSource().getArcsOut()) { // place -> transition
+                                    if (a.equals(arc)) {
+                                        break;
+                                    }
+                                    arcIndex++;
+                                }
+                                value = "'" + idSource + "'.tokenFlow.outflow[" + arcIndex + "]";
+                                break;
 
-            element = model.getElement(idSource + "_" + idTarget);
-            if (element != null && element.getElementType() == Element.Type.ARC) {
+                            case TRANSITION:
+                                for (IArc a : ((IArc) arc).getSource().getArcsIn()) { // transition -> place
+                                    if (a.equals(arc)) {
+                                        break;
+                                    }
+                                    arcIndex++;
+                                }
+                                value = "'" + idTarget + "'.tokenFlow.inflow[" + arcIndex + "]";
+                                break;
 
-                IArc arc = (IArc) element;
-
-                index = 1;
-                for (IArc a : arc.getSource().getArcsOut()) {
-                    if (a.equals(arc)) {
-                        break;
+                            default:
+                                throw new ParameterServiceException("Cannot get parameter. Unexpected element type for arc source. '" + source.getElementType() + "' in candidate '" + candidate + "'.");
+                        }
+                        
+                        if (candidate.matches(regexParamPlaceFlowTotal)) {
+                            return CreateReferencingParameter(model, candidate, value, arc);
+                        } else {
+                            return CreateReferencingParameter(model, candidate, "der(" + value + ")", arc);
+                        }
                     }
-                    index++;
-                }
-                return CreateReferencingParameter(model, candidate, "der('" + idSource + "'.tokenFlow.outflow[" + index + "])", arc);
-            }
-
-        } else if (candidate.matches(regexParamPlaceFlowOutTotal)) {
-
-            index = candidate.indexOf("T");
-
-            String idSource = candidate.substring(0, index);
-            String idTarget = candidate.substring(index, candidate.indexOf("_"));
-
-            element = model.getElement(idSource + "_" + idTarget);
-            if (element != null && element.getElementType() == Element.Type.ARC) {
-
-                IArc arc = (IArc) element;
-
-                index = 1;
-                for (IArc a : arc.getSource().getArcsOut()) {
-                    if (a.equals(arc)) {
-                        break;
-                    }
-                    index++;
-                }
-                return CreateReferencingParameter(model, candidate, "'" + idSource + "'.tokenFlow.outflow[" + index + "]", arc);
-            }
-
-        } else {
-
-            element = model.getElement(candidate);
-            if (element != null) {
-                switch (element.getElementType()) {
-                    case PLACE:
-                        return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.t", element);
-                    case TRANSITION:
-                        return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.actualSpeed", element);
                 }
             }
         }
@@ -359,7 +330,7 @@ public class ParameterService
      * @throws ParameterServiceException
      */
     private Parameter CreateReferencingParameter(Model model, String id, String value, IElement element) throws ParameterServiceException {
-        Parameter param = new Parameter(id, "", value, Parameter.Type.REFERENCE, element.getId());
+        Parameter param = new Parameter(id, value, "", Parameter.Type.REFERENCE, element.getId());
         add(model, param, element);
         return param;
     }
@@ -402,7 +373,7 @@ public class ParameterService
 
         Parameter param;
         String[] candidates;
-        
+
         function = function.replace(" ", "");
         candidates = function.split(functionBuilder.getOperatorExtRegex());
 

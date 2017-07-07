@@ -72,6 +72,10 @@ public class SimulationExecuter extends Thread
 
         isFailed = false;
         simulationOutputReader = null;
+        
+        if (simStopTime == 0 || simIntervals == 0) {
+            return;
+        }
 
         String override = "-override=outputFormat=ia,stopTime=" + simStopTime + ",stepSize=" + simStopTime / simIntervals + ",tolerance=0.0001";
 

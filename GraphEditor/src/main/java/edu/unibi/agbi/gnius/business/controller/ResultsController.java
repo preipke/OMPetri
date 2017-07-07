@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
@@ -96,10 +97,10 @@ public class ResultsController implements Initializable
     @FXML private TableColumn<SimulationData, String> columnElementId;
     @FXML private TableColumn<SimulationData, String> columnElementName;
     @FXML private TableColumn<SimulationData, String> columnValueName;
-    @FXML private TableColumn<SimulationData, String> columnValueStart;
-    @FXML private TableColumn<SimulationData, String> columnValueEnd;
-    @FXML private TableColumn<SimulationData, String> columnValueMin;
-    @FXML private TableColumn<SimulationData, String> columnValueMax;
+    @FXML private TableColumn<SimulationData, Number> columnValueStart;
+    @FXML private TableColumn<SimulationData, Number> columnValueEnd;
+    @FXML private TableColumn<SimulationData, Number> columnValueMin;
+    @FXML private TableColumn<SimulationData, Number> columnValueMax;
     @FXML private TableColumn<SimulationData, CheckBox> columnEnable;
     @FXML private TableColumn<SimulationData, Button> columnDrop;
 
@@ -511,31 +512,23 @@ public class ResultsController implements Initializable
         System.out.println("TODO!");
     }
 
-    private String getStartValueString(List<Data> data) {
+    private Double getStartValue(List<Data> data) {
         if (data.isEmpty()) {
-            return "N/A";
+            return null;
         }
-        return String.valueOf(
-                round(
-                        parseDouble(
-                                data.get(0).getYValue()
-                        )));
+        return round(parseDouble(data.get(0).getYValue()));
     }
 
-    private String getEndValueString(List<Data> data) {
+    private Double getEndValue(List<Data> data) {
         if (data.isEmpty()) {
-            return "N/A";
+            return null;
         }
-        return String.valueOf(
-                round(
-                        parseDouble(
-                                data.get(data.size() - 1).getYValue()
-                        )));
+        return round(parseDouble(data.get(data.size() - 1).getYValue()));
     }
 
-    private String getMinValueString(List<Data> data) {
+    private Double getMinValue(List<Data> data) {
         if (data.isEmpty()) {
-            return "N/A";
+            return null;
         }
         double value, min = parseDouble(data.get(0).getYValue());
         for (Data d : data) {
@@ -544,12 +537,12 @@ public class ResultsController implements Initializable
                 min = value;
             }
         }
-        return String.valueOf(round(min));
+        return round(min);
     }
 
-    private String getMaxValueString(List<Data> data) {
+    private Double getMaxValue(List<Data> data) {
         if (data.isEmpty()) {
-            return "N/A";
+            return null;
         }
         double value, max = parseDouble(data.get(0).getYValue());
         for (Data d : data) {
@@ -558,7 +551,7 @@ public class ResultsController implements Initializable
                 max = value;
             }
         }
-        return String.valueOf(round(max));
+        return round(max);
     }
 
     private double parseDouble(Object o) {
@@ -724,10 +717,10 @@ public class ResultsController implements Initializable
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementId()));
         columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementName()));
         columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(resultsService.getValueName(cellData.getValue().getVariable(), cellData.getValue().getSimulation())));
-        columnValueStart.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getStartValueString(cellData.getValue().getSeries().getData())));
-        columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getEndValueString(cellData.getValue().getSeries().getData())));
-        columnValueMin.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getMinValueString(cellData.getValue().getSeries().getData())));
-        columnValueMax.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(getMaxValueString(cellData.getValue().getSeries().getData())));
+        columnValueStart.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getStartValue(cellData.getValue().getSeries().getData())));
+        columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getEndValue(cellData.getValue().getSeries().getData())));
+        columnValueMin.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getMinValue(cellData.getValue().getSeries().getData())));
+        columnValueMax.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getMaxValue(cellData.getValue().getSeries().getData())));
 
         columnEnable.setCellValueFactory(cellData -> {
             CheckBox cb = new CheckBox();

@@ -85,13 +85,14 @@ public class XmlModelConverter
     private final String attrCreationDateTime = "creationDateTime";
     private final String attrDataId = "dataId";
     private final String attrDescription = "description";
+    private final String attrDisabled = "disabled";
     private final String attrElementId = "elementId";
     private final String attrId = "id";
     private final String attrLabel = "label";
     private final String attrMax = "max";
     private final String attrMin = "min";
     private final String attrName = "name";
-    private final String attrNote = "note";
+    private final String attrUnit = "unit";
     private final String attrParameterId = "parameterId";
     private final String attrPosX = "posX";
     private final String attrPosY = "posY";
@@ -99,7 +100,6 @@ public class XmlModelConverter
     private final String attrStart = "start";
     private final String attrTarget = "target";
     private final String attrType = "type";
-    private final String attrUnit = "unit";
     private final String attrValue = "value";
 
     private final String tagArc = "Arc";
@@ -120,6 +120,7 @@ public class XmlModelConverter
     private final String tagNodes = "Nodes";
     private final String tagParameter = "Parameter";
     private final String tagParameters = "Parameters";
+    private final String tagParametersLocal = "LocalParameters";
     private final String tagPlace = "Place";
     private final String tagPlaces = "Places";
     private final String tagRelatedParameter = "RelatedParameter";
@@ -212,6 +213,7 @@ public class XmlModelConverter
                         dataDao.getModel().add(place);
                         for (IGraphElement shape : place.getShapes()) {
                             dataDao.getGraphRoot().add((IGraphNode) shape);
+                            shape.getElementHandles().forEach(handle -> handle.setDisabled(place.isDisabled()));
                         }
                     }
                 }
@@ -233,11 +235,18 @@ public class XmlModelConverter
                     if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
                         DataTransition transition = getTransition((Element) n.item(i));
                         transition.getFunction().getParameterIds().forEach(id -> {
-                            dataDao.getModel().getParameter(id).getUsingElements().add(transition);
+                            Parameter param;
+                            if (transition.getParameter(id) != null) {
+                                param = transition.getParameter(id);
+                            } else {
+                                param = dataDao.getModel().getParameter(id);
+                            }
+                            param.getUsingElements().add(transition);
                         });
                         dataDao.getModel().add(transition);
                         for (IGraphElement shape : transition.getShapes()) {
                             dataDao.getGraphRoot().add((IGraphNode) shape);
+                            shape.getElementHandles().forEach(handle -> handle.setDisabled(transition.isDisabled()));
                         }
                     }
                 }
@@ -269,6 +278,7 @@ public class XmlModelConverter
                         dataDao.getModel().add(arc);
                         for (IGraphElement shape : arc.getShapes()) {
                             dataDao.getGraphRoot().add((IGraphArc) shape);
+                            shape.getElementHandles().forEach(handle -> handle.setDisabled(arc.isDisabled()));
                         }
                     }
                 }
@@ -448,7 +458,6 @@ public class XmlModelConverter
     
     private void addNodes(NodeList nl, Model model, Graph graph, Map<String,IGraphNode> nodes) throws IOException {
         
-        IGraphNode shape;
         IElement data;
         Element elem;
         
@@ -461,6 +470,7 @@ public class XmlModelConverter
                     if (data == null) {
                         data = new DataCluster(elem.getAttribute(attrDataId));
                     }
+                    IGraphNode shape;
                     switch (data.getElementType()) {
                         case CLUSTER:
                             shape = new GraphCluster(elem.getAttribute(attrId), (DataCluster) data);
@@ -477,6 +487,7 @@ public class XmlModelConverter
                     shape.getLabel().setText(elem.getAttribute(attrLabel));
                     graph.add(shape);
                     dataService.styleElement(shape);
+                    shape.getElementHandles().forEach(handle -> handle.setDisabled(shape.getDataElement().isDisabled()));
                     setShapePos(elem, shape);
                     nodes.put(shape.getId(), shape);
                 }
@@ -514,7 +525,6 @@ public class XmlModelConverter
     private List<IGraphArc> getConnections(NodeList nl, Model model, Map<String, IGraphNode> nodes) throws IOException {
         
         IGraphNode source, target;
-        IGraphArc arc;
         DataArc data;
         Element elem;
         List<IGraphArc> arcs = new ArrayList();
@@ -532,9 +542,10 @@ public class XmlModelConverter
                         data = new DataClusterArc(elem.getAttribute(attrDataId), source.getDataElement(), target.getDataElement());
                     }
 
-                    arc = new GraphEdge(elem.getAttribute(attrId), source, target, data);
+                    IGraphArc arc = new GraphEdge(elem.getAttribute(attrId), source, target, data);
                     arc.getDataElement().getShapes().add(arc);
                     dataService.styleElement(arc);
+                    arc.getElementHandles().forEach(handle -> handle.setDisabled(arc.getDataElement().isDisabled()));
                     arcs.add(arc);
                 }
             }
@@ -571,6 +582,9 @@ public class XmlModelConverter
                 }
             }
         }
+        if (elem.getAttribute(attrDisabled) != null) {
+            arc.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
+        }
         arc.setDescription(elem.getAttribute(attrDescription));
         arc.setName(elem.getAttribute(attrName));
 
@@ -603,6 +617,9 @@ public class XmlModelConverter
                 }
             }
         }
+        if (elem.getAttribute(attrDisabled) != null) {
+            place.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
+        }
         place.setDescription(elem.getAttribute(attrDescription));
         place.setName(elem.getAttribute(attrName));
 
@@ -610,15 +627,37 @@ public class XmlModelConverter
     }
 
     private DataTransition getTransition(final Element elem) throws Exception {
+        
+        NodeList nl;
+        Element tmp;
+        DataTransition transition;
 
-        DataTransition transition = new DataTransition(
+        transition = new DataTransition(
                 elem.getAttribute(attrId),
                 DataTransition.Type.valueOf(elem.getAttribute(attrType))
         );
         setRelatedParameterIds(elem, transition);
-
-        transition.setFunction(getFunction(elem));
         
+        nl = elem.getElementsByTagName(tagParametersLocal);
+        if (nl.getLength() == 1) {
+            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+
+                tmp = (Element) nl.item(0);
+                nl = tmp.getElementsByTagName(tagParameter);
+
+                for (int i = 0; i < nl.getLength(); i++) {
+                    if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                        transition.addParameter(getParameter((Element) nl.item(i)));
+                    }
+                }
+            }
+        }
+
+
+        if (elem.getAttribute(attrDisabled) != null) {
+            transition.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
+        }
+        transition.setFunction(getFunction(elem));
         transition.setDescription(elem.getAttribute(attrDescription));
         transition.setName(elem.getAttribute(attrName));
 
@@ -662,9 +701,9 @@ public class XmlModelConverter
     private Parameter getParameter(Element elem) {
         Parameter param = new Parameter(
                 elem.getAttribute(attrId),
-                elem.getAttribute(attrNote),
                 elem.getTextContent(),
-                Parameter.Type.valueOf(elem.getAttribute(attrType)),
+                elem.getAttribute(attrUnit),
+                Parameter.Type.valueOf(elem.getAttribute(attrType).toUpperCase()),
                 elem.getAttribute(attrElementId)
         );
         return param;
@@ -731,8 +770,13 @@ public class XmlModelConverter
         model.appendChild(getPlacesElement(dom, dataDao.getModel().getPlaces()));
         model.appendChild(getTransitionsElement(dom, dataDao.getModel().getTransitions()));
         model.appendChild(getColorsElement(dom, dataDao.getModel().getColours()));
-        model.appendChild(getParametersElement(dom, dataDao.getModel().getParameters()));
         model.appendChild(getGraphElement(dom, dataDao.getGraphRoot()));
+            
+        Element params = dom.createElement(tagParameters);
+        dataDao.getModel().getParameters().forEach(param -> {
+            params.appendChild(getParameterElement(dom, param));
+        });
+        model.appendChild(params);
 
         dom.appendChild(model);
         dom.normalize();
@@ -761,6 +805,9 @@ public class XmlModelConverter
             a.setAttribute(attrType, data.getArcType().toString());
             a.setAttribute(attrSource, data.getSource().getId());
             a.setAttribute(attrTarget, data.getTarget().getId());
+            if (data.isDisabled()) {
+                a.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
+            }
             if (data.getName() != null && !data.getName().isEmpty()) {
                 a.setAttribute(attrName, data.getName());
             }
@@ -783,6 +830,9 @@ public class XmlModelConverter
             Element p = dom.createElement(tagPlace);
             p.setAttribute(attrId, data.getId());
             p.setAttribute(attrType, data.getPlaceType().toString());
+            if (data.isDisabled()) {
+                p.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
+            }
             if (data.getName() != null && !data.getName().isEmpty()) {
                 p.setAttribute(attrName, data.getName());
             }
@@ -808,6 +858,9 @@ public class XmlModelConverter
             Element t = dom.createElement(tagTransiton);
             t.setAttribute(attrId, data.getId());
             t.setAttribute(attrType, data.getTransitionType().toString());
+            if (data.isDisabled()) {
+                t.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
+            }
             if (data.getName() != null && !data.getName().isEmpty()) {
                 t.setAttribute(attrName, data.getName());
             }
@@ -818,6 +871,12 @@ public class XmlModelConverter
                 t.setAttribute(attrDescription, data.getDescription());
             }
             t.appendChild(getRelatedParameterIdsElement(dom, data));
+            
+            Element p = dom.createElement(tagParametersLocal);
+            data.getParameters().forEach(param -> {
+                p.appendChild(getParameterElement(dom, param));
+            });
+            t.appendChild(p);
 
             Element f = dom.createElement(tagFunction);
             if (!data.getFunction().getUnit().isEmpty()) {
@@ -844,22 +903,16 @@ public class XmlModelConverter
         return elements;
     }
     
-    private Element getParametersElement(Document dom, Collection<Parameter> parameters) {
-        Element elements = dom.createElement(tagParameters);
-        parameters.forEach(param -> {
-            
-            Element p = dom.createElement(tagParameter);
-            p.setAttribute(attrId, param.getId());
-            if (param.getUnit() != null && !param.getUnit().isEmpty()) {
-                p.setAttribute(attrNote, param.getUnit());
-            }
-            p.setAttribute(attrType, param.getType().toString());
-            p.setTextContent(param.getValue());
-            p.setAttribute(attrElementId, param.getRelatedElementId());
-
-            elements.appendChild(p);
-        });
-        return elements;
+    private Element getParameterElement(Document dom, Parameter param) {
+        Element p = dom.createElement(tagParameter);
+        p.setAttribute(attrId, param.getId());
+        p.setTextContent(param.getValue());
+        if (param.getUnit() != null && !param.getUnit().isEmpty()) {
+            p.setAttribute(attrUnit, param.getUnit());
+        }
+        p.setAttribute(attrType, param.getType().toString());
+        p.setAttribute(attrElementId, param.getRelatedElementId());
+        return p;
     }
     
     private Element getGraphElement(Document dom, Graph graph) {

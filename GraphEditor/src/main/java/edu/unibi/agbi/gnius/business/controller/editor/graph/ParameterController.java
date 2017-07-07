@@ -170,7 +170,7 @@ public class ParameterController implements Initializable
     private void CreateParameter(DataTransition transition) {
 
         String id = inputParamName.getText();
-        String note = inputParamNote.getText();
+        String unit = inputParamNote.getText();
         String value = inputParamValue.getText();
         Parameter.Type type = choiceParamScope.getSelectionModel().getSelectedItem();
 
@@ -207,7 +207,7 @@ public class ParameterController implements Initializable
             return;
         }
 
-        Parameter param = new Parameter(id, note, value, type, null);
+        Parameter param = new Parameter(id, value, unit, type, null);
         try {
             parameterService.add(param, transition);
             if (param.getType() == Parameter.Type.LOCAL) {
