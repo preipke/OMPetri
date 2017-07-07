@@ -65,9 +65,4 @@ public final class DataTransition extends Transition implements IDataNode
             ((IGraphNode) shape).getLabel().setText(text);
         }
     }
-
-    @Override
-    public String toString() {
-        return "(" + id + ") " + name;
-    }
 }

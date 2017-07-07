@@ -65,9 +65,4 @@ public final class DataPlace extends Place implements IDataNode
             ((IGraphNode) shape).getLabel().setText(text);
         }
     }
-
-    @Override
-    public String toString() {
-        return "(" + id + ") " + name;
-    }
 }

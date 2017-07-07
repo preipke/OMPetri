@@ -206,17 +206,17 @@ public class SbmlModelConverter
 
             try {
                 parameterService.ValidateFunction(dao.getModel(), transition.getFunction().toString(), (DataTransition) transition);
-                transition.getFunction().getParameterIds().forEach(paramId -> {
-                    if (dao.getModel().getParameter(paramId) != null) {
-                        dao.getModel().getParameter(paramId).getUsingElements().add(transition);
-                    } else if (transition.getParameter(paramId) != null) {
-                        transition.getParameter(paramId).getUsingElements().add(transition);
-                    } else {
-                        System.out.println("Unavailable parameter '" + paramId + "' requested.");
-                    }
-                });
             } catch (ParameterServiceException ex) {
                 throw new IOException(ex);
+            }
+            for (String paramId : transition.getFunction().getParameterIds()) {
+                if (dao.getModel().getParameter(paramId) != null) {
+                    dao.getModel().getParameter(paramId).getUsingElements().add(transition);
+                } else if (transition.getParameter(paramId) != null) {
+                    transition.getParameter(paramId).getUsingElements().add(transition);
+                } else {
+                    throw new Exception("Unavailable parameter '" + paramId + "' requested.");
+                }
             }
         }
 
