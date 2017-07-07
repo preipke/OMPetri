@@ -12,12 +12,13 @@ import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
-import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
+import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircle;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.DoubleProperty;
+import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.QuadCurveTo;
@@ -31,24 +32,24 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
 {
     private final DoubleProperty endXProperty;
     private final DoubleProperty endYProperty;
-    
+
     private final List<GravisShapeHandle> elementHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
 
     private final IGravisNode source;
     private final IGravisNode target;
-    
+
     private final GravisChildArrow arrow;
     private final GravisChildCircle circle;
-    
+
     private final GravisType type;
 
     /**
-     * 
+     *
      * @param id
      * @param source
      * @param target
-     * @param type 
+     * @param type
      */
     public GravisCurve(String id, IGravisNode source, IGravisNode target, GravisType type) {
 
@@ -58,10 +59,7 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
         this.target = target;
         this.type = type;
 
-        /**
-         * Control point X coordinate.
-         */
-        DoubleBinding bindingCurveControlX = new DoubleBinding()
+        DoubleBinding slope = new DoubleBinding()
         {
             {
                 super.bind(
@@ -81,11 +79,7 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
                 double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
                 double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
-                double x3, y3;
-                x3 = (x1 + x2) / 2;
-                y3 = (y1 + y2) / 2;
-
-                double deltaX = (x1 - x2);
+                double deltaX = (x2 - x1);
                 double deltaY = (y2 - y1);
 
                 if (deltaX < 1 && deltaX > -1) {
@@ -104,245 +98,259 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
                     }
                 }
 
-                double m = deltaX / deltaY;
-                double b = y3 - m * x3;
+                return deltaY / deltaX;
+            }
+        };
+
+        DoubleBinding slopeReverse = new DoubleBinding()
+        {
+            {
+                super.bind(slope);
+            }
+
+            @Override
+            protected double computeValue() {
+
+                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
+
+                double x2 = target.translateXProperty().get() + target.getCenterOffsetX();
+                double y2 = target.translateYProperty().get() + target.getCenterOffsetY();
+
+                double deltaX = (x1 - x2);
+                double deltaY = (y2 - y1);
+
+                if (deltaX < 1 && deltaX > -1) {
+                    if (deltaX >= 0) {
+                        deltaX = 1;
+                    }{
+                        deltaX = -1;
+                    }
+                }
+
+                if (deltaY < 1 && deltaY > -1) {
+                    if (deltaY > 0) {
+                        deltaY = 1;
+                    } else if (deltaY == 0) {
+                        return 0;
+                    }{
+                        deltaY = -1;
+                    }
+                }
+                
+                return deltaX / deltaY;
+            }
+        };
+
+        DoubleBinding lineStartX = new DoubleBinding()
+        {
+            {
+                super.bind(slopeReverse);
+            }
+
+            @Override
+            protected double computeValue() {
+
+                double x0 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y0 = source.translateYProperty().get() + source.getCenterOffsetY();
+
+                double m = slopeReverse.get();
+                
+                if (m == 0) {
+                    return x0;
+                }
+                
+                double b = y0 - m * x0;
                 double r = GravisProperties.ARC_GAP / 2;
 
-                double p = 2 * (m * b - m * y3 - x3) / (1 + m * m);
-                double q = (x3 * x3 + b * b + y3 * y3 - 2 * b * y3 - r * r) / (1 + m * m);
+                double p = 2 * (m * b - m * y0 - x0) / (1 + m * m);
+                double q = (x0 * x0 + b * b + y0 * y0 - 2 * b * y0 - r * r) / (1 + m * m);
 
-                if (y2 >= y1) {
-                    return -p / 2 + Math.sqrt(p * p / 4 - q);
-                } else {
+                if (y0 <= target.translateYProperty().get() + target.getCenterOffsetY()) {
+                    return -p / 2 + Math.sqrt(p * p / 4 - q); // higher x coordinate
+                }{
                     return -p / 2 - Math.sqrt(p * p / 4 - q);
                 }
             }
         };
 
-        /**
-         * Control point Y coordinate.
-         */
-        DoubleBinding bindingCurveControlY = new DoubleBinding()
+        DoubleBinding lineStartY = new DoubleBinding()
         {
             {
-                super.bind(bindingCurveControlX);
+                super.bind(lineStartX);
             }
 
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
-                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
-
-                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
-
-                double x = (x1 - x2);
-                double y = (y2 - y1);
-
-                if (x < 1 && x > -1) {
-                    if (x >= 0) {
-                        x = 1;
-                    } else {
-                        x = -1;
+                double x0 = source.translateXProperty().get() + source.getCenterOffsetX();
+                double y0 = source.translateYProperty().get() + source.getCenterOffsetY();
+                double m = slopeReverse.get();
+                
+                if (m == 0) {
+                    if (x0 < target.translateXProperty().get()) {
+                        return y0 - GravisProperties.ARC_GAP / 2;
+                    }{
+                        return y0 + GravisProperties.ARC_GAP / 2;
                     }
+                }{
+                    return m * lineStartX.get() + y0 - m * x0;
                 }
 
-                if (y < 1 && y > -1) {
-                    if (y >= 0) {
-                        y = 1;
-                    } else {
-                        y = -1;
-                    }
-                }
-
-                return x / y * bindingCurveControlX.get() + ((y1 + y2) - x / y * (x1 + x2)) / 2;
             }
         };
 
-        /**
-         * Line's end X coordinate. Changes it's value on any coordinate changes
-         * for the source or target.
-         */
-        DoubleBinding bindingCurveEndX = new DoubleBinding()
+        DoubleBinding targetOffsetX = new DoubleBinding()
         {
             {
-                super.bind(
-                        bindingCurveControlY
-                );
+                super.bind(lineStartY);
             }
 
-            /**
-             * Computes the X coordinate. Computes the intersection point of the
-             * line with a circle through the target coordinates.
-             *
-             * @return
-             */
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
-                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
+                double x0 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
+                double y0 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
 
-                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
+                double m = slope.get();
+                double b = y0 - m * x0;
+                double r = GravisProperties.ARROW_TARGET_DISTANCE;
 
-                double x = (x2 - x1);
-                double y = (y2 - y1);
+                double p = 2 * (m * b - m * y0 - x0) / (1 + m * m);
+                double q = (x0 * x0 + b * b + y0 * y0 - 2 * b * y0 - r * r) / (1 + m * m);
 
-                if (x < 1 && x > -1) {
-                    if (x >= 0) {
-                        x = 1;
-                    } else {
-                        x = -1;
-                    }
-                }
-
-                if (y < 1 && y > -1) {
-                    if (y >= 0) {
-                        y = 1;
-                    } else {
-                        y = -1;
-                    }
-                }
-
-                double b = y1 - y / x * x1;
-                double p = 2 * (y / x * b - y / x * y2 - x2) / (1 + y / x * y / x);
-                double q = (x2 * x2 + b * b + y2 * y2 - 2 * b * y2 - GravisProperties.ARROW_TARGET_DISTANCE * GravisProperties.ARROW_TARGET_DISTANCE) / (1 + y / x * y / x);
-
-                if (x2 <= x1) {
-                    return -p / 2 + Math.sqrt(p * p / 4 - q);
-                } else {
+                if (x0 <= (source.translateXProperty().get() + source.getCenterOffsetX())) {
+                    return -p / 2 + Math.sqrt(p * p / 4 - q); // higher x coordinate
+                }{
                     return -p / 2 - Math.sqrt(p * p / 4 - q);
                 }
             }
         };
 
-        /**
-         * Line's end Y coordinate. Changes it's value on changes of the related
-         * X coordinate.
-         */
-        DoubleBinding bindingCurveEndY = new DoubleBinding()
+        DoubleBinding targetOffsetY = new DoubleBinding()
         {
             {
-                super.bind(bindingCurveEndX);
+                super.bind(targetOffsetX);
             }
 
-            /**
-             * Uses the previously computed X value to determine the Y value.
-             * Uses line function.
-             *
-             * @return
-             */
             @Override
             protected double computeValue() {
 
-                double x1 = source.translateXProperty().get() + source.getCenterOffsetX();
-                double y1 = source.translateYProperty().get() + source.getCenterOffsetY();
+                double x0 = target.translateXProperty().get() + target.getCenterOffsetX();
+                double y0 = target.translateYProperty().get() + target.getCenterOffsetY();
 
-                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
-
-                double x = (x2 - x1);
-                double y = (y2 - y1);
-
-                if (x < 1 && x > -1) {
-                    if (x >= 0) {
-                        x = 1;
-                    } else {
-                        x = -1;
-                    }
-                }
-
-                if (y < 1 && y > -1) {
-                    if (y >= 0) {
-                        y = 1;
-                    } else {
-                        y = -1;
-                    }
-                }
-
-                return y / x * bindingCurveEndX.get() + y1 - y / x * x1;
+                return slope.get() * targetOffsetX.get() + y0 - slope.get() * x0;
             }
         };
-        
+
+        DoubleBinding lineEndX = new DoubleBinding()
+        {
+            {
+                super.bind(targetOffsetY);
+            }
+
+            @Override
+            protected double computeValue() {
+
+                /**
+                 * Compute target point location.
+                 */
+                double x0 = targetOffsetX.get() + 0.0001;
+                double y0 = targetOffsetY.get();
+
+                double m = slopeReverse.get();
+                if (m == 0) {
+                    return x0;
+                }
+                
+                double b = y0 - m * x0;
+                double r = GravisProperties.ARC_GAP / 2;
+
+                double p = 2 * (m * b - m * y0 - x0) / (1 + m * m);
+                double q = (x0 * x0 + b * b + y0 * y0 - 2 * b * y0 - r * r) / (1 + m * m);
+
+                if (y0 > source.translateYProperty().get() + source.getCenterOffsetY() + 0.0001) {
+                    return -p / 2 + Math.sqrt(p * p / 4 - q); // higher x coordinate
+                }{
+                    return -p / 2 - Math.sqrt(p * p / 4 - q);
+                }
+            }
+        };
+
+        DoubleBinding lineEndY = new DoubleBinding()
+        {
+            {
+                super.bind(lineEndX);
+            }
+
+            @Override
+            protected double computeValue() {
+
+                double x0 = targetOffsetX.get();
+                double y0 = targetOffsetY.get();
+                double m = slopeReverse.get();
+                
+                if (m == 0) {
+                    if (x0 < target.translateXProperty().get()) {
+                        return y0 - GravisProperties.ARC_GAP / 2;
+                    }{
+                        return y0 + GravisProperties.ARC_GAP / 2;
+                    }
+                }{
+                    return m * lineEndX.get() + y0 - m * x0;
+                }
+            }
+        };
+
         DoubleBinding arrowAngle = new DoubleBinding()
         {
             {
-                super.bind(bindingCurveEndY);
+                super.bind(lineEndY);
             }
 
             @Override
             protected double computeValue() {
 
-                double x1 = bindingCurveControlX.get();
-                double y1 = bindingCurveControlY.get();
-
-                double x2 = target.translateXProperty().get() + target.getCenterOffsetX() + 0.0001;
-                double y2 = target.translateYProperty().get() + target.getCenterOffsetY() + 0.0001;
-
-                double x = (x2 - x1);
-                double y = (y2 - y1);
-
-                if (x < 1 && x > -1) {
-                    if (x >= 0) {
-                        x = 1;
-                    } else {
-                        x = -1;
-                    }
-                }
-
-                if (y < 1 && y > -1) {
-                    if (y >= 0) {
-                        y = 1;
-                    } else {
-                        y = -1;
-                    }
-                }
-
                 /**
-                 * Winkelverlauf im Uhrzeigersinn: Oben links: 0 bis 90 +180
-                 * Oben rechts: -90 bis 0 Unten rechts: 0 bis 90 Unten links:
-                 * -90 bis 0 +180
+                 * Winkel je Koordinatenabschnitt: 
+                 * Unten links: -90 bis 0 +180 * Oben links: 0 bis 90 +180 * Oben rechts: -90 bis 0 * Unten rechts: 0 bis 90 
                  */
-                if (x2 < x1) {
-                    return Math.toDegrees(Math.atan(y / x)) + 180;
-                } else {
-                    return Math.toDegrees(Math.atan(y / x));
+                if (lineEndX.get() < lineStartX.get()) {
+                    return Math.toDegrees(Math.atan(slope.get())) + 180;
+                }{
+                    return Math.toDegrees(Math.atan(slope.get()));
                 }
             }
         };
-        
-        MoveTo mv = new MoveTo();
-        mv.xProperty().bind(source.translateXProperty().add(source.getCenterOffsetX()));
-        mv.yProperty().bind(source.translateYProperty().add(source.getCenterOffsetY()));
 
-        QuadCurveTo qct = new QuadCurveTo();
-        qct.controlXProperty().bind(bindingCurveControlX);
-        qct.controlYProperty().bind(bindingCurveControlY);
-        qct.xProperty().bind(bindingCurveEndX);
-        qct.yProperty().bind(bindingCurveEndY);
-        
-        this.endXProperty = qct.xProperty();
-        this.endYProperty = qct.yProperty();
-        
+        MoveTo mv = new MoveTo();
+        mv.xProperty().bind(lineStartX);
+        mv.yProperty().bind(lineStartY);
+
+        LineTo lt = new LineTo();
+        lt.xProperty().bind(lineEndX);
+        lt.yProperty().bind(lineEndY);
+
+        this.getElements().add(mv);
+        this.getElements().add(lt);
+
+        this.endXProperty = lt.xProperty();
+        this.endYProperty = lt.yProperty();
+
         this.arrow = new GravisChildArrow(this);
         this.arrow.rotateProperty().bind(arrowAngle);
         this.arrow.translateXProperty().bind(this.endXProperty.subtract(GravisProperties.ARROW_HEIGHT / 2));
         this.arrow.translateYProperty().bind(this.endYProperty.subtract(GravisProperties.ARROW_WIDTH / 2));
-        
+
         this.circle = new GravisChildCircle(this);
         this.circle.centerXProperty().bind(this.endXProperty);
         this.circle.centerYProperty().bind(this.endYProperty);
         this.circle.setRadius(GravisProperties.CIRCLE_SMALL_RADIUS);
 
-        this.getElements().add(mv);
-        this.getElements().add(qct);
-        
         this.elementHandles.add(new GravisShapeHandle(this));
         this.elementHandles.addAll(this.arrow.getElementHandles());
         this.elementHandles.addAll(this.circle.getElementHandles());
-        
+
         this.shapes.add(this);
         this.shapes.add(this.arrow);
         this.shapes.add(this.circle);
@@ -412,8 +420,8 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
         handles.addAll(circle.getElementHandles());
         return handles;
     }
-    
-    @Override 
+
+    @Override
     public GravisType getType() {
         return type;
     }

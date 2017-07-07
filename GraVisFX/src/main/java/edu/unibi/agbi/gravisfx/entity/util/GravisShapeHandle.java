@@ -18,13 +18,15 @@ import javafx.scene.Group;
  * @author PR
  */
 public class GravisShapeHandle {
+    private static final String PSEUDO_CLASS_DISABLED_IDENT = "disabled";
+    private static final String PSEUDO_CLASS_HIGHLIGHTED_IDENT = "highlighted";
+    private static final String PSEUDO_CLASS_HOVERED_IDENT = "hovered";
     private static final String PSEUDO_CLASS_SELECTED_IDENT = "selected";
-    private static final String PSEUDO_CLASS_HIGHLIGHT_IDENT = "highlighted";
-    private static final String PSEUDO_CLASS_HOVER_IDENT = "hovered";
 
+    private static final PseudoClass PSEUDO_CLASS_DISABLED = PseudoClass.getPseudoClass(PSEUDO_CLASS_DISABLED_IDENT);
+    private static final PseudoClass PSEUDO_CLASS_HIGHLIGHTED = PseudoClass.getPseudoClass(PSEUDO_CLASS_HIGHLIGHTED_IDENT);
+    private static final PseudoClass PSEUDO_CLASS_HOVERED = PseudoClass.getPseudoClass(PSEUDO_CLASS_HOVERED_IDENT);
     private static final PseudoClass PSEUDO_CLASS_SELECTED = PseudoClass.getPseudoClass(PSEUDO_CLASS_SELECTED_IDENT);
-    private static final PseudoClass PSEUDO_CLASS_HIGHLIGHT = PseudoClass.getPseudoClass(PSEUDO_CLASS_HIGHLIGHT_IDENT);
-    private static final PseudoClass PSEUDO_CLASS_HOVER = PseudoClass.getPseudoClass(PSEUDO_CLASS_HOVER_IDENT);
 
     private final IGravisElement element;
 
@@ -37,6 +39,57 @@ public class GravisShapeHandle {
     public IGravisElement getElement() {
         return element;
     }
+
+    private final BooleanProperty isDisabled = new BooleanPropertyBase(false) {
+        @Override
+        protected void invalidated() {
+            element.pseudoClassStateChanged(PSEUDO_CLASS_DISABLED, get());
+        }
+
+        @Override
+        public Object getBean() {
+            return element.getBean();
+        }
+
+        @Override
+        public String getName() {
+            return PSEUDO_CLASS_DISABLED_IDENT;
+        }
+    };
+
+    private final BooleanProperty isHighlighted = new BooleanPropertyBase(false) {
+        @Override
+        protected void invalidated() {
+            element.pseudoClassStateChanged(PSEUDO_CLASS_HIGHLIGHTED, get());
+        }
+
+        @Override
+        public Object getBean() {
+            return element.getBean();
+        }
+
+        @Override
+        public String getName() {
+            return PSEUDO_CLASS_HIGHLIGHTED_IDENT;
+        }
+    };
+
+    private final BooleanProperty isHovered = new BooleanPropertyBase(false) {
+        @Override
+        protected void invalidated() {
+            element.pseudoClassStateChanged(PSEUDO_CLASS_HOVERED, get());
+        }
+
+        @Override
+        public Object getBean() {
+            return element.getBean();
+        }
+
+        @Override
+        public String getName() {
+            return PSEUDO_CLASS_HOVERED_IDENT;
+        }
+    };
 
     private final BooleanProperty isSelected = new BooleanPropertyBase(false) {
         @Override
@@ -55,40 +108,6 @@ public class GravisShapeHandle {
         }
     };
 
-    private final BooleanProperty isHighlighted = new BooleanPropertyBase(false) {
-        @Override
-        protected void invalidated() {
-            element.pseudoClassStateChanged(PSEUDO_CLASS_HIGHLIGHT, get());
-        }
-
-        @Override
-        public Object getBean() {
-            return element.getBean();
-        }
-
-        @Override
-        public String getName() {
-            return PSEUDO_CLASS_HIGHLIGHT_IDENT;
-        }
-    };
-
-    private final BooleanProperty isHovered = new BooleanPropertyBase(false) {
-        @Override
-        protected void invalidated() {
-            element.pseudoClassStateChanged(PSEUDO_CLASS_HOVER, get());
-        }
-
-        @Override
-        public Object getBean() {
-            return element.getBean();
-        }
-
-        @Override
-        public String getName() {
-            return PSEUDO_CLASS_HOVER_IDENT;
-        }
-    };
-
     public String getActiveStyleClass() {
         return activeStyleClass;
     }
@@ -100,9 +119,9 @@ public class GravisShapeHandle {
 
         activeStyleClass = name;
     }
-
-    public void setSelected(boolean value) {
-        isSelected.set(value);
+    
+    public void setDisabled(boolean value) {
+        isDisabled.set(value);
     }
 
     public void setHighlighted(boolean value) {
@@ -113,8 +132,12 @@ public class GravisShapeHandle {
         isHovered.set(value);
     }
 
-    public boolean isSelected() {
-        return isSelected.get();
+    public void setSelected(boolean value) {
+        isSelected.set(value);
+    }
+
+    public boolean isDisabled() {
+        return isDisabled.get();
     }
 
     public boolean isHighlighted() {
@@ -123,6 +146,10 @@ public class GravisShapeHandle {
 
     public boolean isHovered() {
         return isHovered.get();
+    }
+
+    public boolean isSelected() {
+        return isSelected.get();
     }
 
     public void putOnTop() {

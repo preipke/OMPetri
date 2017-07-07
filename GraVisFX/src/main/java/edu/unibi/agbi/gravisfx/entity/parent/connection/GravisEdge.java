@@ -12,7 +12,6 @@ import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
-import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;

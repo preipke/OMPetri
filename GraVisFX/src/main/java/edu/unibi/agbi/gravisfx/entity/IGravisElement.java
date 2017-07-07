@@ -30,6 +30,8 @@ public interface IGravisElement
     public List<Shape> getShapes();
 
     public List<GravisShapeHandle> getElementHandles();
+    
+    public void setDisable(boolean value);
 
     public void pseudoClassStateChanged(PseudoClass pseudoClass, boolean active);
 
