@@ -7,7 +7,7 @@
 
 <VBox maxHeight="-Infinity" maxWidth="-Infinity" 
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:id="parameterFrame" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.graph.ParameterController">
+      fx:id="parameterFrame" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.graph.ParameterControllerOld">
     <children>
         <TitledPane animated="false" text="Create Parameter" HBox.hgrow="ALWAYS">
             <content>

@@ -426,4 +426,9 @@ public class GravisCurve extends Path implements IGravisConnection, IGravisParen
     public final double getCenterOffsetY() {
         return 0;
     }
+    
+    @Override
+    public String toString() {
+        return getId() + " (x = " + getTranslateX() + ", y = " + getTranslateY() + ")";
+    }
 }

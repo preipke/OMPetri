@@ -65,7 +65,7 @@ public abstract class Element implements IElement
     
     @Override
     public String toString() {
-        return "(" + id + ") " + name;
+        return name + " (" + id + ")";
     }
 
     public enum Type

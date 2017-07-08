@@ -168,4 +168,9 @@ public class GravisCircle extends Circle implements IGravisNode
     public void setInnerRectangleVisible(boolean value) {
         this.rectangle.setVisible(value);
     }
+    
+    @Override
+    public String toString() {
+        return getId() + " (x = " + getTranslateX() + ", y = " + getTranslateY() + ")";
+    }
 }

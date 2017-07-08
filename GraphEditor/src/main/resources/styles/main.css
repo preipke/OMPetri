@@ -1,11 +1,11 @@
-/*.button {
-    -fx-font-weight: bold;
+/*
+#button {
+    -fx-font-size: 2em;
     -fx-border-color: steelblue;
     -fx-border-width: 2;
     -fx-border-style: dashed;
-}*/
-
-/*.button-deleteTableRow {
+}
+.button-deleteTableRow {
     -fx-background-color: lightgrey;
     -fx-background-image: url('/icons/delete.png');
     -fx-background-repeat: no-repeat;
@@ -29,6 +29,15 @@
     -fx-background-size: 20px;
     -fx-pref-height: 26px;
     -fx-pref-width: 26px;
+}
+
+#buttonReturn {
+    -fx-background-image: url('/icons/return.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 1.5em;
+    -fx-pref-height: 1em;
+    -fx-pref-width: 2em;
 }
 
 #buttonRefresh {

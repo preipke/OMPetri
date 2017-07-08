@@ -70,7 +70,7 @@ public class MainController implements Initializable
         Optional<ButtonType> result = alert.showAndWait();
         if (result.get() == buttonSave) {
             for (DataDao dao : daos) {
-                fileMenuController.SaveAs((Stage) alert.getOwner(), dao);
+                fileMenuController.SaveAs(dao);
             }
             if (event != null) {
                 event.consume();

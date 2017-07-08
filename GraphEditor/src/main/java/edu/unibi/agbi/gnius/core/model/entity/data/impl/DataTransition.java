@@ -9,9 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -22,7 +20,8 @@ public final class DataTransition extends Transition implements IDataNode
 {
     private final Set<IGraphElement> shapes;
 
-    private String description = "";
+    private String description;
+    private boolean isSticky = false;
 
     public DataTransition(String id, Transition.Type type) {
         super(id);
@@ -64,5 +63,23 @@ public final class DataTransition extends Transition implements IDataNode
         for (IGraphElement shape : shapes) {
             ((IGraphNode) shape).getLabel().setText(text);
         }
+    }
+    
+    @Override
+    public void setDisabled(boolean value) {
+        super.setDisabled(value);
+        for (IGraphElement shape : shapes) {
+            ((IGraphNode) shape).getElementHandles().forEach(handle -> handle.setDisabled(value));
+        }
+    }
+
+    @Override
+    public boolean isSticky() {
+        return isSticky;
+    }
+
+    @Override
+    public void setSticky(boolean value) {
+        isSticky = value;
     }
 }

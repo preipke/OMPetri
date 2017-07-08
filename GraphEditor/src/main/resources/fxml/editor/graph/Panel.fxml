@@ -12,7 +12,4 @@
         <fx:include source="Tools.fxml" />
         <fx:include source="Simulation.fxml" />
     </children>
-    <StackPane.margin>
-        <Insets bottom="2.0" />
-    </StackPane.margin>
 </VBox>

@@ -382,4 +382,9 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     public final double getCenterOffsetY() {
         return 0;
     }
+    
+    @Override
+    public String toString() {
+        return getId() + " (x = " + getTranslateX() + ", y = " + getTranslateY() + ")";
+    }
 }

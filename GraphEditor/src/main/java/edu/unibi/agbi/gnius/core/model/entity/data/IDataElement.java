@@ -24,4 +24,8 @@ public interface IDataElement extends IElement
     public void setLabelText(String text);
 
     public Set<IGraphElement> getShapes();
+    
+    public boolean isSticky();
+    
+    public void setSticky(boolean value);
 }

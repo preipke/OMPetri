@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox minHeight="-Infinity" minWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.details.NodeListController">
+    <children>
+        <TitledPane animated="false" collapsible="false" expanded="false" text="Graph">
+            <font>
+                <Font name="System Bold" size="13.0" />
+            </font>
+            <graphic>
+                <Button fx:id="buttonReturn" id="buttonReturn" mnemonicParsing="false" >
+                    <tooltip>
+                        <Tooltip text="Return to graph" />
+                    </tooltip>
+                </Button>
+            </graphic>
+        </TitledPane>
+        <TitledPane animated="false" collapsible="false" maxHeight="1.7976931348623157E308" text="Nodes" VBox.vgrow="ALWAYS">
+            <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <children>
+                                <TextField fx:id="inputFilter" promptText="Filter by Node (ID, Name, Label)" />
+                                <ListView fx:id="listNodes" VBox.vgrow="ALWAYS" />
+                                <!--<HBox alignment="TOP_CENTER" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="buttonEdit" mnemonicParsing="false" text="Edit" />
+                                        <Button fx:id="buttonShow" mnemonicParsing="false" text="Show" />
+                                    </children>
+                                </HBox>-->
+                            </children>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+            </content>
+        </TitledPane>
+    </children>
+</VBox>

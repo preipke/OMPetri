@@ -47,7 +47,7 @@ import org.springframework.stereotype.Controller;
  * @author PR
  */
 @Controller
-public class ParameterController implements Initializable
+public class ParameterControllerOld implements Initializable
 {
     @Autowired private ParameterService parameterService;
     @Autowired private MessengerService messengerService;
@@ -88,7 +88,7 @@ public class ParameterController implements Initializable
     private final ObservableList<Parameter> parametersGlobal;
     private DataTransition transitionSelected;
 
-    public ParameterController() {
+    public ParameterControllerOld() {
         this.parametersLocal = FXCollections.observableArrayList();
         this.parametersGlobal = FXCollections.observableArrayList();
     }

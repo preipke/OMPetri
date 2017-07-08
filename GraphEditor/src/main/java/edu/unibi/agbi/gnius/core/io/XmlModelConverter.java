@@ -21,7 +21,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.DataService;
@@ -550,7 +550,7 @@ public class XmlModelConverter
                         data = new DataClusterArc(elem.getAttribute(attrDataId), source.getDataElement(), target.getDataElement());
                     }
 
-                    IGraphArc arc = new GraphEdge(elem.getAttribute(attrId), source, target, data);
+                    IGraphArc arc = new GraphArc(elem.getAttribute(attrId), source, target, data);
                     arc.getDataElement().getShapes().add(arc);
                     dataService.styleElement(arc);
                     arc.getElementHandles().forEach(handle -> handle.setDisabled(arc.getDataElement().isDisabled()));

@@ -14,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.DataService;
@@ -558,7 +558,7 @@ public class SbmlModelConverter
             }
         }
 
-        connection = new GraphEdge(
+        connection = new GraphArc(
                 dataService.getConnectionId(source, target),
                 source,
                 target,

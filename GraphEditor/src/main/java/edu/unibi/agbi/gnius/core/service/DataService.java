@@ -18,7 +18,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
@@ -138,78 +138,37 @@ public class DataService
         styleElement(node);
         return node;
     }
+    
+    public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataServiceException {
 
-    /**
-     * Changes the subtype of an arc. Styles all related shapes in the scene
-     * accordingly.
-     *
-     * @param arc
-     * @param type
-     * @throws DataServiceException
-     */
-    public synchronized void changeArcType(DataArc arc, DataArc.Type type) throws DataServiceException {
-        DataArc.Type typeOld = arc.getArcType();
-        arc.setArcType(type);
-        try {
-            validateArc(arc);
-        } catch (DataServiceException ex) {
-            arc.setArcType(typeOld);
-            throw ex;
-        }
-        dataDao.setHasChanges(true);
-        styleArc(arc);
-    }
+        switch (element.getElementType()) {
 
-    /**
-     * Changes the subtype of a place. Styles all related shapes in the scene
-     * accordingly.
-     *
-     * @param place
-     * @param type
-     * @throws DataServiceException
-     */
-    public synchronized void changePlaceType(DataPlace place, DataPlace.Type type) throws DataServiceException {
-        DataPlace.Type typeOld = place.getPlaceType();
-        place.setPlaceType(type);
-        try {
-            for (IArc arc : place.getArcsIn()) {
-                validateArc(arc);
-            }
-            for (IArc arc : place.getArcsOut()) {
-                validateArc(arc);
-            }
-        } catch (DataServiceException ex) {
-            place.setPlaceType(typeOld);
-            throw ex;
-        }
-        dataDao.setHasChanges(true);
-        stylePlace(place);
-    }
+            case ARC:
+                DataArc arc = (DataArc) element;
+                DataArc.Type arcType = (DataArc.Type) subtype;
+                if (arc.getArcType() != arcType) {
+                    changeArcType(arc, arcType);
+                }
+                break;
 
-    /**
-     * Changes the subtype of a transition. Styles all related shapes in the
-     * scene accordingly.
-     *
-     * @param transition
-     * @param type
-     * @throws DataServiceException
-     */
-    public synchronized void changeTransitionType(DataTransition transition, DataTransition.Type type) throws DataServiceException {
-        DataTransition.Type typeOld = transition.getTransitionType();
-        transition.setTransitionType(type);
-        try {
-            for (IArc arc : transition.getArcsIn()) {
-                validateArc(arc);
-            }
-            for (IArc arc : transition.getArcsOut()) {
-                validateArc(arc);
-            }
-        } catch (DataServiceException ex) {
-            transition.setTransitionType(typeOld);
-            throw ex;
+            case PLACE:
+                DataPlace place = (DataPlace) element;
+                DataPlace.Type placeType = (DataPlace.Type) subtype;
+                if (place.getPlaceType() != placeType) {
+                    setPlaceTypeDefault(placeType);
+                    changePlaceType(place, placeType);
+                }
+                break;
+
+            case TRANSITION:
+                DataTransition transition = (DataTransition) element;
+                DataTransition.Type transitionType = (DataTransition.Type) subtype;
+                if (transition.getTransitionType() != transitionType) {
+                    setTransitionTypeDefault(transitionType);
+                    changeTransitionType(transition, transitionType);
+                }
+                break;
         }
-        dataDao.setHasChanges(true);
-        styleTransition(transition);
     }
 
     /**
@@ -295,7 +254,7 @@ public class DataService
          * Creating shape.
          */
         id = getConnectionId(source, target);
-        return new GraphEdge(id, source, target, dataArc);
+        return new GraphArc(id, source, target, dataArc);
     }
 
     /**
@@ -305,8 +264,8 @@ public class DataService
      * @return
      */
     public synchronized IGraphArc createConnectionTmp(IGraphNode source) {
-        GraphEdge edge;
-        edge = new GraphEdge(source.getId() + "null", source);
+        GraphArc edge;
+        edge = new GraphArc(source.getId() + "null", source);
         edge.getParentElementHandles().forEach(ele -> {
             ele.setActiveStyleClass(styleArcDefault);
         });
@@ -487,6 +446,79 @@ public class DataService
             default:
                 throw new DataServiceException("Cannot style element of undefined type!");
         }
+    }
+
+    /**
+     * Changes the subtype of an arc. Styles all related shapes in the scene
+     * accordingly.
+     *
+     * @param arc
+     * @param type
+     * @throws DataServiceException
+     */
+    private void changeArcType(DataArc arc, DataArc.Type type) throws DataServiceException {
+        DataArc.Type typeOld = arc.getArcType();
+        arc.setArcType(type);
+        try {
+            validateArc(arc);
+        } catch (DataServiceException ex) {
+            arc.setArcType(typeOld);
+            throw ex;
+        }
+        dataDao.setHasChanges(true);
+        styleArc(arc);
+    }
+
+    /**
+     * Changes the subtype of a place. Styles all related shapes in the scene
+     * accordingly.
+     *
+     * @param place
+     * @param type
+     * @throws DataServiceException
+     */
+    private void changePlaceType(DataPlace place, DataPlace.Type type) throws DataServiceException {
+        DataPlace.Type typeOld = place.getPlaceType();
+        place.setPlaceType(type);
+        try {
+            for (IArc arc : place.getArcsIn()) {
+                validateArc(arc);
+            }
+            for (IArc arc : place.getArcsOut()) {
+                validateArc(arc);
+            }
+        } catch (DataServiceException ex) {
+            place.setPlaceType(typeOld);
+            throw ex;
+        }
+        dataDao.setHasChanges(true);
+        stylePlace(place);
+    }
+
+    /**
+     * Changes the subtype of a transition. Styles all related shapes in the
+     * scene accordingly.
+     *
+     * @param transition
+     * @param type
+     * @throws DataServiceException
+     */
+    private void changeTransitionType(DataTransition transition, DataTransition.Type type) throws DataServiceException {
+        DataTransition.Type typeOld = transition.getTransitionType();
+        transition.setTransitionType(type);
+        try {
+            for (IArc arc : transition.getArcsIn()) {
+                validateArc(arc);
+            }
+            for (IArc arc : transition.getArcsOut()) {
+                validateArc(arc);
+            }
+        } catch (DataServiceException ex) {
+            transition.setTransitionType(typeOld);
+            throw ex;
+        }
+        dataDao.setHasChanges(true);
+        styleTransition(transition);
     }
 
     /**

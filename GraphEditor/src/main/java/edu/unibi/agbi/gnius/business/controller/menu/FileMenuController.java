@@ -180,17 +180,17 @@ public class FileMenuController implements Initializable
         return file;
     }
     
-    public File ShowOpenFile(Stage stage) {
+    public File ShowOpenFile() {
         fileChooser.getExtensionFilters().clear();
         fileChooser.getExtensionFilters().add(typeAll);
         fileChooser.getExtensionFilters().add(typeXml);
         fileChooser.getExtensionFilters().add(typeSbml);
         fileChooser.setTitle("Open model");
-        return fileChooser.showOpenDialog(stage);
+        return fileChooser.showOpenDialog(mainController.getStage());
     }
 
-    public void Open(Stage stage) {
-        File file = ShowOpenFile(stage);
+    public void Open() {
+        File file = ShowOpenFile();
         if (file != null) {
             try {
                 Open(file);
@@ -202,7 +202,7 @@ public class FileMenuController implements Initializable
         }
     }
 
-    public void Save(Stage stage) {
+    public void Save() {
         
         DataDao dao = dataService.getDao();
         File file = dao.getFile();
@@ -228,7 +228,7 @@ public class FileMenuController implements Initializable
         if (filter != null) {
             SaveFile(dao, file, filter);
         } else {
-            SaveAs(stage, dao);
+            SaveAs(dao);
         }
     }
     
@@ -238,8 +238,8 @@ public class FileMenuController implements Initializable
      * @param dao
      * @return indicates wether the model has been saved or not
      */
-    public boolean SaveAs(Stage stage, DataDao dao) {
-        File file = ShowSaveFile(stage, dao);
+    public boolean SaveAs(DataDao dao) {
+        File file = ShowSaveFile(mainController.getStage(), dao);
         return SaveFile(dao, file, latestFilter);
     }
 
@@ -248,9 +248,9 @@ public class FileMenuController implements Initializable
 
         buttonNew.setOnAction(eh -> graphController.CreateTab());
         buttonQuit.setOnAction(eh -> mainController.ShowDialogExit(null));
-        buttonOpen.setOnAction(eh -> Open(mainController.getStage()));
-        buttonSave.setOnAction(eh -> Save(mainController.getStage()));
-        buttonSaveAs.setOnAction(eh -> SaveAs(mainController.getStage(), dataService.getDao()));
+        buttonOpen.setOnAction(eh -> Open());
+        buttonSave.setOnAction(eh -> Save());
+        buttonSaveAs.setOnAction(eh -> SaveAs(dataService.getDao()));
         
         buttonSave.setDisable(true);
         buttonSaveAs.setDisable(true);

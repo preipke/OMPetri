@@ -540,4 +540,9 @@ public class GravisFlexEdge extends Path implements IGravisConnection, IGravisPa
     public GravisType getType() {
         return type;
     }
+    
+    @Override
+    public String toString() {
+        return source.toString() + " \u2192 " + target.toString();
+    }
 }

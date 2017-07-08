@@ -14,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphEdge;
+import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
@@ -378,7 +378,7 @@ public class HierarchyService
         } else {
 
             dataForward = new DataClusterArc(idData, source.getDataElement(), target.getDataElement());
-            arcForward = new GraphEdge(idShape, source, target, dataForward);
+            arcForward = new GraphArc(idShape, source, target, dataForward);
 
             arcs.add(arcForward);
         }

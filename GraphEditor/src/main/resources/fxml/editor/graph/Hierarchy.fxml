@@ -19,7 +19,4 @@
             </content>
         </TitledPane>
     </children>
-    <StackPane.margin>
-        <Insets bottom="2.0" />
-    </StackPane.margin>
 </VBox>

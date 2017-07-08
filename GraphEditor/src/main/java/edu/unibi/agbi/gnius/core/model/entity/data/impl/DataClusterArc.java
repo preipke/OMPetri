@@ -23,7 +23,7 @@ public final class DataClusterArc extends DataArc {
     private final Set<IGraphElement> shapes;
     private final Map<String,IGraphArc> storedArcs;
     
-    private String description = "";
+    private String description;
     
     public DataClusterArc(String id, IDataNode source, IDataNode target) {
         super(id, source, target, null);

@@ -82,4 +82,14 @@ public class DataCluster extends Node implements IDataNode
     public boolean isConstant() {
         throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
+
+    @Override
+    public boolean isSticky() {
+        throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setSticky(boolean value) {
+        throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

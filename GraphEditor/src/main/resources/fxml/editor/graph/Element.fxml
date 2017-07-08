@@ -21,7 +21,7 @@
                                 <GridPane hgap="5.0">
                                     <children>
                                         <Label text="Type" />
-                                        <TextField fx:id="inputSubType" disable="true" editable="false" GridPane.columnIndex="1" />
+                                        <TextField fx:id="inputType" disable="true" editable="false" GridPane.columnIndex="1" />
                                         <Label text="Id" GridPane.rowIndex="1" />
                                         <TextField fx:id="inputId" disable="true" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                         <Label text="Name" GridPane.rowIndex="2" />

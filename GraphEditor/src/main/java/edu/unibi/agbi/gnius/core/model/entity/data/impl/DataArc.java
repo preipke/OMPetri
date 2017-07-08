@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import java.util.HashSet;
@@ -20,7 +21,7 @@ public class DataArc extends Arc implements IDataArc
 {
     private final Set<IGraphElement> shapes;
     
-    private String description = "";
+    private String description;
     
     public DataArc(String id, IDataNode source, Arc.Type arctype) {
         this(id, source, null, arctype);
@@ -59,11 +60,31 @@ public class DataArc extends Arc implements IDataArc
 
     @Override
     public String getLabelText() {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+        return "";
     }
 
     @Override
     public void setLabelText(String text) {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+//        for (IGraphElement shape : shapes) {
+//            ((IGraphArc) shape).getLabel().setText(text);
+//        }
+    }
+    
+    @Override
+    public void setDisabled(boolean value) {
+        super.setDisabled(value);
+        for (IGraphElement shape : shapes) {
+            ((IGraphArc) shape).getElementHandles().forEach(handle -> handle.setDisabled(value));
+        }
+    }
+
+    @Override
+    public boolean isSticky() {
+        throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setSticky(boolean value) {
+        throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
     }
 }

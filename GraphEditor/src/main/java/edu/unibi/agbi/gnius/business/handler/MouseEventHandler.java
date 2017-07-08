@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
+import edu.unibi.agbi.gnius.business.controller.editor.DetailsController;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -46,6 +47,7 @@ public class MouseEventHandler {
     @Autowired private MessengerService messengerService;
     @Autowired private SelectionService selectionService;
 
+    @Autowired private DetailsController detailsController;
     @Autowired private GraphController graphController;
     @Autowired private ToolsController editorToolsController;
 
@@ -60,12 +62,14 @@ public class MouseEventHandler {
 
     private final Rectangle selectionFrame;
     private final PauseTransition pauseTransition = new PauseTransition(Duration.seconds(0.35));
+    private final PauseTransition clickTransition = new PauseTransition(Duration.seconds(0.2));
 
     private boolean isPrimaryButtonDown = false;
 
     private MouseEvent eventMouseMoved;
     private MouseEvent eventMouseMovedPrevious;
     private MouseEvent eventMousePressed;
+    private MouseEvent eventMouseReleased;
 
     private IGraphArc arcTemp;
     
@@ -358,6 +362,11 @@ public class MouseEventHandler {
     }
 
     private void onMouseReleased(MouseEvent event, GraphPane pane) {
+        
+        if (eventMouseReleased != null) {
+            eventMouseReleased.consume(); // click transition event
+        }
+        eventMouseReleased = event;
 
         if (isInSelectionFrameMode.get()) {
 
@@ -446,7 +455,7 @@ public class MouseEventHandler {
                  * Selecting elements by clicking.
                  */
                 Object eventTarget = event.getTarget();
-                IGraphElement node;
+                IGraphElement element;
 
                 if (eventTarget instanceof IGravisChild) {
                     eventTarget = ((IGravisChild) event.getTarget()).getParentShape();
@@ -454,27 +463,39 @@ public class MouseEventHandler {
 
                 if (eventTarget instanceof IGravisElement) {
 
-                    node = (IGraphElement) eventTarget;
+                    element = (IGraphElement) eventTarget;
 
                     if (event.isControlDown()) {
-                        if (node.getElementHandles().get(0).isSelected()) {
-                            selectionService.unselect(node);
-                            selectionService.unhighlightRelated(node);
+                        
+                        if (element.getElementHandles().get(0).isSelected()) {
+                            selectionService.unselect(element);
+                            selectionService.unhighlightRelated(element);
                         } else {
-                            selectionService.select(node);
-                            selectionService.highlightRelated(node);
+                            selectionService.select(element);
+                            selectionService.highlightRelated(element);
                         }
                         graphController.HideElementPane();
+                        
                     } else {
+                        
                         selectionService.unselectAll();
-                        selectionService.select(node);
-                        selectionService.highlightRelated(node);
-                        graphController.ShowElementPane(node);
+                        selectionService.select(element);
+                        selectionService.highlightRelated(element);
+                        
+                        clickTransition.setOnFinished(e -> {
+                            if (!event.isConsumed()) {
+                                if (event.getClickCount() == 2) {
+                                    graphController.ShowDetailsPane(element.getDataElement());
+                                } else {
+                                    graphController.ShowElementPane(element);
+                                }
+                            }
+                        });
+                        clickTransition.playFromStart();
                     }
                 }
             }
         }
-        event.consume();
     }
 
     private void onMouseClicked(MouseEvent event) {

@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
-import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
@@ -80,7 +79,7 @@ public class ElementController implements Initializable
     @FXML private VBox propertiesBox;
 
     // Identifier
-    @FXML private TextField inputSubType;
+    @FXML private TextField inputType;
     @FXML private TextField inputId;
     @FXML private TextField inputName;
     @FXML private TextField inputLabel;
@@ -187,7 +186,7 @@ public class ElementController implements Initializable
      */
     private void LoadElementType(IDataElement element) {
 
-        inputSubType.setText(element.getElementType().toString());
+        inputType.setText(element.getElementType().toString());
         choiceSubtype.getItems().clear();
 
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
@@ -243,14 +242,18 @@ public class ElementController implements Initializable
      * @param element
      */
     private void LoadElementInfo(IDataElement element) {
-        inputId.setText(element.getId());
-        inputName.setText(element.getName());
-        if (!inputLabel.isDisabled()) {
+        if (element.getDescription() != null) {
+            inputDescription.setText(element.getDescription());
+        } else {
+            inputDescription.setText("");
+        }
+        if (element.getLabelText() != null) {
             inputLabel.setText(element.getLabelText());
         } else {
             inputLabel.setText("");
         }
-        inputDescription.setText(element.getDescription());
+        inputId.setText(element.getId());
+        inputName.setText(element.getName());
     }
 
     /**
@@ -460,39 +463,9 @@ public class ElementController implements Initializable
     }
 
     private void StoreElementType(IDataElement element) throws DataServiceException {
-
-        Object itemSelected = choiceSubtype.getSelectionModel().getSelectedItem();
-        if (itemSelected == null) {
-            return;
-        }
-
-        switch (element.getElementType()) {
-
-            case ARC:
-                DataArc arc = (DataArc) element;
-                DataArc.Type arcType = (DataArc.Type) itemSelected;
-                if (arc.getArcType() != arcType) {
-                    dataService.changeArcType(arc, arcType);
-                }
-                break;
-
-            case PLACE:
-                DataPlace place = (DataPlace) element;
-                DataPlace.Type placeType = (DataPlace.Type) itemSelected;
-                if (place.getPlaceType() != placeType) {
-                    dataService.setPlaceTypeDefault(placeType);
-                    dataService.changePlaceType(place, placeType);
-                }
-                break;
-
-            case TRANSITION:
-                DataTransition transition = (DataTransition) element;
-                DataTransition.Type transitionType = (DataTransition.Type) itemSelected;
-                if (transition.getTransitionType() != transitionType) {
-                    dataService.setTransitionTypeDefault(transitionType);
-                    dataService.changeTransitionType(transition, transitionType);
-                }
-                break;
+        Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
+        if (subtype != null) {
+            dataService.ChangeElementSubtype(element, subtype);
         }
     }
 

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.DetailsController">
+    <children>
+        <fx:include source="details/Nodes.fxml" />
+        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+            <children>
+                <TitledPane animated="false" collapsible="false" expanded="false" text="Element Details">
+                    <font>
+                        <Font name="System Bold" size="13.0" />
+                    </font>
+                    <graphic>
+                        <CheckBox fx:id="choiceSticky" mnemonicParsing="false">
+                            <tooltip>
+                                <Tooltip text="Stick this node to the top of the nodes list" />
+                            </tooltip>
+                        </CheckBox>
+                    </graphic>
+                </TitledPane>
+                <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                    <content>
+                        <BorderPane>
+                            <center>
+                                <VBox minHeight="-Infinity" minWidth="-Infinity" BorderPane.alignment="TOP_LEFT">
+                                    <children>
+                                        <TitledPane animated="false" text="Identifier">
+                                            <content>
+                                                <BorderPane>
+                                                    <center>
+                                                        <fx:include source="details/Identifier.fxml" />
+                                                    </center>
+                                                </BorderPane>
+                                            </content>
+                                        </TitledPane>
+                                        <TitledPane animated="false" text="Connections and Entities">
+                                            <content>
+                                                <AnchorPane>
+                                                    <children>
+                                                        <fx:include source="details/Connections.fxml" />
+                                                    </children>
+                                                </AnchorPane>
+                                            </content>
+                                        </TitledPane>
+                                        <TitledPane animated="false" text="Properties" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                                            <content>
+                                                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                                                    <padding>
+                                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                    </padding>
+                                                </VBox>
+                                            </content>
+                                        </TitledPane>
+                                    </children>
+                                </VBox>
+                            </center>
+                        </BorderPane>
+                    </content>
+                </ScrollPane>
+            </children>
+        </VBox>
+        <fx:include source="details/Parameter.fxml" />
+    </children>
+</HBox>

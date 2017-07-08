@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
@@ -121,8 +122,8 @@ public class ZoomController implements Initializable
         }
         dataService.getDao().setScalePower(dataService.getDao().getScalePower() + 1);
 
-        dataService.getDao().getGraphPane().getGraph().getScale().setX(scale_t1);
-        dataService.getDao().getGraphPane().getGraph().getScale().setY(scale_t1);
+        dataService.getGraph().getScale().setX(scale_t1);
+        dataService.getGraph().getScale().setY(scale_t1);
 
         ApplyZoomOffset(
                 dataService.getDao().getGraphPane(),

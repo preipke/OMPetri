@@ -15,16 +15,16 @@ import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisFlexEdge;
  *
  * @author PR
  */
-public class GraphEdge extends GravisFlexEdge implements IGraphArc
+public class GraphArc extends GravisFlexEdge implements IGraphArc
 {
     private final DataArc dataArc;
     
-    public GraphEdge(String id, IGraphNode source) {
+    public GraphArc(String id, IGraphNode source) {
         super(id, source, GravisType.CONNECTION);
         this.dataArc = null;
     }
     
-    public GraphEdge(String id, IGraphNode source, IGraphNode target, DataArc dataArc) {
+    public GraphArc(String id, IGraphNode source, IGraphNode target, DataArc dataArc) {
         super(id, source, target, GravisType.CONNECTION);
         this.dataArc = dataArc;
         this.dataArc.getShapes().add(this);
