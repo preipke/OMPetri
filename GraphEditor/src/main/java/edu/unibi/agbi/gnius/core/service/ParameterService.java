@@ -150,9 +150,7 @@ public class ParameterService
         getParameters().forEach(param -> {
             if (param.getType() == Parameter.Type.REFERENCE) {
                 if (param.getUsingElements().isEmpty()) {
-                    dataService.getModel()
-                            .getElement(param.getRelatedElementId()).getRelatedParameterIds()
-                            .remove(param.getId());
+                    param.getRelatedElement().getRelatedParameterIds().remove(param.getId());
                     paramsUnused.add(param);
                 }
             }
@@ -234,6 +232,55 @@ public class ParameterService
     }
 
     /**
+     * Gets a collection of all parameters for the current dao.
+     *
+     * @param element
+     * @param filter
+     * @return
+     */
+    public List<Parameter> getFilteredAndSortedParameterList(IDataElement element, String filter) {
+
+        List<Parameter> all = new ArrayList();
+        List<Parameter> locals = new ArrayList();
+        List<Parameter> restricted = new ArrayList();
+
+        dataService.getModel().getTransitions().forEach(transition -> {
+            if (transition.equals(element)) {
+                locals.addAll(transition.getParameters());
+            } else {
+                restricted.addAll(transition.getParameters());
+            }
+        });
+
+        locals.stream()
+                .filter(param -> param.getId().contains(filter))
+                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
+                .forEach(param -> all.add(param));
+        dataService.getModel().getParameters().stream()
+                .filter(param -> param.getType() == Parameter.Type.GLOBAL
+                        && param.getId().contains(filter))
+                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
+                .forEach(param -> all.add(param));
+        restricted.stream()
+                .filter(param -> param.getId().contains(filter))
+                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
+                .forEach(param -> all.add(param));
+
+        return all;
+    }
+
+    public List<DataTransition> getReferenceChoices(String filter) {
+        List<DataTransition> list = new ArrayList();
+        dataService.getModel().getTransitions().stream()
+                .filter(transition -> transition.getId().contains(filter)
+                        || transition.getName().contains(filter)
+                        || ((DataTransition) transition).getLabelText().contains(filter))
+                .sorted((t1, t2) -> t1.toString().compareTo(t2.toString()))
+                .forEach(transition -> list.add((DataTransition) transition));
+        return list;
+    }
+
+    /**
      * Attempts to get a referencing parameter for a given candidate identifier.
      *
      * @param model
@@ -244,7 +291,7 @@ public class ParameterService
     private Parameter getReferencingParameter(Model model, String candidate) throws ParameterServiceException {
 
         IElement element;
-        
+
         if ((element = model.getElement(candidate)) != null) {
             switch (element.getElementType()) {
                 case PLACE:
@@ -252,7 +299,7 @@ public class ParameterService
                 case TRANSITION:
                     return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.actualSpeed", element);
             }
-            
+
         } else if (candidate.matches(regexParamPlaceFlowNow) || candidate.matches(regexParamPlaceFlowTotal)) {
 
             String[] tmp = candidate.split("_");
@@ -276,7 +323,7 @@ public class ParameterService
                 }
 
                 if (target != null && index == tmp.length - 1) {
-                    
+
                     arc = model.getElement(dataService.getArcId((IDataNode) source, (IDataNode) target));
                     if (arc != null && arc instanceof IArc) {
 
@@ -306,7 +353,7 @@ public class ParameterService
                             default:
                                 throw new ParameterServiceException("Cannot get parameter. Unexpected element type for arc source. '" + source.getElementType() + "' in candidate '" + candidate + "'.");
                         }
-                        
+
                         if (candidate.matches(regexParamPlaceFlowTotal)) {
                             return CreateReferencingParameter(model, candidate, value, arc);
                         } else {
@@ -330,7 +377,7 @@ public class ParameterService
      * @throws ParameterServiceException
      */
     private Parameter CreateReferencingParameter(Model model, String id, String value, IElement element) throws ParameterServiceException {
-        Parameter param = new Parameter(id, value, "", Parameter.Type.REFERENCE, element.getId());
+        Parameter param = new Parameter(id, value, "", Parameter.Type.REFERENCE, element);
         add(model, param, element);
         return param;
     }

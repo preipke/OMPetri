@@ -147,7 +147,7 @@ public class XmlModelConverter
 //        doc.getDocumentElement().normalize();
 
         NodeList n;
-        Element root, elem;
+        Element root, elem, tmp;
         DataDao dao;
 
         /**
@@ -272,7 +272,8 @@ public class XmlModelConverter
 
                 for (int i = 0; i < n.getLength(); i++) {
                     if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        dao.getModel().add(getParameter((Element) n.item(i)));
+                        tmp = (Element) n.item(i);
+                        dao.getModel().add(getParameter(tmp, dao.getModel().getElement(tmp.getAttribute(attrElementId))));
                     }
                 }
             }
@@ -659,7 +660,7 @@ public class XmlModelConverter
 
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        transition.addParameter(getParameter((Element) nl.item(i)));
+                        transition.addParameter(getParameter((Element) nl.item(i), transition));
                     }
                 }
             }
@@ -712,13 +713,13 @@ public class XmlModelConverter
         return node;
     }
 
-    private Parameter getParameter(Element elem) {
+    private Parameter getParameter(Element elem, IElement element) {
         Parameter param = new Parameter(
                 elem.getAttribute(attrId),
                 elem.getTextContent(),
                 elem.getAttribute(attrUnit),
                 Parameter.Type.valueOf(elem.getAttribute(attrType).toUpperCase()),
-                elem.getAttribute(attrElementId)
+                element
         );
         return param;
     }
@@ -913,7 +914,7 @@ public class XmlModelConverter
             p.setAttribute(attrUnit, param.getUnit());
         }
         p.setAttribute(attrType, param.getType().toString());
-        p.setAttribute(attrElementId, param.getRelatedElementId());
+        p.setAttribute(attrElementId, param.getRelatedElement().getId());
         return p;
     }
     

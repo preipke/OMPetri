@@ -12,9 +12,10 @@
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="edu.unibi.agbi.gnius.business.controller.menu.ViewMenuController">
     <items>
-        <MenuItem onAction="#ShowParams" mnemonicParsing="false" text="View Parameters" />
+        <MenuItem onAction="#ShowGraphEditor" mnemonicParsing="false" text="View Graph Editor" />
+        <MenuItem onAction="#ShowElementEditor" mnemonicParsing="false" text="View Element Editor" />
         <SeparatorMenuItem mnemonicParsing="false" />
         <MenuItem onAction="#OpenLogWindow" mnemonicParsing="false" text="Open Log Window" />
-        <MenuItem onAction="#OpenNewResultsWindow" mnemonicParsing="false" text="Open New Results Window" />
+        <MenuItem onAction="#OpenResultsWindow" mnemonicParsing="false" text="Open Results Window" />
     </items>
 </Menu>

@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.menu;
 
-import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
 import edu.unibi.agbi.gnius.business.controller.MainController;
 import edu.unibi.agbi.gnius.core.io.SbmlModelConverter;
 import edu.unibi.agbi.gnius.core.io.XmlModelConverter;
@@ -43,7 +43,7 @@ public class FileMenuController implements Initializable
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     
-    @Autowired private GraphController graphController;
+    @Autowired private GraphEditorController graphController;
     @Autowired private MainController mainController;
 
     @Autowired private OpenModelicaExporter omExporter;

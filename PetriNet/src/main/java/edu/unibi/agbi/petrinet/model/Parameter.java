@@ -9,8 +9,6 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 
 /**
  *
@@ -19,29 +17,29 @@ import javafx.beans.property.StringProperty;
 public class Parameter
 {
     private final String id;
-    private final StringProperty value;
-    private final StringProperty unit;
+    private String value;
+    private String unit;
     private final Type type;
 
-    private final String elementIdRelated;
+    private final IElement element;
     private final Set<IElement> elementsUsing;
 
     /**
      * Default constructor.
      *
-     * @param id               identifier for this parameter
-     * @param unit             an optional note
-     * @param value            the parameter value
-     * @param type             the type or scope of this parameter
-     * @param elementIdRelated the ID of the related element in case this is
-     *                         parameter is of type reference
+     * @param id      identifier for this parameter
+     * @param unit    an optional note
+     * @param value   the parameter value
+     * @param type    the type or scope of this parameter
+     * @param element the related element in case this is parameter is of type
+     *                local or reference
      */
-    public Parameter(String id, String value, String unit, Type type, String elementIdRelated) {
+    public Parameter(String id, String value, String unit, Type type, IElement element) {
         this.id = id;
-        this.unit = new SimpleStringProperty(unit);
-        this.value = new SimpleStringProperty(value);
+        this.unit = unit;
+        this.value = value;
         this.type = type;
-        this.elementIdRelated = elementIdRelated;
+        this.element = element;
         this.elementsUsing = new HashSet();
     }
 
@@ -57,10 +55,10 @@ public class Parameter
     /**
      * Sets the unit for this parameter.
      *
-     * @param note
+     * @param unit
      */
-    public void setUnit(String note) {
-        this.unit.set(note);
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
     /**
@@ -69,15 +67,6 @@ public class Parameter
      * @return
      */
     public String getUnit() {
-        return unit.get();
-    }
-
-    /**
-     * Gets the note string property.
-     *
-     * @return
-     */
-    public StringProperty getUnitProperty() {
         return unit;
     }
 
@@ -87,7 +76,7 @@ public class Parameter
      * @param value
      */
     public void setValue(String value) {
-        this.value.set(value);
+        this.value = value;
     }
 
     /**
@@ -96,15 +85,6 @@ public class Parameter
      * @return
      */
     public String getValue() {
-        return value.get();
-    }
-
-    /**
-     * Gets the value string property.
-     *
-     * @return
-     */
-    public StringProperty getValueProperty() {
         return value;
     }
 
@@ -122,8 +102,8 @@ public class Parameter
      *
      * @return
      */
-    public String getRelatedElementId() {
-        return elementIdRelated;
+    public IElement getRelatedElement() {
+        return element;
     }
 
     /**
@@ -157,6 +137,15 @@ public class Parameter
         hash = 97 * hash + Objects.hashCode(this.value);
         hash = 97 * hash + Objects.hashCode(this.type);
         return hash;
+    }
+
+    @Override
+    public String toString() {
+        if (unit != null) {
+            return id + " = " + getValue() + " [" + getUnit() + "]";
+        } else {
+            return id + " = " + getValue();
+        }
     }
 
     public enum Type

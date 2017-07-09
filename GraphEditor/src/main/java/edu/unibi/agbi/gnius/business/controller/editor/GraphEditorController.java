@@ -6,7 +6,6 @@
 package edu.unibi.agbi.gnius.business.controller.editor;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ElementController;
-import edu.unibi.agbi.gnius.business.controller.editor.graph.ParameterControllerOld;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.HierarchyController;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ModelController;
@@ -50,7 +49,7 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class GraphController implements Initializable
+public class GraphEditorController implements Initializable
 {
     @Autowired private ConfigurableApplicationContext springContext;
     
@@ -58,12 +57,11 @@ public class GraphController implements Initializable
     @Autowired private MessengerService messengerService;
     @Autowired private SelectionService selectionService;
     
-    @Autowired private DetailsController detailsController;
+    @Autowired private ElementEditorController elementEditorController;
     @Autowired private ModelController modelController;
     @Autowired private ElementController elementController;
     @Autowired private FileMenuController fileMenuController;
     @Autowired private HierarchyController hierarchyController;
-    @Autowired private ParameterControllerOld parameterController;
     @Autowired private ZoomController zoomController;
     
     @Autowired private MouseEventHandler mouseEventHandler;
@@ -81,11 +79,10 @@ public class GraphController implements Initializable
     private final String fxmlParameter = "/fxml/editor/graph/Parameter.fxml";
     private final String fxmlZoom = "/fxml/editor/graph/Zoom.fxml";
     
-    private Parent paneDetails;
+    private Parent paneElementEditor;
     private Parent paneElement;
     private Parent paneHierarchy;
     private Parent panePanel;
-    private Parent paneParameter;
     private Parent paneZoom;
     
     private StackPane stackPaneActive;
@@ -148,26 +145,9 @@ public class GraphController implements Initializable
         messengerService.printMessage("New model created!");
     }
     
-    public void HideElementPane() {
-        if (stackPaneActive != null) {
-            stackPaneActive.getChildren().remove(paneElement);
-            stackPaneActive.getChildren().remove(paneParameter);
-        }
-    }
-    
-    public void ShowDetailsPane(IDataElement element) {
-        if (stackPaneActive != null) {
-            stackPaneActive.getChildren().remove(paneHierarchy);
-            stackPaneActive.getChildren().remove(panePanel);
-            stackPaneActive.getChildren().remove(paneZoom);
-            stackPaneActive.getChildren().add(paneDetails);
-            detailsController.ShowDetails(element);
-        }
-    }
-    
     public void FocusGraphElement(IGraphElement element) {
         
-        ShowGraphPane();
+        ShowGraphEditor();
         
         if (element != null) {
             double posX, posY;
@@ -197,35 +177,45 @@ public class GraphController implements Initializable
         }
     }
     
-    public void ShowGraphPane() {
+    public void HideElementPane() {
         if (stackPaneActive != null) {
-            stackPaneActive.getChildren().remove(paneDetails);
+            stackPaneActive.getChildren().remove(paneElement);
+        }
+    }
+    
+    public void ShowElementEditor(IDataElement element) {
+        if (stackPaneActive != null) {
+            stackPaneActive.getChildren().remove(paneHierarchy);
+            stackPaneActive.getChildren().remove(panePanel);
+            stackPaneActive.getChildren().remove(paneZoom);
+            stackPaneActive.getChildren().add(paneElementEditor);
+            elementEditorController.setElement(element);
+        }
+    }
+    
+    public void ShowGraphEditor() {
+        if (stackPaneActive != null) {
+            stackPaneActive.getChildren().remove(paneElementEditor);
             stackPaneActive.getChildren().add(paneHierarchy);
             stackPaneActive.getChildren().add(panePanel);
             stackPaneActive.getChildren().add(paneZoom);
         }
     }
     
-    public void setPane(StackPane pane, DataDao dao) {
-        stackPaneActive = pane;
-        if (pane != null && dao != null) {
-            dataService.setDao(dao);
-            modelController.setDao(dao);
-            hierarchyController.setDao(dao);
-            ShowGraphPane();
-        }
-    }
-    
-    public void ShowElementPane(IGraphElement element) {
-        stackPaneActive.getChildren().remove(paneParameter);
+    public void ShowElementInfoPane(IGraphElement element) {
         stackPaneActive.getChildren().add(paneElement);
         elementController.ShowElementDetails(element);
     }
     
-    public void ShowParameterPane(IDataElement element) {
-        stackPaneActive.getChildren().remove(paneElement);
-        stackPaneActive.getChildren().add(paneParameter);
-        parameterController.ShowParameters(element);
+    public void setPane(StackPane pane, DataDao dao) {
+        stackPaneActive = pane;
+        if (pane != null && dao != null) {
+            dataService.setDao(dao);
+            elementEditorController.clear();
+            modelController.setDao(dao);
+            hierarchyController.setDao(dao);
+            ShowGraphEditor();
+        }
     }
     
     private String getTabName(Tab tab, String modelName) {
@@ -309,7 +299,7 @@ public class GraphController implements Initializable
             fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(springContext::getBean);
             fxmlLoader.setLocation(getClass().getResource(fxmlDetails));
-            paneDetails = fxmlLoader.load();
+            paneElementEditor = fxmlLoader.load();
             
             fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(springContext::getBean);
@@ -328,19 +318,13 @@ public class GraphController implements Initializable
 
             fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(springContext::getBean);
-            fxmlLoader.setLocation(getClass().getResource(fxmlParameter));
-            paneParameter = fxmlLoader.load();
-
-            fxmlLoader = new FXMLLoader();
-            fxmlLoader.setControllerFactory(springContext::getBean);
             fxmlLoader.setLocation(getClass().getResource(fxmlZoom));
             paneZoom = fxmlLoader.load();
             
             StackPane.setAlignment(paneElement, Pos.TOP_RIGHT);
-            StackPane.setAlignment(paneDetails, Pos.CENTER);
+            StackPane.setAlignment(paneElementEditor, Pos.CENTER);
             StackPane.setAlignment(paneHierarchy, Pos.BOTTOM_LEFT);
             StackPane.setAlignment(panePanel, Pos.TOP_LEFT);
-            StackPane.setAlignment(paneParameter, Pos.TOP_RIGHT);
             StackPane.setAlignment(paneZoom, Pos.BOTTOM_CENTER);
             
         } catch (IOException ex) {

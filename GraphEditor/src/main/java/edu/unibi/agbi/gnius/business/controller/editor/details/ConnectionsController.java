@@ -5,17 +5,14 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.details;
 
-import edu.unibi.agbi.gnius.business.controller.editor.DetailsController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
+import edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -34,8 +31,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ConnectionsController implements Initializable
 {
-    @Autowired private DetailsController detailsController;
-    @Autowired private GraphController graphController;
+    @Autowired private ElementEditorController elementEditorController;
+    @Autowired private GraphEditorController graphController;
 
     @FXML private ListView<IDataArc> listConnectionsIncoming;
     @FXML private ListView<IDataArc> listConnectionsOutgoing;
@@ -110,7 +107,7 @@ public class ConnectionsController implements Initializable
     private void EditElement(ListView<IDataArc> listView) {
         IDataArc arc = listView.getSelectionModel().getSelectedItem();
         if (arc != null) {
-            detailsController.ShowDetails(arc.getShapes().iterator().next().getDataElement());
+            elementEditorController.setElement(arc.getShapes().iterator().next().getDataElement());
         }
     }
 
@@ -246,8 +243,8 @@ public class ConnectionsController implements Initializable
                         break;
                 }
                 setOnMouseClicked(event -> {
-                    if (event.getClickCount() > 1) {
-                        detailsController.ShowDetails(dataArcItem.getSource());
+                    if (event.getClickCount() == 2) {
+                        elementEditorController.setElement(dataArcItem.getSource());
                     }
                 });
             }
@@ -271,8 +268,8 @@ public class ConnectionsController implements Initializable
                         break;
                 }
                 setOnMouseClicked(event -> {
-                    if (event.getClickCount() > 1) {
-                        detailsController.ShowDetails(dataArcItem.getTarget());
+                    if (event.getClickCount() == 2) {
+                        elementEditorController.setElement(dataArcItem.getTarget());
                     }
                 });
             }
@@ -297,7 +294,7 @@ public class ConnectionsController implements Initializable
                         break;
                 }
                 setOnMouseClicked(event -> {
-                    if (event.getClickCount() > 1) {
+                    if (event.getClickCount() == 2) {
                         graphController.FocusGraphElement(item);
                     }
                 });

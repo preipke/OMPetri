@@ -255,7 +255,7 @@ public class SbmlModelConverter
                             }
                         }
                     }
-                    param = new Parameter(id, value, unit, Parameter.Type.LOCAL, null);
+                    param = new Parameter(id, value, unit, Parameter.Type.LOCAL, transition);
 
                     /**
                      * If param id is same as an existing node, store param

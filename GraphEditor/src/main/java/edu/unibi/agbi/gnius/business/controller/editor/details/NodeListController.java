@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.details;
 
-import edu.unibi.agbi.gnius.business.controller.editor.DetailsController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
+import edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
@@ -36,8 +36,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class NodeListController implements Initializable
 {
-    @Autowired private GraphController graphController;
-    @Autowired private DetailsController detailsController;
+    @Autowired private GraphEditorController graphController;
+    @Autowired private ElementEditorController elementEditorController;
     
     @FXML private ListView<IDataElement> listNodes;
     @FXML private TextField inputFilter;
@@ -95,13 +95,13 @@ public class NodeListController implements Initializable
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buttonReturn.setOnAction(eh -> graphController.ShowGraphPane());
+        buttonReturn.setOnAction(eh -> graphController.ShowGraphEditor());
         buttonReturn.setPadding(Insets.EMPTY);
         inputFilter.textProperty().addListener(cl -> setNodes(nodes));
-        listNodes.setCellFactory(l -> new ActiveCellFormatter());
+        listNodes.setCellFactory(l -> new NodeCellFormatter());
     }
     
-    private class ActiveCellFormatter extends ListCell<IDataElement>
+    private class NodeCellFormatter extends ListCell<IDataElement>
     {
         @Override
         protected void updateItem(IDataElement item, boolean empty) {
@@ -139,8 +139,8 @@ public class NodeListController implements Initializable
                     }
                 }
                 setOnMouseClicked(event -> {
-                    if (event.getClickCount() > 1) {
-                        detailsController.ShowDetails(item);
+                    if (event.getClickCount() == 2) {
+                        elementEditorController.setElement(item);
                     }
                 });
             } else {
