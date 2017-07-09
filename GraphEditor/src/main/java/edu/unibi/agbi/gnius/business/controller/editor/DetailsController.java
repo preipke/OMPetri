@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -34,6 +36,8 @@ public class DetailsController implements Initializable
     @Autowired private IdentifierController identifierController;
     
     @FXML private CheckBox choiceSticky;
+    @FXML private Button buttonBack;
+    @FXML private Button buttonForward;
     
     private IDataElement activeElement;
     
@@ -74,5 +78,9 @@ public class DetailsController implements Initializable
                 PopulateNodesPane();
             }
         });
+//        buttonBack.setOnAction(eh -> graphController.ShowGraphPane());
+        buttonBack.setPadding(Insets.EMPTY);
+//        buttonForward.setOnAction(eh -> graphController.ShowGraphPane());
+        buttonForward.setPadding(Insets.EMPTY);
     }
 }

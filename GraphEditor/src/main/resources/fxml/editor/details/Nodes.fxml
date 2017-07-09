@@ -30,12 +30,6 @@
                             <children>
                                 <TextField fx:id="inputFilter" promptText="Filter by Node (ID, Name, Label)" />
                                 <ListView fx:id="listNodes" VBox.vgrow="ALWAYS" />
-                                <!--<HBox alignment="TOP_CENTER" spacing="10.0">
-                                    <children>
-                                        <Button fx:id="buttonEdit" mnemonicParsing="false" text="Edit" />
-                                        <Button fx:id="buttonShow" mnemonicParsing="false" text="Show" />
-                                    </children>
-                                </HBox>-->
                             </children>
                         </VBox>
                     </children>

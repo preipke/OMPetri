@@ -85,8 +85,8 @@ public class IdentifierController implements Initializable
     private void LoadSampleShape(IDataElement element) {
         
         IGraphElement sample;
-        double width = 120;
-        double height = 120;
+        double width = 115;
+        double height = 115;
         
         switch (element.getElementType()) {
             

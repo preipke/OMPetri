@@ -42,8 +42,6 @@ public class NodeListController implements Initializable
     @FXML private ListView<IDataElement> listNodes;
     @FXML private TextField inputFilter;
     @FXML private Button buttonReturn;
-//    @FXML private Button buttonEdit;
-//    @FXML private Button buttonShow;
     
     private List<IDataElement> nodes; 
     private Set<IDataElement> sources;

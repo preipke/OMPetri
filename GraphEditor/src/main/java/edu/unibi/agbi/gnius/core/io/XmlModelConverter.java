@@ -102,6 +102,7 @@ public class XmlModelConverter
     private final String attrPosY = "posY";
     private final String attrSource = "source";
     private final String attrStart = "start";
+    private final String attrSticky = "sticky";
     private final String attrTarget = "target";
     private final String attrType = "type";
     private final String attrValue = "value";
@@ -628,6 +629,9 @@ public class XmlModelConverter
         if (elem.getAttribute(attrDisabled) != null) {
             place.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
         }
+        if (elem.getAttribute(attrSticky) != null) {
+            place.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
+        }
         place.setDescription(elem.getAttribute(attrDescription));
         place.setName(elem.getAttribute(attrName));
 
@@ -661,9 +665,11 @@ public class XmlModelConverter
             }
         }
 
-
         if (elem.getAttribute(attrDisabled) != null) {
             transition.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
+        }
+        if (elem.getAttribute(attrSticky) != null) {
+            transition.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         transition.setFunction(getFunction(elem));
         transition.setDescription(elem.getAttribute(attrDescription));
@@ -823,6 +829,9 @@ public class XmlModelConverter
             if (data.isDisabled()) {
                 p.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
             }
+            if (data.isSticky()) {
+                p.setAttribute(attrSticky, Boolean.toString(data.isSticky()));
+            }
             if (data.getName() != null && !data.getName().isEmpty()) {
                 p.setAttribute(attrName, data.getName());
             }
@@ -850,6 +859,9 @@ public class XmlModelConverter
             t.setAttribute(attrType, data.getTransitionType().toString());
             if (data.isDisabled()) {
                 t.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
+            }
+            if (data.isSticky()) {
+                t.setAttribute(attrSticky, Boolean.toString(data.isSticky()));
             }
             if (data.getName() != null && !data.getName().isEmpty()) {
                 t.setAttribute(attrName, data.getName());

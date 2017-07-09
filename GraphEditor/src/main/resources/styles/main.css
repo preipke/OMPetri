@@ -31,12 +31,30 @@
     -fx-pref-width: 26px;
 }
 
+#buttonBack {
+    -fx-background-image: url('/icons/back.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 1.4em;
+    -fx-pref-height: 1.4em;
+    -fx-pref-width: 2em;
+}
+
+#buttonForward {
+    -fx-background-image: url('/icons/forward.png');
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-background-size: 1.4em;
+    -fx-pref-height: 1.4em;
+    -fx-pref-width: 2em;
+}
+
 #buttonReturn {
     -fx-background-image: url('/icons/return.png');
     -fx-background-repeat: no-repeat;
     -fx-background-position: center;
     -fx-background-size: 1.5em;
-    -fx-pref-height: 1em;
+    -fx-pref-height: 1.4em;
     -fx-pref-width: 2em;
 }
 
@@ -65,6 +83,12 @@
     -fx-background-size: 20px;
     -fx-pref-height: 26px;
     -fx-pref-width: 26px;
+}
+
+#paneSampleParent {
+    -fx-background-color: white;
+    -fx-border-color: darkgrey;
+    -fx-border-radius: 2;
 }
 
 #statusTop {
@@ -99,7 +123,7 @@
 }
 
 /* Custom LineChart colors for later use */
-.default-color0.chart-line-symbol { -fx-background-color: #f9d900, white; }
+/*.default-color0.chart-line-symbol { -fx-background-color: #f9d900, white; }
 .default-color1.chart-line-symbol { -fx-background-color: #a9e200, white; }
 .default-color2.chart-line-symbol { -fx-background-color: #22bad9, white; }
 .default-color3.chart-line-symbol { -fx-background-color: #0181e2, white; }
@@ -114,4 +138,4 @@
 .default-color4.chart-series-line { -fx-stroke: #2f357f; }
 .default-color5.chart-series-line { -fx-stroke: #860061; }
 .default-color6.chart-series-line { -fx-stroke: #c62b00; }
-.default-color7.chart-series-line { -fx-stroke: #ff5700; }
+.default-color7.chart-series-line { -fx-stroke: #ff5700; }*/
