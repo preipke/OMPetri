@@ -280,7 +280,7 @@ public class XmlModelConverter
         }
         for (Transition transition : dao.getModel().getTransitions()) {
             try {
-                parameterService.ValidateFunction(dao.getModel(), transition.getFunction().toString(), (DataTransition) transition);
+                parameterService.ValidateFunction(dao.getModel(), transition, transition.getFunction().toString());
             } catch (ParameterServiceException ex) {
                 throw new IOException(ex);
             }

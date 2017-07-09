@@ -9,6 +9,7 @@ import edu.unibi.agbi.gnius.business.controller.editor.details.ConnectionsContro
 import edu.unibi.agbi.gnius.business.controller.editor.details.IdentifierController;
 import edu.unibi.agbi.gnius.business.controller.editor.details.NodeListController;
 import edu.unibi.agbi.gnius.business.controller.editor.details.ParameterController;
+import edu.unibi.agbi.gnius.business.controller.editor.details.PropertiesController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import java.net.URL;
@@ -36,6 +37,7 @@ public class ElementEditorController implements Initializable
     @Autowired private NodeListController nodeListController;
     @Autowired private IdentifierController identifierController;
     @Autowired private ParameterController parameterController;
+    @Autowired private PropertiesController propertiesController;
     
     @FXML private CheckBox choiceSticky;
     @FXML private Button buttonBack;
@@ -100,6 +102,7 @@ public class ElementEditorController implements Initializable
         connectionsController.setElement(element);
         identifierController.setElement(element);
         parameterController.setElement(element);
+        propertiesController.setElement(element);
     }
     
     private void NextDetails() {

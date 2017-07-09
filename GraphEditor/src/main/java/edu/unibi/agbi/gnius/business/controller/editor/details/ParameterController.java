@@ -64,7 +64,6 @@ public class ParameterController implements Initializable
     private IDataElement data;
     
     private PauseTransition pauseTransition;
-    private PauseTransition colorTransition;
     
     public void setElement(IDataElement element) {
         IDataElement dataOld = data;
@@ -131,14 +130,16 @@ public class ParameterController implements Initializable
     
     private void setParameters(IDataElement element) {
         listParameters.getItems().clear();
-        listParameters.getItems().addAll(parameterService.getFilteredAndSortedParameterList(element, inputFilterParam.getText()));
+        listParameters.getItems().addAll(parameterService.getFilteredAndSortedParameterList(element, inputFilterParam.getText().toLowerCase()));
     }
     
     private void RemoveParameter(Parameter param) {
         try {
             parameterService.remove(param);
             listParameters.getItems().remove(param);
+            listParameters.setStyle("-fx-border-color: green");
         } catch (ParameterServiceException ex) {
+            listParameters.setStyle("-fx-border-color: red");
             messengerService.setRightStatus("Cannot delete parameter.", ex);
         }
     }
@@ -158,9 +159,9 @@ public class ParameterController implements Initializable
         Parameter param;
         
         String id = inputName.getText();
-        String unit = inputUnit.getText();
         String value = inputValue.getText();
-        Parameter.Type type = choiceScope.getSelectionModel().getSelectedItem();
+        String unit = inputUnit.getText();
+        Parameter.Type scope = choiceScope.getSelectionModel().getSelectedItem();
         DataTransition transition = choiceNode.getSelectionModel().getSelectedItem();
 
         // Validate id
@@ -199,7 +200,7 @@ public class ParameterController implements Initializable
         }
 
         // Scope and Related
-        if (type == Parameter.Type.LOCAL) {
+        if (scope == Parameter.Type.LOCAL) {
             if (transition == null) {
                 choiceScope.setStyle("-fx-border-color: red");
                 choiceNode.setStyle("-fx-border-color: red");
@@ -211,24 +212,29 @@ public class ParameterController implements Initializable
         choiceNode.setStyle("");
         
         try {
-            
-            param = parameterService.getParameter(id);
+            if (scope == Parameter.Type.LOCAL) {
+                param = transition.getParameter(id);
+            } else {
+                param = parameterService.getParameter(id);
+            }
             if (param != null) {
                 param.setValue(value);
                 param.setUnit(value);
             } else {
-                parameterService.add(new Parameter(id, value, unit, type, transition), transition);
+                parameterService.add(new Parameter(id, value, unit, scope, transition), transition);
+                buttonCreate.setDisable(true);
             }
             setParameters(data);
+            listParameters.setStyle("-fx-border-color: green");
         } catch (ParameterServiceException ex) {
             messengerService.addException("Parameter creation failed!", ex);
+            listParameters.setStyle("-fx-border-color: red");
         }
     }
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        colorTransition = new PauseTransition(Duration.seconds(2));
         pauseTransition = new PauseTransition(Duration.seconds(1));
         pauseTransition.setOnFinished(e -> setParameters(data));
 
@@ -245,28 +251,16 @@ public class ParameterController implements Initializable
         choiceScope.getItems().add(Parameter.Type.GLOBAL);
         choiceScope.getItems().add(Parameter.Type.LOCAL);
         choiceScope.getSelectionModel().selectedItemProperty().addListener(cl -> {
-            if (choiceScope.getSelectionModel().getSelectedItem() != null) {
-                choiceNode.getItems().clear();
-                if (choiceScope.getSelectionModel().getSelectedItem() == Parameter.Type.LOCAL) {
-                    choiceNode.setDisable(false);
-                    inputFilterNode.setDisable(false);
-                    choiceNode.getItems().addAll(parameterService.getReferenceChoices(inputFilterNode.getText())); // populate node choice method
-                    if (data != null && data instanceof DataTransition) {
-                        choiceNode.getSelectionModel().select((DataTransition) data);
-                    }
-                } else {
-                    choiceNode.setDisable(true);
-                    inputFilterNode.setDisable(true);
-                }
-            }
+            setReferenceChoices();
             setButtons();
         });
         
-//        inputFilterNode.textProperty().addListener(cl -> setNodes(data));
+        inputFilterNode.textProperty().addListener(cl -> setReferenceChoices());
         inputFilterParam.textProperty().addListener(cl -> pauseTransition.playFromStart());
         
         listParameters.setCellFactory(l -> new ParameterCellFormatter());
         listParameters.getSelectionModel().selectedItemProperty().addListener(cl -> {
+            listParameters.setStyle("");
             if (listParameters.getSelectionModel().selectedItemProperty() != null) {
                 buttonEdit.setDisable(false);
                 buttonRemove.setDisable(false);
@@ -275,6 +269,23 @@ public class ParameterController implements Initializable
                 buttonRemove.setDisable(true);
             }
         });
+    }
+    
+    private void setReferenceChoices() {
+        if (choiceScope.getSelectionModel().getSelectedItem() != null) {
+            choiceNode.getItems().clear();
+            if (choiceScope.getSelectionModel().getSelectedItem() == Parameter.Type.LOCAL) {
+                choiceNode.setDisable(false);
+                inputFilterNode.setDisable(false);
+                choiceNode.getItems().addAll(parameterService.getReferenceChoices(inputFilterNode.getText().toLowerCase())); // populate node choice method
+                if (data != null && data instanceof DataTransition) {
+                    choiceNode.getSelectionModel().select((DataTransition) data);
+                }
+            } else {
+                choiceNode.setDisable(true);
+                inputFilterNode.setDisable(true);
+            }
+        }
     }
     
     private void setButtons() {

@@ -204,7 +204,7 @@ public class GraphEditorController implements Initializable
     
     public void ShowElementInfoPane(IGraphElement element) {
         stackPaneActive.getChildren().add(paneElement);
-        elementController.ShowElementDetails(element);
+        elementController.ShowElementInfo(element);
     }
     
     public void setPane(StackPane pane, DataDao dao) {

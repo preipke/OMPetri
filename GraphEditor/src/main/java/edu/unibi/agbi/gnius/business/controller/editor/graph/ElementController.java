@@ -15,46 +15,36 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
-import edu.unibi.agbi.prettyformulafx.main.DetailedParseCancellationException;
-import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
-import java.awt.image.BufferedImage;
 import java.net.URL;
 import java.util.Collection;
-import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.control.TitledPane;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javax.swing.SwingUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -71,12 +61,23 @@ public class ElementController implements Initializable
     @Autowired private ParameterService parameterService;
     @Autowired private FunctionBuilder functionBuilder;
 
-    // Container
+    // Parent Container
     @FXML private VBox elementFrame;
-    @FXML private TitledPane identifierPane;
-    @FXML private TitledPane propertiesPane;
-    @FXML private TitledPane clusterPane;
+    @FXML private Parent identifierPane;
+    @FXML private Parent propertiesPane;
+    @FXML private Parent clusterPane;
     @FXML private VBox propertiesBox;
+
+    // Properties Container
+    @FXML private Parent propertiesSubtype;
+    @FXML private Parent propertiesColor;
+    @FXML private Parent propertiesArc;
+    @FXML private Parent propertiesPlace;
+    @FXML private Parent propertiesTransition;
+    
+    @FXML private Button buttonClone;
+    @FXML private Button buttonDisable;
+    @FXML private Button buttonEdit;
 
     // Identifier
     @FXML private TextField inputType;
@@ -85,37 +86,22 @@ public class ElementController implements Initializable
     @FXML private TextField inputLabel;
     @FXML private TextArea inputDescription;
 
-    // Properties
-    @FXML private GridPane propertiesSubtype;
-    @FXML private GridPane propertiesColor;
-    @FXML private GridPane propertiesArc;
-    @FXML private GridPane propertiesPlace;
-    @FXML private VBox propertiesTransition;
-
+    // Colour
     @FXML private ChoiceBox choiceSubtype;
     @FXML private ChoiceBox choiceColour;
-    @FXML private Button buttonColourCreate;
+//    @FXML private Button buttonColourCreate;
 
+    // Properties
     @FXML private TextField inputArcWeight;
     @FXML private TextField inputPlaceToken;
     @FXML private TextField inputPlaceTokenMin;
     @FXML private TextField inputPlaceTokenMax;
-    @FXML private TextField inputTransitionFunction;
-    @FXML private SwingNode swingNodeTransitionFunctionImage;
-
-    @FXML private Menu menuRefPlaces;
-    @FXML private Menu menuRefTransitions;
-    @FXML private Menu menuParamLocal;
-    @FXML private Menu menuParamGlobal;
-    @FXML private MenuItem menuItemParamEdit;
-
+    @FXML private TextArea inputTransitionFunction;
     @FXML private Label statusMessage;
-    
     @FXML private ListView<ClusterElement> listClusteredElements;
 
     private IDataElement elementSelected;
     private String inputLatestValid;
-    private int inputLatestCaretPosition;
 
     /**
      * Shows the details for the given graph element. The values are loaded from
@@ -123,7 +109,7 @@ public class ElementController implements Initializable
      *
      * @param element
      */
-    public void ShowElementDetails(IGraphElement element) {
+    public void ShowElementInfo(IGraphElement element) {
 
         elementSelected = element.getDataElement();
 
@@ -140,6 +126,7 @@ public class ElementController implements Initializable
      */
     private void LoadGuiElements(IDataElement element) {
 
+        setDisableButtonText(element);
         elementFrame.getChildren().clear();
         elementFrame.getChildren().add(identifierPane);
         propertiesBox.getChildren().clear();
@@ -319,147 +306,9 @@ public class ElementController implements Initializable
             case TRANSITION:
                 DataTransition transition = (DataTransition) element;
                 inputTransitionFunction.setText(transition.getFunction().toString());
-                inputLatestCaretPosition = inputTransitionFunction.getText().length();
-                LoadParameterChoices(transition);
                 break;
         }
 
-    }
-
-    /**
-     * Creates MenuItem choices for inserting parameter from the parameters
-     * available for the given element.
-     */
-    private void LoadParameterChoices(IDataElement element) {
-
-        final String filter = "".toLowerCase();
-
-        menuRefPlaces.getItems().clear();
-        menuRefTransitions.getItems().clear();
-        menuParamLocal.getItems().clear();
-        menuParamGlobal.getItems().clear();
-
-        dataService.getModel().getPlaces().stream()
-                .filter(place -> place.getId().toLowerCase().contains(filter) || place.getName().toLowerCase().contains(filter))
-                .forEach(place -> {
-
-//                    final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
-//                    if (place.getArcsIn().size() > 0) {
-//
-//                        place.getArcsIn().forEach(arc -> {
-//
-//                            String ident = arc.getSource().getId() + arc.getTarget().getId();
-//
-//                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
-//                            itemArcFlowDer.setOnAction(e -> {
-//                                InsertToFunctionInput(ident + "_now");
-//                            });
-//
-//                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
-//                            itemArcFlow.setOnAction(e -> {
-//                                InsertToFunctionInput(ident + "_total");
-//                            });
-//
-//                            Menu menuArc = new Menu("Token Flow from " + arc.getSource().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
-//                            menuArc.getItems().add(itemArcFlowDer);
-//                            menuArc.getItems().add(itemArcFlow);
-//
-//                            menuPlaceArcsIn.getItems().add(menuArc);
-//                        });
-//                    } else {
-//                        menuPlaceArcsIn.setDisable(true);
-//                    }
-
-//                    final Menu menuPlaceArcsOut = new Menu("Outgoing Arcs");
-//                    if (place.getArcsOut().size() > 0) {
-//
-//                        place.getArcsOut().forEach(arc -> {
-//
-//                            String ident = arc.getSource().getId() + arc.getTarget().getId();
-//
-//                            MenuItem itemArcFlowDer = new MenuItem("Actual | f(t)");
-//                            itemArcFlowDer.setOnAction(e -> {
-//                                InsertToFunctionInput(ident + "_now");
-//                            });
-//
-//                            MenuItem itemArcFlow = new MenuItem("Total | F(t)");
-//                            itemArcFlow.setOnAction(e -> {
-//                                InsertToFunctionInput(ident + "_total");
-//                            });
-//
-//                            Menu menuArc = new Menu("Token Flow to " + arc.getTarget().getId() + " (" + arc.getSource().getId() + "->" + arc.getTarget().getId() + ")");
-//                            menuArc.getItems().add(itemArcFlowDer);
-//                            menuArc.getItems().add(itemArcFlow);
-//
-//                            menuPlaceArcsOut.getItems().add(menuArc);
-//                        });
-//                    } else {
-//                        menuPlaceArcsOut.setDisable(true);
-//                    }
-
-                    MenuItem itemPlaceToken = new MenuItem("Token");
-                    itemPlaceToken.setOnAction(e -> {
-                        InsertToFunctionInput(place.getId());
-                    });
-
-                    Menu menuPlace = new Menu("(" + place.getId() + ") " + place.getName());
-                    menuPlace.getItems().add(itemPlaceToken);
-//                    menuPlace.getItems().add(menuPlaceArcsIn);
-//                    menuPlace.getItems().add(menuPlaceArcsOut);
-
-                    menuRefPlaces.getItems().add(menuPlace);
-                });
-
-        dataService.getModel().getTransitions().stream()
-                .filter(transition -> transition.getId().toLowerCase().contains(filter) || transition.getName().toLowerCase().contains(filter))
-                .forEach(transition -> {
-
-                    MenuItem itemTransitionSpeed = new MenuItem("Speed | v(t)");
-                    itemTransitionSpeed.setOnAction(e -> {
-                        InsertToFunctionInput(transition.getId());
-                    });
-
-                    MenuItem itemTransitionFire = new MenuItem("Fire | 0 or 1");
-                    itemTransitionFire.setDisable(true);
-
-                    Menu menuTransition = new Menu("(" + transition.getId() + ") " + transition.getName());
-                    menuTransition.getItems().add(itemTransitionFire);
-                    menuTransition.getItems().add(itemTransitionSpeed);
-
-                    menuRefTransitions.getItems().add(menuTransition);
-                });
-
-        List<Parameter> paramsLocal = parameterService.getLocalParameters(element);
-        if (!paramsLocal.isEmpty()) {
-            paramsLocal.stream()
-                    .filter(param -> param.getId().toLowerCase().contains(filter))
-                    .forEach(param -> {
-                        MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
-                        item.setOnAction(e -> {
-                            InsertToFunctionInput(param.getId());
-                        });
-                        menuParamLocal.getItems().add(item);
-                    });
-            menuParamLocal.setDisable(false);
-        } else {
-            menuParamLocal.setDisable(true);
-        }
-
-        List<Parameter> paramsGlobal = parameterService.getGlobalParameters();
-        if (!paramsGlobal.isEmpty()) {
-            paramsGlobal.stream()
-                    .filter(param -> param.getId().toLowerCase().contains(filter))
-                    .forEach(param -> {
-                        MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
-                        item.setOnAction(e -> {
-                            InsertToFunctionInput(param.getId());
-                        });
-                        menuParamGlobal.getItems().add(item);
-                    });
-            menuParamGlobal.setDisable(false);
-        } else {
-            menuParamGlobal.setDisable(true);
-        }
     }
 
     private void StoreElementType(IDataElement element) throws DataServiceException {
@@ -467,21 +316,6 @@ public class ElementController implements Initializable
         if (subtype != null) {
             dataService.ChangeElementSubtype(element, subtype);
         }
-    }
-
-    /**
-     * Inserts the given parameter to the function input. Inserts the function
-     * at the latest caret position, moves caret by values length.
-     *
-     * @param param
-     */
-    private void InsertToFunctionInput(String value) {
-        String function;
-        function = inputTransitionFunction.getText().substring(0, inputLatestCaretPosition);
-        function += value;
-        function += inputTransitionFunction.getText().substring(inputLatestCaretPosition);
-        inputTransitionFunction.setText(function);
-        inputLatestCaretPosition = inputLatestCaretPosition + value.length();
     }
 
     private void ParseArcWeight() {
@@ -536,9 +370,13 @@ public class ElementController implements Initializable
         if (elementSelected instanceof DataTransition) {
 
             DataTransition transition = (DataTransition) elementSelected;
+            String input = inputTransitionFunction.getText().replace("\n", "");
 
             try {
-                ParseInputToImage(inputTransitionFunction.getText());
+                parameterService.ValidateFunction(transition, input);
+                PrettyFormulaParser.parseToImage(input);
+                
+                inputLatestValid = input;
                 setInputStatus(inputTransitionFunction, false);
             } catch (Exception ex) {
                 setInputStatus(inputTransitionFunction, true);
@@ -556,60 +394,54 @@ public class ElementController implements Initializable
         }
     }
 
-    private void ParseInputToImage(String input) throws Exception {
-
-        final DataTransition transition;
-        final BufferedImage image;
-
-        if (elementSelected != null && elementSelected.getElementType() == Element.Type.TRANSITION) {
-            transition = (DataTransition) elementSelected;
-        } else {
-            return;
-        }
-
-        parameterService.ValidateFunction(input, transition);
-        image = PrettyFormulaParser.parseToImage(input);
-
-        SwingUtilities.invokeLater(() -> {
-            if (swingNodeTransitionFunctionImage.getContent() != null) {
-                swingNodeTransitionFunctionImage.getContent().removeAll();
-            }
-            ImageComponent img = new ImageComponent();
-            img.setImage(image);
-            swingNodeTransitionFunctionImage.setContent(img);
-        });
-
-        inputLatestValid = input;
-    }
-
     private void setInputStatus(Control input, boolean isError) {
         if (isError) {
             input.setStyle("-fx-border-color: red");
             statusMessage.setTextFill(Color.RED);
             statusMessage.setText("Invalid!");
         } else {
-            input.setStyle("");
+            input.setStyle("-fx-border-color: green");
             statusMessage.setTextFill(Color.GREEN);
             statusMessage.setText("Valid!");
         }
     }
 
     private boolean ValidateNumberInput(TextField input) {
-        try {
-            String value = input.getText().replace(",", ".");
-            if (!value.matches(functionBuilder.getNumberRegex())) {
-                throw new InputValidationException("'" + value + "' is not a number");
-            }
-            setInputStatus(input, false);
-        } catch (InputValidationException ex) {
-            setInputStatus(input, true);
+        String value = input.getText().replace(",", ".");
+        if (value.matches(functionBuilder.getNumberRegex())) {
+            input.setStyle("-fx-border-color: green");
+            return true;
+        } else {
+            input.setStyle("-fx-border-color: red");
             return false;
         }
-        return true;
+    }
+    
+    private void setDisableButtonText(IDataElement element) {
+        if (element.isDisabled()) {
+            buttonDisable.setText("Enable");
+        } else {
+            buttonDisable.setText("Disable");
+        }
+    }
+    
+    private String getText(TextInputControl control) {
+        if (!control.isDisabled()) {
+            if (control.getText() != null) {
+                return control.getText();
+            }
+        }
+        return "";
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        
+        buttonDisable.setOnAction(eh -> {
+            elementSelected.setDisabled(!elementSelected.isDisabled());
+            setDisableButtonText(elementSelected);
+        });
+        buttonEdit.setOnAction(eh -> graphController.ShowElementEditor(elementSelected));
 
         choiceSubtype.valueProperty().addListener(cl -> {
             if (elementSelected != null) {
@@ -623,78 +455,25 @@ public class ElementController implements Initializable
             }
         });
 
-        inputName.textProperty().addListener(cl -> {
-            if (!inputName.isDisabled()) {
-                if (inputName.getText() != null) {
-                    elementSelected.setName(inputName.getText());
-                } else {
-                    elementSelected.setName("");
-                }
-            }
-        });
-        inputLabel.textProperty().addListener(cl -> {
-            if (!inputLabel.isDisabled()) {
-                if (inputLabel.getText() != null) {
-                    elementSelected.setLabelText(inputLabel.getText());
-                } else {
-                    elementSelected.setLabelText("");
-                }
-            }
-        });
-        inputDescription.textProperty().addListener(cl -> {
-            if (!inputDescription.isDisabled()) {
-                if (inputDescription.getText() != null) {
-                    elementSelected.setDescription(inputDescription.getText());
-                } else {
-                    elementSelected.setDescription("");
-                }
-            }
-        });
-        inputArcWeight.textProperty().addListener(cl -> {
-            ParseArcWeight();
-        });
-        inputPlaceToken.textProperty().addListener(cl -> {
-            ParsePlaceToken();
-        });
-        inputPlaceTokenMin.textProperty().addListener(cl -> {
-            ParsePlaceToken();
-        });
-        inputPlaceTokenMax.textProperty().addListener(cl -> {
-            ParsePlaceToken();
-        });
-        inputTransitionFunction.textProperty().addListener(e -> {
-            ParseTransitionFunction();
-        });
-        inputTransitionFunction.setOnKeyTyped(eh -> {
-            try {
-                PrettyFormulaParser.parseToImage(inputTransitionFunction.getText());
-            } catch (DetailedParseCancellationException ex) {
-                if (eh != null && eh.getCode() != KeyCode.RIGHT && eh.getCode() != KeyCode.LEFT && eh.getCode() != KeyCode.UNDERSCORE) {
-//                    inputTransitionFunction.selectRange(ex.getCharPositionInLine(), ex.getEndCharPositionInLine());
-                }
-            }
-        });
-        inputTransitionFunction.setOnMouseClicked(eh -> {
-            inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
-        });
-        inputTransitionFunction.setOnKeyReleased(eh -> {
-            inputLatestCaretPosition = inputTransitionFunction.getCaretPosition();
-        });
-
-        menuItemParamEdit.setOnAction(e -> {
-            graphController.ShowElementEditor(elementSelected);
-        });
+        inputName.textProperty().addListener(cl -> elementSelected.setName(getText(inputName)));
+        inputLabel.textProperty().addListener(cl -> elementSelected.setLabelText(getText(inputLabel)));
+        inputDescription.textProperty().addListener(cl -> elementSelected.setDescription(getText(inputDescription)));
+        
+        inputArcWeight.textProperty().addListener(cl -> ParseArcWeight());
+        inputPlaceToken.textProperty().addListener(cl -> ParsePlaceToken());
+        inputPlaceTokenMin.textProperty().addListener(cl -> ParsePlaceToken());
+        inputPlaceTokenMax.textProperty().addListener(cl -> ParsePlaceToken());
+        inputTransitionFunction.textProperty().addListener(e -> ParseTransitionFunction());
         
         listClusteredElements.setOnMouseClicked(eh -> {
             if (!listClusteredElements.getItems().isEmpty()) {
                 if (eh.getButton() == MouseButton.PRIMARY && eh.getClickCount() == 2) {
-                    ShowElementDetails(listClusteredElements.getSelectionModel().getSelectedItem().getElement());
+                    ShowElementInfo(listClusteredElements.getSelectionModel().getSelectedItem().getElement());
                 }
             }
         });
-        
-        listClusteredElements.selectionModelProperty().addListener(cl -> {
-        });
+//        listClusteredElements.selectionModelProperty().addListener(cl -> {
+//        });
     }
     
     private class ClusterElement {

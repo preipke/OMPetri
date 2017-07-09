@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.embed.swing.*?>
 <?import javafx.scene.text.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" 
-      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController">
+<HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="1600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController">
     <children>
         <fx:include source="details/Nodes.fxml" />
         <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
@@ -17,22 +16,22 @@
                     <font>
                         <Font name="System Bold" size="13.0" />
                     </font>
-               <graphic>
-                  <HBox alignment="CENTER" spacing="5.0">
-                     <children>
-                              <CheckBox fx:id="choiceSticky" mnemonicParsing="false">
-                                  <tooltip>
-                                      <Tooltip text="Stick this node to the top of the nodes list" />
-                                  </tooltip>
-                              </CheckBox>
-                        <Button fx:id="buttonBack" mnemonicParsing="false" />
-                        <Button fx:id="buttonForward" layoutX="39.0" layoutY="10.0" mnemonicParsing="false" />
-                     </children>
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                  </HBox>
-               </graphic>
+                    <graphic>
+                        <HBox alignment="CENTER" spacing="5.0">
+                            <children>
+                                <CheckBox fx:id="choiceSticky" mnemonicParsing="false">
+                                    <tooltip>
+                                        <Tooltip text="Stick this node to the top of the nodes list" />
+                                    </tooltip>
+                                </CheckBox>
+                                <Button fx:id="buttonBack" mnemonicParsing="false" />
+                                <Button fx:id="buttonForward" layoutX="39.0" layoutY="10.0" mnemonicParsing="false" />
+                            </children>
+                            <padding>
+                                <Insets right="10.0" />
+                            </padding>
+                        </HBox>
+                    </graphic>
                 </TitledPane>
                 <ScrollPane fitToHeight="true" fitToWidth="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                     <content>
@@ -58,15 +57,24 @@
                                                 </AnchorPane>
                                             </content>
                                         </TitledPane>
-                                        <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Properties" VBox.vgrow="ALWAYS">
-                                            <content>
-                                                <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-                                                    <padding>
-                                                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
-                                                    </padding>
-                                                </VBox>
-                                            </content>
-                                        </TitledPane>
+                                        <HBox VBox.vgrow="ALWAYS">
+                                            <children>
+                                                <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Properties">
+                                                    <content>
+                                                        <fx:include source="details/Properties.fxml" />
+                                                    </content>
+                                                </TitledPane>
+                                                <TitledPane animated="false" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" text="Simulation" HBox.hgrow="ALWAYS">
+                                                    <content>
+                                                        <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                                                            <padding>
+                                                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                                            </padding>
+                                                        </VBox>
+                                                    </content>
+                                                </TitledPane>
+                                            </children>
+                                        </HBox>
                                     </children>
                                 </VBox>
                             </center>

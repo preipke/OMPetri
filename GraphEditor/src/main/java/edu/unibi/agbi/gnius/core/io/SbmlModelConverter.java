@@ -205,7 +205,7 @@ public class SbmlModelConverter
             }
 
             try {
-                parameterService.ValidateFunction(dao.getModel(), transition.getFunction().toString(), (DataTransition) transition);
+                parameterService.ValidateFunction(dao.getModel(), transition, transition.getFunction().toString());
             } catch (ParameterServiceException ex) {
                 throw new IOException(ex);
             }

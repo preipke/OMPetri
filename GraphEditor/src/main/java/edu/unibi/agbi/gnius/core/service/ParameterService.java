@@ -14,6 +14,7 @@ import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
@@ -64,12 +65,19 @@ public class ParameterService
         } else {
             if (element != null) {
                 if (model.containsAndNotEqual(param)) {
-                    throw new ParameterServiceException("Conflict! Another parameter has already been stored using the same ID!");
+                    throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
                 }
                 model.add(param);
+                if (Parameter.Type.LOCAL == param.getType()) {
+                    if (element instanceof DataTransition) {
+                        ((DataTransition) element).addParameter(param);
+                    } else {
+                        throw new ParameterServiceException("Trying to store LOCAL parameter for non-transition element.");
+                    }
+                }
                 element.getRelatedParameterIds().add(param.getId());
             } else {
-                throw new ParameterServiceException("A reference element is required for storing non global parameters!");
+                throw new ParameterServiceException("A reference element is required for storing non global parameters.");
             }
         }
     }
@@ -184,20 +192,8 @@ public class ParameterService
      */
     public List<Parameter> getLocalParameters(IDataElement elem) {
         List<Parameter> parameters = new ArrayList();
-        Parameter param;
-        if (elem != null) {
-            for (String id : elem.getRelatedParameterIds()) {
-                param = getParameter(id);
-                if (param.getType() == Parameter.Type.LOCAL) {
-                    parameters.add(param);
-                }
-            }
-        } else {
-            getParameters().forEach(p -> {
-                if (p.getType() == Parameter.Type.LOCAL) {
-                    parameters.add(p);
-                }
-            });
+        if (elem instanceof DataTransition) {
+            parameters.addAll(((DataTransition) elem).getParameters());
         }
         parameters.sort(Comparator.comparing(Parameter::getId));
         return parameters;
@@ -272,9 +268,9 @@ public class ParameterService
     public List<DataTransition> getReferenceChoices(String filter) {
         List<DataTransition> list = new ArrayList();
         dataService.getModel().getTransitions().stream()
-                .filter(transition -> transition.getId().contains(filter)
-                        || transition.getName().contains(filter)
-                        || ((DataTransition) transition).getLabelText().contains(filter))
+                .filter(transition -> transition.getId().toLowerCase().contains(filter)
+                        || transition.getName().toLowerCase().contains(filter)
+                        || ((DataTransition) transition).getLabelText().toLowerCase().contains(filter))
                 .sorted((t1, t2) -> t1.toString().compareTo(t2.toString()))
                 .forEach(transition -> list.add((DataTransition) transition));
         return list;
@@ -390,7 +386,16 @@ public class ParameterService
      */
     public void remove(Parameter param) throws ParameterServiceException {
         ValidateRemoval(param);
-        dataService.getModel().remove(param);
+        if (param.getType() == Parameter.Type.LOCAL) {
+            if (param.getRelatedElement() != null
+                    && param.getRelatedElement() instanceof DataTransition) {
+                ((DataTransition) param.getRelatedElement()).getParameters().remove(param);
+            } else {
+                throw new ParameterServiceException("Inconsistency found. LOCAL parameter related to non-transition element.");
+            }
+        } else {
+            dataService.getModel().remove(param);
+        }
     }
 
     /**
@@ -402,8 +407,8 @@ public class ParameterService
      * @param element
      * @throws ParameterServiceException
      */
-    public void ValidateFunction(String function, DataTransition element) throws ParameterServiceException {
-        ValidateFunction(dataService.getModel(), function, element);
+    public void ValidateFunction(DataTransition element, String function) throws ParameterServiceException {
+        ValidateFunction(dataService.getModel(), element, function);
     }
 
     /**
@@ -416,7 +421,7 @@ public class ParameterService
      * @param transition
      * @throws ParameterServiceException
      */
-    public void ValidateFunction(Model model, String function, DataTransition transition) throws ParameterServiceException {
+    public void ValidateFunction(Model model, Transition transition, String function) throws ParameterServiceException {
 
         Parameter param;
         String[] candidates;

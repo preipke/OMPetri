@@ -72,11 +72,13 @@ public class NodeListController implements Initializable
     }
     
     private void setNodes(List<IDataElement> nodes) {
-        String filter = inputFilter.getText();
+        String filter = inputFilter.getText().toLowerCase();
         ObservableList items = FXCollections.observableArrayList();
         items.addAll(
                 nodes.stream()
-                        .filter(n -> n.getId().contains(filter) || n.getName().contains(filter) || n.getLabelText().contains(filter))
+                        .filter(n -> n.getId().toLowerCase().contains(filter)
+                                || n.getName().toLowerCase().contains(filter)
+                                || n.getLabelText().toLowerCase().contains(filter))
                         .sorted((n1, n2) -> {
                             if (n1.isSticky() != n2.isSticky()) {
                                 if (n1.isSticky()) {
