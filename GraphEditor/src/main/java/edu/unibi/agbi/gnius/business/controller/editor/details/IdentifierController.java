@@ -42,7 +42,7 @@ public class IdentifierController implements Initializable
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private NodeListController nodeListController;
-    
+
     @FXML private Pane paneSample;
     @FXML private ChoiceBox choiceSubtype;
     @FXML private TextArea inputDescription;
@@ -50,12 +50,12 @@ public class IdentifierController implements Initializable
     @FXML private TextField inputLabel;
     @FXML private TextField inputName;
     @FXML private TextField inputType;
-    
+
     private IDataElement data;
     private PauseTransition pauseTransition;
-    
+
     public void setElement(IDataElement element) {
-        
+
         data = element;
         if (element != null) {
             if (element.getDescription() != null) {
@@ -81,15 +81,21 @@ public class IdentifierController implements Initializable
         LoadElementSubtype(element);
         LoadSampleShape(element);
     }
-    
+
     private void LoadSampleShape(IDataElement element) {
-        
+
         IGraphElement sample;
         double width = 115;
         double height = 115;
-        
+
+        paneSample.getChildren().clear();
+
+        if (element == null) {
+            return;
+        }
+
         switch (element.getElementType()) {
-            
+
             case ARC:
                 IGraphNode source = new GraphPlace(null, new DataPlace(null, null));
                 IGraphNode target = new GraphTransition(null, new DataTransition(null, null));
@@ -99,7 +105,7 @@ public class IdentifierController implements Initializable
                 target.translateYProperty().set(height * 5 / 6 - target.getCenterOffsetY());
                 sample = new GraphArc(null, source, target, (DataArc) element);
                 break;
-                
+
             case PLACE:
                 sample = new GraphPlace(null, (DataPlace) element);
                 sample.translateXProperty().set(width / 2 - sample.getCenterOffsetX());
@@ -111,15 +117,13 @@ public class IdentifierController implements Initializable
                 sample.translateXProperty().set(width / 2 - sample.getCenterOffsetX());
                 sample.translateYProperty().set(height / 2 - sample.getCenterOffsetY());
                 break;
-                
+
             default:
                 return;
         }
-        
-        paneSample.getChildren().clear();
-        paneSample.getChildren().addAll(sample.getShapes());
-        
+
         try {
+            paneSample.getChildren().addAll(sample.getShapes());
             dataService.styleElement(sample);
         } catch (DataServiceException ex) {
             messengerService.addException("Cannot render sample shape.", ex);
@@ -135,9 +139,9 @@ public class IdentifierController implements Initializable
      * @param element
      */
     private void LoadElementSubtype(IDataElement element) {
-        
+
         choiceSubtype.getItems().clear();
-        
+
         if (element == null) {
             return;
         }
@@ -195,28 +199,34 @@ public class IdentifierController implements Initializable
             dataService.ChangeElementSubtype(element, subtype);
         }
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         pauseTransition = new PauseTransition(Duration.seconds(1));
         pauseTransition.setOnFinished(e -> nodeListController.Update());
-        
+
         inputName.textProperty().addListener(cl -> {
-            if (!inputName.isDisabled() && !data.getName().contentEquals(inputName.getText())) {
-                data.setName(inputName.getText());
-                pauseTransition.playFromStart();
+            if (!inputName.isDisabled()) {
+                if (data != null && !data.getName().contentEquals(inputName.getText())) {
+                    data.setName(inputName.getText());
+                    pauseTransition.playFromStart();
+                }
             }
         });
         inputLabel.textProperty().addListener(cl -> {
-            if (!inputLabel.isDisabled() && !data.getLabelText().contentEquals(inputLabel.getText())) {
-                data.setLabelText(inputLabel.getText());
-                pauseTransition.playFromStart();
+            if (!inputLabel.isDisabled()) {
+                if (data != null && !data.getLabelText().contentEquals(inputLabel.getText())) {
+                    data.setLabelText(inputLabel.getText());
+                    pauseTransition.playFromStart();
+                }
             }
         });
         inputDescription.textProperty().addListener(cl -> {
-            if (!inputDescription.isDisabled() && !data.getDescription().contentEquals(inputDescription.getText())) {
-                data.setDescription(inputDescription.getText());
+            if (!inputDescription.isDisabled()) {
+                if (data != null && !data.getDescription().contentEquals(inputDescription.getText())) {
+                    data.setDescription(inputDescription.getText());
+                }
             }
         });
 

@@ -54,11 +54,10 @@ public final class DataClusterArc extends DataArc {
 
     @Override
     public String getLabelText() {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+        return "";
     }
 
     @Override
     public void setLabelText(String text) {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
     }
 }

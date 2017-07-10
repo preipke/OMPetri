@@ -20,6 +20,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
@@ -183,6 +184,11 @@ public class GraphEditorController implements Initializable
     }
     
     public void ShowElementEditor(IDataElement element) {
+        if (element != null) {
+            if (element.getElementType() == Element.Type.CLUSTER || element.getElementType() == Element.Type.CLUSTERARC) {
+                return;
+            }
+        }
         if (stackPaneActive != null) {
             stackPaneActive.getChildren().remove(paneHierarchy);
             stackPaneActive.getChildren().remove(panePanel);

@@ -71,7 +71,7 @@ public class ParameterController implements Initializable
         if (dataOld == null) {
             setParameters(element);
         } else {
-            if (element.getElementType() == Element.Type.TRANSITION) {
+            if (element != null && element.getElementType() == Element.Type.TRANSITION) {
                 if (((DataTransition) element).getParameters().size() > 0) {
                     setParameters(element);
                 } else {

@@ -160,7 +160,7 @@ public class MouseEventHandler
 
                 if (node != null) {
 
-                    if (!node.getElementHandles().get(0).isSelected()) {
+                    if (!node.getElementHandles().iterator().next().isSelected()) {
 
                         // Clicking not yet selected node
                         // Node has to be set to selected to allow immediate dragging
@@ -479,7 +479,7 @@ public class MouseEventHandler
 
                     if (event.isControlDown()) {
 
-                        if (element.getElementHandles().get(0).isSelected()) {
+                        if (element.getElementHandles().iterator().next().isSelected()) {
                             selectionService.unselect(element);
                             selectionService.unhighlightRelated(element);
                         } else {

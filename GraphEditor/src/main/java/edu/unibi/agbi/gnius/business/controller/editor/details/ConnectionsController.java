@@ -68,6 +68,10 @@ public class ConnectionsController implements Initializable
 
         listConnectionsIncoming.getItems().clear();
         listConnectionsOutgoing.getItems().clear();
+        
+        if (element == null) {
+            return;
+        }
 
         switch (element.getElementType()) {
 
@@ -87,7 +91,9 @@ public class ConnectionsController implements Initializable
 
     private void setGraphEntities(IDataElement element) {
         listGraphEntities.getItems().clear();
-        listGraphEntities.getItems().addAll(element.getShapes());
+        if (element != null) {
+            listGraphEntities.getItems().addAll(element.getShapes());
+        }
     }
 
     private void DisableElement(ListView<IDataArc> listView) {
@@ -283,15 +289,14 @@ public class ConnectionsController implements Initializable
             super.updateItem(item, empty);
             if (item != null) {
                 switch (item.getDataElement().getElementType()) {
-                    case ARC:
-                        setText(item.toString());
-                        break;
                     case PLACE:
                         setText("\u25CB  " + item.toString());
                         break;
                     case TRANSITION:
                         setText("\u25AF  " + item.toString());
                         break;
+                    default:
+                        setText(item.toString());
                 }
                 setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2) {
