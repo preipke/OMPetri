@@ -80,7 +80,7 @@ public class DataService
 
     private final ObservableList<DataDao> dataDaos = FXCollections.observableArrayList();
     private DataDao dataDao;
-    
+
     private final BooleanProperty isGridEnabled = new SimpleBooleanProperty(true);
 
     /**
@@ -138,7 +138,7 @@ public class DataService
         styleElement(node);
         return node;
     }
-    
+
     public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataServiceException {
 
         switch (element.getElementType()) {
@@ -191,6 +191,36 @@ public class DataService
     }
 
     /**
+     * Creates a cloned node. Results in a node of the same type that references
+     * the given data.
+     *
+     * @param data
+     * @param posX
+     * @param posY
+     * @return
+     * @throws DataServiceException
+     */
+    public IGraphNode CreateClone(IDataNode data, double posX, double posY) throws DataServiceException {
+        IGraphNode clone;
+        switch (data.getElementType()) {
+            case PLACE:
+                clone = new GraphPlace(getGraphNodeId(dataDao), (DataPlace) data);
+                break;
+            case TRANSITION:
+                clone = new GraphTransition(getGraphNodeId(dataDao), (DataTransition) data);
+                break;
+            default:
+                throw new DataServiceException("Cannot clone the given type of element! [" + data.getElementType() + "]");
+        }
+        Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
+        clone.translateXProperty().set(pos.getX() - clone.getCenterOffsetX());
+        clone.translateYProperty().set(pos.getY() - clone.getCenterOffsetY());
+        clone = add(clone);
+        dataDao.setHasChanges(true);
+        return clone;
+    }
+
+    /**
      * Creates a node of the specified type at the given event position.
      *
      * @param type
@@ -199,7 +229,7 @@ public class DataService
      * @return
      * @throws DataServiceException
      */
-    public synchronized IGraphNode create(Element.Type type, double posX, double posY) throws DataServiceException {
+    public synchronized IGraphNode CreateNode(Element.Type type, double posX, double posY) throws DataServiceException {
         IGraphNode shape;
         switch (type) {
             case PLACE:
@@ -238,7 +268,7 @@ public class DataService
      * @return
      */
     public IGraphArc createConnection(IGraphNode source, IGraphNode target, DataArc dataArc) {
-        
+
         String id;
 
         /**
@@ -330,7 +360,7 @@ public class DataService
     public synchronized IGraphNode remove(IGraphNode node) throws DataServiceException {
 
         validateRemoval(node);
-        
+
         IGraphArc arc;
         while (!node.getConnections().isEmpty()) {
             arc = (IGraphArc) node.getConnections().get(0);
@@ -400,20 +430,20 @@ public class DataService
 
             shapes.add(shape);
         }
-        
+
         if (isGridEnabled()) {
 
             Point2D pos;
             for (IGraphNode node : shapes) {
-                
+
                 pos = new Point2D(node.translateXProperty().get(), node.translateYProperty().get());
                 pos = calculator.getPositionInGrid(pos, getGraph());
-                
+
                 node.translateXProperty().set(pos.getX());
                 node.translateYProperty().set(pos.getY());
             }
         }
-        
+
         dataDao.setHasChanges(true);
         return shapes;
     }
@@ -522,26 +552,6 @@ public class DataService
     }
 
     /**
-     * Clones the given node. Results in a node of the same type that references
-     * the data object of the given node.
-     *
-     * @param target
-     * @return
-     * @throws DataServiceException
-     */
-    private IGraphNode clone(IGraphNode target) throws DataServiceException {
-        IDataNode node = target.getDataElement();
-        switch (node.getElementType()) {
-            case PLACE:
-                return new GraphPlace(getGraphNodeId(dataDao), (DataPlace) node);
-            case TRANSITION:
-                return new GraphTransition(getGraphNodeId(dataDao), (DataTransition) node);
-            default:
-                throw new DataServiceException("Cannot clone the given type of element! [" + node.getElementType() + "]");
-        }
-    }
-
-    /**
      * Creates a copy of the given node. Results in a node of the same type as
      * the given node.
      *
@@ -599,7 +609,7 @@ public class DataService
         if (arc.getTarget() == null) {
             return arc;
         }
-        
+
         return arc;
     }
 
@@ -894,11 +904,11 @@ public class DataService
             }
         }
     }
-    
+
     public synchronized String getArcId(IDataNode source, IDataNode target) {
         return source.getId() + "_" + target.getId();
     }
-    
+
     public synchronized String getConnectionId(IGraphNode source, IGraphNode target) {
         return source.getId() + "_" + target.getId();
     }
@@ -975,10 +985,10 @@ public class DataService
             parameterService.setTransitionFunction(transition, functionString);
             dataDao.setHasChanges(true);
         } catch (Exception ex) {
-            throw new DataServiceException("Cannot build function from input '" + functionString + "'! [" + ex.getMessage() + "]");
+            throw new DataServiceException(ex.getMessage());
         }
     }
-    
+
     public Colour getColourDefault() {
         return DEFAULT_COLOUR;
     }
@@ -990,11 +1000,11 @@ public class DataService
     public void setTransitionTypeDefault(DataTransition.Type type) {
         defaultTransitionType = type;
     }
-    
+
     public boolean isGridEnabled() {
         return isGridEnabled.get();
     }
-    
+
     public BooleanProperty isGridEnabledProperty() {
         return isGridEnabled;
     }

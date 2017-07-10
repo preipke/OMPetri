@@ -153,6 +153,42 @@
     -fx-stroke-width: 2px;
     -fx-stroke-dash-array: 1px 8px;
 }
+.cluster-place {
+    -fx-fill: yellowgreen;
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 1px;
+    -fx-stroke-type: outside;
+}
+.cluster-place :hovered {
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 1px;
+}
+.cluster-place :selected {
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 1px;
+}
+.cluster-place :highlighted {
+    -fx-stroke: forestgreen;
+    -fx-stroke-width: 1px;
+}
+.cluster-transition {
+    -fx-fill: lightblue;
+    -fx-stroke: blue;
+    -fx-stroke-width: 1px;
+    -fx-stroke-type: outside;
+}
+.cluster-transition :hovered {
+    -fx-stroke: blue;
+    -fx-stroke-width: 1px;
+}
+.cluster-transition :selected {
+    -fx-stroke: blue;
+    -fx-stroke-width: 1px;
+}
+.cluster-transition :highlighted {
+    -fx-stroke: blue;
+    -fx-stroke-width: 1px;
+}
 
 /* Default Place Style */
 .place {

@@ -225,7 +225,9 @@ public class ResultsController implements Initializable
         }
         choicesSimulation.setItems(choices);
         if (found) {
-            choicesElement.getSelectionModel().select(index);
+            choicesSimulation.getSelectionModel().select(index);
+        } else {
+            choicesSimulation.getSelectionModel().select(choicesSimulation.getItems().size() - 1);
         }
         FilterChoices(choicesSimulation, inputSimulationFilter.getText());
     }
@@ -337,6 +339,8 @@ public class ResultsController implements Initializable
         choicesValue.setItems(choices);
         if (found) {
             choicesValue.getSelectionModel().select(index);
+        } else {
+            choicesValue.getSelectionModel().select(choicesValue.getItems().size() - 1);
         }
         FilterChoices(choicesValue, inputValueFilter.getText());
     }

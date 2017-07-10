@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
@@ -15,6 +16,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -40,9 +42,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
-import javafx.scene.control.TitledPane;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,11 +55,12 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ElementController implements Initializable
 {
-    @Autowired private GraphEditorController graphController;
-    @Autowired private MessengerService messengerService;
     @Autowired private DataService dataService;
-    @Autowired private ParameterService parameterService;
     @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private MessengerService messengerService;
+    @Autowired private ParameterService parameterService;
+    @Autowired private MouseEventHandler mouseEventHandler;
+    @Autowired private GraphEditorController graphController;
 
     // Parent Container
     @FXML private VBox elementFrame;
@@ -100,7 +101,7 @@ public class ElementController implements Initializable
     @FXML private Label statusMessage;
     @FXML private ListView<ClusterElement> listClusteredElements;
 
-    private IDataElement elementSelected;
+    private IDataElement data;
     private String inputLatestValid;
 
     /**
@@ -111,12 +112,12 @@ public class ElementController implements Initializable
      */
     public void ShowElementInfo(IGraphElement element) {
 
-        elementSelected = element.getDataElement();
+        data = element.getDataElement();
 
-        LoadGuiElements(elementSelected);
-        LoadElementInfo(elementSelected);
-        LoadElementType(elementSelected);
-        LoadElementProperties(elementSelected);
+        LoadGuiElements(data);
+        LoadElementInfo(data);
+        LoadElementType(data);
+        LoadElementProperties(data);
     }
 
     /**
@@ -136,28 +137,43 @@ public class ElementController implements Initializable
         switch (element.getElementType()) {
             
             case ARC:
+                buttonClone.setDisable(true);
+                buttonDisable.setDisable(false);
+                buttonEdit.setDisable(false);
                 inputLabel.setDisable(true);
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(propertiesArc);
                 break;
 
             case CLUSTER:
+                buttonClone.setDisable(true);
+                buttonDisable.setDisable(true);
+                buttonEdit.setDisable(true);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(clusterPane);
                 break;
 
             case CLUSTERARC:
+                buttonClone.setDisable(true);
+                buttonDisable.setDisable(true);
+                buttonEdit.setDisable(true);
                 inputLabel.setDisable(true);
                 elementFrame.getChildren().add(clusterPane);
                 break;
 
             case PLACE:
+                buttonClone.setDisable(false);
+                buttonDisable.setDisable(false);
+                buttonEdit.setDisable(false);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(propertiesPlace);
                 break;
 
             case TRANSITION:
+                buttonClone.setDisable(false);
+                buttonDisable.setDisable(false);
+                buttonEdit.setDisable(false);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(propertiesTransition);
@@ -322,9 +338,9 @@ public class ElementController implements Initializable
 
         if (ValidateNumberInput(inputArcWeight)) {
 
-            if (elementSelected instanceof DataArc) {
+            if (data instanceof DataArc) {
 
-                DataArc arc = (DataArc) elementSelected;
+                DataArc arc = (DataArc) data;
                 Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
 
                 try {
@@ -342,9 +358,9 @@ public class ElementController implements Initializable
 
     private void ParsePlaceToken() {
 
-        if (elementSelected instanceof DataPlace) {
+        if (data instanceof DataPlace) {
 
-            DataPlace place = (DataPlace) elementSelected;
+            DataPlace place = (DataPlace) data;
             Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
 
             try {
@@ -367,9 +383,9 @@ public class ElementController implements Initializable
 
     private void ParseTransitionFunction() {
 
-        if (elementSelected instanceof DataTransition) {
+        if (data instanceof DataTransition) {
 
-            DataTransition transition = (DataTransition) elementSelected;
+            DataTransition transition = (DataTransition) data;
             String input = inputTransitionFunction.getText().replace("\n", "");
 
             try {
@@ -389,7 +405,7 @@ public class ElementController implements Initializable
                     dataService.setTransitionFunction(transition, inputLatestValid);
                 }
             } catch (DataServiceException ex) {
-                messengerService.addException(ex);
+                messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
             }
         }
     }
@@ -437,16 +453,25 @@ public class ElementController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         
-        buttonDisable.setOnAction(eh -> {
-            elementSelected.setDisabled(!elementSelected.isDisabled());
-            setDisableButtonText(elementSelected);
+        buttonClone.setOnAction(eh -> {
+            if (data instanceof IDataNode) {
+                try {
+                    mouseEventHandler.setCloningMode((IDataNode) data);
+                } catch (Exception ex) {
+                    messengerService.addException("Cannot clone node!", ex);
+                }
+            }
         });
-        buttonEdit.setOnAction(eh -> graphController.ShowElementEditor(elementSelected));
+        buttonDisable.setOnAction(eh -> {
+            data.setDisabled(!data.isDisabled());
+            setDisableButtonText(data);
+        });
+        buttonEdit.setOnAction(eh -> graphController.ShowElementEditor(data));
 
         choiceSubtype.valueProperty().addListener(cl -> {
-            if (elementSelected != null) {
+            if (data != null) {
                 try {
-                    StoreElementType(elementSelected);
+                    StoreElementType(data);
                     setInputStatus(choiceSubtype, false);
                 } catch (DataServiceException ex) {
                     setInputStatus(choiceSubtype, true);
@@ -455,9 +480,9 @@ public class ElementController implements Initializable
             }
         });
 
-        inputName.textProperty().addListener(cl -> elementSelected.setName(getText(inputName)));
-        inputLabel.textProperty().addListener(cl -> elementSelected.setLabelText(getText(inputLabel)));
-        inputDescription.textProperty().addListener(cl -> elementSelected.setDescription(getText(inputDescription)));
+        inputName.textProperty().addListener(cl -> data.setName(getText(inputName)));
+        inputLabel.textProperty().addListener(cl -> data.setLabelText(getText(inputLabel)));
+        inputDescription.textProperty().addListener(cl -> data.setDescription(getText(inputDescription)));
         
         inputArcWeight.textProperty().addListener(cl -> ParseArcWeight());
         inputPlaceToken.textProperty().addListener(cl -> ParsePlaceToken());

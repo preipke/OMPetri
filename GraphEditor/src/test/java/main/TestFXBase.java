@@ -265,11 +265,11 @@ public class TestFXBase extends ApplicationTest {
     }
 
     private IGraphNode CreatePlace() throws DataServiceException {
-        return dataService.create(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
+        return dataService.CreateNode(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
     private IGraphNode CreateTransition() throws DataServiceException {
-        return dataService.create(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
+        return dataService.CreateNode(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 
     private void waitForFxThread(AtomicBoolean isFinished) {

@@ -5,7 +5,6 @@
  */
 package edu.unibi.agbi.gnius.business.handler;
 
-import edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ToolsController;
 import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -16,6 +15,7 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisChild;
@@ -40,8 +40,10 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class MouseEventHandler {
+public class MouseEventHandler
+{
 
+    @Autowired private Calculator calculator;
     @Autowired private DataService dataService;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private MessengerService messengerService;
@@ -50,12 +52,11 @@ public class MouseEventHandler {
     @Autowired private GraphEditorController graphController;
     @Autowired private ToolsController editorToolsController;
 
-    @Autowired private Calculator calculator;
-
     // TODO bind GUI buttons to these later
     private final BooleanProperty isInArcCreationMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInDraggingMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInNodeCreationMode = new SimpleBooleanProperty(false);
+    private final BooleanProperty isInNodeCloningMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInSelectionFrameMode = new SimpleBooleanProperty(false);
     private final BooleanProperty isInFreeMode = new SimpleBooleanProperty(true);
 
@@ -70,8 +71,9 @@ public class MouseEventHandler {
     private MouseEvent eventMousePressed;
     private MouseEvent eventMouseReleased;
 
+    private IDataNode data;
     private IGraphArc arcTemp;
-    
+
     public MouseEventHandler() {
         selectionFrame = new Rectangle(0, 0, 0, 0);
         selectionFrame.setStroke(Color.BLUE);
@@ -87,11 +89,11 @@ public class MouseEventHandler {
      */
     public void registerTo(GraphPane graphPane) {
         graphPane.setOnMouseMoved(e -> onMouseMoved(e, graphPane));
-        graphPane.setOnMouseDragged(e -> onMouseDragged(e, graphPane));
         graphPane.setOnMousePressed(e -> onMousePressed(e, graphPane));
+        graphPane.setOnMouseDragged(e -> onMouseDragged(e, graphPane));
         graphPane.setOnMouseReleased(e -> onMouseReleased(e, graphPane));
         graphPane.setOnMouseClicked(e -> onMouseClicked(e));
-        // reihenfolge: pressed -> released -> clicked
+        // order: pressed -> dragged -> released -> clicked
     }
 
     private void onMouseMoved(MouseEvent event, GraphPane pane) {
@@ -108,9 +110,9 @@ public class MouseEventHandler {
     }
 
     private void onMousePressed(final MouseEvent event, GraphPane pane) {
-        
+
         isPrimaryButtonDown = false;
-        
+
         eventMouseMovedPrevious = event; // used for dragging to avoid initial null pointer
         if (eventMousePressed != null) {
             eventMousePressed.consume(); // avoids multiple pause transitions
@@ -123,7 +125,7 @@ public class MouseEventHandler {
         if (event.isPrimaryButtonDown()) {
 
             isPrimaryButtonDown = true;
-            
+
             if (event.isShiftDown()) {
 
                 /**
@@ -132,7 +134,7 @@ public class MouseEventHandler {
                 if (!event.isControlDown()) {
                     selectionService.unselectAll(); // Clearing current selection.
                 }
-                
+
             } else if (event.getTarget() instanceof IGravisElement) {
 
                 /**
@@ -207,7 +209,7 @@ public class MouseEventHandler {
                     selectionService.unselectAll(); // Clearing current selection.
                 }
             }
-            
+
         } else {
             UnlockEditorMode();
         }
@@ -272,7 +274,6 @@ public class MouseEventHandler {
                 /**
                  * Dragging Mode. Drags selected node(s).
                  */
-
                 Object eventTarget = event.getTarget();
 
                 if (eventTarget instanceof IGravisChild) {
@@ -280,7 +281,7 @@ public class MouseEventHandler {
                 }
 
                 if (eventTarget instanceof IGraphNode) {
-                    
+
                     Point2D pos_t0, pos_t1;
 
                     pos_t0 = calculator.getCorrectedPosition(dataService.getGraph(), eventMouseMovedPrevious.getX(), eventMouseMovedPrevious.getY());
@@ -291,7 +292,7 @@ public class MouseEventHandler {
                         element.translateYProperty().set(element.translateYProperty().get() + pos_t1.getY() - pos_t0.getY());
                     }
                 }
-                
+
             } else {
 
                 Object eventTarget = event.getTarget();
@@ -299,13 +300,13 @@ public class MouseEventHandler {
                 if (eventTarget instanceof IGravisChild) {
                     eventTarget = ((IGravisChild) eventTarget).getParentShape();
                 }
-                
+
                 if (event.isShiftDown() || !(eventTarget instanceof IGraphNode)) {
-                    
+
                     double distance
                             = Math.sqrt(Math.pow(event.getX() - eventMousePressed.getX(), 2)
                                     + Math.pow(event.getY() - eventMousePressed.getY(), 2));
-                    
+
                     if (event.isShiftDown() || distance > 5) {
 
                         /**
@@ -330,9 +331,9 @@ public class MouseEventHandler {
                         selectionFrame.setHeight(0);
 
                         pane.getGraph().getChildren().add(selectionFrame);
-                        
+
                     }
-                    
+
                 } else {
 
                     /**
@@ -344,10 +345,10 @@ public class MouseEventHandler {
                     } catch (Exception ex) {
                         messengerService.addException("Cannot switch to node dragging mode!", ex);
                     }
-                    
+
                 }
             }
-            
+
         } else if (event.isSecondaryButtonDown()) {
 
             /**
@@ -361,7 +362,7 @@ public class MouseEventHandler {
     }
 
     private void onMouseReleased(MouseEvent event, GraphPane pane) {
-        
+
         if (eventMouseReleased != null) {
             eventMouseReleased.consume(); // click transition event
         }
@@ -382,7 +383,7 @@ public class MouseEventHandler {
                 }
             }
             pane.getGraph().getChildren().remove(selectionFrame);
-            
+
             disableMode(isInSelectionFrameMode);
 
         } else if (isInArcCreationMode.get()) {
@@ -420,19 +421,31 @@ public class MouseEventHandler {
              */
             if (isPrimaryButtonDown) {
                 try {
-                    dataService.create(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
+                    dataService.CreateNode(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
                 } catch (DataServiceException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }
             }
-            
+
+        } else if (isInNodeCloningMode.get()) {
+
+            if (isPrimaryButtonDown) {
+                try {
+                    dataService.CreateClone(data, event.getX(), event.getY());
+                } catch (DataServiceException ex) {
+                    messengerService.addException("Cannot create node!", ex);
+                }
+            }
+
+            disableMode(isInNodeCloningMode);
+
         } else if (isInDraggingMode.get()) {
-            
+
             /**
              * Dragging Mode. Align dragged nodes to grid if enabled.
              */
             if (dataService.isGridEnabled()) {
-                
+
                 Point2D pos;
                 for (IGraphElement elem : selectionService.getSelectedElements()) {
 
@@ -443,9 +456,9 @@ public class MouseEventHandler {
                     elem.translateYProperty().set(pos.getY());
                 }
             }
-            
+
             disableMode(isInDraggingMode);
-            
+
         } else {
 
             if (isPrimaryButtonDown) {
@@ -465,7 +478,7 @@ public class MouseEventHandler {
                     element = (IGraphElement) eventTarget;
 
                     if (event.isControlDown()) {
-                        
+
                         if (element.getElementHandles().get(0).isSelected()) {
                             selectionService.unselect(element);
                             selectionService.unhighlightRelated(element);
@@ -474,13 +487,13 @@ public class MouseEventHandler {
                             selectionService.highlightRelated(element);
                         }
                         graphController.HideElementPane();
-                        
+
                     } else {
-                        
+
                         selectionService.unselectAll();
                         selectionService.select(element);
                         selectionService.highlightRelated(element);
-                        
+
                         clickTransition.setOnFinished(e -> {
                             if (!event.isConsumed()) {
                                 if (event.getClickCount() == 2) {
@@ -498,11 +511,8 @@ public class MouseEventHandler {
     }
 
     private void onMouseClicked(MouseEvent event) {
-
         eventMousePressed.consume();
         event.consume();
-
-        isPrimaryButtonDown = false;
     }
 
     public MouseEvent getMouseMovedEventLatest() {
@@ -518,31 +528,7 @@ public class MouseEventHandler {
     }
 
     /**
-     * Lock editor mode. Prevents more than one mode to be active at any time.
-     *
-     * @param mode
-     * @throws Exception
-     */
-    private synchronized void setEditorMode(BooleanProperty mode) throws Exception {
-        if (!mode.get()) {
-            if (!isInFreeMode.get()) {
-                if (isInArcCreationMode.get()) {
-                    throw new Exception("Changing mode is blocked! In ArcCreation Mode.");
-                } else if (isInDraggingMode.get()) {
-                    throw new Exception("Changing mode is blocked! In Draggin Mode.");
-                } else if (isInNodeCreationMode.get()) {
-                    throw new Exception("Changing mode is blocked! In NodeCreation Mode.");
-                } else if (isInSelectionFrameMode.get()) {
-                    throw new Exception("Changing mode is blocked! In SelectionFrame Mode.");
-                }
-            }
-            isInFreeMode.set(false);
-            mode.set(true);
-        }
-    }
-
-    /**
-     * Unlock editor mode.
+     * Unlocks a mode.
      *
      * @param mode
      */
@@ -554,21 +540,62 @@ public class MouseEventHandler {
     }
 
     /**
+     * Enables the Event Handler to clone a node on the graph pane.
      *
+     * @param data the node that will be cloned
+     * @throws Exception
      */
-    public synchronized void UnlockEditorMode() {
-        isInArcCreationMode.set(false);
-        isInDraggingMode.set(false);
-        isInNodeCreationMode.set(false);
-        isInSelectionFrameMode.set(false);
-        isInFreeMode.set(true);
+    public synchronized void setCloningMode(IDataNode data) throws Exception {
+        System.out.println("Enter cloning mode");
+        setEditorMode(isInNodeCloningMode);
+        this.data = data;
     }
 
     /**
+     * Enables the Event Handler to CreateNode nodes on the graph pane.
      *
      * @throws Exception
      */
-    public void setNodeCreationMode() throws Exception {
+    public synchronized void setNodeCreationMode() throws Exception {
         setEditorMode(isInNodeCreationMode);
+    }
+
+    /**
+     * Lock editor mode. Prevents more than one mode to be active at any time.
+     *
+     * @param mode
+     * @throws Exception
+     */
+    private synchronized void setEditorMode(BooleanProperty mode) throws Exception {
+        if (!mode.get()) {
+            if (!isInFreeMode.get()) {
+                if (isInArcCreationMode.get()) {
+                    throw new Exception("Blocked! In arc creation mode.");
+                } else if (isInDraggingMode.get()) {
+                    throw new Exception("Blocked! In node dragging mode.");
+                } else if (isInNodeCreationMode.get()) {
+                    throw new Exception("Blocked! In node creation mode.");
+                } else if (isInNodeCloningMode.get()) {
+                    throw new Exception("Blocked! In node cloning mode.");
+                } else if (isInSelectionFrameMode.get()) {
+                    throw new Exception("Blocked! In selection frame mode.");
+                }
+            }
+            isInFreeMode.set(false);
+            mode.set(true);
+        }
+    }
+
+    /**
+     * Unlocks all modes so that no actions are performed on the graph pane.
+     */
+    public synchronized void UnlockEditorMode() {
+        System.out.println("Setting free mode");
+        isInArcCreationMode.set(false);
+        isInDraggingMode.set(false);
+        isInNodeCreationMode.set(false);
+        isInNodeCloningMode.set(false);
+        isInSelectionFrameMode.set(false);
+        isInFreeMode.set(true);
     }
 }

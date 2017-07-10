@@ -13,9 +13,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
@@ -29,13 +27,11 @@ import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import javax.swing.SwingUtilities;
@@ -69,12 +65,12 @@ public class PropertiesController implements Initializable
     @FXML private TextField inputTokenMin;
     @FXML private TextField inputTokenMax;
     @FXML private TextField inputWeight;
-    
+
     @FXML private Menu menuLocalParams;
     @FXML private Menu menuGlobalParams;
     @FXML private Menu menuPlaces;
     @FXML private Menu menuTransitions;
-    
+
     private PauseTransition pauseTransition;
 
     private IDataElement data;
@@ -111,7 +107,7 @@ public class PropertiesController implements Initializable
             }
         }
     }
-    
+
     private void setArc(DataArc arc) {
         for (Colour color : choiceColour.getItems()) {
             if (arc.getWeight(color) != null) {
@@ -121,7 +117,7 @@ public class PropertiesController implements Initializable
             }
         }
     }
-    
+
     private void setPlace(DataPlace place) {
         Token token;
         for (Colour color : choiceColour.getItems()) {
@@ -139,7 +135,7 @@ public class PropertiesController implements Initializable
 
         inputFunction.setText(transition.getFunction().toString());
         inputCaretPosition = inputFunction.getText().length();
-        
+
         setFunctionReferenceChoices(inputFilter.getText().toLowerCase());
         setFunctionParameterChoices(transition, inputFilter.getText().toLowerCase());
     }
@@ -201,7 +197,7 @@ public class PropertiesController implements Initializable
             try {
                 parameterService.ValidateFunction(transition, input);
                 ParseFunctionToImage(input);
-                
+
                 inputLatestValid = input;
                 inputFunction.setStyle("-fx-border-color: green");
             } catch (Exception ex) {
@@ -215,7 +211,7 @@ public class PropertiesController implements Initializable
                     dataService.setTransitionFunction(transition, inputLatestValid);
                 }
             } catch (DataServiceException ex) {
-                messengerService.addException("Exception parsing transition function!", ex);
+                messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
             }
         }
     }
@@ -250,19 +246,21 @@ public class PropertiesController implements Initializable
         inputFunction.setText(function);
         inputCaretPosition = inputCaretPosition + value.length();
     }
-    
+
     private void setFunctionReferenceChoices(String filter) {
-        
+
         menuPlaces.getItems().clear();
         menuTransitions.getItems().clear();
 
         dataService.getModel().getPlaces().stream()
-                .filter(place -> place.getId().toLowerCase().contains(filter) 
-                        || place.getName().toLowerCase().contains(filter)
-                        || ((DataPlace) place).getLabelText().contains(filter))
+                .filter(place -> place.getId().toLowerCase().contains(filter)
+                || place.getName().toLowerCase().contains(filter)
+                || ((DataPlace) place).getLabelText().contains(filter))
                 .forEach(place -> {
 
-//                    final Menu menuPlaceArcsIn = new Menu("Incoming Arcs");
+//                    final Menu menuArcsIn = new Menu("Incoming Arcs");
+//                    final Menu menuArcsOut = new Menu("Outgoing Arcs");
+//                    
 //                    if (place.getArcsIn().size() > 0) {
 //
 //                        place.getArcsIn().forEach(arc -> {
@@ -283,13 +281,12 @@ public class PropertiesController implements Initializable
 //                            menuArc.getItems().add(itemArcFlowDer);
 //                            menuArc.getItems().add(itemArcFlow);
 //
-//                            menuPlaceArcsIn.getItems().add(menuArc);
+//                            menuArcsIn.getItems().add(menuArc);
 //                        });
 //                    } else {
-//                        menuPlaceArcsIn.setDisable(true);
+//                        menuArcsIn.setDisable(true);
 //                    }
-
-//                    final Menu menuPlaceArcsOut = new Menu("Outgoing Arcs");
+//                    
 //                    if (place.getArcsOut().size() > 0) {
 //
 //                        place.getArcsOut().forEach(arc -> {
@@ -310,25 +307,32 @@ public class PropertiesController implements Initializable
 //                            menuArc.getItems().add(itemArcFlowDer);
 //                            menuArc.getItems().add(itemArcFlow);
 //
-//                            menuPlaceArcsOut.getItems().add(menuArc);
+//                            menuArcsOut.getItems().add(menuArc);
 //                        });
 //                    } else {
-//                        menuPlaceArcsOut.setDisable(true);
+//                        menuArcsOut.setDisable(true);
 //                    }
-
-                    MenuItem itemPlaceToken = new MenuItem("Token");
-                    itemPlaceToken.setOnAction(e -> {
+//
+//                    MenuItem itemToken = new MenuItem("Token");
+//                    itemToken.setOnAction(e -> {
+//                        InsertToFunctionInput(place.getId());
+//                    });
+//                    
+//                    Menu menu = new Menu(place.toString());
+//                    menu.setMnemonicParsing(false);
+//                    menu.getItems().add(itemToken);
+//                    menu.getItems().add(menuArcsIn);
+//                    menu.getItems().add(menuArcsOut);
+//                    menuPlaces.getItems().add(menu);
+                    
+                    MenuItem item = new MenuItem(place.toString());
+                    item.setMnemonicParsing(false);
+                    item.setOnAction(e -> {
                         InsertToFunctionInput(place.getId());
                     });
-
-                    Menu menuPlace = new Menu("(" + place.getId() + ") " + place.getName());
-                    menuPlace.getItems().add(itemPlaceToken);
-//                    menuPlace.getItems().add(menuPlaceArcsIn);
-//                    menuPlace.getItems().add(menuPlaceArcsOut);
-
-                    menuPlaces.getItems().add(menuPlace);
+                    menuPlaces.getItems().add(item);
                 });
-        
+
         if (menuPlaces.getItems().isEmpty()) {
             menuPlaces.setDisable(true);
         } else {
@@ -337,50 +341,57 @@ public class PropertiesController implements Initializable
 
         dataService.getModel().getTransitions().stream()
                 .filter(transition -> transition.getId().toLowerCase().contains(filter)
-                        || transition.getName().toLowerCase().contains(filter)
-                        || ((DataTransition) transition).getLabelText().contains(filter))
+                || transition.getName().toLowerCase().contains(filter)
+                || ((DataTransition) transition).getLabelText().contains(filter))
                 .forEach(transition -> {
 
-                    MenuItem itemTransitionSpeed = new MenuItem("Speed | v(t)");
-                    itemTransitionSpeed.setOnAction(e -> {
+//                    MenuItem itemSpeed = new MenuItem("Speed | v(t)");
+//                    itemSpeed.setOnAction(e -> {
+//                        InsertToFunctionInput(transition.getId());
+//                    });
+//                    MenuItem itemFire = new MenuItem("Fire | 0 or 1");
+//                    itemFire.setDisable(true);
+//
+//                    Menu menu = new Menu(transition.toString());
+//                    menu.setMnemonicParsing(false);
+//                    menu.getItems().add(itemFire);
+//                    menu.getItems().add(itemSpeed);
+//                    menuTransitions.getItems().add(menu);
+
+                    MenuItem item = new MenuItem(transition.toString());
+                    item.setMnemonicParsing(false);
+                    item.setOnAction(e -> {
                         InsertToFunctionInput(transition.getId());
                     });
-
-                    MenuItem itemTransitionFire = new MenuItem("Fire | 0 or 1");
-                    itemTransitionFire.setDisable(true);
-
-                    Menu menuTransition = new Menu("(" + transition.getId() + ") " + transition.getName());
-                    menuTransition.getItems().add(itemTransitionFire);
-                    menuTransition.getItems().add(itemTransitionSpeed);
-
-                    menuTransitions.getItems().add(menuTransition);
+                    menuTransitions.getItems().add(item);
                 });
-        
+
         if (menuTransitions.getItems().isEmpty()) {
             menuTransitions.setDisable(true);
         } else {
             menuTransitions.setDisable(false);
         }
     }
-    
+
     private void setFunctionParameterChoices(DataTransition transition, String filter) {
-        
+
         menuLocalParams.getItems().clear();
         menuGlobalParams.getItems().clear();
-        
+
         transition.getParameters();
         parameterService.getParameters();
-        
+
         parameterService.getLocalParameters(transition).stream()
-                    .filter(param -> param.getId().toLowerCase().contains(filter))
-                    .forEach(param -> {
-                        MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
-                        item.setOnAction(e -> {
-                            InsertToFunctionInput(param.getId());
-                        });
-                        menuLocalParams.getItems().add(item);
+                .filter(param -> param.getId().toLowerCase().contains(filter))
+                .forEach(param -> {
+                    MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
+                    item.setMnemonicParsing(false);
+                    item.setOnAction(e -> {
+                        InsertToFunctionInput(param.getId());
                     });
-        
+                    menuLocalParams.getItems().add(item);
+                });
+
         if (menuLocalParams.getItems().isEmpty()) {
             menuLocalParams.setDisable(true);
         } else {
@@ -388,15 +399,16 @@ public class PropertiesController implements Initializable
         }
 
         parameterService.getGlobalParameters().stream()
-                    .filter(param -> param.getId().toLowerCase().contains(filter))
-                    .forEach(param -> {
-                        MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
-                        item.setOnAction(e -> {
-                            InsertToFunctionInput(param.getId());
-                        });
-                        menuGlobalParams.getItems().add(item);
+                .filter(param -> param.getId().toLowerCase().contains(filter))
+                .forEach(param -> {
+                    MenuItem item = new MenuItem(param.toString());
+                    item.setMnemonicParsing(false);
+                    item.setOnAction(e -> {
+                        InsertToFunctionInput(param.getId());
                     });
-        
+                    menuGlobalParams.getItems().add(item);
+                });
+
         if (menuGlobalParams.getItems().isEmpty()) {
             menuGlobalParams.setDisable(true);
         } else {
@@ -417,7 +429,7 @@ public class PropertiesController implements Initializable
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         pauseTransition = new PauseTransition(Duration.seconds(0.25));
         pauseTransition.setOnFinished(e -> {
             if (data instanceof DataTransition) {

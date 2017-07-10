@@ -47,7 +47,7 @@
                         </GridPane>
                         <HBox alignment="TOP_CENTER" spacing="10.0">
                             <children>
-                                <Button fx:id="buttonClone" disable="true" mnemonicParsing="false" text="Clone" />
+                                <Button fx:id="buttonClone" mnemonicParsing="false" text="Clone" />
                                 <Button fx:id="buttonDisable" mnemonicParsing="false" text="Disable" />
                                 <Button fx:id="buttonEdit" mnemonicParsing="false" text="Edit" />
                             </children>

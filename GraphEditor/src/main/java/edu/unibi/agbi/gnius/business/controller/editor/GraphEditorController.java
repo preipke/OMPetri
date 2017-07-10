@@ -76,7 +76,6 @@ public class GraphEditorController implements Initializable
     private final String fxmlElement = "/fxml/editor/graph/Element.fxml";
     private final String fxmlHierarchy = "/fxml/editor/graph/Hierarchy.fxml";
     private final String fxmlPanel = "/fxml/editor/graph/Panel.fxml";
-    private final String fxmlParameter = "/fxml/editor/graph/Parameter.fxml";
     private final String fxmlZoom = "/fxml/editor/graph/Zoom.fxml";
     
     private Parent paneElementEditor;
