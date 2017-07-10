@@ -159,7 +159,7 @@ public class Graph extends Group
 
     public IGravisNode remove(IGravisNode node) {
         while (!node.getConnections().isEmpty()) {
-            remove(node.getConnections().get(0)); // while to prevent concurrent modification
+            remove(node.getConnections().iterator().next()); // while to prevent concurrent modification exception
         }
         labelLayer.getChildren().remove(node.getLabel());
         nodeLayer.getChildren().removeAll(node.getShapes());

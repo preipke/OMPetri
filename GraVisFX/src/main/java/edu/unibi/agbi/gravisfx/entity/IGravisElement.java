@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gravisfx.entity;
 
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
+import java.util.Collection;
 import java.util.List;
 import javafx.beans.property.DoubleProperty;
 import javafx.collections.ObservableList;
@@ -27,7 +28,7 @@ public interface IGravisElement
 
     public Shape getShape();
 
-    public List<Shape> getShapes();
+    public Collection<Shape> getShapes();
 
     public List<GravisShapeHandle> getElementHandles();
     

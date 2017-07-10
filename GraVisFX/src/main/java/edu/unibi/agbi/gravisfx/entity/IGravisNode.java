@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gravisfx.entity;
 
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Interface for interactive nodes within the graph. Used by parent components
@@ -16,11 +16,11 @@ import java.util.List;
  */
 public interface IGravisNode extends IGravisElement, IGravisParent
 {
-    public List<IGravisNode> getParents();
+    public Collection<IGravisNode> getParents();
 
-    public List<IGravisNode> getChildren();
+    public Collection<IGravisNode> getChildren();
 
-    public List<IGravisConnection> getConnections();
+    public Collection<IGravisConnection> getConnections();
 
     public GravisChildLabel getLabel();
 

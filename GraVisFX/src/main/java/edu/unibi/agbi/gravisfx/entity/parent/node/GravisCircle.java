@@ -17,6 +17,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -27,9 +30,9 @@ public class GravisCircle extends Circle implements IGravisNode
     private final List<GravisShapeHandle> shapeHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
 
-    private final List<IGravisNode> children = new ArrayList();
-    private final List<IGravisNode> parents = new ArrayList();
-    private final List<IGravisConnection> connections = new ArrayList();
+    private final Set<IGravisNode> children = new HashSet();
+    private final Set<IGravisNode> parents = new HashSet();
+    private final Set<IGravisConnection> connections = new HashSet();
 
     private final GravisChildLabel label;
     private final GravisChildCircle circle;
@@ -120,17 +123,17 @@ public class GravisCircle extends Circle implements IGravisNode
     }
 
     @Override
-    public final List<IGravisNode> getParents() {
+    public final Set<IGravisNode> getParents() {
         return parents;
     }
 
     @Override
-    public final List<IGravisNode> getChildren() {
+    public final Set<IGravisNode> getChildren() {
         return children;
     }
 
     @Override
-    public final List<IGravisConnection> getConnections() {
+    public final Set<IGravisConnection> getConnections() {
         return connections;
     }
 

@@ -23,6 +23,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
@@ -363,7 +364,7 @@ public class DataService
 
         IGraphArc arc;
         while (!node.getConnections().isEmpty()) {
-            arc = (IGraphArc) node.getConnections().get(0);
+            arc = (IGraphArc) node.getConnections().iterator().next();
             removeShape(arc);
             removeData(arc.getDataElement());
         }
@@ -415,7 +416,6 @@ public class DataService
         for (int i = 0; i < nodes.size(); i++) {
 
             if (cut) {
-//                shape = clone(nodes.get(i));
                 shape = nodes.get(i);
             } else {
                 shape = copy(nodes.get(i));
@@ -849,9 +849,8 @@ public class DataService
         for (IGraphElement relatedSourceElement : dataSource.getShapes()) {
 
             relatedSourceShape = (IGraphNode) relatedSourceElement;
-            for (int i = 0; i < relatedSourceShape.getChildren().size(); i++) {
-
-                relatedSourceShapeChild = (IGraphNode) relatedSourceShape.getChildren().get(i);
+            for (IGravisNode shape : relatedSourceShape.getChildren()) {
+                relatedSourceShapeChild = (IGraphNode) shape;
                 if (dataTarget == relatedSourceShapeChild.getDataElement()) {
                     throw new DataServiceException("The nodes are already connected by a related element.");
                 }
