@@ -58,13 +58,13 @@ public class PropertiesController implements Initializable
 
     @FXML private ChoiceBox<Colour> choiceColour;
 //    @FXML private Button buttonColourCreate;
-    @FXML private SwingNode imageFunction;
     @FXML private TextArea inputFunction;
     @FXML private TextField inputFilter;
     @FXML private TextField inputToken;
     @FXML private TextField inputTokenMin;
     @FXML private TextField inputTokenMax;
     @FXML private TextField inputWeight;
+    @FXML private SwingNode imageFunction;
 
     @FXML private Menu menuLocalParams;
     @FXML private Menu menuGlobalParams;
@@ -221,11 +221,11 @@ public class PropertiesController implements Initializable
         final BufferedImage image;
 
         image = PrettyFormulaParser.parseToImage(input);
+        if (imageFunction.getContent() != null) {
+            imageFunction.getContent().removeAll();
+        }
 
         SwingUtilities.invokeLater(() -> {
-            if (imageFunction.getContent() != null) {
-                imageFunction.getContent().removeAll();
-            }
             ImageComponent img = new ImageComponent();
             img.setImage(image);
             imageFunction.setContent(img);

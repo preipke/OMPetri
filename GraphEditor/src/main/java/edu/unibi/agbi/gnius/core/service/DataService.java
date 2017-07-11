@@ -981,7 +981,7 @@ public class DataService
 
     public synchronized void setTransitionFunction(DataTransition transition, String functionString) throws DataServiceException {
         try {
-            parameterService.setTransitionFunction(transition, functionString);
+            parameterService.setTransitionFunction(dataDao.getModel(), transition, functionString);
             dataDao.setHasChanges(true);
         } catch (Exception ex) {
             throw new DataServiceException(ex.getMessage());

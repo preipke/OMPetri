@@ -196,27 +196,18 @@ public class SbmlModelConverter
          * Validate transition functions, set parameter relations.
          */
         for (Transition transition : dao.getModel().getTransitions()) {
-
             for (Function functionElem : transition.getFunction().getElements()) {
                 tmp = functionElem.getValue();
                 if (idReferenceMap.containsKey(tmp)) {
                     functionElem.setValue(idReferenceMap.get(tmp));
                 }
             }
-
             try {
-                parameterService.ValidateFunction(dao.getModel(), transition, transition.getFunction().toString());
+                String functionString = transition.getFunction().toString();
+                parameterService.ValidateFunction(dao.getModel(), transition, functionString);
+                parameterService.setTransitionFunction(dao.getModel(), transition, functionString);
             } catch (ParameterServiceException ex) {
                 throw new IOException(ex);
-            }
-            for (String paramId : transition.getFunction().getParameterIds()) {
-                if (dao.getModel().getParameter(paramId) != null) {
-                    dao.getModel().getParameter(paramId).getUsingElements().add(transition);
-                } else if (transition.getParameter(paramId) != null) {
-                    transition.getParameter(paramId).getUsingElements().add(transition);
-                } else {
-                    throw new Exception("Unavailable parameter '" + paramId + "' requested.");
-                }
             }
         }
 

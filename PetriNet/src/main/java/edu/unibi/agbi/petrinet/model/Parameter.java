@@ -131,15 +131,6 @@ public class Parameter
     }
 
     @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.id);
-        hash = 97 * hash + Objects.hashCode(this.value);
-        hash = 97 * hash + Objects.hashCode(this.type);
-        return hash;
-    }
-
-    @Override
     public String toString() {
         if (unit != null) {
             return id + " = " + getValue() + " [" + getUnit() + "]";

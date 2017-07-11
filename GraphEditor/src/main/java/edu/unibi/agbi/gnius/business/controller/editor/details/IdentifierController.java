@@ -207,26 +207,20 @@ public class IdentifierController implements Initializable
         pauseTransition.setOnFinished(e -> nodeListController.Update());
 
         inputName.textProperty().addListener(cl -> {
-            if (!inputName.isDisabled()) {
-                if (data != null && !data.getName().contentEquals(inputName.getText())) {
-                    data.setName(inputName.getText());
-                    pauseTransition.playFromStart();
-                }
+            if (data != null && !data.getName().contentEquals(inputName.getText())) {
+                data.setName(inputName.getText());
+                pauseTransition.playFromStart();
             }
         });
         inputLabel.textProperty().addListener(cl -> {
-            if (!inputLabel.isDisabled()) {
-                if (data != null && !data.getLabelText().contentEquals(inputLabel.getText())) {
-                    data.setLabelText(inputLabel.getText());
-                    pauseTransition.playFromStart();
-                }
+            if (data != null && !data.getLabelText().contentEquals(inputLabel.getText())) {
+                data.setLabelText(inputLabel.getText());
+                pauseTransition.playFromStart();
             }
         });
         inputDescription.textProperty().addListener(cl -> {
-            if (!inputDescription.isDisabled()) {
-                if (data != null && !data.getDescription().contentEquals(inputDescription.getText())) {
-                    data.setDescription(inputDescription.getText());
-                }
+            if (data != null) {
+                data.setDescription(inputDescription.getText());
             }
         });
 

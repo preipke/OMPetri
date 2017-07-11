@@ -9,7 +9,6 @@ import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
@@ -128,8 +127,6 @@ public class XmlModelConverter
     private final String tagParametersLocal = "LocalParameters";
     private final String tagPlace = "Place";
     private final String tagPlaces = "Places";
-    private final String tagRelatedParameter = "RelatedParameter";
-    private final String tagRelatedParameters = "RelatedParameters";
     private final String tagToken = "Token";
     private final String tagTokens = "Tokens";
     private final String tagTransiton = "Transition";
@@ -219,8 +216,7 @@ public class XmlModelConverter
                 // Each transition
                 for (int i = 0; i < n.getLength(); i++) {
                     if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        DataTransition transition = getTransition((Element) n.item(i));
-                        dao.getModel().add(transition);
+                        DataTransition transition = getTransition(dao.getModel(), (Element) n.item(i));
                         for (IGraphElement shape : transition.getShapes()) {
                             dao.getGraphRoot().add((IGraphNode) shape);
                         }
@@ -273,25 +269,18 @@ public class XmlModelConverter
                 for (int i = 0; i < n.getLength(); i++) {
                     if (n.item(i).getNodeType() == Node.ELEMENT_NODE) {
                         tmp = (Element) n.item(i);
-                        dao.getModel().add(getParameter(tmp, dao.getModel().getElement(tmp.getAttribute(attrElementId))));
+                        parameterService.add(dao.getModel(), getParameter(tmp, dao.getModel().getElement(tmp.getAttribute(attrElementId))));
                     }
                 }
             }
         }
         for (Transition transition : dao.getModel().getTransitions()) {
             try {
-                parameterService.ValidateFunction(dao.getModel(), transition, transition.getFunction().toString());
+                String functionString = transition.getFunction().toString();
+                parameterService.ValidateFunction(dao.getModel(), transition, functionString);
+                parameterService.setTransitionFunction(dao.getModel(), transition, functionString);
             } catch (ParameterServiceException ex) {
                 throw new IOException(ex);
-            }
-            for (String paramId : transition.getFunction().getParameterIds()) {
-                if (transition.getParameter(paramId) != null) {
-                    transition.getParameter(paramId).getUsingElements().add(transition);
-                } else if (dao.getModel().getParameter(paramId) != null) {
-                    dao.getModel().getParameter(paramId).getUsingElements().add(transition);
-                } else {
-                    throw new IOException("Unavailable parameter '" + paramId + "' requested by node '" + transition.toString()+ "'.");
-                }
             }
         }
         
@@ -639,7 +628,7 @@ public class XmlModelConverter
         return place;
     }
 
-    private DataTransition getTransition(final Element elem) throws Exception {
+    private DataTransition getTransition(Model model, final Element elem) throws Exception {
         
         NodeList nl;
         Element tmp;
@@ -660,7 +649,7 @@ public class XmlModelConverter
 
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        transition.addParameter(getParameter((Element) nl.item(i), transition));
+                        parameterService.add(model, getParameter((Element) nl.item(i), transition));
                     }
                 }
             }
@@ -676,6 +665,8 @@ public class XmlModelConverter
         transition.setDescription(elem.getAttribute(attrDescription));
         transition.setName(elem.getAttribute(attrName));
 
+        model.add(transition);
+        
         return transition;
     }
 
@@ -811,7 +802,6 @@ public class XmlModelConverter
             if (data.getDescription() != null && !data.getDescription().isEmpty()) {
                 a.setAttribute(attrDescription, data.getDescription());
             }
-            a.appendChild(getRelatedParameterIdsElement(dom, data));
             a.appendChild(getWeightsElement(dom, data));
 
             elements.appendChild(a);
@@ -842,7 +832,6 @@ public class XmlModelConverter
             if (data.getDescription() != null && !data.getDescription().isEmpty()) {
                 p.setAttribute(attrDescription, data.getDescription());
             }
-            p.appendChild(getRelatedParameterIdsElement(dom, data));
             p.appendChild(getTokensElement(dom, data));
 
             elements.appendChild(p);
@@ -873,7 +862,6 @@ public class XmlModelConverter
             if (data.getDescription() != null && !data.getDescription().isEmpty()) {
                 t.setAttribute(attrDescription, data.getDescription());
             }
-            t.appendChild(getRelatedParameterIdsElement(dom, data));
             
             Element p = dom.createElement(tagParametersLocal);
             data.getParameters().forEach(param -> {
@@ -998,16 +986,6 @@ public class XmlModelConverter
             elements.appendChild(n);
         });
         return elements;
-    }
-    
-    private Element getRelatedParameterIdsElement(Document dom, IDataElement data) {
-        Element elem = dom.createElement(tagRelatedParameters);
-        data.getRelatedParameterIds().forEach(id -> {
-            Element paramElem = dom.createElement(tagRelatedParameter);
-            paramElem.setAttribute(attrParameterId, id);
-            elem.appendChild(paramElem);
-        });
-        return elem;
     }
     
     private Element getTokensElement(Document dom, DataPlace data) {

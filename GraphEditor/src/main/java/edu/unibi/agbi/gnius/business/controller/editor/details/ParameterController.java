@@ -221,7 +221,7 @@ public class ParameterController implements Initializable
                 param.setValue(value);
                 param.setUnit(value);
             } else {
-                parameterService.add(new Parameter(id, value, unit, scope, transition), transition);
+                parameterService.add(new Parameter(id, value, unit, scope, transition));
                 buttonCreate.setDisable(true);
             }
             setParameters(data);

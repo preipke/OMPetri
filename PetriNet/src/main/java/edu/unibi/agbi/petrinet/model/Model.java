@@ -117,8 +117,8 @@ public class Model
     }
 
     private IArc remove(Arc arc) {
-        arc.getRelatedParameterIds().forEach(id -> {
-            parameters.remove(id);
+        arc.getRelatedParameters().forEach(param -> {
+            parameters.remove(param.getId());
         });
         arc.getSource().getArcsOut().remove(arc);
         arc.getTarget().getArcsIn().remove(arc);
@@ -140,8 +140,8 @@ public class Model
         } else {
             node = remove((Transition) node);
         }
-        node.getRelatedParameterIds().forEach((id) -> {
-            parameters.remove(id);
+        node.getRelatedParameters().forEach((param) -> {
+            parameters.remove(param.getId());
         });
         return node;
     }
@@ -154,7 +154,7 @@ public class Model
     }
 
     public Parameter remove(Parameter param) {
-        param.getUsingElements().forEach(elem -> elem.getRelatedParameterIds().remove(param.getId()));
+        param.getUsingElements().forEach(elem -> elem.getRelatedParameters().remove(param));
         return parameters.remove(param.getId());
     }
 
