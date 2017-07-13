@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.business.handler;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ToolsController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -49,7 +49,7 @@ public class MouseEventHandler
     @Autowired private MessengerService messengerService;
     @Autowired private SelectionService selectionService;
 
-    @Autowired private GraphEditorController graphController;
+    @Autowired private GraphController graphController;
     @Autowired private ToolsController editorToolsController;
 
     // TODO bind GUI buttons to these later
@@ -497,7 +497,7 @@ public class MouseEventHandler
                         clickTransition.setOnFinished(e -> {
                             if (!event.isConsumed()) {
                                 if (event.getClickCount() == 2) {
-                                    graphController.ShowElementEditor(element.getDataElement());
+                                    graphController.ShowInspector(element.getDataElement());
                                 } else {
                                     graphController.ShowElementInfoPane(element);
                                 }

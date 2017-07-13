@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
-import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
@@ -20,9 +20,9 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 public class GravisChildLabel extends Text implements IGravisChild
 {
     private final List<GravisShapeHandle> elementHandles;
-    private final IGravisNode parentElement;
+    private final IGravisParent parentElement;
 
-    public GravisChildLabel(IGravisNode parentElement) {
+    public GravisChildLabel(IGravisParent parentElement) {
 
         super();
 
@@ -33,7 +33,7 @@ public class GravisChildLabel extends Text implements IGravisChild
     }
 
     @Override
-    public IGravisNode getParentShape() {
+    public IGravisParent getParentShape() {
         return parentElement;
     }
 

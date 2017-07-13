@@ -108,7 +108,7 @@ public class Model
         return !parameters.get(param.getId()).equals(param);
     }
 
-    public IElement remove(IElement element) {
+    public IElement remove(IElement element) throws Exception {
         if (element instanceof Arc) {
             return remove((Arc) element);
         } else {
@@ -116,18 +116,30 @@ public class Model
         }
     }
 
-    private IArc remove(Arc arc) {
-        arc.getRelatedParameters().forEach(param -> {
+    private IArc remove(Arc arc) throws Exception {
+        for (Parameter param : arc.getRelatedParameters()) {
+            if (param.getUsingElements().size() > 0) {
+                throw new Exception("A related parameter is still being used and cannot be deleted! (" + arc.getId() + " -> " + param.getId() + ")");
+            }
             parameters.remove(param.getId());
-        });
+        }
         arc.getSource().getArcsOut().remove(arc);
         arc.getTarget().getArcsIn().remove(arc);
         return arcs.remove(arc.getId());
     }
 
-    private INode remove(INode node) {
+    private INode remove(INode node) throws Exception {
         if (!nodeIds.remove(node.getId())) {
             return null;
+        }
+        for (Parameter param : node.getRelatedParameters()) {
+            if (param.getUsingElements().size() > 0) {
+                if (!param.getUsingElements().iterator().next().equals(node)) {
+                    nodeIds.add(node.getId());
+                    throw new Exception("A related parameter is still being used and cannot be deleted! (" + node.getId() + " -> " + param.getId() + ")");
+                }
+            }
+            parameters.remove(param.getId());
         }
         while (!node.getArcsIn().isEmpty()) {
             remove(node.getArcsIn().remove(0));

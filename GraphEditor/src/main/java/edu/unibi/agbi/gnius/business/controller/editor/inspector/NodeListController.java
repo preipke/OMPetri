@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.details;
+package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.InspectorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
@@ -36,8 +36,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class NodeListController implements Initializable
 {
-    @Autowired private GraphEditorController graphController;
-    @Autowired private ElementEditorController elementEditorController;
+    @Autowired private GraphController graphController;
+    @Autowired private InspectorController inspectorController;
     
     @FXML private ListView<IDataElement> listNodes;
     @FXML private TextField inputFilter;
@@ -142,7 +142,7 @@ public class NodeListController implements Initializable
                 }
                 setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2) {
-                        elementEditorController.setElement(item);
+                        inspectorController.setElement(item);
                     }
                 });
             } else {

@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.business.controller.editor.details;
+package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.business.controller.editor.ElementEditorController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.InspectorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
@@ -31,8 +31,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ConnectionsController implements Initializable
 {
-    @Autowired private ElementEditorController elementEditorController;
-    @Autowired private GraphEditorController graphController;
+    @Autowired private InspectorController inspectorController;
+    @Autowired private GraphController graphController;
 
     @FXML private ListView<IDataArc> listConnectionsIncoming;
     @FXML private ListView<IDataArc> listConnectionsOutgoing;
@@ -113,7 +113,7 @@ public class ConnectionsController implements Initializable
     private void EditElement(ListView<IDataArc> listView) {
         IDataArc arc = listView.getSelectionModel().getSelectedItem();
         if (arc != null) {
-            elementEditorController.setElement(arc.getShapes().iterator().next().getDataElement());
+            inspectorController.setElement(arc.getShapes().iterator().next().getDataElement());
         }
     }
 
@@ -250,7 +250,7 @@ public class ConnectionsController implements Initializable
                 }
                 setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2) {
-                        elementEditorController.setElement(dataArcItem.getSource());
+                        inspectorController.setElement(dataArcItem.getSource());
                     }
                 });
             }
@@ -275,7 +275,7 @@ public class ConnectionsController implements Initializable
                 }
                 setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2) {
-                        elementEditorController.setElement(dataArcItem.getTarget());
+                        inspectorController.setElement(dataArcItem.getTarget());
                     }
                 });
             }

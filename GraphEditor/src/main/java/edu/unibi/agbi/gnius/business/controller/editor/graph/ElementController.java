@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
-import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
@@ -60,7 +60,7 @@ public class ElementController implements Initializable
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
     @Autowired private MouseEventHandler mouseEventHandler;
-    @Autowired private GraphEditorController graphController;
+    @Autowired private GraphController graphController;
 
     // Parent Container
     @FXML private VBox elementFrame;
@@ -466,7 +466,7 @@ public class ElementController implements Initializable
             data.setDisabled(!data.isDisabled());
             setDisableButtonText(data);
         });
-        buttonEdit.setOnAction(eh -> graphController.ShowElementEditor(data));
+        buttonEdit.setOnAction(eh -> graphController.ShowInspector(data));
 
         choiceSubtype.valueProperty().addListener(cl -> {
             if (data != null) {

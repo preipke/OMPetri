@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <HBox spacing="10.0">
+         <children>
+            <MenuButton mnemonicParsing="false" text="Results">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Simulation 1">
+                     <graphic>
+                        <CheckBox mnemonicParsing="false" />
+                     </graphic>
+                  </MenuItem>
+                <MenuItem mnemonicParsing="false" text="Simulation 2">
+                     <graphic>
+                        <CheckBox mnemonicParsing="false" />
+                     </graphic>
+                  </MenuItem>
+                  <MenuItem mnemonicParsing="false" text="Simulation 3">
+                     <graphic>
+                        <CheckBox mnemonicParsing="false" />
+                     </graphic>
+                  </MenuItem>
+              </items>
+            </MenuButton>
+            <Button mnemonicParsing="false" text="Viewer" />
+         </children>
+         <VBox.margin>
+            <Insets />
+         </VBox.margin>
+         <padding>
+            <Insets left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </HBox>
+      <LineChart title="Latest Results">
+        <xAxis>
+          <CategoryAxis side="BOTTOM" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+   </children>
+</VBox>

@@ -6,8 +6,8 @@
 package edu.unibi.agbi.gravisfx.entity.child;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +15,6 @@ import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
@@ -24,9 +23,9 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 public class GravisChildArrow extends Path implements IGravisChild
 {
     private final List<GravisShapeHandle> elementHandles;
-    private final IGravisConnection parentElement;
+    private final IGravisParent parentElement;
 
-    public GravisChildArrow(IGravisConnection parentElement) {
+    public GravisChildArrow(IGravisParent parentElement) {
 
         super();
 
@@ -43,7 +42,7 @@ public class GravisChildArrow extends Path implements IGravisChild
     }
 
     @Override
-    public IGravisElement getParentShape() {
+    public IGravisParent getParentShape() {
         return parentElement;
     }
 

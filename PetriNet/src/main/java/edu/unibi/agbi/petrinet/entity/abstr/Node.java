@@ -29,15 +29,6 @@ public abstract class Node extends Element implements INode
         arcsOut = new ArrayList();
     }
 
-    public void setConstant(boolean isConstant) {
-        this.isConstant = isConstant;
-    }
-
-    @Override
-    public boolean isConstant() {
-        return isConstant;
-    }
-
     @Override
     public List<IArc> getArcsIn() {
         return arcsIn;
@@ -46,5 +37,15 @@ public abstract class Node extends Element implements INode
     @Override
     public List<IArc> getArcsOut() {
         return arcsOut;
+    }
+
+    @Override
+    public boolean isConstant() {
+        return isConstant;
+    }
+
+    @Override
+    public void setConstant(boolean isConstant) {
+        this.isConstant = isConstant;
     }
 }

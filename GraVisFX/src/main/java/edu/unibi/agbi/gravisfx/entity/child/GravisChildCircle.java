@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
@@ -20,9 +20,9 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 public class GravisChildCircle extends Circle implements IGravisChild
 {
     private final List<GravisShapeHandle> elementHandles;
-    private final IGravisElement parentElement;
+    private final IGravisParent parentElement;
 
-    public GravisChildCircle(IGravisElement parentElement) {
+    public GravisChildCircle(IGravisParent parentElement) {
 
         super();
 
@@ -33,7 +33,7 @@ public class GravisChildCircle extends Circle implements IGravisChild
     }
 
     @Override
-    public IGravisElement getParentShape() {
+    public IGravisParent getParentShape() {
         return parentElement;
     }
 

@@ -49,10 +49,6 @@ public class Arc extends Element implements IArc
     public INode getSource() {
         return source;
     }
-
-    public void setWeight(Weight weight) {
-        weights.put(weight.getColour(), weight);
-    }
     
     @Override
     public void addWeight(Weight weight) {

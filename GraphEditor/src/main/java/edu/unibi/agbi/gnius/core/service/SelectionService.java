@@ -5,8 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.business.controller.MainController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.core.model.dao.SelectionDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -27,7 +26,7 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 @Service
 public class SelectionService
 {
-    @Autowired private GraphEditorController graphController;
+    @Autowired private GraphController graphController;
 
     private final SelectionDao selectionDao;
 

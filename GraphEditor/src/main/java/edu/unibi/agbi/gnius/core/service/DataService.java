@@ -344,9 +344,12 @@ public class DataService
     public synchronized IGraphArc remove(IGraphArc arc) throws DataServiceException {
         validateRemoval(arc);
         removeShape(arc);
-        removeData(arc.getDataElement());
+        try {
+            removeData(arc.getDataElement());
+        } catch (Exception ex) {
+            throw new DataServiceException(ex.getMessage());
+        }
         dataDao.setHasChanges(true);
-
         return arc;
     }
 
@@ -359,19 +362,20 @@ public class DataService
      * @throws DataServiceException
      */
     public synchronized IGraphNode remove(IGraphNode node) throws DataServiceException {
-
         validateRemoval(node);
-
-        IGraphArc arc;
-        while (!node.getConnections().isEmpty()) {
-            arc = (IGraphArc) node.getConnections().iterator().next();
-            removeShape(arc);
-            removeData(arc.getDataElement());
+        try {
+            IGraphArc arc;
+            while (!node.getConnections().isEmpty()) {
+                arc = (IGraphArc) node.getConnections().iterator().next();
+                removeShape(arc);
+                removeData(arc.getDataElement());
+            }
+            removeShape(node);
+            removeData(node.getDataElement());
+            dataDao.setHasChanges(true);
+        } catch (Exception ex) {
+            throw new DataServiceException(ex.getMessage());
         }
-        removeShape(node);
-        removeData(node.getDataElement());
-        dataDao.setHasChanges(true);
-
         return node;
     }
 
@@ -581,7 +585,7 @@ public class DataService
      * @param node
      * @return
      */
-    private IDataElement removeData(IDataElement element) throws DataServiceException {
+    private IDataElement removeData(IDataElement element) throws Exception {
         if (element != null) {
             if (element.getShapes().isEmpty()) {
                 dataDao.getModel().remove(element);

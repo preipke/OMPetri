@@ -18,4 +18,6 @@ public interface INode extends IElement
     public List<IArc> getArcsIn();
 
     public boolean isConstant();
+
+    public void setConstant(boolean value);
 }

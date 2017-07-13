@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author pr
  */
-public interface IGravisParent {
+public interface IGravisParent extends IGravisElement {
     
     public List<GravisShapeHandle> getParentElementHandles();
     

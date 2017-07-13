@@ -5,15 +5,14 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.IGravisChild;
+import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
+import edu.unibi.agbi.gravisfx.GravisProperties;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 
 /**
  *
@@ -22,9 +21,9 @@ import edu.unibi.agbi.gravisfx.entity.IGravisChild;
 public class GravisChildRectangle extends Rectangle implements IGravisChild
 {
     private final List<GravisShapeHandle> elementHandles;
-    private final IGravisNode parentElement;
+    private final IGravisParent parentElement;
 
-    public GravisChildRectangle(IGravisNode parentNode) {
+    public GravisChildRectangle(IGravisParent parentNode) {
 
         super();
 
@@ -40,7 +39,7 @@ public class GravisChildRectangle extends Rectangle implements IGravisChild
     }
 
     @Override
-    public IGravisElement getParentShape() {
+    public IGravisParent getParentShape() {
         return parentElement;
     }
 

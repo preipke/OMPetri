@@ -50,7 +50,7 @@ import org.springframework.stereotype.Component;
  * @author PR
  */
 @Component
-public class GraphEditorController implements Initializable
+public class GraphController implements Initializable
 {
     @Autowired private ConfigurableApplicationContext springContext;
     
@@ -58,7 +58,7 @@ public class GraphEditorController implements Initializable
     @Autowired private MessengerService messengerService;
     @Autowired private SelectionService selectionService;
     
-    @Autowired private ElementEditorController elementEditorController;
+    @Autowired private InspectorController inspectorController;
     @Autowired private ModelController modelController;
     @Autowired private ElementController elementController;
     @Autowired private FileMenuController fileMenuController;
@@ -73,13 +73,13 @@ public class GraphEditorController implements Initializable
     @FXML private TabPane editorTabPane;
     @FXML private Button buttonCreateTab;
     
-    private final String fxmlDetails = "/fxml/editor/Details.fxml";
+    private final String fxmlInspector = "/fxml/editor/Inspector.fxml";
     private final String fxmlElement = "/fxml/editor/graph/Element.fxml";
     private final String fxmlHierarchy = "/fxml/editor/graph/Hierarchy.fxml";
     private final String fxmlPanel = "/fxml/editor/graph/Panel.fxml";
     private final String fxmlZoom = "/fxml/editor/graph/Zoom.fxml";
     
-    private Parent paneElementEditor;
+    private Parent paneInspector;
     private Parent paneElement;
     private Parent paneHierarchy;
     private Parent panePanel;
@@ -183,7 +183,7 @@ public class GraphEditorController implements Initializable
         }
     }
     
-    public void ShowElementEditor(IDataElement element) {
+    public void ShowInspector(IDataElement element) {
         if (element != null) {
             if (element.getElementType() == Element.Type.CLUSTER || element.getElementType() == Element.Type.CLUSTERARC) {
                 return;
@@ -193,14 +193,14 @@ public class GraphEditorController implements Initializable
             stackPaneActive.getChildren().remove(paneHierarchy);
             stackPaneActive.getChildren().remove(panePanel);
             stackPaneActive.getChildren().remove(paneZoom);
-            stackPaneActive.getChildren().add(paneElementEditor);
-            elementEditorController.setElement(element);
+            stackPaneActive.getChildren().add(paneInspector);
+            inspectorController.setElement(element);
         }
     }
     
     public void ShowGraphEditor() {
         if (stackPaneActive != null) {
-            stackPaneActive.getChildren().remove(paneElementEditor);
+            stackPaneActive.getChildren().remove(paneInspector);
             stackPaneActive.getChildren().add(paneHierarchy);
             stackPaneActive.getChildren().add(panePanel);
             stackPaneActive.getChildren().add(paneZoom);
@@ -216,7 +216,7 @@ public class GraphEditorController implements Initializable
         stackPaneActive = pane;
         if (pane != null && dao != null) {
             dataService.setDao(dao);
-            elementEditorController.clear();
+            inspectorController.clear();
             modelController.setDao(dao);
             hierarchyController.setDao(dao);
             ShowGraphEditor();
@@ -303,8 +303,8 @@ public class GraphEditorController implements Initializable
             
             fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(springContext::getBean);
-            fxmlLoader.setLocation(getClass().getResource(fxmlDetails));
-            paneElementEditor = fxmlLoader.load();
+            fxmlLoader.setLocation(getClass().getResource(fxmlInspector));
+            paneInspector = fxmlLoader.load();
             
             fxmlLoader = new FXMLLoader();
             fxmlLoader.setControllerFactory(springContext::getBean);
@@ -327,7 +327,7 @@ public class GraphEditorController implements Initializable
             paneZoom = fxmlLoader.load();
             
             StackPane.setAlignment(paneElement, Pos.TOP_RIGHT);
-            StackPane.setAlignment(paneElementEditor, Pos.CENTER);
+            StackPane.setAlignment(paneInspector, Pos.CENTER);
             StackPane.setAlignment(paneHierarchy, Pos.BOTTOM_LEFT);
             StackPane.setAlignment(panePanel, Pos.TOP_LEFT);
             StackPane.setAlignment(paneZoom, Pos.BOTTOM_CENTER);

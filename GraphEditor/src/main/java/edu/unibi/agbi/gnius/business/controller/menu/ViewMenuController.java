@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.menu;
 
 import edu.unibi.agbi.gnius.business.controller.LogController;
 import edu.unibi.agbi.gnius.business.controller.ResultsController;
-import edu.unibi.agbi.gnius.business.controller.editor.GraphEditorController;
+import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -22,13 +22,13 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ViewMenuController implements Initializable
 {
-    @Autowired private GraphEditorController graphController;
+    @Autowired private GraphController graphController;
     @Autowired private LogController logController;
     @Autowired private ResultsController resultsController;
     
     @FXML
     public void ShowElementEditor() {
-        graphController.ShowElementEditor(null);
+        graphController.ShowInspector(null);
     }
     
     @FXML

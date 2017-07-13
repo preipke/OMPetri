@@ -5,11 +5,11 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor;
 
-import edu.unibi.agbi.gnius.business.controller.editor.details.ConnectionsController;
-import edu.unibi.agbi.gnius.business.controller.editor.details.IdentifierController;
-import edu.unibi.agbi.gnius.business.controller.editor.details.NodeListController;
-import edu.unibi.agbi.gnius.business.controller.editor.details.ParameterController;
-import edu.unibi.agbi.gnius.business.controller.editor.details.PropertiesController;
+import edu.unibi.agbi.gnius.business.controller.editor.inspector.ConnectionsController;
+import edu.unibi.agbi.gnius.business.controller.editor.inspector.IdentifierController;
+import edu.unibi.agbi.gnius.business.controller.editor.inspector.NodeListController;
+import edu.unibi.agbi.gnius.business.controller.editor.inspector.ParameterController;
+import edu.unibi.agbi.gnius.business.controller.editor.inspector.PropertiesController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import java.net.URL;
@@ -29,7 +29,7 @@ import org.springframework.stereotype.Controller;
  * @author PR
  */
 @Controller
-public class ElementEditorController implements Initializable
+public class InspectorController implements Initializable
 {
     @Autowired private DataService dataService;
 
