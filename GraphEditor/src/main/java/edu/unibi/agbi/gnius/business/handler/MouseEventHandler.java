@@ -486,7 +486,7 @@ public class MouseEventHandler
                             selectionService.select(element);
                             selectionService.highlightRelated(element);
                         }
-                        graphController.HideElementPane();
+                        graphController.HideInfo();
 
                     } else {
 
@@ -497,9 +497,9 @@ public class MouseEventHandler
                         clickTransition.setOnFinished(e -> {
                             if (!event.isConsumed()) {
                                 if (event.getClickCount() == 2) {
-                                    graphController.ShowInspector(element.getDataElement());
+                                    graphController.ShowInspector(element.getData());
                                 } else {
-                                    graphController.ShowElementInfoPane(element);
+                                    graphController.ShowInfo(element);
                                 }
                             }
                         });
@@ -546,7 +546,6 @@ public class MouseEventHandler
      * @throws Exception
      */
     public synchronized void setCloningMode(IDataNode data) throws Exception {
-        System.out.println("Enter cloning mode");
         setEditorMode(isInNodeCloningMode);
         this.data = data;
     }
@@ -590,7 +589,6 @@ public class MouseEventHandler
      * Unlocks all modes so that no actions are performed on the graph pane.
      */
     public synchronized void UnlockEditorMode() {
-        System.out.println("Setting free mode");
         isInArcCreationMode.set(false);
         isInDraggingMode.set(false);
         isInNodeCreationMode.set(false);

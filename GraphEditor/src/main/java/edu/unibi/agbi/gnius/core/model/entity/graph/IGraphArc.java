@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 
 /**
@@ -14,7 +14,7 @@ import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
  */
 public interface IGraphArc extends IGraphElement, IGravisConnection
 {
-    @Override public DataArc getDataElement();
+    @Override public IDataArc getData();
     @Override public IGraphNode getSource();
     @Override public IGraphNode getTarget();
 }

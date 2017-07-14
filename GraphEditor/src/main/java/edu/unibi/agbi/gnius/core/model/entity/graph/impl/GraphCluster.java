@@ -8,7 +8,6 @@ package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircle;
 import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangle;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
@@ -31,20 +30,20 @@ public class GraphCluster extends GravisRectangle implements IGraphCluster {
         setWidth(getHeight());
         setArcWidth(getArcHeight());
         
-        getCircle().getStyleClass().add("cluster-place");
-        getCircle().setRadius(getCircle().getRadius() / 8 * 7);
-        getCircle().translateXProperty().bind(translateXProperty().add(getWidth() / 5 * 2));
-        getCircle().translateYProperty().bind(translateYProperty().add(getHeight() / 5 * 2));
+        super.getCircle().getStyleClass().add("cluster-place");
+        super.getCircle().setRadius(super.getCircle().getRadius() / 8 * 7);
+        super.getCircle().translateXProperty().bind(translateXProperty().add(getWidth() / 5 * 2));
+        super.getCircle().translateYProperty().bind(translateYProperty().add(getHeight() / 5 * 2));
         
-        getRectangle().getStyleClass().add("cluster-transition");
-        getRectangle().setWidth(getRectangle().getWidth() / 8 * 7);
-        getRectangle().setHeight(getRectangle().getHeight() / 8 * 7);
-        getRectangle().translateXProperty().bind(translateXProperty().add(getWidth() / 3 * 2 + 1));
-        getRectangle().translateYProperty().bind(translateYProperty().add(getHeight() / 4 * 1));
+        super.getRectangle().getStyleClass().add("cluster-transition");
+        super.getRectangle().setWidth(super.getRectangle().getWidth() / 8 * 7);
+        super.getRectangle().setHeight(super.getRectangle().getHeight() / 8 * 7);
+        super.getRectangle().translateXProperty().bind(translateXProperty().add(getWidth() / 3 * 2 + 1));
+        super.getRectangle().translateYProperty().bind(translateYProperty().add(getHeight() / 4 * 1));
     }
     
     @Override
-    public DataCluster getDataElement() {
+    public DataCluster getData() {
         return dataCluster;
     }
 
@@ -53,8 +52,8 @@ public class GraphCluster extends GravisRectangle implements IGraphCluster {
         return dataCluster.getGraph();
     }
     
-    @Override
-    public List<GravisShapeHandle> getChildElementHandles() {
-        return new ArrayList();
-    }
+//    @Override
+//    public List<GravisShapeHandle> getChildElementHandles() {
+//        return new ArrayList();
+//    }
 }

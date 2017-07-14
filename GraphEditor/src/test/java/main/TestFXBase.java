@@ -2,6 +2,7 @@ package main;
 
 import edu.unibi.agbi.gnius.Main;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -11,7 +12,6 @@ import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -265,11 +265,11 @@ public class TestFXBase extends ApplicationTest {
     }
 
     private IGraphNode CreatePlace() throws DataServiceException {
-        return dataService.CreateNode(Element.Type.PLACE, Math.random() * 1000, Math.random() * 800);
+        return dataService.CreateNode(DataType.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
     private IGraphNode CreateTransition() throws DataServiceException {
-        return dataService.CreateNode(Element.Type.TRANSITION, Math.random() * 1000, Math.random() * 800);
+        return dataService.CreateNode(DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 
     private void waitForFxThread(AtomicBoolean isFinished) {

@@ -102,7 +102,7 @@ public class SelectionService
      * @param element
      */
     public void highlightRelated(IGraphElement element) {
-        IDataElement dataElement = element.getDataElement();
+        IDataElement dataElement = element.getData();
         if (dataElement == null) {
             return;
         }
@@ -135,7 +135,7 @@ public class SelectionService
      */
     public void unhighlightRelated(IGraphElement element) {
 
-        IDataElement dataElement = element.getDataElement();
+        IDataElement dataElement = element.getData();
 
         boolean isStillSelected = false;
         for (IGraphElement relatedShape : dataElement.getShapes()) {
@@ -183,7 +183,7 @@ public class SelectionService
      * @param element
      */
     public void selectAll(IGraphElement element) {
-        IDataElement dataElement = element.getDataElement();
+        IDataElement dataElement = element.getData();
         for (IGraphElement relatedElement : dataElement.getShapes()) {
             select(relatedElement);
         }
@@ -228,7 +228,7 @@ public class SelectionService
             });
         }
         selectionDao.clear();
-        graphController.HideElementPane();
+        graphController.HideInfo();
     }
 
     /**

@@ -15,6 +15,8 @@ import java.util.Set;
  */
 public interface IDataElement extends IElement
 {
+    public DataType getDataType();
+    
     public String getDescription();
 
     public void setDescription(String text);

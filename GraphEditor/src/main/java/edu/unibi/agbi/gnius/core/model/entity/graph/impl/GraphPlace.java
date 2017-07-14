@@ -26,7 +26,7 @@ public class GraphPlace extends GravisCircle implements IGraphNode
     }
     
     @Override
-    public DataPlace getDataElement() {
+    public DataPlace getData() {
         return dataPlace;
     }
 }

@@ -6,12 +6,12 @@
 package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -41,9 +41,9 @@ public class ToolsController implements Initializable
     @FXML private Button buttonClusterCreate;
     @FXML private Button buttonClusterRemove;
     
-    private Element.Type createNodeType;
+    private DataType createNodeType;
     
-    public Element.Type getCreateNodeType() {
+    public DataType getCreateNodeType() {
         return createNodeType;
     }
     
@@ -77,11 +77,11 @@ public class ToolsController implements Initializable
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         buttonCreatePlace.setOnAction(e -> { 
-            createNodeType = Element.Type.PLACE; 
+            createNodeType = DataType.PLACE; 
             EnableCreatingNodes();
         });
         buttonCreateTransition.setOnAction(e -> { 
-            createNodeType = Element.Type.TRANSITION; 
+            createNodeType = DataType.TRANSITION; 
             EnableCreatingNodes();
         });
         buttonRemove.setOnAction(e -> RemoveSelected());

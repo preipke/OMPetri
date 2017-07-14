@@ -13,6 +13,7 @@ import edu.unibi.agbi.gnius.business.controller.menu.FileMenuController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
 import edu.unibi.agbi.gnius.business.handler.ScrollEventHandler;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
@@ -20,7 +21,6 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Optional;
@@ -147,7 +147,7 @@ public class GraphController implements Initializable
     
     public void FocusGraphElement(IGraphElement element) {
         
-        ShowGraphEditor();
+        ShowGraph();
         
         if (element != null) {
             double posX, posY;
@@ -177,15 +177,20 @@ public class GraphController implements Initializable
         }
     }
     
-    public void HideElementPane() {
+    public void HideInfo() {
         if (stackPaneActive != null) {
             stackPaneActive.getChildren().remove(paneElement);
         }
     }
     
+    public void ShowInfo(IGraphElement element) {
+        stackPaneActive.getChildren().add(paneElement);
+        elementController.ShowElementInfo(element);
+    }
+    
     public void ShowInspector(IDataElement element) {
         if (element != null) {
-            if (element.getElementType() == Element.Type.CLUSTER || element.getElementType() == Element.Type.CLUSTERARC) {
+            if (element.getDataType()== DataType.CLUSTER || element.getDataType()== DataType.CLUSTERARC) {
                 return;
             }
         }
@@ -198,18 +203,14 @@ public class GraphController implements Initializable
         }
     }
     
-    public void ShowGraphEditor() {
+    public void ShowGraph() {
         if (stackPaneActive != null) {
             stackPaneActive.getChildren().remove(paneInspector);
             stackPaneActive.getChildren().add(paneHierarchy);
             stackPaneActive.getChildren().add(panePanel);
             stackPaneActive.getChildren().add(paneZoom);
+            dataService.UpdateClusterShapes();
         }
-    }
-    
-    public void ShowElementInfoPane(IGraphElement element) {
-        stackPaneActive.getChildren().add(paneElement);
-        elementController.ShowElementInfo(element);
     }
     
     public void setPane(StackPane pane, DataDao dao) {
@@ -219,7 +220,7 @@ public class GraphController implements Initializable
             inspectorController.clear();
             modelController.setDao(dao);
             hierarchyController.setDao(dao);
-            ShowGraphEditor();
+            ShowGraph();
         }
     }
     

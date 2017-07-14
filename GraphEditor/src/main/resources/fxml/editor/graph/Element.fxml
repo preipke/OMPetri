@@ -145,13 +145,19 @@
             </content>
         </TitledPane>
         <TitledPane fx:id="clusterPane" animated="false" text="Stored Elements">
-            <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0">
-                    <children>
-                        <ListView fx:id="listClusteredElements" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                    </children>
-                </AnchorPane>
-            </content>
+         <content>
+            <VBox spacing="10.0">
+               <children>
+                  <HBox alignment="CENTER" spacing="10.0">
+                     <children>
+                        <Button fx:id="buttonDisableClustered" mnemonicParsing="false" text="Disable" />
+                        <Button fx:id="buttonEditClustered" mnemonicParsing="false" text="Edit" />
+                     </children>
+                  </HBox>
+                        <ListView fx:id="listClusteredElements" prefHeight="200.0" prefWidth="200.0" />
+               </children>
+            </VBox>
+         </content>
         </TitledPane>
     </children>
 </VBox>

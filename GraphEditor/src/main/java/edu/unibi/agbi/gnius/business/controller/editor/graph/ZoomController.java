@@ -66,6 +66,26 @@ public class ZoomController implements Initializable
         Point2D center;
         double scaleDistance, scaleTarget, scaleCurrent, adjustedOffsetX, adjustedOffsetY;
 
+        scaleTarget = calculator.getOptimalScale(dataService.getDao().getGraphPane());
+        scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
+        scaleDistance = Math.abs(scaleTarget - scaleCurrent);
+
+        if (scaleTarget > scaleCurrent) {
+            while (scaleCurrent < scaleMax && scaleCurrent < scaleTarget) {
+                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() + 1);
+                if (scaleDistance > (scaleDistance = Math.abs(scaleTarget - scaleCurrent))) {
+                    ZoomIn();
+                }
+            }
+        } else if (scaleTarget < scaleCurrent) {
+            while (scaleCurrent > scaleMin && scaleCurrent > scaleTarget) {
+                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() - 1);
+                if (scaleDistance > (scaleDistance = Math.abs(scaleTarget - scaleCurrent))) {
+                    ZoomOut();
+                }
+            }
+        }
+
         dataService.getGraph().setTranslateX(0);
         dataService.getGraph().setTranslateY(0);
 
@@ -89,26 +109,6 @@ public class ZoomController implements Initializable
             node.translateXProperty().set(pos.getX());
             node.translateYProperty().set(pos.getY());
         });
-
-        scaleTarget = calculator.getOptimalScale(dataService.getDao().getGraphPane());
-        scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower());
-        scaleDistance = Math.abs(scaleTarget - scaleCurrent);
-
-        if (scaleTarget > scaleCurrent) {
-            while (scaleCurrent < scaleMax && scaleCurrent < scaleTarget) {
-                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() + 1);
-                if (scaleDistance > (scaleDistance = Math.abs(scaleTarget - scaleCurrent))) {
-                    ZoomIn();
-                }
-            }
-        } else if (scaleTarget < scaleCurrent) {
-            while (scaleCurrent > scaleMin && scaleCurrent > scaleTarget) {
-                scaleCurrent = scaleBase * Math.pow(scaleFactor, dataService.getDao().getScalePower() - 1);
-                if (scaleDistance > (scaleDistance = Math.abs(scaleTarget - scaleCurrent))) {
-                    ZoomOut();
-                }
-            }
-        }
     }
     
     @FXML

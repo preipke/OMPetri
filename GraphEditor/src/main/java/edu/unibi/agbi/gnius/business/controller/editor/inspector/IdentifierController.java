@@ -70,7 +70,7 @@ public class IdentifierController implements Initializable
             }
             inputId.setText(element.getId());
             inputName.setText(element.getName());
-            inputType.setText(element.getElementType().toString());
+            inputType.setText(element.getDataType().toString());
         } else {
             inputDescription.setText("");
             inputId.setText("");
@@ -94,7 +94,7 @@ public class IdentifierController implements Initializable
             return;
         }
 
-        switch (element.getElementType()) {
+        switch (element.getDataType()) {
 
             case ARC:
                 IGraphNode source = new GraphPlace(null, new DataPlace(null, null));
@@ -149,7 +149,7 @@ public class IdentifierController implements Initializable
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
         int typeIndex = -1;
 
-        switch (element.getElementType()) {
+        switch (element.getDataType()) {
 
             case ARC:
                 DataArc arc = (DataArc) element;

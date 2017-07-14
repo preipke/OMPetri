@@ -7,19 +7,18 @@ package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
+import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -38,6 +37,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -75,10 +75,6 @@ public class ElementController implements Initializable
     @FXML private Parent propertiesArc;
     @FXML private Parent propertiesPlace;
     @FXML private Parent propertiesTransition;
-    
-    @FXML private Button buttonClone;
-    @FXML private Button buttonDisable;
-    @FXML private Button buttonEdit;
 
     // Identifier
     @FXML private TextField inputType;
@@ -86,6 +82,10 @@ public class ElementController implements Initializable
     @FXML private TextField inputName;
     @FXML private TextField inputLabel;
     @FXML private TextArea inputDescription;
+    
+    @FXML private Button buttonClone;
+    @FXML private Button buttonDisable;
+    @FXML private Button buttonDisableClustered;
 
     // Colour
     @FXML private ChoiceBox choiceSubtype;
@@ -93,13 +93,15 @@ public class ElementController implements Initializable
 //    @FXML private Button buttonColourCreate;
 
     // Properties
+    @FXML private Button buttonEdit;
+    @FXML private Button buttonEditClustered;
+    @FXML private Label statusMessage;
+    @FXML private ListView<IGraphElement> listClusteredElements;
+    @FXML private TextArea inputTransitionFunction;
     @FXML private TextField inputArcWeight;
     @FXML private TextField inputPlaceToken;
     @FXML private TextField inputPlaceTokenMin;
     @FXML private TextField inputPlaceTokenMax;
-    @FXML private TextArea inputTransitionFunction;
-    @FXML private Label statusMessage;
-    @FXML private ListView<ClusterElement> listClusteredElements;
 
     private IDataElement data;
     private String inputLatestValid;
@@ -111,8 +113,12 @@ public class ElementController implements Initializable
      * @param element
      */
     public void ShowElementInfo(IGraphElement element) {
+        
+        if (element == null) {
+            return;
+        }
 
-        data = element.getDataElement();
+        data = element.getData();
 
         LoadGuiElements(data);
         LoadElementInfo(data);
@@ -127,18 +133,20 @@ public class ElementController implements Initializable
      */
     private void LoadGuiElements(IDataElement element) {
 
-        setDisableButtonText(element);
+        setDisableButton(data);
+        setDisableClusteredButton(null);
         elementFrame.getChildren().clear();
         elementFrame.getChildren().add(identifierPane);
         propertiesBox.getChildren().clear();
         propertiesBox.getChildren().add(propertiesSubtype);
         propertiesBox.getChildren().add(propertiesColor);
+        buttonDisableClustered.setDisable(true);
+        buttonEditClustered.setDisable(true);
 
-        switch (element.getElementType()) {
+        switch (element.getDataType()) {
             
             case ARC:
                 buttonClone.setDisable(true);
-                buttonDisable.setDisable(false);
                 buttonEdit.setDisable(false);
                 inputLabel.setDisable(true);
                 elementFrame.getChildren().add(propertiesPane);
@@ -147,7 +155,6 @@ public class ElementController implements Initializable
 
             case CLUSTER:
                 buttonClone.setDisable(true);
-                buttonDisable.setDisable(true);
                 buttonEdit.setDisable(true);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(clusterPane);
@@ -155,7 +162,6 @@ public class ElementController implements Initializable
 
             case CLUSTERARC:
                 buttonClone.setDisable(true);
-                buttonDisable.setDisable(true);
                 buttonEdit.setDisable(true);
                 inputLabel.setDisable(true);
                 elementFrame.getChildren().add(clusterPane);
@@ -163,7 +169,6 @@ public class ElementController implements Initializable
 
             case PLACE:
                 buttonClone.setDisable(false);
-                buttonDisable.setDisable(false);
                 buttonEdit.setDisable(false);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(propertiesPane);
@@ -172,7 +177,6 @@ public class ElementController implements Initializable
 
             case TRANSITION:
                 buttonClone.setDisable(false);
-                buttonDisable.setDisable(false);
                 buttonEdit.setDisable(false);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(propertiesPane);
@@ -189,13 +193,13 @@ public class ElementController implements Initializable
      */
     private void LoadElementType(IDataElement element) {
 
-        inputType.setText(element.getElementType().toString());
+        inputType.setText(element.getDataType().toString());
         choiceSubtype.getItems().clear();
 
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
         int typeIndex = -1;
 
-        switch (element.getElementType()) {
+        switch (element.getDataType()) {
 
             case ARC:
                 DataArc arc = (DataArc) element;
@@ -271,7 +275,7 @@ public class ElementController implements Initializable
 
         choiceColour.setItems(choicesColour); // assign upfront, input listeners accesses on text change
 
-        switch (element.getElementType()) {
+        switch (element.getDataType()) {
 
             case ARC:
                 DataArc arc = (DataArc) element;
@@ -290,8 +294,7 @@ public class ElementController implements Initializable
                 DataCluster cluster = (DataCluster) element;
                 listClusteredElements.getItems().clear();
                 cluster.getGraph().getNodes().forEach(n -> {
-                    ClusterElement ce = new ClusterElement((IGraphNode) n);
-                    listClusteredElements.getItems().add(ce);
+                    listClusteredElements.getItems().add((IGraphElement) n);
                 });
                 break;
 
@@ -299,8 +302,7 @@ public class ElementController implements Initializable
                 DataClusterArc clusterArc = (DataClusterArc) element;
                 listClusteredElements.getItems().clear();
                 clusterArc.getStoredArcs().values().forEach(a -> {
-                    ClusterElement ce = new ClusterElement((IGraphArc) a);
-                    listClusteredElements.getItems().add(ce);
+                    listClusteredElements.getItems().add(a);
                 });
                 break;
 
@@ -433,11 +435,35 @@ public class ElementController implements Initializable
         }
     }
     
-    private void setDisableButtonText(IDataElement element) {
-        if (element.isDisabled()) {
-            buttonDisable.setText("Enable");
+    private void setDisableButton(IDataElement element) {
+        if (element.getDataType() == DataType.CLUSTER
+                || element.getDataType() == DataType.CLUSTERARC) {
+            if (element.isDisabled()) {
+                buttonDisable.setText("Enable All");
+            } else {
+                buttonDisable.setText("Disable All");
+            }
         } else {
-            buttonDisable.setText("Disable");
+            if (element.isDisabled()) {
+                buttonDisable.setText("Enable");
+            } else {
+                buttonDisable.setText("Disable");
+            }
+        }
+    }
+    
+    private void setDisableClusteredButton(IGraphElement element) {
+        if (element != null) {
+            buttonDisableClustered.setDisable(false);
+            buttonEditClustered.setDisable(false);
+            if (element.getData().isDisabled()) {
+                buttonDisableClustered.setText("Enable");
+            } else {
+                buttonDisableClustered.setText("Disable");
+            }
+        } else {
+            buttonDisableClustered.setDisable(true);
+            buttonEditClustered.setDisable(true);
         }
     }
     
@@ -464,9 +490,30 @@ public class ElementController implements Initializable
         });
         buttonDisable.setOnAction(eh -> {
             data.setDisabled(!data.isDisabled());
-            setDisableButtonText(data);
+            setDisableButton(data);
+            LoadElementProperties(data);
+        });
+        buttonDisableClustered.setOnAction(eh -> {
+            if (listClusteredElements.getSelectionModel().getSelectedItem() != null) {
+                int index = listClusteredElements.getSelectionModel().getSelectedIndex();
+                IGraphElement elem = listClusteredElements.getSelectionModel().getSelectedItem();
+                elem.getData().setDisabled(!elem.getData().isDisabled());
+                listClusteredElements.getItems().remove(elem);
+                listClusteredElements.getItems().add(index, elem);
+            }
+            setDisableButton(data);
+            setDisableClusteredButton(listClusteredElements.getSelectionModel().getSelectedItem());
+            if (data.getDataType() == DataType.CLUSTER) { // should be mandatory
+                ((DataCluster) data).UpdateShape();
+            }
         });
         buttonEdit.setOnAction(eh -> graphController.ShowInspector(data));
+        buttonEditClustered.setOnAction(eh -> {
+            if (listClusteredElements.getSelectionModel().getSelectedItem() != null) {
+                IGraphElement elem = listClusteredElements.getSelectionModel().getSelectedItem();
+                graphController.ShowInspector(listClusteredElements.getSelectionModel().getSelectedItem().getData());
+            }
+        });
 
         choiceSubtype.valueProperty().addListener(cl -> {
             if (data != null) {
@@ -490,32 +537,31 @@ public class ElementController implements Initializable
         inputPlaceTokenMax.textProperty().addListener(cl -> ParsePlaceToken());
         inputTransitionFunction.textProperty().addListener(e -> ParseTransitionFunction());
         
-        listClusteredElements.setOnMouseClicked(eh -> {
-            if (!listClusteredElements.getItems().isEmpty()) {
-                if (eh.getButton() == MouseButton.PRIMARY && eh.getClickCount() == 2) {
-                    ShowElementInfo(listClusteredElements.getSelectionModel().getSelectedItem().getElement());
-                }
-            }
+        listClusteredElements.setCellFactory(l -> new ClusterCellFormatter());
+        listClusteredElements.getSelectionModel().selectedItemProperty().addListener(cl -> {
+            setDisableClusteredButton(listClusteredElements.getSelectionModel().getSelectedItem());
         });
-//        listClusteredElements.selectionModelProperty().addListener(cl -> {
-//        });
     }
     
-    private class ClusterElement {
-        
-        private final IGraphElement element;
-        
-        private ClusterElement(IGraphElement element) {
-            this.element = element;
-        }
-        
-        private IGraphElement getElement() {
-            return element;
-        }
-        
+    private class ClusterCellFormatter extends ListCell<IGraphElement>
+    {
         @Override
-        public String toString() {
-            return element.getDataElement().getName() + " (" + element.getDataElement().getId() + ")";
+        protected void updateItem(IGraphElement item, boolean empty) {
+            super.updateItem(item, empty);
+            if (item != null) {
+                setText(item.toString());
+                setOpacity(1.0);
+                if (item.getData().isDisabled()) {
+                    setOpacity(0.5);
+                }
+                setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2) {
+                        ShowElementInfo(item);
+                    }
+                });
+            } else {
+                setText("");
+            }
         }
     }
 }

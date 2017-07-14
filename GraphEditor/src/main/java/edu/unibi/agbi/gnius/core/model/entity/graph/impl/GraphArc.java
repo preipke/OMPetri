@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -17,21 +18,21 @@ import edu.unibi.agbi.gravisfx.entity.parent.connection.GravisFlexEdge;
  */
 public class GraphArc extends GravisFlexEdge implements IGraphArc
 {
-    private final DataArc dataArc;
+    private final IDataArc dataArc;
     
     public GraphArc(String id, IGraphNode source) {
         super(id, source, GravisType.CONNECTION);
         this.dataArc = null;
     }
     
-    public GraphArc(String id, IGraphNode source, IGraphNode target, DataArc dataArc) {
+    public GraphArc(String id, IGraphNode source, IGraphNode target, IDataArc dataArc) {
         super(id, source, target, GravisType.CONNECTION);
         this.dataArc = dataArc;
         this.dataArc.getShapes().add(this);
     }
     
     @Override
-    public DataArc getDataElement() {
+    public IDataArc getData() {
         return dataArc;
     }
 

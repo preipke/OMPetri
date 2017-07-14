@@ -26,7 +26,7 @@ public class GraphTransition extends GravisRectangle implements IGraphNode {
     }
     
     @Override
-    public DataTransition getDataElement() {
+    public DataTransition getData() {
         return dataTransition;
     }
 }

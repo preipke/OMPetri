@@ -33,7 +33,7 @@ public class ViewMenuController implements Initializable
     
     @FXML
     public void ShowGraphEditor() {
-        graphController.ShowGraphEditor();
+        graphController.ShowGraph();
     }
     
     @FXML

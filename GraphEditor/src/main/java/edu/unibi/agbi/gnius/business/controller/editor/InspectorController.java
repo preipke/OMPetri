@@ -89,7 +89,7 @@ public class InspectorController implements Initializable
 
         choiceSticky.setDisable(true);
         if (element != null) {
-            switch (element.getElementType()) {
+            switch (element.getDataType()) {
                 case PLACE:
                     choiceSticky.setDisable(false);
                     break;

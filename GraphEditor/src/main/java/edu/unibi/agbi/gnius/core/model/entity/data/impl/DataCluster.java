@@ -5,36 +5,55 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
-import edu.unibi.agbi.petrinet.entity.abstr.Node;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
  *
  * @author PR
  */
-public class DataCluster extends Node implements IDataNode
+public class DataCluster implements IDataNode
 {
     private final Set<IGraphElement> shapes;
+    private final DataType dataType;
     private final Graph graph;
 
-    private String description = "";
+    private final String id;
+    private String description;
+    private String name;
 
     public DataCluster(String id) {
-        super(id);
-        super.type = Element.Type.CLUSTER;
-        super.name = id;
-        this.shapes = new HashSet();
+        this.dataType = DataType.CLUSTER;
         this.graph = new Graph();
+        this.id = id;
+        this.name = id;
+        this.shapes = new HashSet();
     }
 
     public Graph getGraph() {
         return graph;
+    }
+    
+    public void UpdateShape() {
+        boolean isDisabled = isDisabled();
+        for (IGraphElement shape : shapes) {
+            ((IGraphNode) shape).getElementHandles().forEach(handle -> handle.setDisabled(isDisabled));
+        }
+    }
+
+    @Override
+    public DataType getDataType() {
+        return dataType;
     }
 
     @Override
@@ -48,6 +67,34 @@ public class DataCluster extends Node implements IDataNode
     }
 
     @Override
+    public boolean isDisabled() {
+        boolean isDisabled = true;
+        for (IGravisElement element : graph.getNodes()) {
+            isDisabled = ((IGraphElement) element).getData().isDisabled();
+            if (!isDisabled) { // if at least one node is not disabled, show shape as enabled
+                break;
+            }
+        }
+        return isDisabled;
+    }
+
+    @Override
+    public void setDisabled(boolean value) {
+        for (IGravisElement element : graph.getNodes()) {
+            ((IGraphElement) element).getData().setDisabled(value);
+        }
+        for (IGravisElement element : graph.getConnections()) {
+            ((IGraphElement) element).getData().setDisabled(value);
+        }
+        UpdateShape();
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
     public String getLabelText() {
         if (shapes.isEmpty()) {
             return null;
@@ -55,11 +102,6 @@ public class DataCluster extends Node implements IDataNode
         return ((IGraphNode) shapes.iterator().next()).getLabel().getText();
     }
 
-    /**
-     * Sets the label text for all related shapes in the scene.
-     *
-     * @param text
-     */
     @Override
     public void setLabelText(String text) {
         for (IGraphElement shape : shapes) {
@@ -68,8 +110,13 @@ public class DataCluster extends Node implements IDataNode
     }
 
     @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void setName(String name) {
-        super.name = name;
+        this.name = name;
         this.graph.setName(name);
     }
 
@@ -79,8 +126,33 @@ public class DataCluster extends Node implements IDataNode
     }
 
     @Override
+    public List<IArc> getArcsIn() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public List<IArc> getArcsOut() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
     public boolean isConstant() {
-        throw new UnsupportedOperationException("This method is not meant to be used at any time.");
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setConstant(boolean value) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Element.Type getElementType() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Set<Parameter> getRelatedParameters() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

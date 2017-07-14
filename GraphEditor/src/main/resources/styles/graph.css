@@ -153,6 +153,16 @@
     -fx-stroke-width: 2px;
     -fx-stroke-dash-array: 1px 8px;
 }
+.cluster:disabled {
+    -fx-fill: grey;
+    -fx-opacity: 0.5;
+}
+.cluster:disabled:selected {
+    -fx-opacity: 0.75;
+}
+.cluster:disabled:highlighted {
+    -fx-opacity: 0.75;
+}
 .cluster-place {
     -fx-fill: yellowgreen;
     -fx-stroke: forestgreen;
@@ -171,6 +181,17 @@
     -fx-stroke: forestgreen;
     -fx-stroke-width: 1px;
 }
+.cluster-place:disabled {
+    -fx-fill: grey;
+    -fx-stroke: black;
+    -fx-opacity: 0.3;
+}
+.cluster-place:disabled:selected {
+    -fx-opacity: 0.5;
+}
+.cluster-place:disabled:highlighted {
+    -fx-opacity: 0.5;
+}
 .cluster-transition {
     -fx-fill: lightblue;
     -fx-stroke: blue;
@@ -188,6 +209,17 @@
 .cluster-transition :highlighted {
     -fx-stroke: blue;
     -fx-stroke-width: 1px;
+}
+.cluster-transition:disabled {
+    -fx-fill: grey;
+    -fx-stroke: black;
+    -fx-opacity: 0.3;
+}
+.cluster-transition:disabled:selected {
+    -fx-opacity: 0.5;
+}
+.cluster-transition:disabled:highlighted {
+    -fx-opacity: 0.5;
 }
 
 /* Default Place Style */

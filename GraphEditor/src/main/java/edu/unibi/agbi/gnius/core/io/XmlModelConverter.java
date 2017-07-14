@@ -9,6 +9,7 @@ import edu.unibi.agbi.gnius.core.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
@@ -457,7 +458,7 @@ public class XmlModelConverter
     
     private void addNodes(NodeList nl, Model model, Graph graph, Map<String,IGraphNode> nodes) throws IOException {
         
-        IElement data;
+        IDataElement data;
         Element elem;
         
         try {
@@ -465,12 +466,12 @@ public class XmlModelConverter
                 if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
                     elem = (Element) nl.item(i);
 
-                    data = model.getElement(elem.getAttribute(attrDataId));
+                    data = (IDataElement) model.getElement(elem.getAttribute(attrDataId));
                     if (data == null) {
                         data = new DataCluster(elem.getAttribute(attrDataId));
                     }
                     IGraphNode shape;
-                    switch (data.getElementType()) {
+                    switch (data.getDataType()) {
                         case CLUSTER:
                             shape = new GraphCluster(elem.getAttribute(attrId), (DataCluster) data);
                             break;
@@ -481,12 +482,12 @@ public class XmlModelConverter
                             shape = new GraphTransition(elem.getAttribute(attrId), (DataTransition) data);
                             break;
                         default:
-                            throw new IOException("Malformed node detected! Cannot create node shape for data type " + data.getElementType() + "!");
+                            throw new IOException("Malformed node detected! Cannot create node shape for data type " + data.getDataType() + "!");
                     }
                     shape.getLabel().setText(elem.getAttribute(attrLabel));
                     graph.add(shape);
                     dataService.styleElement(shape);
-                    shape.getElementHandles().forEach(handle -> handle.setDisabled(shape.getDataElement().isDisabled()));
+                    shape.getElementHandles().forEach(handle -> handle.setDisabled(shape.getData().isDisabled()));
                     setLabelAndPosition(elem, shape);
                     nodes.put(shape.getId(), shape);
                 }
@@ -507,14 +508,14 @@ public class XmlModelConverter
                 elem = (Element) nl.item(i);
                 
                 arc = (IGraphArc) graph.getConnection(elem.getAttribute(attrId));
-                data = (DataClusterArc) arc.getDataElement();
+                data = (DataClusterArc) arc.getData();
                 
-                arc.getDataElement().getShapes().add(arc);
+                arc.getData().getShapes().add(arc);
 
                 for (IGraphArc a : getConnections(elem.getElementsByTagName(tagConnection), model, nodes)) {
                     data.getStoredArcs().put(a.getId(), a);
-                    a.getDataElement().getShapes().clear();
-                    a.getDataElement().getShapes().add(arc);
+                    a.getData().getShapes().clear();
+                    a.getData().getShapes().add(arc);
                 }
                 graph.add(arc);
             }
@@ -523,9 +524,9 @@ public class XmlModelConverter
     
     private List<IGraphArc> getConnections(NodeList nl, Model model, Map<String, IGraphNode> nodes) throws IOException {
         
-        IGraphNode source, target;
-        DataArc data;
         Element elem;
+        IDataArc data;
+        IGraphNode source, target;
         List<IGraphArc> arcs = new ArrayList();
         
         try {
@@ -538,13 +539,13 @@ public class XmlModelConverter
                     
                     data = (DataArc) model.getElement(elem.getAttribute(attrDataId));
                     if (data == null) {
-                        data = new DataClusterArc(elem.getAttribute(attrDataId), source.getDataElement(), target.getDataElement());
+                        data = new DataClusterArc(elem.getAttribute(attrDataId));
                     }
 
                     IGraphArc arc = new GraphArc(elem.getAttribute(attrId), source, target, data);
-                    arc.getDataElement().getShapes().add(arc);
+                    arc.getData().getShapes().add(arc);
                     dataService.styleElement(arc);
-                    arc.getElementHandles().forEach(handle -> handle.setDisabled(arc.getDataElement().isDisabled()));
+                    arc.getElementHandles().forEach(handle -> handle.setDisabled(arc.getData().isDisabled()));
                     arcs.add(arc);
                 }
             }
@@ -564,7 +565,6 @@ public class XmlModelConverter
                 source, target,
                 DataArc.Type.valueOf(elem.getAttribute(attrType))
         );
-//        setRelatedParameterIds(elem, arc);
 
         // Weights
         nl = elem.getElementsByTagName(tagWeights);
@@ -599,7 +599,6 @@ public class XmlModelConverter
                 elem.getAttribute(attrId),
                 DataPlace.Type.valueOf(elem.getAttribute(attrType))
         );
-//        setRelatedParameterIds(elem, place);
 
         // Token
         nodes = elem.getElementsByTagName(tagTokens);
@@ -638,7 +637,6 @@ public class XmlModelConverter
                 elem.getAttribute(attrId),
                 DataTransition.Type.valueOf(elem.getAttribute(attrType))
         );
-//        setRelatedParameterIds(elem, transition);
         
         nl = elem.getElementsByTagName(tagParametersLocal);
         if (nl.getLength() == 1) {
@@ -696,7 +694,7 @@ public class XmlModelConverter
         if (elem.getElementsByTagName(tagLabel).getLength() == 1) {
             if (elem.getElementsByTagName(tagLabel).item(0).getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) elem.getElementsByTagName(tagLabel).item(0);
-                node.getDataElement().setLabelText(elem.getAttribute(attrLabel));
+                node.getData().setLabelText(elem.getAttribute(attrLabel));
                 node.getLabel().setTranslateX(Double.parseDouble(elem.getAttribute(attrPosX)));
                 node.getLabel().setTranslateY(Double.parseDouble(elem.getAttribute(attrPosY)));
             }
@@ -932,7 +930,7 @@ public class XmlModelConverter
         
         Element elements = dom.createElement(tagClusterArcs);
         connections.forEach(clusterArc -> {
-            DataClusterArc data = (DataClusterArc) ((IGraphArc) clusterArc).getDataElement();
+            DataClusterArc data = (DataClusterArc) ((IGraphArc) clusterArc).getData();
             
             Element a = dom.createElement(tagClusterArc);
             a.setAttribute(attrId, clusterArc.getId());
@@ -940,7 +938,7 @@ public class XmlModelConverter
             data.getStoredArcs().values().forEach(storedArc -> {
                 Element sa = dom.createElement(tagConnection);
                 sa.setAttribute(attrId, storedArc.getId());
-                sa.setAttribute(attrDataId, ((IGraphArc) storedArc).getDataElement().getId());
+                sa.setAttribute(attrDataId, ((IGraphArc) storedArc).getData().getId());
                 sa.setAttribute(attrSource, String.valueOf(storedArc.getSource().getId()));
                 sa.setAttribute(attrTarget, String.valueOf(storedArc.getTarget().getId()));
                 
@@ -957,7 +955,7 @@ public class XmlModelConverter
             
             Element c = dom.createElement(tagConnection);
             c.setAttribute(attrId, connection.getId());
-            c.setAttribute(attrDataId, ((IGraphArc) connection).getDataElement().getId());
+            c.setAttribute(attrDataId, ((IGraphArc) connection).getData().getId());
             c.setAttribute(attrSource, String.valueOf(connection.getSource().getId()));
             c.setAttribute(attrTarget, String.valueOf(connection.getTarget().getId()));
             
@@ -972,7 +970,7 @@ public class XmlModelConverter
             
             Element n = dom.createElement(tagNode);
             n.setAttribute(attrId, node.getId());
-            n.setAttribute(attrDataId, ((IGraphNode) node).getDataElement().getId());
+            n.setAttribute(attrDataId, ((IGraphNode) node).getData().getId());
             n.setAttribute(attrPosX, String.valueOf(node.getShape().getTranslateX()));
             n.setAttribute(attrPosY, String.valueOf(node.getShape().getTranslateY()));
             

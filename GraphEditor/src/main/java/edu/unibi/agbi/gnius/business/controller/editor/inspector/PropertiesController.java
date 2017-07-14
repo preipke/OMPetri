@@ -87,7 +87,7 @@ public class PropertiesController implements Initializable
 
         parentContainer.getChildren().clear();
         if (element != null) {
-            switch (element.getElementType()) {
+            switch (element.getDataType()) {
                 case ARC:
                     parentContainer.getChildren().add(parentColor);
                     parentContainer.getChildren().add(parentArc);

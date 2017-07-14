@@ -14,5 +14,5 @@ import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
  */
 public interface IGraphCluster extends IGraphNode, IGravisCluster
 {
-    @Override public DataCluster getDataElement();
+    @Override public DataCluster getData();
 }

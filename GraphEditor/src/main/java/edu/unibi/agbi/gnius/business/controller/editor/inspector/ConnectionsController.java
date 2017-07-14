@@ -73,7 +73,7 @@ public class ConnectionsController implements Initializable
             return;
         }
 
-        switch (element.getElementType()) {
+        switch (element.getDataType()) {
 
             case ARC:
                 IDataArc arc = (IDataArc) element;
@@ -113,7 +113,7 @@ public class ConnectionsController implements Initializable
     private void EditElement(ListView<IDataArc> listView) {
         IDataArc arc = listView.getSelectionModel().getSelectedItem();
         if (arc != null) {
-            inspectorController.setElement(arc.getShapes().iterator().next().getDataElement());
+            inspectorController.setElement(arc.getShapes().iterator().next().getData());
         }
     }
 
@@ -195,13 +195,13 @@ public class ConnectionsController implements Initializable
      * @return
      */
     private boolean isNodeRelated(IDataArc arc, IGraphNode node) {
-        if (arc.getSource().equals(node.getDataElement())) { // node is source ->
+        if (arc.getSource().equals(node.getData())) { // node is source ->
             for (IGraphElement element : arc.getTarget().getShapes()) {
                 if (node.getChildren().contains(element)) {
                     return true;
                 }
             }
-        } else if (arc.getTarget().equals(node.getDataElement())) { // node is target ->
+        } else if (arc.getTarget().equals(node.getData())) { // node is target ->
             for (IGraphElement element : arc.getSource().getShapes()) {
                 if (node.getParents().contains(element)) {
                     return true;
@@ -240,7 +240,7 @@ public class ConnectionsController implements Initializable
             setText("");
             if (dataArcItem != null) {
                 InitConnectionCell(this, dataArcItem);
-                switch (dataArcItem.getSource().getElementType()) {
+                switch (dataArcItem.getSource().getDataType()) {
                     case PLACE:
                         setText(getText() + "\u25CB\u2192  " + dataArcItem.getSource().toString());
                         break;
@@ -265,7 +265,7 @@ public class ConnectionsController implements Initializable
             setText("");
             if (dataArcItem != null) {
                 InitConnectionCell(this, dataArcItem);
-                switch (dataArcItem.getTarget().getElementType()) {
+                switch (dataArcItem.getTarget().getDataType()) {
                     case PLACE:
                         setText("\u2192\u25CB  " + dataArcItem.getTarget().toString());
                         break;
@@ -288,7 +288,7 @@ public class ConnectionsController implements Initializable
         protected void updateItem(IGraphElement item, boolean empty) {
             super.updateItem(item, empty);
             if (item != null) {
-                switch (item.getDataElement().getElementType()) {
+                switch (item.getData().getDataType()) {
                     case PLACE:
                         setText("\u25CB  " + item.toString());
                         break;

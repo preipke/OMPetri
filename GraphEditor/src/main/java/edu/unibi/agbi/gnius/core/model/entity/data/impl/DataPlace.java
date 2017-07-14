@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
@@ -18,21 +19,22 @@ import java.util.Set;
  */
 public final class DataPlace extends Place implements IDataNode
 {
+    private final DataType dataType;
     private final Set<IGraphElement> shapes;
 
     private String description;
     private boolean isSticky = false;
 
     public DataPlace(String id, Place.Type type) {
-        super(id);
-        setPlaceType(type);
-        this.name = this.id;
+        super(id, type);
+        super.name = super.id;
+        this.dataType = DataType.PLACE;
         this.shapes = new HashSet();
     }
 
     @Override
-    public Set<IGraphElement> getShapes() {
-        return shapes;
+    public DataType getDataType() {
+        return dataType;
     }
 
     @Override
@@ -44,6 +46,14 @@ public final class DataPlace extends Place implements IDataNode
     public String getDescription() {
         return description;
     }
+    
+    @Override
+    public void setDisabled(boolean value) {
+        super.setDisabled(value);
+        for (IGraphElement shape : shapes) {
+            ((IGraphNode) shape).getElementHandles().forEach(handle -> handle.setDisabled(value));
+        }
+    }
 
     @Override
     public String getLabelText() {
@@ -53,24 +63,16 @@ public final class DataPlace extends Place implements IDataNode
         return ((IGraphNode) shapes.iterator().next()).getLabel().getText();
     }
 
-    /**
-     * Sets the label text for all related shapes in the scene.
-     *
-     * @param text
-     */
     @Override
     public void setLabelText(String text) {
         for (IGraphElement shape : shapes) {
             ((IGraphNode) shape).getLabel().setText(text);
         }
     }
-    
+
     @Override
-    public void setDisabled(boolean value) {
-        super.setDisabled(value);
-        for (IGraphElement shape : shapes) {
-            ((IGraphNode) shape).getElementHandles().forEach(handle -> handle.setDisabled(value));
-        }
+    public Set<IGraphElement> getShapes() {
+        return shapes;
     }
 
     @Override

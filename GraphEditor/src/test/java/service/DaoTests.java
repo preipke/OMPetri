@@ -72,8 +72,8 @@ public class DaoTests extends TestFXBase {
             arc = (IGraphArc) connection;
             Assert.assertEquals(true, arc.getSource().getConnections().contains(arc));
             Assert.assertEquals(true, arc.getTarget().getConnections().contains(arc));
-            Assert.assertEquals(true, arc.getDataElement().getSource().getArcsOut().contains(arc.getDataElement()));
-            Assert.assertEquals(true, arc.getDataElement().getTarget().getArcsIn().contains(arc.getDataElement()));
+            Assert.assertEquals(true, arc.getData().getSource().getArcsOut().contains(arc.getData()));
+            Assert.assertEquals(true, arc.getData().getTarget().getArcsIn().contains(arc.getData()));
         }
         
         for (IGraphNode place : places) {
@@ -85,11 +85,11 @@ public class DaoTests extends TestFXBase {
             
             Assert.assertEquals(
                     place.getConnections().size() / 2,
-                    (place.getDataElement()).getArcsIn().size(),
+                    (place.getData()).getArcsIn().size(),
                     transitions.size());
             Assert.assertEquals(
                     place.getConnections().size() / 2,
-                    (place.getDataElement()).getArcsOut().size(),
+                    (place.getData()).getArcsOut().size(),
                     transitions.size());
         }
         
@@ -102,11 +102,11 @@ public class DaoTests extends TestFXBase {
             
             Assert.assertEquals(
                     transition.getConnections().size() / 2,
-                    (transition.getDataElement()).getArcsIn().size(),
+                    (transition.getData()).getArcsIn().size(),
                     places.size());
             Assert.assertEquals(
                     transition.getConnections().size() / 2,
-                    (transition.getDataElement()).getArcsOut().size(),
+                    (transition.getData()).getArcsOut().size(),
                     places.size());
         }
     }
@@ -127,7 +127,7 @@ public class DaoTests extends TestFXBase {
             nodesCopy = copyNodes(dataService.getGraph().getNodes());
 
             node = (IGraphNode) nodesCopy.remove(getRandomIndex(nodesCopy));
-            nodeData = node.getDataElement();
+            nodeData = node.getData();
             
             RemoveNode(node);
 
@@ -175,7 +175,7 @@ public class DaoTests extends TestFXBase {
             arcsCopy = copyConnections(dataService.getGraph().getConnections());
             
             arc = (IGraphArc) arcsCopy.remove(getRandomIndex(arcsCopy));
-            arcData = arc.getDataElement();
+            arcData = arc.getData();
             
             RemoveArc(arc);
 

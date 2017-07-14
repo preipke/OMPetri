@@ -170,7 +170,7 @@ public class SbmlModelConverter
                     .getConnections()
                     .forEach(conn -> {
                         IGraphArc arc = (IGraphArc) conn;
-                        arc.getDataElement().setDisabled(true);
+                        arc.getData().setDisabled(true);
                         arc.getElementHandles().forEach(handle -> handle.setDisabled(true));
                     });
         }
@@ -334,7 +334,7 @@ public class SbmlModelConverter
                             tmp.getAttribute(attrRefId);
                             if (addRefering) {
                                 if (dao.getGraph().contains("spec_" + tmp.getAttribute(attrRefId))) {
-                                    data = ((IGraphNode) dao.getGraph().getNode("spec_" + tmp.getAttribute(attrRefId))).getDataElement();
+                                    data = ((IGraphNode) dao.getGraph().getNode("spec_" + tmp.getAttribute(attrRefId))).getData();
                                     idReferenceMap.put(dataId, data.getId());
                                 } else {
                                     throw new IOException("Missing node reference '" + ("spec_" + tmp.getAttribute(attrRefId)) + "' for '" + dataId + "' ('" + nodeId + "')");
@@ -531,13 +531,13 @@ public class SbmlModelConverter
         }
 
         DataArc data = new DataArc(
-                dataService.getArcId(source.getDataElement(), target.getDataElement()),
-                source.getDataElement(),
-                target.getDataElement(),
+                dataService.getArcId(source.getData(), target.getData()),
+                source.getData(),
+                target.getData(),
                 arcType
         );
 
-        if (source.getDataElement().isDisabled() || target.getDataElement().isDisabled()) {
+        if (source.getData().isDisabled() || target.getData().isDisabled()) {
             data.setDisabled(true);
         }
         data.setName(elem.getAttribute(attrName));

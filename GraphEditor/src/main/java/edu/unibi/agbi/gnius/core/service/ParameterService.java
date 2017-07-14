@@ -57,25 +57,31 @@ public class ParameterService
      */
     public void add(Model model, Parameter param) throws ParameterServiceException {
         if (Parameter.Type.GLOBAL == param.getType()) {
-            add(model, param);
+            if (model.contains(param)) {
+                throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
+            }
+            model.add(param);
         } else {
-            if (param.getRelatedElement() != null) {
-                if (model.containsAndNotEqual(param)) {
-                    throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
-                }
-                if (Parameter.Type.LOCAL == param.getType()) {
-                    if (param.getRelatedElement() instanceof DataTransition) {
-                        ((DataTransition) param.getRelatedElement()).addParameter(param);
-                    } else {
-                        throw new ParameterServiceException("Trying to store LOCAL parameter for non-transition element.");
-                    }
-                } else {
-                    model.add(param);
-                }
-                param.getRelatedElement().getRelatedParameters().add(param);
-            } else {
+            if (param.getRelatedElement() == null) {
                 throw new ParameterServiceException("A reference element is required for storing non global parameters.");
             }
+            if (Parameter.Type.LOCAL == param.getType()) {
+                if (param.getRelatedElement() instanceof DataTransition) {
+                    DataTransition transition = (DataTransition) param.getRelatedElement();
+                    if (transition.getParameter(param.getId()) != null) {
+                        throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
+                    }
+                    transition.addParameter(param);
+                } else {
+                    throw new ParameterServiceException("Trying to store LOCAL parameter for non-transition element.");
+                }
+            } else {
+                if (model.contains(param)) {
+                    throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
+                }
+                model.add(param);
+            }
+            param.getRelatedElement().getRelatedParameters().add(param);
         }
     }
 

@@ -7,11 +7,11 @@ package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
 import edu.unibi.agbi.gnius.core.exception.InputValidationException;
 import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import java.net.URL;
@@ -71,18 +71,18 @@ public class ParameterController implements Initializable
         if (dataOld == null) {
             setParameters(element);
         } else {
-            if (element != null && element.getElementType() == Element.Type.TRANSITION) {
+            if (element != null && element.getDataType() == DataType.TRANSITION) {
                 if (((DataTransition) element).getParameters().size() > 0) {
                     setParameters(element);
                 } else {
-                    if (dataOld.getElementType() == Element.Type.TRANSITION) {
+                    if (dataOld.getDataType() == DataType.TRANSITION) {
                         if (((DataTransition) dataOld).getParameters().size() > 0) {
                             setParameters(element);
                         }
                     }
                 }
             } else {
-                if (dataOld.getElementType() == Element.Type.TRANSITION) {
+                if (dataOld.getDataType() == DataType.TRANSITION) {
                     if (((DataTransition) dataOld).getParameters().size() > 0) {
                         setParameters(element);
                     }
@@ -167,7 +167,7 @@ public class ParameterController implements Initializable
         // Validate id
         try {
             if (id.isEmpty() | !id.matches(functionBuilder.getParameterRegex())) {
-                throw new InputValidationException("Trying to create parameter using restricted characters or identifier format");
+                throw new InputValidationException("Trying to create parameter using restricted identifier format");
             }
             String[] restrictedRegex = new String[]{
                 regexParamIdentFlowInActual, regexParamIdentFlowInTotal,
@@ -176,7 +176,7 @@ public class ParameterController implements Initializable
             };
             for (String regex : restrictedRegex) {
                 if (id.matches(regex)) {
-                    throw new InputValidationException("Trying to create parameter using restricted identifier");
+                    throw new InputValidationException("Trying to create parameter using restricted identifier format");
                 }
             }
             inputName.setStyle("");
@@ -254,6 +254,7 @@ public class ParameterController implements Initializable
             setReferenceChoices();
             setButtons();
         });
+        choiceNode.getSelectionModel().selectedItemProperty().addListener(cl -> setButtons());
         
         inputFilterNode.textProperty().addListener(cl -> setReferenceChoices());
         inputFilterParam.textProperty().addListener(cl -> pauseTransition.playFromStart());
@@ -328,7 +329,7 @@ public class ParameterController implements Initializable
                     }
                 }
                 setOnMouseClicked(event -> {
-                    if (event.getClickCount() > 1) {
+                    if (event.getClickCount() == 2) {
                         ShowParameter(item);
                     }
                 });

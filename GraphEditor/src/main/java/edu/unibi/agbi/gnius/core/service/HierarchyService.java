@@ -6,7 +6,9 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.HierarchyController;
+import edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -21,7 +23,6 @@ import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ public class HierarchyService
     @Autowired private MessengerService messengerService;
     @Autowired private HierarchyController hierarchyController;
     @Autowired private SelectionService selectionService;
+    @Autowired private ZoomController zoomController;
 
     /**
      * Climbs one level in the graph layer hierarchy.
@@ -70,8 +72,10 @@ public class HierarchyService
      */
     public void show(Graph graph) {
         dataService.setGraph(graph);
+        dataService.UpdateClusterShapes();
         hierarchyController.update();
         selectionService.unselectAll();
+        zoomController.CenterNodes();
     }
 
     /**
@@ -311,7 +315,7 @@ public class HierarchyService
              * Check if stored arc nodes are present in scene.
              * If so, add arc. If not, create new cluster arc.
              */
-            dca = (DataClusterArc) ((IGraphArc) clusterArc).getDataElement();
+            dca = (DataClusterArc) ((IGraphArc) clusterArc).getData();
             
             for (IGraphArc storedArc : dca.getStoredArcs().values()) {
                 
@@ -332,8 +336,8 @@ public class HierarchyService
                     addClusterArcs(clusterArcs, source, target, storedArc);
                 } else {
                     arcs.add(storedArc);
-                    storedArc.getDataElement().getShapes().clear();
-                    storedArc.getDataElement().getShapes().add(storedArc);
+                    storedArc.getData().getShapes().clear();
+                    storedArc.getData().getShapes().add(storedArc);
                 }
             }
         }
@@ -351,17 +355,16 @@ public class HierarchyService
     
     private void addClusterArcs(Collection<IGraphArc> arcs, IGraphNode source, IGraphNode target, IGraphArc arcRelated) throws DataServiceException {
         
-        final IGraphArc arcForward, arcBackwards;
-        final DataClusterArc dataForward, dataBackwards, dca;
+        final IGraphArc arcForward;
+        final DataClusterArc dataForward, dca;
         Optional<IGraphArc> existingArc;
-        IGraphArc arc;
         
         if (source.getType() != GravisType.CLUSTER && target.getType() != GravisType.CLUSTER) {
             throw new DataServiceException("Trying to create cluster arc without source or target being a cluster!");
         }
         
         String idShape = dataService.getConnectionId(source, target);
-        String idData = dataService.getArcId(source.getDataElement(), target.getDataElement());
+        String idData = dataService.getArcId(source.getData(), target.getData());
 
         /**
          * Check if connection already exists.
@@ -373,11 +376,11 @@ public class HierarchyService
         if (existingArc.isPresent()) {
             
             arcForward = existingArc.get();
-            dataForward = (DataClusterArc) arcForward.getDataElement();
+            dataForward = (DataClusterArc) arcForward.getData();
             
         } else {
 
-            dataForward = new DataClusterArc(idData, source.getDataElement(), target.getDataElement());
+            dataForward = new DataClusterArc(idData);
             arcForward = new GraphArc(idShape, source, target, dataForward);
 
             arcs.add(arcForward);
@@ -387,8 +390,8 @@ public class HierarchyService
          * Check if the related arc is also a cluster arc. Add references for 
          * all stored arcs to the new cluster arc.
          */
-        if (arcRelated.getDataElement().getElementType() == Element.Type.CLUSTERARC) {
-            dca = (DataClusterArc) arcRelated.getDataElement();
+        if (arcRelated.getData().getDataType()== DataType.CLUSTERARC) {
+            dca = (DataClusterArc) arcRelated.getData();
             dca.getStoredArcs().values().forEach(storedArc -> {
                 dataForward.getStoredArcs().put(storedArc.getId(), storedArc);
             });
@@ -400,8 +403,8 @@ public class HierarchyService
         dataForward.getShapes().clear();
         dataForward.getShapes().add(arcForward);
         dataForward.getStoredArcs().values().forEach(storedArc -> {
-            storedArc.getDataElement().getShapes().clear();
-            storedArc.getDataElement().getShapes().add(arcForward);
+            storedArc.getData().getShapes().clear();
+            storedArc.getData().getShapes().add(arcForward);
         });
     }
     

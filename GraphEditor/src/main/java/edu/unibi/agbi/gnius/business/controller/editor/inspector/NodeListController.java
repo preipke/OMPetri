@@ -97,7 +97,7 @@ public class NodeListController implements Initializable
     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        buttonReturn.setOnAction(eh -> graphController.ShowGraphEditor());
+        buttonReturn.setOnAction(eh -> graphController.ShowGraph());
         buttonReturn.setPadding(Insets.EMPTY);
         inputFilter.textProperty().addListener(cl -> setNodes(nodes));
         listNodes.setCellFactory(l -> new NodeCellFormatter());
@@ -114,7 +114,7 @@ public class NodeListController implements Initializable
                 } else {
                     setText("");
                 }
-                switch (item.getElementType()) {
+                switch (item.getDataType()) {
                     case PLACE:
                         setText(getText() + "\u25CB " + item.toString());
                         break;

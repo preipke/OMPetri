@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.model.entity.data.impl;
 
+import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
@@ -19,6 +20,7 @@ import java.util.Set;
  */
 public class DataArc extends Arc implements IDataArc
 {
+    private final DataType dataType;
     private final Set<IGraphElement> shapes;
     
     private String description;
@@ -30,22 +32,13 @@ public class DataArc extends Arc implements IDataArc
     public DataArc(String id, IDataNode source, IDataNode target, Arc.Type arctype) {
         super(id, source, target, arctype);
         super.name = id;
+        this.dataType = DataType.ARC;
         this.shapes = new HashSet();
     }
 
     @Override
-    public Set<IGraphElement> getShapes() {
-        return shapes;
-    }
-
-    @Override
-    public IDataNode getSource() {
-        return (IDataNode) this.source;
-    }
-
-    @Override
-    public IDataNode getTarget() {
-        return (IDataNode) this.target;
+    public DataType getDataType() {
+        return dataType;
     }
 
     @Override
@@ -57,18 +50,6 @@ public class DataArc extends Arc implements IDataArc
     public void setDescription(String description) {
         this.description = description;
     }
-
-    @Override
-    public String getLabelText() {
-        return "";
-    }
-
-    @Override
-    public void setLabelText(String text) {
-//        for (IGraphElement shape : shapes) {
-//            ((IGraphArc) shape).getLabel().setText(text);
-//        }
-    }
     
     @Override
     public void setDisabled(boolean value) {
@@ -79,12 +60,36 @@ public class DataArc extends Arc implements IDataArc
     }
 
     @Override
+    public String getLabelText() {
+        return "";
+    }
+
+    @Override
+    public void setLabelText(String text) {
+    }
+
+    @Override
+    public Set<IGraphElement> getShapes() {
+        return shapes;
+    }
+
+    @Override
     public boolean isSticky() {
-        throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported."); 
     }
 
     @Override
     public void setSticky(boolean value) {
-        throw new UnsupportedOperationException("Not supported."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Not supported."); 
+    }
+
+    @Override
+    public IDataNode getSource() {
+        return (IDataNode) this.source;
+    }
+
+    @Override
+    public IDataNode getTarget() {
+        return (IDataNode) this.target;
     }
 }
