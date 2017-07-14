@@ -15,6 +15,10 @@ import java.util.Set;
  */
 public interface IElement
 {
+    public boolean isDisabled();
+
+    public void setDisabled(boolean value);
+    
     public Element.Type getElementType();
 
     public String getId();
@@ -31,8 +35,4 @@ public interface IElement
      * @return
      */
     public Set<Parameter> getRelatedParameters();
-
-    public boolean isDisabled();
-
-    public void setDisabled(boolean value);
 }

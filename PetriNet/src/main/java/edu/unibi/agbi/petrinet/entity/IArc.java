@@ -16,6 +16,10 @@ import java.util.Collection;
  */
 public interface IArc extends IElement
 {
+    public void setArcType(Arc.Type arcType);
+
+    public Arc.Type getArcType();
+
     public INode getSource();
 
     public INode getTarget();
@@ -25,8 +29,4 @@ public interface IArc extends IElement
     public Weight getWeight(Colour colour);
 
     public Collection<Weight> getWeights();
-
-    public void setArcType(Arc.Type arcType);
-
-    public Arc.Type getArcType();
 }

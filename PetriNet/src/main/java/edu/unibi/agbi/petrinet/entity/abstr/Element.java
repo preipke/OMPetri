@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public abstract class Element implements IElement
 {
-    protected Type type;
+    protected Type elementType;
 
     protected String id;
     protected String name;
@@ -30,8 +30,18 @@ public abstract class Element implements IElement
     }
 
     @Override
+    public void setDisabled(boolean isDisabled) {
+        this.isDisabled = isDisabled;
+    }
+
+    @Override
+    public boolean isDisabled() {
+        return isDisabled;
+    }
+
+    @Override
     public Type getElementType() {
-        return type;
+        return elementType;
     }
 
     @Override
@@ -53,16 +63,6 @@ public abstract class Element implements IElement
     public Set<Parameter> getRelatedParameters() {
         return parameter;
     }
-
-    @Override
-    public void setDisabled(boolean isDisabled) {
-        this.isDisabled = isDisabled;
-    }
-
-    @Override
-    public boolean isDisabled() {
-        return isDisabled;
-    }
     
     @Override
     public String toString() {
@@ -71,6 +71,6 @@ public abstract class Element implements IElement
 
     public enum Type
     {
-        ARC, CLUSTER, CLUSTERARC, PLACE, TRANSITION;
+        ARC, PLACE, TRANSITION;
     }
 }

@@ -33,7 +33,7 @@ public class Arc extends Element implements IArc
 
     public Arc(String id, INode source, INode target, Type arcType) {
         this.id = id;
-        this.type = Element.Type.ARC;
+        this.elementType = Element.Type.ARC;
         this.weights = new HashMap();
         this.source = source;
         this.target = target;

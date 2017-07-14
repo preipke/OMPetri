@@ -23,9 +23,10 @@ public class Place extends Node
 
     private final Map<Colour, Token> token;
 
-    public Place(String id) {
+    public Place(String id, Type placeType) {
         super(id);
-        this.type = Element.Type.PLACE;
+        this.elementType = Element.Type.PLACE;
+        this.placeType = placeType;
         this.token = new HashMap();
     }
 

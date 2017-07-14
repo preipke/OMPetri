@@ -23,12 +23,13 @@ public class Transition extends Node
     private Type transitionType;
     private Function function;
 
-    public Transition(String id) {
+    public Transition(String id, Type transitionType) {
         super(id);
-        super.type = Element.Type.TRANSITION;
+        super.elementType = Element.Type.TRANSITION;
         this.function = new Function(Function.Type.FUNCTION);
         this.function.addElement(new Function("1", Function.Type.NUMBER));
         this.parameters = new HashMap();
+        this.transitionType = transitionType;
     }
     
     public void addParameter(Parameter param) {

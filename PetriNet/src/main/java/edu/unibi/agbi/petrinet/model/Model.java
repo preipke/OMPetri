@@ -51,8 +51,8 @@ public class Model
         parameters.put(param.getId(), param);
     }
 
-    public void add(Arc arc) {
-        arcs.put(arc.getId(), arc);
+    public void add(IArc arc) {
+        arcs.put(arc.getId(), (Arc) arc);
         arc.getSource().getArcsOut().add(arc);
         arc.getTarget().getArcsIn().add(arc);
     }
@@ -83,7 +83,7 @@ public class Model
         return nodeIds.contains(nodeId);
     }
 
-    public boolean containsAndNotEqual(Arc arc) {
+    public boolean containsAndNotEqual(IArc arc) {
         if (!arcs.containsKey(arc.getId())) {
             return false;
         }
@@ -99,13 +99,6 @@ public class Model
         } else {
             return !transitions.get(node.getId()).equals(node);
         }
-    }
-
-    public boolean containsAndNotEqual(Parameter param) {
-        if (!parameters.containsKey(param.getId())) {
-            return false;
-        }
-        return !parameters.get(param.getId()).equals(param);
     }
 
     public IElement remove(IElement element) throws Exception {
