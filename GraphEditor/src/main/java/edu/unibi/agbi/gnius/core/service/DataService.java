@@ -327,7 +327,7 @@ public class DataService
         DataDao dao = new DataDao();
         dao.setAuthor(System.getProperty("user.name"));
         dao.setCreationDateTime(LocalDateTime.now());
-        dao.setDaoId(String.valueOf(System.nanoTime()));
+        dao.setModelId(String.valueOf(System.nanoTime()));
         dao.setModelName("Untitled");
         dao.getModel().add(DEFAULT_COLOUR);
         dao.setHasChanges(false);

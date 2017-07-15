@@ -156,11 +156,11 @@ public class DataDao
         this.description = description;
     }
     
-    public String getDaoId() {
+    public String getModelId() {
         return id;
     }
     
-    public void setDaoId(String id) {
+    public void setModelId(String id) {
         this.id = id;
     }
 

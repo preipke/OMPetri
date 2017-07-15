@@ -50,7 +50,7 @@ public class Simulation
     }
     
     public String getModelId() {
-        return dataDao.getDaoId();
+        return dataDao.getModelId();
     }
 
     /**
@@ -133,7 +133,7 @@ public class Simulation
             return false;
         }
 
-        return dataDao.getDaoId().contentEquals(simulation.getModelId());
+        return dataDao.getModelId().contentEquals(simulation.getModelId());
     }
 
     @Override

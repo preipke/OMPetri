@@ -64,7 +64,7 @@ public class ResultsController implements Initializable
     private final String resultsFxml = "/fxml/Results.fxml";
     private final String resultsTitle = "Application - Results Viewer";
     private final String mainCss = "/styles/main.css";
-    
+
     @Autowired private ApplicationContext applicationContext;
     @Autowired private MessengerService messengerService;
     @Autowired private ResultsService resultsService;
@@ -118,7 +118,7 @@ public class ResultsController implements Initializable
 
     private final FileChooser fileChooser;
     private Stage stage;
-    
+
     @Autowired
     public ResultsController() {
         fileChooser = new FileChooser();
@@ -127,10 +127,10 @@ public class ResultsController implements Initializable
     }
 
     public void OpenWindow() {
-        
+
         ResultsController controller = new ResultsController();
         applicationContext.getAutowireCapableBeanFactory().autowireBean(controller);
-        
+
         // init results window
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource(resultsFxml));
@@ -142,11 +142,11 @@ public class ResultsController implements Initializable
             System.out.println(ex.getMessage());
             return;
         }
-        
+
         Scene scene = new Scene(root);
         scene.getStylesheets().add(mainCss);
-        
-        Stage stg= new Stage();
+
+        Stage stg = new Stage();
         stg.setScene(scene);
         stg.setTitle(resultsTitle);
         stg.show();
@@ -155,7 +155,7 @@ public class ResultsController implements Initializable
         stg.setOnCloseRequest(e -> {
             resultsService.drop(controller.getLineChart());
         });
-        
+
         controller.setStage(stg);
     }
 
@@ -165,21 +165,40 @@ public class ResultsController implements Initializable
 
     public synchronized void RefreshModelChoices() {
 
-        String modelChoicePrev = getModelChoice();
+        Choice choiceModel = getModelChoice();
+        String modelId;
         int index = 0;
-        boolean found = false;
+        boolean found;
 
-        ObservableList choices = FXCollections.observableArrayList();
-        resultsService.getSimulations().forEach(sim -> {
-            if (!choices.contains(sim.getModelName())) {
-                choices.add(sim.getModelName());
+        ObservableList<Choice> choices = FXCollections.observableArrayList();
+        Choice choice;
+
+        for (Simulation sim : resultsService.getSimulations()) {
+
+            found = false;
+            for (Choice ch : choices) {
+                modelId = ((Simulation) ch.getValue()).getModelId();
+                if (modelId.contentEquals(sim.getModelId())) {
+                    found = true;
+                    break;
+                }
             }
-        });
-        choices.sort(Comparator.naturalOrder());
-        
-        if (modelChoicePrev != null) {
-            for (Object n : choices) {
-                if (n.toString().contentEquals(modelChoicePrev)) {
+
+            if (found) {
+                continue;
+            }
+
+            choice = new Choice(sim.getModelName(), sim);
+            choices.add(choice);
+        }
+        choices.sort(Comparator.comparing(Choice::toString));
+
+        found = false;
+        if (choiceModel != null) {
+            for (Choice ch : choices) {
+                if (((Simulation) ch.getValue()).getModelId()
+                        .contentEquals(
+                        ((Simulation) choiceModel.getValue()).getModelId())) {
                     found = true;
                     break;
                 }
@@ -195,23 +214,24 @@ public class ResultsController implements Initializable
     }
 
     public synchronized void RefreshSimulationChoices() {
-        
+
         ObservableList choices = FXCollections.observableArrayList();
         boolean found = false;
         int index = 0;
 
-        String modelNameChoice = getModelChoice();
+        Choice modelChoice = getModelChoice();
         Simulation simulationChoicePrev;
-        
-        if (modelNameChoice != null) {
+
+        if (modelChoice != null) {
 
             resultsService.getSimulations().stream()
-                    .filter(sim -> (sim.getModelName().contentEquals(modelNameChoice)))
+                    .filter(sim -> (sim.getModelId().contentEquals(
+                            ((Simulation) modelChoice.getValue()).getModelId())))
                     .forEach(sim -> {
                         choices.add(sim);
                     });
             choices.sort(Comparator.comparing(Simulation::toString));
-            
+
             simulationChoicePrev = getSimulationChoice();
             if (simulationChoicePrev != null) {
                 for (Object s : choices) {
@@ -233,19 +253,19 @@ public class ResultsController implements Initializable
     }
 
     private synchronized void RefreshElementChoices() {
-        
+
         ObservableList choices = FXCollections.observableArrayList();
         boolean found = false;
         int index = 0;
 
         Simulation simulationChoice = getSimulationChoice();
         Choice elementChoicePrev;
-        
+
         if (simulationChoice != null) {
-            
+
             List<Object> places = new ArrayList();
             List<Object> transitions = new ArrayList();
-            
+
             simulationChoice.getElementFilterReferences()
                     .keySet().stream()
                     .filter(elem -> (elem.getElementType() != Element.Type.ARC))
@@ -255,14 +275,14 @@ public class ResultsController implements Initializable
                         } else {
                             transitions.add(elem);
                         }
-                        Choice choice = new Choice(elem.toString());
-                        choice.getValues().add(elem);
+                        Choice choice = new Choice(elem.toString(), new ArrayList());
+                        ((List) choice.getValue()).add(elem);
                         choices.add(choice);
                     });
             choices.sort(Comparator.comparing(Choice::toString));
             choices.add(0, new Choice("<ALL PLACES>", places));
             choices.add(1, new Choice("<ALL TRANSITIONS>", transitions));
-            
+
             elementChoicePrev = getElementChoice();
             if (elementChoicePrev != null) {
                 for (Object e : choices) {
@@ -286,44 +306,45 @@ public class ResultsController implements Initializable
         ObservableList choices = FXCollections.observableArrayList();
         boolean found = false;
         int index = 0;
-        
+
         Simulation simulationChoice = getSimulationChoice();
         Choice elementChoice = getElementChoice();
         Choice valueChoicePrev;
-        
+
         if (simulationChoice != null && elementChoice != null) {
-            
+
             String name;
             Choice choice;
-            
-            if (elementChoice.getValues().size() == 1) {
+            List values = (List) elementChoice.getValue();
 
-                List<String> values = simulationChoice.getElementFilterReferences().get((IElement) elementChoice.getValues().get(0));
-                
-                for (String value : values) {
+            if (values.size() == 1) {
+
+                List<String> valueStings = simulationChoice.getElementFilterReferences().get((IElement) values.get(0));
+
+                for (String value : valueStings) {
                     name = resultsService.getValueName(value, simulationChoice);
                     if (name == null) {
                         messengerService.addWarning("Unhandled value choice will not be available for displaying: '" + simulationChoice.toString() + "', '" + elementChoice.toString() + "', '" + value + "'");
                         continue;
                     }
-                    choice = new Choice(name);
-                    choice.getValues().add(value);
+                    choice = new Choice(name, new ArrayList());
+                    ((List) choice.getValue()).add(value);
                     choices.add(choice);
                 }
-                
+
             } else {
-                
-                Map<String,List<String>> valuesMap = resultsService.getSharedValues(simulationChoice, elementChoice.getValues());
-                
+
+                Map<String, List<String>> valuesMap = resultsService.getSharedValues(simulationChoice, values);
+
                 for (String key : valuesMap.keySet()) {
                     name = "<ALL> " + key;
-                    choice = new Choice(name);
-                    choice.getValues().addAll(valuesMap.get(key));
+                    choice = new Choice(name, new ArrayList());
+                    ((List) choice.getValue()).addAll(valuesMap.get(key));
                     choices.add(choice);
                 }
             }
 
-            choices.sort(Comparator.comparing(Choice::toString));
+//            choices.sort(Comparator.comparing(Choice::toString));
 
             valueChoicePrev = getValueChoice();
             if (valueChoicePrev != null) {
@@ -344,11 +365,11 @@ public class ResultsController implements Initializable
         }
         FilterChoices(choicesValue, inputValueFilter.getText());
     }
-    
-    private String getModelChoice() {
-        return (String) choicesModel.getSelectionModel().getSelectedItem();
+
+    private Choice getModelChoice() {
+        return (Choice) choicesModel.getSelectionModel().getSelectedItem();
     }
-    
+
     private Simulation getSimulationChoice() {
         if (choicesSimulation.getSelectionModel().getSelectedItem() != null) {
             return (Simulation) choicesSimulation.getSelectionModel().getSelectedItem();
@@ -356,7 +377,7 @@ public class ResultsController implements Initializable
             return null;
         }
     }
-    
+
     private Choice getElementChoice() {
         if (choicesElement.getSelectionModel().getSelectedItem() != null) {
             return (Choice) choicesElement.getSelectionModel().getSelectedItem();
@@ -364,7 +385,7 @@ public class ResultsController implements Initializable
             return null;
         }
     }
-    
+
     private Choice getValueChoice() {
         if (choicesValue.getSelectionModel().getSelectedItem() != null) {
             return (Choice) choicesValue.getSelectionModel().getSelectedItem();
@@ -389,25 +410,25 @@ public class ResultsController implements Initializable
             setStatus("Select a value before adding!", Status.WARNING);
             return;
         }
-        
+
         List<SimulationData> dataList = new ArrayList();
         String variable;
         IElement element;
-        
-        for (Object var : valueChoice.getValues()) {
-            
+
+        for (Object var : (List) valueChoice.getValue()) {
+
             variable = (String) var;
             element = simulationChoice.getFilterElementReferences().get(variable);
-            
+
             dataList.add(new SimulationData(simulationChoice, element, variable));
         }
-        
+
         boolean exceptions = false;
         boolean duplicates = false;
         boolean success = false;
-        
+
         for (SimulationData data : dataList) {
-            
+
             try {
                 resultsService.add(lineChart, data);
                 try {
@@ -421,12 +442,12 @@ public class ResultsController implements Initializable
             } catch (ResultsServiceException ex) {
                 duplicates = true;
             }
-            
+
             if (checkboxAutoAddSelected.isSelected()) {
                 resultsService.addForAutoAdding(lineChart, data);
             }
         }
-        
+
         if (exceptions) {
             if (success) {
                 setStatus("Failed to add some data to the chart!", Status.WARNING);
@@ -503,7 +524,7 @@ public class ResultsController implements Initializable
     private void exportData() {
         try {
             xmlResultsConverter.exportXml(
-                    fileChooser.showSaveDialog(stage), 
+                    fileChooser.showSaveDialog(stage),
                     resultsService.getChartData(lineChart)
             );
             setStatus("Data successfully exported!", Status.SUCCESS);
@@ -572,13 +593,13 @@ public class ResultsController implements Initializable
         }
         return value;
     }
-    
+
     private void ClearAllItems() {
         while (!tableView.getItems().isEmpty()) {
             resultsService.drop(getLineChart(), getTableView().getItems().get(0));
         }
     }
-    
+
     private void DisableAllItems() {
         tableView.getItems().forEach(data -> {
             if ((System.currentTimeMillis() - data.getTimeLastShownStatusChange()) < 1000) {
@@ -588,7 +609,7 @@ public class ResultsController implements Initializable
         });
         tableView.refresh();
     }
-    
+
     private void EnableAllItems() {
         tableView.getItems().forEach(data -> {
             if ((System.currentTimeMillis() - data.getTimeLastShownStatusChange()) < 1000) {
@@ -621,7 +642,7 @@ public class ResultsController implements Initializable
                 }
             }
         });
-        
+
         inputModelFilter.setOnKeyReleased(e -> {
             RefreshModelChoices();
             getModelChoices().show();
@@ -629,7 +650,7 @@ public class ResultsController implements Initializable
             getElementChoices().hide();
             getValueChoices().hide();
         });
-        
+
         choicesModel.valueProperty().addListener(cl -> RefreshSimulationChoices());
         inputSimulationFilter.setOnKeyReleased(e -> {
             RefreshSimulationChoices();
@@ -665,7 +686,7 @@ public class ResultsController implements Initializable
          */
         buttonImportData.setOnAction(e -> importData());
         buttonExportData.setOnAction(e -> exportData());
-        
+
         buttonEnableAll.setOnAction(e -> EnableAllItems());
         buttonDisableAll.setOnAction(e -> DisableAllItems());
         buttonDropAll.setOnAction(e -> ClearAllItems());
@@ -715,7 +736,7 @@ public class ResultsController implements Initializable
             cell.setTooltip(tooltip);
             return cell;
         });
-        
+
         columnDateTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDateTime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss"))));
         columnModel.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getModelName()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementId()));
@@ -779,7 +800,7 @@ public class ResultsController implements Initializable
             cell.setTooltip(tooltip);
             return cell;
         });
-        
+
         RefreshModelChoices();
     }
 
@@ -790,19 +811,19 @@ public class ResultsController implements Initializable
     public TableView<SimulationData> getTableView() {
         return tableView;
     }
-    
+
     public ChoiceBox getElementChoices() {
         return choicesElement;
     }
-    
+
     public ChoiceBox getModelChoices() {
         return choicesModel;
     }
-    
+
     public ChoiceBox getSimulationChoices() {
         return choicesSimulation;
     }
-    
+
     public ChoiceBox getValueChoices() {
         return choicesValue;
     }
@@ -810,19 +831,15 @@ public class ResultsController implements Initializable
     private class Choice
     {
         private final String name;
-        private final List values;
+        private final Object value;
 
-        private Choice(String name) {
-            this(name, new ArrayList());
-        }
-
-        private Choice(String name, List values) {
+        private Choice(String name, Object value) {
             this.name = name;
-            this.values = values;
+            this.value = value;
         }
 
-        private List getValues() {
-            return values;
+        private Object getValue() {
+            return value;
         }
 
         @Override
@@ -830,8 +847,9 @@ public class ResultsController implements Initializable
             return name;
         }
     }
-    
-    private enum Status {
+
+    private enum Status
+    {
         SUCCESS, WARNING, FAILURE;
     }
 }

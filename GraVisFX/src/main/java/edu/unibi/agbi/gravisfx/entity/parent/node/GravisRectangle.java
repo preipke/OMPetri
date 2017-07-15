@@ -11,15 +11,12 @@ import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
+import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
-import edu.unibi.agbi.gravisfx.entity.child.GravisChildRectangle;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

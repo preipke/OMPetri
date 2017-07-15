@@ -201,7 +201,7 @@ public class TestFXBase extends ApplicationTest {
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
             try {
-                cluster.add(hierarchyService.cluster(elements));
+                cluster.add(hierarchyService.cluster(dataService.getDao(), elements, dataService.getClusterId(dataService.getDao())));
             } catch (DataServiceException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -261,15 +261,15 @@ public class TestFXBase extends ApplicationTest {
     }
 
     private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataServiceException {
-        return dataService.connect(source, target);
+        return dataService.connect(dataService.getDao(), source, target);
     }
 
     private IGraphNode CreatePlace() throws DataServiceException {
-        return dataService.CreateNode(DataType.PLACE, Math.random() * 1000, Math.random() * 800);
+        return dataService.CreateNode(dataService.getDao(), DataType.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
     private IGraphNode CreateTransition() throws DataServiceException {
-        return dataService.CreateNode(DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
+        return dataService.CreateNode(dataService.getDao(), DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 
     private void waitForFxThread(AtomicBoolean isFinished) {

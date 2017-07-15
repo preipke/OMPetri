@@ -38,12 +38,13 @@ public class ConnectionsController implements Initializable
     @FXML private ListView<IDataArc> listConnectionsOutgoing;
     @FXML private ListView<IGraphElement> listGraphEntities;
 
-    @FXML private Button buttonConnectionFromDisable;
-    @FXML private Button buttonConnectionToDisable;
-    @FXML private Button buttonConnectionFromEdit;
-    @FXML private Button buttonConnectionToEdit;
-    @FXML private Button buttonConnectionFromShow;
-    @FXML private Button buttonConnectionToShow;
+    @FXML private Button buttonArcFromDisable;
+    @FXML private Button buttonArcFromEdit;
+    @FXML private Button buttonArcFromShow;
+    
+    @FXML private Button buttonArcToDisable;
+    @FXML private Button buttonArcToEdit;
+    @FXML private Button buttonArcToShow;
 
     private IDataElement data;
 
@@ -55,13 +56,13 @@ public class ConnectionsController implements Initializable
     public void Update() {
         setConnections(data);
         setGraphEntities(data);
-        buttonConnectionToDisable.setText("Disable");
-        buttonConnectionFromDisable.setDisable(true);
-        buttonConnectionFromEdit.setDisable(true);
-        buttonConnectionFromShow.setDisable(true);
-        buttonConnectionToDisable.setDisable(true);
-        buttonConnectionToEdit.setDisable(true);
-        buttonConnectionToShow.setDisable(true);
+        buttonArcToDisable.setText("Disable");
+        buttonArcFromDisable.setDisable(true);
+        buttonArcFromEdit.setDisable(true);
+        buttonArcFromShow.setDisable(true);
+        buttonArcToDisable.setDisable(true);
+        buttonArcToEdit.setDisable(true);
+        buttonArcToShow.setDisable(true);
     }
 
     private void setConnections(IDataElement element) {
@@ -127,49 +128,52 @@ public class ConnectionsController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-        buttonConnectionFromDisable.setOnAction(eh -> DisableElement(listConnectionsIncoming));
-        buttonConnectionFromEdit.setOnAction(eh -> EditElement(listConnectionsIncoming));
-        buttonConnectionFromShow.setOnAction(eh -> ShowElement(listConnectionsIncoming));
-        buttonConnectionToDisable.setOnAction(eh -> DisableElement(listConnectionsOutgoing));
-        buttonConnectionToEdit.setOnAction(eh -> EditElement(listConnectionsOutgoing));
-        buttonConnectionToShow.setOnAction(eh -> ShowElement(listConnectionsOutgoing));
+        buttonArcFromDisable.setOnAction(eh -> DisableElement(listConnectionsIncoming));
+        buttonArcFromEdit.setOnAction(eh -> EditElement(listConnectionsIncoming));
+        buttonArcFromShow.setOnAction(eh -> ShowElement(listConnectionsIncoming));
+        
+        buttonArcToDisable.setOnAction(eh -> DisableElement(listConnectionsOutgoing));
+        buttonArcToEdit.setOnAction(eh -> EditElement(listConnectionsOutgoing));
+        buttonArcToShow.setOnAction(eh -> ShowElement(listConnectionsOutgoing));
 
         listConnectionsIncoming.setCellFactory(l -> new ConnectionSourceCellFormatter());
         listConnectionsIncoming.getSelectionModel().selectedItemProperty().addListener(cl -> {
             IDataArc arc = listConnectionsIncoming.getSelectionModel().getSelectedItem();
             if (arc != null) {
                 if (arc.isDisabled()) {
-                    buttonConnectionFromDisable.setText("Enable");
+                    buttonArcFromDisable.setText("Enable");
                 } else {
-                    buttonConnectionFromDisable.setText("Disable");
+                    buttonArcFromDisable.setText("Disable");
                 }
-                buttonConnectionFromDisable.setDisable(false);
-                buttonConnectionFromEdit.setDisable(false);
-                buttonConnectionFromShow.setDisable(false);
+                buttonArcFromDisable.setDisable(false);
+                buttonArcFromEdit.setDisable(false);
+                buttonArcFromShow.setDisable(false);
             } else {
-                buttonConnectionFromDisable.setDisable(true);
-                buttonConnectionFromEdit.setDisable(true);
-                buttonConnectionFromShow.setDisable(true);
+                buttonArcFromDisable.setDisable(true);
+                buttonArcFromEdit.setDisable(true);
+                buttonArcFromShow.setDisable(true);
             }
         });
+        
         listConnectionsOutgoing.setCellFactory(l -> new ConnectionTargetCellFormatter());
         listConnectionsOutgoing.getSelectionModel().selectedItemProperty().addListener(cl -> {
             IDataArc arc = listConnectionsOutgoing.getSelectionModel().getSelectedItem();
             if (arc != null) {
                 if (arc.isDisabled()) {
-                    buttonConnectionToDisable.setText("Enable");
+                    buttonArcToDisable.setText("Enable");
                 } else {
-                    buttonConnectionToDisable.setText("Disable");
+                    buttonArcToDisable.setText("Disable");
                 }
-                buttonConnectionToDisable.setDisable(false);
-                buttonConnectionToEdit.setDisable(false);
-                buttonConnectionToShow.setDisable(false);
+                buttonArcToDisable.setDisable(false);
+                buttonArcToEdit.setDisable(false);
+                buttonArcToShow.setDisable(false);
             } else {
-                buttonConnectionToDisable.setDisable(true);
-                buttonConnectionToEdit.setDisable(true);
-                buttonConnectionToShow.setDisable(true);
+                buttonArcToDisable.setDisable(true);
+                buttonArcToEdit.setDisable(true);
+                buttonArcToShow.setDisable(true);
             }
         });
+        
         listGraphEntities.setCellFactory(l -> new GraphEntityCellFormatter());
         listGraphEntities.getSelectionModel().selectedItemProperty().addListener(cl -> {
             if (listGraphEntities.getSelectionModel().getSelectedItem() != null) {

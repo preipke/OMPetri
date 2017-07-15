@@ -10,6 +10,7 @@ import edu.unibi.agbi.gnius.business.controller.editor.inspector.IdentifierContr
 import edu.unibi.agbi.gnius.business.controller.editor.inspector.NodeListController;
 import edu.unibi.agbi.gnius.business.controller.editor.inspector.ParameterController;
 import edu.unibi.agbi.gnius.business.controller.editor.inspector.PropertiesController;
+import edu.unibi.agbi.gnius.business.controller.editor.inspector.QuickResultsController;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import java.net.URL;
@@ -38,6 +39,7 @@ public class InspectorController implements Initializable
     @Autowired private IdentifierController identifierController;
     @Autowired private ParameterController parameterController;
     @Autowired private PropertiesController propertiesController;
+    @Autowired private QuickResultsController quickResultsController;
 
     @FXML private CheckBox choiceSticky;
     @FXML private Button buttonBack;
@@ -109,6 +111,7 @@ public class InspectorController implements Initializable
         identifierController.setElement(element);
         parameterController.setElement(element);
         propertiesController.setElement(element);
+        quickResultsController.setElement(element);
     }
 
     private void NextDetails() {

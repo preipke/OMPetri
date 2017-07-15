@@ -6,11 +6,13 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.inspector.QuickResultsController" >
    <children>
       <HBox spacing="10.0">
          <children>
-            <MenuButton mnemonicParsing="false" text="Results">
+            <MenuButton fx:id="buttonMenuResults" mnemonicParsing="false" text="Results">
               <items>
                 <MenuItem mnemonicParsing="false" text="Simulation 1">
                      <graphic>
@@ -38,7 +40,7 @@
             <Insets left="20.0" right="20.0" top="20.0" />
          </padding>
       </HBox>
-      <LineChart title="Latest Results">
+      <LineChart fx:id="lineChartResults" title="Latest Results">
         <xAxis>
           <CategoryAxis side="BOTTOM" />
         </xAxis>

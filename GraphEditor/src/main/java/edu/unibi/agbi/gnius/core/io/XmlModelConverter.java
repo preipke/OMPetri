@@ -79,6 +79,7 @@ public class XmlModelConverter
 
     private final String attrAuthor = "author";
     private final String attrColourId = "colourId";
+    private final String attrCurrentClusterId = "currentClusterId";
     private final String attrCurrentNodeId = "currentNodeId";
     private final String attrCurrentPlaceId = "currentPlaceId";
     private final String attrCurrentTransitionId = "currentTransitionId";
@@ -273,8 +274,10 @@ public class XmlModelConverter
         dao.setAuthor(elem.getAttribute(attrAuthor));
         dao.setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
         dao.setModelDescription(elem.getAttribute(attrDescription));
-        dao.setDaoId(elem.getAttribute(attrId));
+        dao.setModelId(elem.getAttribute(attrId));
         dao.setModelName(elem.getAttribute(attrName));
+        dao.setNextClusterId(Integer.parseInt(elem.getAttribute(attrCurrentClusterId)));
+        dao.setNextNodeId(Integer.parseInt(elem.getAttribute(attrCurrentNodeId)));
         dao.setNextPlaceId(Integer.parseInt(elem.getAttribute(attrCurrentPlaceId)));
         dao.setNextTransitionId(Integer.parseInt(elem.getAttribute(attrCurrentTransitionId)));
         return dao;
@@ -632,9 +635,10 @@ public class XmlModelConverter
         model.setAttribute(attrAuthor, dao.getAuthor());
         model.setAttribute(attrCreationDateTime, dao.getCreationDateTime().format(DateTimeFormatter.ofPattern(formatDateTime)));
         model.setAttribute(attrDescription, dao.getModelDescription());
-        model.setAttribute(attrId, dao.getDaoId());
+        model.setAttribute(attrId, dao.getModelId());
         model.setAttribute(attrName, dao.getModelName());
         
+        model.setAttribute(attrCurrentClusterId, Integer.toString(dao.getNextClusterId()));
         model.setAttribute(attrCurrentNodeId, Integer.toString(dao.getNextNodeId()));
         model.setAttribute(attrCurrentPlaceId, Integer.toString(dao.getNextPlaceId()));
         model.setAttribute(attrCurrentTransitionId, Integer.toString(dao.getNextTransitionId()));
