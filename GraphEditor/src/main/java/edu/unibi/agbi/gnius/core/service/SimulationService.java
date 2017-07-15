@@ -6,10 +6,10 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.SimulationController;
-import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;

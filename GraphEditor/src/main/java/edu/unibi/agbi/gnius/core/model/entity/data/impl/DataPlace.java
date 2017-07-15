@@ -33,7 +33,7 @@ public final class DataPlace extends Place implements IDataNode
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType getType() {
         return dataType;
     }
 

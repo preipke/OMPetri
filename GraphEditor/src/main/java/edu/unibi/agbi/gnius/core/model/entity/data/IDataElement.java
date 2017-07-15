@@ -15,7 +15,7 @@ import java.util.Set;
  */
 public interface IDataElement extends IElement
 {
-    public DataType getDataType();
+    public DataType getType();
     
     public String getDescription();
 

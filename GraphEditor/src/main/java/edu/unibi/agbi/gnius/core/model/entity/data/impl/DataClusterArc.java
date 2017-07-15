@@ -48,7 +48,7 @@ public final class DataClusterArc implements IDataArc {
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType getType() {
         return dataType;
     }
 

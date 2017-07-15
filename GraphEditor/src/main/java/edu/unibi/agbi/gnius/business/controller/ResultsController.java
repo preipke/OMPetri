@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.business.controller;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
-import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.core.io.XmlResultsConverter;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;

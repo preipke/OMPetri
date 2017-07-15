@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.business.handler;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
@@ -73,9 +73,9 @@ public class KeyEventHandler
                 selectionService.unselectAll();
                 try {
                     if (activeDao != dataService.getDao()) {
-                        selectionService.selectAll(dataService.paste(nodes, false));
+                        selectionService.selectAll(dataService.paste(dataService.getDao(), nodes, false));
                     } else {
-                        selectionService.selectAll(dataService.paste(nodes, isCutting));
+                        selectionService.selectAll(dataService.paste(dataService.getDao(), nodes, isCutting));
                     }
                 } catch (DataServiceException ex) {
                     messengerService.addException(ex);

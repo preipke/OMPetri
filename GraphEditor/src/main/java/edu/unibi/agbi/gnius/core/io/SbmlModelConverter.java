@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.io;
 
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
@@ -119,7 +119,7 @@ public class SbmlModelConverter
         if (nl.getLength() >= 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 model = (Element) nl.item(0);
-                dao = dataService.createDao();
+                dao = dataService.CreateDao();
                 dao.setAuthor("");
                 dao.setModelName(model.getAttribute(attrId));
             } else {

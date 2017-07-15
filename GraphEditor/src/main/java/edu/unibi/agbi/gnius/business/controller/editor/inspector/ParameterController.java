@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.core.exception.InputValidationException;
-import edu.unibi.agbi.gnius.core.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.InputValidationException;
+import edu.unibi.agbi.gnius.core.service.exception.ParameterServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
@@ -71,18 +71,18 @@ public class ParameterController implements Initializable
         if (dataOld == null) {
             setParameters(element);
         } else {
-            if (element != null && element.getDataType() == DataType.TRANSITION) {
+            if (element != null && element.getType() == DataType.TRANSITION) {
                 if (((DataTransition) element).getParameters().size() > 0) {
                     setParameters(element);
                 } else {
-                    if (dataOld.getDataType() == DataType.TRANSITION) {
+                    if (dataOld.getType() == DataType.TRANSITION) {
                         if (((DataTransition) dataOld).getParameters().size() > 0) {
                             setParameters(element);
                         }
                     }
                 }
             } else {
-                if (dataOld.getDataType() == DataType.TRANSITION) {
+                if (dataOld.getType() == DataType.TRANSITION) {
                     if (((DataTransition) dataOld).getParameters().size() > 0) {
                         setParameters(element);
                     }

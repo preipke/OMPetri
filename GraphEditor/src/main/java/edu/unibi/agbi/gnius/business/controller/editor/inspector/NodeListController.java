@@ -114,7 +114,7 @@ public class NodeListController implements Initializable
                 } else {
                     setText("");
                 }
-                switch (item.getDataType()) {
+                switch (item.getType()) {
                     case PLACE:
                         setText(getText() + "\u25CB " + item.toString());
                         break;

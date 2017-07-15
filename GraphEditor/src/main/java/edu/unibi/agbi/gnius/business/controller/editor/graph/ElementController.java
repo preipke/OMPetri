@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
@@ -143,7 +143,7 @@ public class ElementController implements Initializable
         buttonDisableClustered.setDisable(true);
         buttonEditClustered.setDisable(true);
 
-        switch (element.getDataType()) {
+        switch (element.getType()) {
             
             case ARC:
                 buttonClone.setDisable(true);
@@ -193,13 +193,13 @@ public class ElementController implements Initializable
      */
     private void LoadElementType(IDataElement element) {
 
-        inputType.setText(element.getDataType().toString());
+        inputType.setText(element.getType().toString());
         choiceSubtype.getItems().clear();
 
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
         int typeIndex = -1;
 
-        switch (element.getDataType()) {
+        switch (element.getType()) {
 
             case ARC:
                 DataArc arc = (DataArc) element;
@@ -275,7 +275,7 @@ public class ElementController implements Initializable
 
         choiceColour.setItems(choicesColour); // assign upfront, input listeners accesses on text change
 
-        switch (element.getDataType()) {
+        switch (element.getType()) {
 
             case ARC:
                 DataArc arc = (DataArc) element;
@@ -301,9 +301,7 @@ public class ElementController implements Initializable
             case CLUSTERARC:
                 DataClusterArc clusterArc = (DataClusterArc) element;
                 listClusteredElements.getItems().clear();
-                clusterArc.getStoredArcs().values().forEach(a -> {
-                    listClusteredElements.getItems().add(a);
-                });
+                listClusteredElements.getItems().addAll(clusterArc.getStoredArcs().values());
                 break;
 
             case PLACE:
@@ -436,8 +434,8 @@ public class ElementController implements Initializable
     }
     
     private void setDisableButton(IDataElement element) {
-        if (element.getDataType() == DataType.CLUSTER
-                || element.getDataType() == DataType.CLUSTERARC) {
+        if (element.getType() == DataType.CLUSTER
+                || element.getType() == DataType.CLUSTERARC) {
             if (element.isDisabled()) {
                 buttonDisable.setText("Enable All");
             } else {
@@ -503,7 +501,7 @@ public class ElementController implements Initializable
             }
             setDisableButton(data);
             setDisableClusteredButton(listClusteredElements.getSelectionModel().getSelectedItem());
-            if (data.getDataType() == DataType.CLUSTER) { // should be mandatory
+            if (data.getType() == DataType.CLUSTER) { // should be mandatory
                 ((DataCluster) data).UpdateShape();
             }
         });

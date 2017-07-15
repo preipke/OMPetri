@@ -3,15 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.exception;
+package edu.unibi.agbi.gnius.core.service.exception;
 
 /**
  *
  * @author PR
  */
-public class InputValidationException extends Exception 
+public class ParameterServiceException extends Exception
 {
-    public InputValidationException(String msg) {
+    public ParameterServiceException(String msg) {
         super(msg);
     }
 }

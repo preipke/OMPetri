@@ -130,7 +130,7 @@ public class FileMenuController implements Initializable
             dataService.getDao().setFile(file);
             dataService.getDao().setHasChanges(false);
             return true;
-        } catch (FileNotFoundException | ParserConfigurationException | TransformerException ex) {
+        } catch (IOException | ParserConfigurationException | TransformerException ex) {
             messengerService.printMessage("XML export failed!");
             messengerService.setStatusAndAddExceptionToLog("XML export to '" + file.getName() + "' failed!", ex);
             return false;

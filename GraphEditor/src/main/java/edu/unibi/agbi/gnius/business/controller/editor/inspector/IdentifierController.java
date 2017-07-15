@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
@@ -70,7 +70,7 @@ public class IdentifierController implements Initializable
             }
             inputId.setText(element.getId());
             inputName.setText(element.getName());
-            inputType.setText(element.getDataType().toString());
+            inputType.setText(element.getType().toString());
         } else {
             inputDescription.setText("");
             inputId.setText("");
@@ -94,7 +94,7 @@ public class IdentifierController implements Initializable
             return;
         }
 
-        switch (element.getDataType()) {
+        switch (element.getType()) {
 
             case ARC:
                 IGraphNode source = new GraphPlace(null, new DataPlace(null, null));
@@ -149,7 +149,7 @@ public class IdentifierController implements Initializable
         ObservableList<Object> choicesSubtype = FXCollections.observableArrayList();
         int typeIndex = -1;
 
-        switch (element.getDataType()) {
+        switch (element.getType()) {
 
             case ARC:
                 DataArc arc = (DataArc) element;

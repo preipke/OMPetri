@@ -52,7 +52,7 @@ public class DataCluster implements IDataNode
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType getType() {
         return dataType;
     }
 

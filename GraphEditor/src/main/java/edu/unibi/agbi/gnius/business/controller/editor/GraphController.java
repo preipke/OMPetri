@@ -95,7 +95,7 @@ public class GraphController implements Initializable
         
         final DataDao dao;
         if (dataDao == null) {
-            dao = dataService.createDao();
+            dao = dataService.CreateDao();
         } else {
             dao = dataDao;
         }
@@ -190,7 +190,7 @@ public class GraphController implements Initializable
     
     public void ShowInspector(IDataElement element) {
         if (element != null) {
-            if (element.getDataType()== DataType.CLUSTER || element.getDataType()== DataType.CLUSTERARC) {
+            if (element.getType() == DataType.CLUSTER || element.getType() == DataType.CLUSTERARC) {
                 return;
             }
         }

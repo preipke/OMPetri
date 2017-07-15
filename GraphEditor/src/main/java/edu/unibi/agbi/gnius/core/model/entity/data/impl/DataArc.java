@@ -37,7 +37,7 @@ public class DataArc extends Arc implements IDataArc
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType getType() {
         return dataType;
     }
 

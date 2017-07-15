@@ -1,7 +1,7 @@
 package main;
 
 import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
@@ -61,7 +61,7 @@ public class TestFXBase extends ApplicationTest {
     @Before
     public void setUpClass() throws Exception {
         ApplicationTest.launch(Main.class); // verifies that MainApp is a JavaFX application (extends Application)
-        dataService.setDao(dataService.createDao());
+        dataService.setDao(dataService.CreateDao());
     }
 
     @Override

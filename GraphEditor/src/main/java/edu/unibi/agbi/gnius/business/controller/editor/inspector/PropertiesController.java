@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
@@ -87,7 +87,7 @@ public class PropertiesController implements Initializable
 
         parentContainer.getChildren().clear();
         if (element != null) {
-            switch (element.getDataType()) {
+            switch (element.getType()) {
                 case ARC:
                     parentContainer.getChildren().add(parentColor);
                     parentContainer.getChildren().add(parentArc);

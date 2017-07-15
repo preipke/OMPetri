@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service.simulation;
 
-import edu.unibi.agbi.gnius.core.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
 import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.File;

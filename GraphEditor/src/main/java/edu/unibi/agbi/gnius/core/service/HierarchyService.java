@@ -7,7 +7,8 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.HierarchyController;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
@@ -81,11 +82,13 @@ public class HierarchyService
     /**
      * Groups and hides elements in a new cluster.
      *
+     * @param dao
      * @param selected
+     * @param clusterId
      * @return
      * @throws DataServiceException
      */
-    public synchronized IGraphCluster cluster(List<IGraphElement> selected) throws DataServiceException {
+    public synchronized IGraphCluster cluster(DataDao dao, List<IGraphElement> selected, String clusterId) throws DataServiceException {
 
         if (selected.isEmpty()) {
             messengerService.addWarning("Nothing was selected for clustering!");
@@ -114,8 +117,8 @@ public class HierarchyService
             return null;
         }
 
-        IGraphCluster cluster = create(nodes, clusters);
-        dataService.getDao().setHasChanges(true);
+        IGraphCluster cluster = create(dao, nodes, clusters, clusterId);
+        dao.setHasChanges(true);
 
         return cluster;
     }
@@ -161,7 +164,7 @@ public class HierarchyService
      * @return
      * @throws DataServiceException
      */
-    private IGraphCluster create(Set<IGraphNode> nodes, Set<GraphCluster> clusters) throws DataServiceException {
+    private IGraphCluster create(DataDao dao, Set<IGraphNode> nodes, Set<GraphCluster> clusters, String clusterId) throws DataServiceException {
 
         DataCluster dataCluster;
         GraphCluster cluster;
@@ -169,15 +172,15 @@ public class HierarchyService
         List<IGravisConnection> nodeConnections;
         List<IGraphArc> clusterArcs, arcs;
 
-        Graph graph;
         Graph graphChild;
-        
+        Graph graph;
+
         nodes.addAll(clusters);
 
         /**
          * Create cluster data and shape.
          */
-        dataCluster = new DataCluster(dataService.getClusterId(dataService.getDao()));
+        dataCluster = new DataCluster(clusterId);
         cluster = new GraphCluster(dataCluster.getId(), dataCluster);
         clusterArcs = new ArrayList();
         arcs = new ArrayList();
@@ -185,7 +188,7 @@ public class HierarchyService
         /**
          * Reassign graph hierarchy.
          */
-        graph = dataService.getGraph();
+        graph = dao.getGraph();
         graphChild = dataCluster.getGraph();
         graphChild.nameProperty().set(dataCluster.getId());
         graphChild.setParentGraph(graph);
@@ -199,41 +202,41 @@ public class HierarchyService
 
         Point2D pos = calculator.getCenterN(nodes);
         if (dataService.isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, dataService.getGraph());
+            pos = calculator.getPositionInGrid(pos, graph);
         }
         cluster.setTranslateX(pos.getX() - cluster.getCenterOffsetX());
         cluster.setTranslateY(pos.getY() - cluster.getCenterOffsetY());
 
         /**
-         * Move nodes and determine wether node is connected to nodes in or 
-         * outside of the cluster. All arcs connecting to nodes outside the 
-         * cluster will be cluster arcs.
+         * Move nodes and determine wether node is connected to node in or
+         * outside of the cluster. All arcs connecting to nodes outside the
+         * cluster will be stored in cluster arcs.
          */
         for (IGraphNode node : nodes) {
-            
+
             nodeConnections = new ArrayList();
-            nodeConnections.addAll(node.getConnections());
-            
+            nodeConnections.addAll(node.getConnections()); // copy, references are lost after removing from graph
+
             graph.remove(node);
             graphChild.add(node);
-            
+
             for (IGravisConnection connection : nodeConnections) {
                 arc = (IGraphArc) connection;
-                
+
                 if (!nodes.contains(arc.getTarget())) { // target OUTSIDE
-                    addClusterArcs(clusterArcs, cluster, arc.getTarget(), arc);
+                    getClusterArc(clusterArcs, cluster, arc.getTarget(), arc);
                 } else if (!nodes.contains(arc.getSource())) { // source OUTSIDE
-                    addClusterArcs(clusterArcs, arc.getSource(), cluster, arc);
+                    getClusterArc(clusterArcs, arc.getSource(), cluster, arc);
                 } else {
-                    arcs.add(arc);
+                    arcs.add(arc); // connection INSIDE
                 }
             }
         }
-        
+
         for (IGraphArc conn : arcs) {
             graphChild.add(conn);
         }
-        
+
         for (IGraphArc conn : clusterArcs) {
             graph.add(conn);
             dataService.styleElement(conn);
@@ -254,12 +257,13 @@ public class HierarchyService
         Graph graph = graphChild.getParentGraph();
 
         DataClusterArc dca;
-        IGraphNode source = null, target = null;
+        IGraphNode source, target;
         List<IGravisConnection> clusterConnections;
-        Set<IGraphArc> clusterArcs, arcs;
+        Set<IGraphArc> arcs;
+        IGraphArc arc;
 
         /**
-         * Add all nodes and connections from the cluster child graph.
+         * Calculate translation offset.
          */
         Point2D pos = calculator.getCenter(graphChild.getNodes());
         if (dataService.isGridEnabled()) {
@@ -268,6 +272,10 @@ public class HierarchyService
         double translateX = cluster.getShape().getTranslateX() + cluster.getCenterOffsetX() - pos.getX();
         double translateY = cluster.getShape().getTranslateY() + cluster.getCenterOffsetY() - pos.getY();
 
+        /**
+         * Add all nodes and connections from the child graph (cluster) to the
+         * parent graph.
+         */
         for (IGravisNode n : graphChild.getNodes()) {
             graph.add(n);
             n.translateXProperty().set(n.translateXProperty().get() + translateX);
@@ -277,13 +285,14 @@ public class HierarchyService
             graph.add(c);
         }
         graphChild.clear();
-        
+
         /**
-         * Create copy of cluster arcs due to modification of original list.
+         * Create copy of cluster arcs.
          */
+        arcs = new HashSet();
         clusterConnections = new ArrayList();
         clusterConnections.addAll(cluster.getConnections());
-        
+
         /**
          * Remove cluster and reassign graph hierarchy.
          */
@@ -292,122 +301,130 @@ public class HierarchyService
         while (!graphChild.getChildGraphs().isEmpty()) {
             graphChild.getChildGraphs().get(0).setParentGraph(graph);
         }
-        
+
         /**
-         * Create new cluster arcs.
+         * Restore stored arcs or create cluster arcs.
          */
-        clusterArcs = new HashSet();
-        arcs = new HashSet();
-        
         for (IGravisConnection clusterArc : clusterConnections) {
-            
-            boolean isSourceRemaining;
-            
-            if (clusterArc.getSource() == cluster) {
-                target = (IGraphNode) clusterArc.getTarget();
-                isSourceRemaining = false;
-            } else {
-                source = (IGraphNode) clusterArc.getSource();
-                isSourceRemaining = true;
-            }
-            
+
             /**
-             * Check if stored arc nodes are present in scene.
-             * If so, add arc. If not, create new cluster arc.
+             * Check if nodes related to a stored arc are present in the graph.
+             * If so, add arc to graph. If not, create new cluster arc.
              */
             dca = (DataClusterArc) ((IGraphArc) clusterArc).getData();
-            
+
             for (IGraphArc storedArc : dca.getStoredArcs().values()) {
-                
-                if (!graph.contains(storedArc.getSource()) || !graph.contains(storedArc.getTarget())) {
-                    if (isSourceRemaining) {
-                        if (graph.contains(storedArc.getTarget())) {
-                            target = storedArc.getTarget();
-                        } else {
-                            target = getClusterContainingNode(graph, storedArc.getTarget());
-                        }
-                    } else {
+
+                if (graph.contains(storedArc.getSource()) && graph.contains(storedArc.getTarget())) {
+
+                    arcs.add(storedArc);
+                    storedArc.getData().getShapes().clear();
+                    storedArc.getData().getShapes().add(storedArc);
+
+                } else { // must be a connection to a lower level cluster
+                    
+                    Set<IGraphArc> clusterArcs = new HashSet();
+
+                    if (clusterArc.getSource().equals(cluster)) { // cluster arc target remains
+
                         if (graph.contains(storedArc.getSource())) {
                             source = storedArc.getSource();
                         } else {
                             source = getClusterContainingNode(graph, storedArc.getSource());
+                            source.getConnections().forEach(conn -> clusterArcs.add((IGraphArc) conn));
                         }
+                        target = (IGraphNode) clusterArc.getTarget();
+
+                    } else { // cluster arc source remains
+
+                        if (graph.contains(storedArc.getTarget())) {
+                            target = storedArc.getTarget();
+                        } else {
+                            target = getClusterContainingNode(graph, storedArc.getTarget());
+                            target.getConnections().forEach(conn -> clusterArcs.add((IGraphArc) conn));
+                        }
+                        source = (IGraphNode) clusterArc.getSource();
+
                     }
-                    addClusterArcs(clusterArcs, source, target, storedArc);
-                } else {
-                    arcs.add(storedArc);
-                    storedArc.getData().getShapes().clear();
-                    storedArc.getData().getShapes().add(storedArc);
+                    arc = getClusterArc(clusterArcs, source, target, storedArc);
+                    if (arc != null) {
+                        graph.add(arc);
+                        dataService.styleElement(arc);
+                    }
                 }
             }
         }
-        
+
         for (IGraphArc a : arcs) {
             graph.add(a);
-            dataService.styleElement(a);
-        }
-        
-        for (IGraphArc a : clusterArcs) {
-            graph.add(a);
-            dataService.styleElement(a);
+//            dataService.styleElement(a);
         }
     }
-    
-    private void addClusterArcs(Collection<IGraphArc> arcs, IGraphNode source, IGraphNode target, IGraphArc arcRelated) throws DataServiceException {
-        
-        final IGraphArc arcForward;
-        final DataClusterArc dataForward, dca;
+
+    /**
+     *
+     * @param clusterArcs collection of cluster arcs that connect a cluster to
+     *                    outside nodes
+     * @param source      source of the connection
+     * @param target      target of the connection
+     * @param arcRelated  arc that will be stored in the cluster arc
+     * @throws DataServiceException
+     */
+    private IGraphArc getClusterArc(Collection<IGraphArc> clusterArcs, IGraphNode source, IGraphNode target, IGraphArc arcRelated) throws DataServiceException {
+
+        IGraphArc shape, shapeNew = null;
+        DataClusterArc data, dca;
         Optional<IGraphArc> existingArc;
-        
+
         if (source.getType() != GravisType.CLUSTER && target.getType() != GravisType.CLUSTER) {
             throw new DataServiceException("Trying to create cluster arc without source or target being a cluster!");
         }
-        
+
         String idShape = dataService.getConnectionId(source, target);
         String idData = dataService.getArcId(source.getData(), target.getData());
 
         /**
          * Check if connection already exists.
          */
-        existingArc = arcs.stream()
+        existingArc = clusterArcs.stream()
                 .filter(a -> a.getSource().equals(source) && a.getTarget().equals(target))
                 .findFirst();
-        
+
         if (existingArc.isPresent()) {
-            
-            arcForward = existingArc.get();
-            dataForward = (DataClusterArc) arcForward.getData();
-            
+
+            shape = existingArc.get();
+            data = (DataClusterArc) shape.getData();
+
         } else {
 
-            dataForward = new DataClusterArc(idData);
-            arcForward = new GraphArc(idShape, source, target, dataForward);
-
-            arcs.add(arcForward);
+            data = new DataClusterArc(idData);
+            shape = new GraphArc(idShape, source, target, data);
+            
+            shapeNew = shape;
+            clusterArcs.add(shapeNew);
         }
-        
+
         /**
-         * Check if the related arc is also a cluster arc. Add references for 
-         * all stored arcs to the new cluster arc.
+         * Check if the related arc is also a cluster arc. Add all stored arcs
+         * to the higher level cluster arc.
          */
-        if (arcRelated.getData().getDataType()== DataType.CLUSTERARC) {
+        if (arcRelated.getData().getType() == DataType.CLUSTERARC) {
             dca = (DataClusterArc) arcRelated.getData();
             dca.getStoredArcs().values().forEach(storedArc -> {
-                dataForward.getStoredArcs().put(storedArc.getId(), storedArc);
+                data.getStoredArcs().put(storedArc.getId(), storedArc);
+                storedArc.getData().getShapes().clear(); // remove reference to currently hidden shape
+                storedArc.getData().getShapes().add(shape); // replace by reference to cluster arc shape
             });
-            dca.getStoredArcs().clear();
+//            dca.getStoredArcs().clear();
         } else {
-            dataForward.getStoredArcs().put(arcRelated.getId(), arcRelated);
+            data.getStoredArcs().put(arcRelated.getId(), arcRelated);
+            arcRelated.getData().getShapes().clear(); // remove reference to currently hidden shape
+            arcRelated.getData().getShapes().add(shape); // replace by reference to cluster arc shape
         }
         
-        dataForward.getShapes().clear();
-        dataForward.getShapes().add(arcForward);
-        dataForward.getStoredArcs().values().forEach(storedArc -> {
-            storedArc.getData().getShapes().clear();
-            storedArc.getData().getShapes().add(arcForward);
-        });
+        return shapeNew;
     }
-    
+
     private IGraphCluster getClusterContainingNode(Graph graph, IGraphNode node) {
         for (IGravisCluster cluster : graph.getClusters()) {
             if (isClusterContainingNode(cluster, node)) {
@@ -416,7 +433,7 @@ public class HierarchyService
         }
         return null;
     }
-    
+
     private boolean isClusterContainingNode(IGravisCluster cluster, IGraphNode node) {
         if (cluster.getGraph().contains(node)) {
             return true;

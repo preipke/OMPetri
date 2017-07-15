@@ -33,7 +33,7 @@ public final class DataTransition extends Transition implements IDataNode
     }
 
     @Override
-    public DataType getDataType() {
+    public DataType getType() {
         return dataType;
     }
 

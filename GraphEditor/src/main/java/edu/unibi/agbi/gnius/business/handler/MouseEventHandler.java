@@ -14,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.util.Calculator;
@@ -190,7 +190,7 @@ public class MouseEventHandler
                             try {
                                 selectionService.unselectAll();
                                 selectionService.highlight(node);
-                                arcTemp = dataService.createConnectionTmp(node);
+                                arcTemp = dataService.CreateConnectionTmp(node);
                                 setEditorMode(isInArcCreationMode);
                             } catch (Exception ex) {
                                 messengerService.addException("Cannot switch to arc creation mode!", ex);
@@ -398,7 +398,7 @@ public class MouseEventHandler
             }
             if (eventTarget instanceof IGraphNode) {
                 try {
-                    dataService.connect(arcTemp.getSource(), (IGraphNode) eventTarget);
+                    dataService.connect(dataService.getDao(), arcTemp.getSource(), (IGraphNode) eventTarget);
                 } catch (DataServiceException ex) {
                     messengerService.printMessage("Cannot connect nodes!");
                     messengerService.setStatusAndAddExceptionToLog("Selected nodes cannot be connected!", ex);
@@ -421,7 +421,7 @@ public class MouseEventHandler
              */
             if (isPrimaryButtonDown) {
                 try {
-                    dataService.CreateNode(editorToolsController.getCreateNodeType(), event.getX(), event.getY());
+                    dataService.CreateNode(dataService.getDao(), editorToolsController.getCreateNodeType(), event.getX(), event.getY());
                 } catch (DataServiceException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }
@@ -431,7 +431,7 @@ public class MouseEventHandler
 
             if (isPrimaryButtonDown) {
                 try {
-                    dataService.CreateClone(data, event.getX(), event.getY());
+                    dataService.CreateClone(dataService.getDao(), data, event.getX(), event.getY());
                 } catch (DataServiceException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }

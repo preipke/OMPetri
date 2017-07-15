@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.service;
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
 import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
-import edu.unibi.agbi.gnius.core.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ResultsServiceException;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.ArrayList;
