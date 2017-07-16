@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
@@ -59,7 +59,7 @@ public class ToolsController implements Initializable
         try {
             hierarchyService.cluster(dataService.getDao(), selectionService.getSelectedElements(), dataService.getClusterId(dataService.getDao()));
             hierarchyController.update();
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             messengerService.addException(ex);
         }
     }

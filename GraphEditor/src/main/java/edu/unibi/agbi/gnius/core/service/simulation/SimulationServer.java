@@ -5,8 +5,9 @@
  */
 package edu.unibi.agbi.gnius.core.service.simulation;
 
-import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
+import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationException;
 import edu.unibi.agbi.gnius.util.Utility;
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -31,10 +32,10 @@ public class SimulationServer extends Thread {
 
     private boolean isRunning; // indicates wether the server is up and running
     private boolean isFailed; // indicates wether the server has been terminated
-    private SimulationServiceException exception;
+    private SimulationException exception;
 
     private String[] simulationVariables;
-    private Simulation simulation;
+    private SimulationResult results;
 
     public SimulationServer() {
         if (Utility.isOsWindows()) {
@@ -52,7 +53,7 @@ public class SimulationServer extends Thread {
         return isFailed;
     }
 
-    public SimulationServiceException getException() {
+    public SimulationException getException() {
         return exception;
     }
 
@@ -65,14 +66,14 @@ public class SimulationServer extends Thread {
     }
 
     public double getSimulationTime() {
-        if (simulation == null) {
+        if (results == null) {
             return 0;
         }
-        return (double) simulation.getResults()[0].get(simulation.getResults()[0].size()-1);
+        return (double) results.getTimeData().get(results.getTimeData().size() - 1);
     }
 
-    public void setSimulation(Simulation simulation) {
-        this.simulation = simulation;
+    public void setResultsStorage(SimulationResult simulation) {
+        this.results = simulation;
     }
 
     public void terminate() {
@@ -93,7 +94,7 @@ public class SimulationServer extends Thread {
         isFailed = false;
         isRunning = true;
         simulationVariables = null;
-        simulation = null;
+        results = null;
 
         /**
          * Open Server Socket.
@@ -115,31 +116,35 @@ public class SimulationServer extends Thread {
                 client = serverSocket.accept(); // blocks until connection found
                 inputStream = new DataInputStream(client.getInputStream());
             } catch (IOException ex) {
-                throw new SimulationServiceException("Failed accepting client!", ex);
-            }
-
-            try {
-                simulationVariables = ReadSimulationVariables(inputStream);
-            } catch (IOException ex) {
-                throw new SimulationServiceException("Failed reading variables!", ex);
+                throw new SimulationException("Failed accepting client!", ex);
             }
 
             try {
                 synchronized (this) {
-                    this.notify(); // notify thread that variables have been initalized
-                    this.wait(); // wait for initialization of simulation storage object
+                    simulationVariables = ReadSimulationVariables(inputStream);
                 }
-            } catch (InterruptedException ex) {
-                throw new SimulationServiceException("Server got interrupted while waiting for storage object!", ex);
+            } catch (IOException ex) {
+                throw new SimulationException("Failed reading variables!", ex);
             }
 
             try {
-                ReadAndStoreSimulationResults(inputStream, simulation);
-            } catch (IOException ex) {
-                throw new SimulationServiceException("Failed reading results!", ex);
+                synchronized (this) {
+                    this.notify(); // notify thread that variables have been initalized (3)
+                    this.wait(); // wait for initialization of results storage object (4)
+                }
+            } catch (InterruptedException ex) {
+                throw new SimulationException("Server got interrupted while waiting for storage object!", ex);
             }
 
-        } catch (SimulationServiceException ex) {
+            try {
+                ReadAndStoreSimulationResults(inputStream, results);
+            } catch (IOException ex) {
+                throw new SimulationException("Failed reading results data!", ex);
+            } catch (ResultsException ex) {
+                throw new SimulationException("Failed storing results data!", ex);
+            }
+
+        } catch (SimulationException ex) {
             isFailed = true;
             exception = ex;
         } finally {
@@ -248,7 +253,7 @@ public class SimulationServer extends Thread {
         return names;
     }
 
-    public void ReadAndStoreSimulationResults(DataInputStream inputStream, Simulation simulation) throws IOException {
+    public void ReadAndStoreSimulationResults(DataInputStream inputStream, SimulationResult results) throws IOException, ResultsException {
 
         Object[] data;
         String[] messages;
@@ -298,7 +303,7 @@ public class SimulationServer extends Thread {
                                 System.out.println(messages[i]);
                             }
                         }
-                        simulation.addResult(data);
+                        results.addData(data);
                     }
                     break;
 

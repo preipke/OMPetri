@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
@@ -125,7 +125,7 @@ public class IdentifierController implements Initializable
         try {
             paneSample.getChildren().addAll(sample.getShapes());
             dataService.styleElement(sample);
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             messengerService.addException("Cannot render sample shape.", ex);
         } finally {
             element.getShapes().remove(sample);
@@ -193,7 +193,7 @@ public class IdentifierController implements Initializable
         }
     }
 
-    private void StoreElementType(IDataElement element) throws DataServiceException {
+    private void StoreElementType(IDataElement element) throws DataException {
         Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
         if (subtype != null) {
             dataService.ChangeElementSubtype(element, subtype);
@@ -230,7 +230,7 @@ public class IdentifierController implements Initializable
                     StoreElementType(data);
                     LoadSampleShape(data);
                     choiceSubtype.setStyle("");
-                } catch (DataServiceException ex) {
+                } catch (DataException ex) {
                     choiceSubtype.setStyle("-fx-border-color: red");
                     messengerService.addException("Cannot change element subtype!", ex);
                 }

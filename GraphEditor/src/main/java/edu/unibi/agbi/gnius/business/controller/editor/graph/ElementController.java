@@ -7,7 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.editor.graph;
 
 import edu.unibi.agbi.gnius.business.controller.editor.GraphController;
 import edu.unibi.agbi.gnius.business.handler.MouseEventHandler;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
@@ -327,7 +327,7 @@ public class ElementController implements Initializable
 
     }
 
-    private void StoreElementType(IDataElement element) throws DataServiceException {
+    private void StoreElementType(IDataElement element) throws DataException {
         Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
         if (subtype != null) {
             dataService.ChangeElementSubtype(element, subtype);
@@ -404,7 +404,7 @@ public class ElementController implements Initializable
                 } else {
                     dataService.setTransitionFunction(transition, inputLatestValid);
                 }
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
             }
         }
@@ -518,7 +518,7 @@ public class ElementController implements Initializable
                 try {
                     StoreElementType(data);
                     setInputStatus(choiceSubtype, false);
-                } catch (DataServiceException ex) {
+                } catch (DataException ex) {
                     setInputStatus(choiceSubtype, true);
                     messengerService.addException("Cannot change subtype!", ex);
                 }

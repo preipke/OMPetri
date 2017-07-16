@@ -6,7 +6,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
@@ -30,7 +30,7 @@ public class DaoTests extends TestFXBase {
     IGraphNode tmpNode;
 
     @Test
-    public void CreateNodes() throws DataServiceException {
+    public void CreateNodes() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
@@ -55,7 +55,7 @@ public class DaoTests extends TestFXBase {
     }
 
     @Test
-    public void ConnectAndValidateNodes() throws DataServiceException {
+    public void ConnectAndValidateNodes() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
@@ -112,7 +112,7 @@ public class DaoTests extends TestFXBase {
     }
 
     @Test
-    public void RemoveNodesAndValidate() throws DataServiceException {
+    public void RemoveNodesAndValidate() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
@@ -159,7 +159,7 @@ public class DaoTests extends TestFXBase {
     }
 
     @Test
-    public void RemoveConnectionsAndValidate() throws DataServiceException {
+    public void RemoveConnectionsAndValidate() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
@@ -191,7 +191,7 @@ public class DaoTests extends TestFXBase {
     }
     
     @Test
-    public void ClusteringNodes() throws DataServiceException {
+    public void ClusteringNodes() throws DataException {
         
         Collection<IGravisNode> nodesAfterClustering, nodesBeforeClustering;
         Collection<IGravisConnection> connectionsAfterCluster, connectionsBeforeCluster;

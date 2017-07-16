@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.model.dao;
 
-import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
+import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
+import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,53 +25,53 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ResultsDao
 {
-    private final ObservableList<Simulation> simulations;
-    private final Map<LineChart, TableView<SimulationData>> chartSimulationDataTableViews;
+    private final ObservableList<SimulationResult> results;
+    private final Map<LineChart, TableView<ResultSet>> chartSimulationDataTableViews;
     private final Map<LineChart, Map<String, Map<IElement, Set<String>>>> chartSimulationDataAutoAdd;
     
     public ResultsDao() {
-        simulations = FXCollections.observableArrayList();
+        results = FXCollections.observableArrayList();
         chartSimulationDataAutoAdd = new HashMap();
         chartSimulationDataTableViews = new HashMap();
     }
     
-    public void add(Simulation simulation) {
-        simulations.add(simulation);
+    public void add(SimulationResult simulation) {
+        results.add(simulation);
     }
     
-    public void add(LineChart lineChart, TableView<SimulationData> tableView) {
+    public void add(LineChart lineChart, TableView<ResultSet> tableView) {
         chartSimulationDataTableViews.put(lineChart, tableView);
     }
     
-    public void add(LineChart lineChart, SimulationData data) {
+    public void add(LineChart lineChart, ResultSet data) {
         chartSimulationDataTableViews.get(lineChart).getItems().add(data);
     }
     
-    public void addForAutoAdding(LineChart lineChart, SimulationData data) {
+    public void addForAutoAdding(LineChart lineChart, ResultSet data) {
         if (!chartSimulationDataAutoAdd.containsKey(lineChart)) {
             chartSimulationDataAutoAdd.put(lineChart, new HashMap());
         }
-        if (!chartSimulationDataAutoAdd.get(lineChart).containsKey(data.getSimulation().getModelId())) {
-            chartSimulationDataAutoAdd.get(lineChart).put(data.getSimulation().getModelId(), new HashMap());
+        if (!chartSimulationDataAutoAdd.get(lineChart).containsKey(data.getSimulation().getDao().getModelId())) {
+            chartSimulationDataAutoAdd.get(lineChart).put(data.getSimulation().getDao().getModelId(), new HashMap());
         }
-        if (!chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getModelId()).containsKey(data.getElement())) {
-            chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getModelId()).put(data.getElement(), new TreeSet());
+        if (!chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).containsKey(data.getElement())) {
+            chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).put(data.getElement(), new TreeSet());
         }
-        chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getModelId()).get(data.getElement()).add(data.getVariable());
+        chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).get(data.getElement()).add(data.getVariable());
     }
     
     public boolean contains(LineChart lineChart) {
         return chartSimulationDataTableViews.containsKey(lineChart);
     }
     
-    public boolean contains(LineChart lineChart, SimulationData data) {
+    public boolean contains(LineChart lineChart, ResultSet data) {
         if (!chartSimulationDataTableViews.containsKey(lineChart)) {
             return false;
         }
         return chartSimulationDataTableViews.get(lineChart).getItems().contains(data);
     }
     
-    public boolean containsForAutoAdding(LineChart lineChart, SimulationData data) {
+    public boolean containsForAutoAdding(LineChart lineChart, ResultSet data) {
         
         Map<String, Map<IElement, Set<String>>> modelsToAutoAdd;
         Map<IElement, Set<String>> elementsToAutoAdd;
@@ -81,7 +81,7 @@ public class ResultsDao
         
         if (modelsToAutoAdd != null) {
             
-            elementsToAutoAdd = modelsToAutoAdd.get(data.getSimulation().getModelId());
+            elementsToAutoAdd = modelsToAutoAdd.get(data.getSimulation().getDao().getModelId());
             
             if (elementsToAutoAdd != null) {
                 
@@ -101,15 +101,15 @@ public class ResultsDao
         chartSimulationDataAutoAdd.remove(lineChart);
     }
     
-    public boolean remove(LineChart lineChart, SimulationData data) {
+    public boolean remove(LineChart lineChart, ResultSet data) {
         return chartSimulationDataTableViews.get(lineChart).getItems().remove(data);
     }
     
-    public void removeFromAutoAdding(LineChart lineChart, SimulationData data) {
+    public void removeFromAutoAdding(LineChart lineChart, ResultSet data) {
         if (chartSimulationDataAutoAdd.containsKey(lineChart)) {
-            if (chartSimulationDataAutoAdd.get(lineChart).containsKey(data.getSimulation().getModelId())) {
-                if (chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getModelId()).containsKey(data.getElement())) {
-                    chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getModelId()).get(data.getElement()).remove(data.getVariable());
+            if (chartSimulationDataAutoAdd.get(lineChart).containsKey(data.getSimulation().getDao().getModelId())) {
+                if (chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).containsKey(data.getElement())) {
+                    chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).get(data.getElement()).remove(data.getVariable());
                 }
             }
         }
@@ -123,15 +123,15 @@ public class ResultsDao
         return chartSimulationDataAutoAdd.get(lineChart);
     }
     
-    public TableView<SimulationData> getChartTable(LineChart lineChart) {
+    public TableView<ResultSet> getChartTable(LineChart lineChart) {
         return chartSimulationDataTableViews.get(lineChart);
     }
     
-    public ObservableList<SimulationData> getChartResultsList(LineChart lineChart) {
+    public ObservableList<ResultSet> getChartResultsList(LineChart lineChart) {
         return chartSimulationDataTableViews.get(lineChart).getItems();
     }
     
-    public ObservableList<Simulation> getSimulations() {
-        return simulations;
+    public ObservableList<SimulationResult> getSimulationResults() {
+        return results;
     }
 }

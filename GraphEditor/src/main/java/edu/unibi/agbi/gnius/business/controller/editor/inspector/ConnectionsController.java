@@ -17,6 +17,7 @@ import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.text.Font;
@@ -34,6 +35,9 @@ public class ConnectionsController implements Initializable
     @Autowired private InspectorController inspectorController;
     @Autowired private GraphController graphController;
 
+    @FXML private Label labelListConnectionsIn;
+    @FXML private Label labelListConnectionsOut;
+    
     @FXML private ListView<IDataArc> listConnectionsIncoming;
     @FXML private ListView<IDataArc> listConnectionsOutgoing;
     @FXML private ListView<IGraphElement> listGraphEntities;
@@ -41,7 +45,7 @@ public class ConnectionsController implements Initializable
     @FXML private Button buttonArcFromDisable;
     @FXML private Button buttonArcFromEdit;
     @FXML private Button buttonArcFromShow;
-    
+
     @FXML private Button buttonArcToDisable;
     @FXML private Button buttonArcToEdit;
     @FXML private Button buttonArcToShow;
@@ -56,10 +60,22 @@ public class ConnectionsController implements Initializable
     public void Update() {
         setConnections(data);
         setGraphEntities(data);
-        buttonArcToDisable.setText("Disable");
+        if (data instanceof IDataArc) {
+            labelListConnectionsIn.setText("Source Node");
+            labelListConnectionsOut.setText("Target Node");
+            buttonArcFromDisable.setVisible(false);
+            buttonArcToDisable.setVisible(false);
+        } else {
+            labelListConnectionsIn.setText("Incoming Arcs");
+            labelListConnectionsOut.setText("Outgoing Arcs");
+            buttonArcFromDisable.setVisible(true);
+            buttonArcToDisable.setVisible(true);
+        }
+        buttonArcFromDisable.setText("Disable");
         buttonArcFromDisable.setDisable(true);
         buttonArcFromEdit.setDisable(true);
         buttonArcFromShow.setDisable(true);
+        buttonArcToDisable.setText("Disable");
         buttonArcToDisable.setDisable(true);
         buttonArcToEdit.setDisable(true);
         buttonArcToShow.setDisable(true);
@@ -69,7 +85,7 @@ public class ConnectionsController implements Initializable
 
         listConnectionsIncoming.getItems().clear();
         listConnectionsOutgoing.getItems().clear();
-        
+
         if (element == null) {
             return;
         }
@@ -97,7 +113,7 @@ public class ConnectionsController implements Initializable
         }
     }
 
-    private void DisableElement(ListView<IDataArc> listView) {
+    private void DisableSelectedElement(ListView<IDataArc> listView) {
         IDataArc arc = listView.getSelectionModel().getSelectedItem();
         int index = listView.getSelectionModel().getSelectedIndex();
         if (arc != null) {
@@ -128,11 +144,11 @@ public class ConnectionsController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
-        buttonArcFromDisable.setOnAction(eh -> DisableElement(listConnectionsIncoming));
+        buttonArcFromDisable.setOnAction(eh -> DisableSelectedElement(listConnectionsIncoming));
         buttonArcFromEdit.setOnAction(eh -> EditElement(listConnectionsIncoming));
         buttonArcFromShow.setOnAction(eh -> ShowElement(listConnectionsIncoming));
-        
-        buttonArcToDisable.setOnAction(eh -> DisableElement(listConnectionsOutgoing));
+
+        buttonArcToDisable.setOnAction(eh -> DisableSelectedElement(listConnectionsOutgoing));
         buttonArcToEdit.setOnAction(eh -> EditElement(listConnectionsOutgoing));
         buttonArcToShow.setOnAction(eh -> ShowElement(listConnectionsOutgoing));
 
@@ -154,7 +170,7 @@ public class ConnectionsController implements Initializable
                 buttonArcFromShow.setDisable(true);
             }
         });
-        
+
         listConnectionsOutgoing.setCellFactory(l -> new ConnectionTargetCellFormatter());
         listConnectionsOutgoing.getSelectionModel().selectedItemProperty().addListener(cl -> {
             IDataArc arc = listConnectionsOutgoing.getSelectionModel().getSelectedItem();
@@ -173,7 +189,7 @@ public class ConnectionsController implements Initializable
                 buttonArcToShow.setDisable(true);
             }
         });
-        
+
         listGraphEntities.setCellFactory(l -> new GraphEntityCellFormatter());
         listGraphEntities.getSelectionModel().selectedItemProperty().addListener(cl -> {
             if (listGraphEntities.getSelectionModel().getSelectedItem() != null) {
@@ -214,15 +230,19 @@ public class ConnectionsController implements Initializable
         }
         return false;
     }
-    
+
     private void InitConnectionCell(ListCell<IDataArc> cell, IDataArc dataArcItem) {
         cell.setFont(Font.font(null, FontWeight.NORMAL, 12));
         if (data != null) { // mark connections related to selected graph entity
             if (data instanceof IDataNode) {
                 if (listGraphEntities.getSelectionModel().getSelectedItem() != null) {
-                    IGraphNode node = (IGraphNode) listGraphEntities.getSelectionModel().getSelectedItem();
-                    if (isNodeRelated(dataArcItem, node)) {
-                        cell.setFont(Font.font(null, FontWeight.BOLD, 12));
+                    if (listGraphEntities.getSelectionModel().getSelectedItem() instanceof IGraphNode) {
+                        IGraphNode node = (IGraphNode) listGraphEntities.getSelectionModel().getSelectedItem();
+                        if (isNodeRelated(dataArcItem, node)) {
+                            cell.setFont(Font.font(null, FontWeight.BOLD, 12));
+                        }
+                    } else {
+                        System.out.println("NOW");
                     }
                 }
             } else { // for an arc, all are related

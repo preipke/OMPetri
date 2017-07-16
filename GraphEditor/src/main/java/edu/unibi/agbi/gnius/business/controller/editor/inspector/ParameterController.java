@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
 import edu.unibi.agbi.gnius.core.service.exception.InputValidationException;
-import edu.unibi.agbi.gnius.core.service.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ParameterException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
@@ -138,7 +138,7 @@ public class ParameterController implements Initializable
             parameterService.remove(param);
             listParameters.getItems().remove(param);
             listParameters.setStyle("-fx-border-color: green");
-        } catch (ParameterServiceException ex) {
+        } catch (ParameterException ex) {
             listParameters.setStyle("-fx-border-color: red");
             messengerService.setRightStatus("Cannot delete parameter.", ex);
         }
@@ -204,7 +204,7 @@ public class ParameterController implements Initializable
             if (transition == null) {
                 choiceScope.setStyle("-fx-border-color: red");
                 choiceNode.setStyle("-fx-border-color: red");
-                messengerService.addException("Trying to create local parameter without specifying a node!", new ParameterServiceException("Must specify a related node for local parameters."));
+                messengerService.addException("Trying to create local parameter without specifying a node!", new ParameterException("Must specify a related node for local parameters."));
                 return;
             }
         }
@@ -226,7 +226,7 @@ public class ParameterController implements Initializable
             }
             setParameters(data);
             listParameters.setStyle("-fx-border-color: green");
-        } catch (ParameterServiceException ex) {
+        } catch (ParameterException ex) {
             messengerService.addException("Parameter creation failed!", ex);
             listParameters.setStyle("-fx-border-color: red");
         }

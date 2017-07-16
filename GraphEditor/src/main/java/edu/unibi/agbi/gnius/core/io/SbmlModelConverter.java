@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.io;
 
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.service.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
+import edu.unibi.agbi.gnius.core.service.exception.ParameterException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
@@ -206,7 +206,7 @@ public class SbmlModelConverter
                 String functionString = transition.getFunction().toString();
                 parameterService.ValidateFunction(dao.getModel(), transition, functionString);
                 parameterService.setTransitionFunction(dao.getModel(), transition, functionString);
-            } catch (ParameterServiceException ex) {
+            } catch (ParameterException ex) {
                 throw new IOException(ex);
             }
         }
@@ -392,7 +392,7 @@ public class SbmlModelConverter
         dao.getGraphRoot().add(node);
         try {
             dataService.styleElement(node);
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             throw new IOException(ex);
         }
 
@@ -560,7 +560,7 @@ public class SbmlModelConverter
         dao.getGraphRoot().add(connection);
         try {
             dataService.styleElement(connection);
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             throw new IOException(ex);
         }
 

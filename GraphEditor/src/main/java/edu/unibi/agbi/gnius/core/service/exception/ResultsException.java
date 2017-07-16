@@ -9,12 +9,12 @@ package edu.unibi.agbi.gnius.core.service.exception;
  *
  * @author PR
  */
-public class ResultsServiceException extends Exception
+public class ResultsException extends Exception
 {
-    public ResultsServiceException(String msg) {
+    public ResultsException(String msg) {
         super(msg);
     }
-    public ResultsServiceException(Throwable throwable) {
+    public ResultsException(Throwable throwable) {
         super(throwable);
     }
 }

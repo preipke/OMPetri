@@ -5,10 +5,10 @@
  */
 package edu.unibi.agbi.gnius.business.controller;
 
-import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
-import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
+import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
+import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
-import edu.unibi.agbi.gnius.core.service.exception.ResultsServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
 import edu.unibi.agbi.gnius.core.io.XmlResultsConverter;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
@@ -90,19 +90,19 @@ public class ResultsController implements Initializable
     @FXML private Button buttonDropAll;
     @FXML private Button buttonRefresh;
 
-    @FXML private TableView<SimulationData> tableView;
-    @FXML private TableColumn<SimulationData, CheckBox> columnAutoAdd;
-    @FXML private TableColumn<SimulationData, String> columnDateTime;
-    @FXML private TableColumn<SimulationData, String> columnModel;
-    @FXML private TableColumn<SimulationData, String> columnElementId;
-    @FXML private TableColumn<SimulationData, String> columnElementName;
-    @FXML private TableColumn<SimulationData, String> columnValueName;
-    @FXML private TableColumn<SimulationData, Number> columnValueStart;
-    @FXML private TableColumn<SimulationData, Number> columnValueEnd;
-    @FXML private TableColumn<SimulationData, Number> columnValueMin;
-    @FXML private TableColumn<SimulationData, Number> columnValueMax;
-    @FXML private TableColumn<SimulationData, CheckBox> columnEnable;
-    @FXML private TableColumn<SimulationData, Button> columnDrop;
+    @FXML private TableView<ResultSet> tableView;
+    @FXML private TableColumn<ResultSet, CheckBox> columnAutoAdd;
+    @FXML private TableColumn<ResultSet, String> columnDateTime;
+    @FXML private TableColumn<ResultSet, String> columnModel;
+    @FXML private TableColumn<ResultSet, String> columnElementId;
+    @FXML private TableColumn<ResultSet, String> columnElementName;
+    @FXML private TableColumn<ResultSet, String> columnValueName;
+    @FXML private TableColumn<ResultSet, Number> columnValueStart;
+    @FXML private TableColumn<ResultSet, Number> columnValueEnd;
+    @FXML private TableColumn<ResultSet, Number> columnValueMin;
+    @FXML private TableColumn<ResultSet, Number> columnValueMax;
+    @FXML private TableColumn<ResultSet, CheckBox> columnEnable;
+    @FXML private TableColumn<ResultSet, Button> columnDrop;
 
     @FXML private LineChart lineChart;
     @FXML private TextField inputChartTitle;
@@ -173,12 +173,12 @@ public class ResultsController implements Initializable
         ObservableList<Choice> choices = FXCollections.observableArrayList();
         Choice choice;
 
-        for (Simulation sim : resultsService.getSimulations()) {
+        for (SimulationResult sim : resultsService.getSimulationResults()) {
 
             found = false;
             for (Choice ch : choices) {
-                modelId = ((Simulation) ch.getValue()).getModelId();
-                if (modelId.contentEquals(sim.getModelId())) {
+                modelId = ((SimulationResult) ch.getValue()).getDao().getModelId();
+                if (modelId.contentEquals(sim.getDao().getModelId())) {
                     found = true;
                     break;
                 }
@@ -188,7 +188,7 @@ public class ResultsController implements Initializable
                 continue;
             }
 
-            choice = new Choice(sim.getModelName(), sim);
+            choice = new Choice(sim.getDao().getModelName(), sim);
             choices.add(choice);
         }
         choices.sort(Comparator.comparing(Choice::toString));
@@ -196,9 +196,8 @@ public class ResultsController implements Initializable
         found = false;
         if (choiceModel != null) {
             for (Choice ch : choices) {
-                if (((Simulation) ch.getValue()).getModelId()
-                        .contentEquals(
-                        ((Simulation) choiceModel.getValue()).getModelId())) {
+                if (((SimulationResult) ch.getValue()).getDao().getModelId()
+                        .contentEquals(((SimulationResult) choiceModel.getValue()).getDao().getModelId())) {
                     found = true;
                     break;
                 }
@@ -220,17 +219,18 @@ public class ResultsController implements Initializable
         int index = 0;
 
         Choice modelChoice = getModelChoice();
-        Simulation simulationChoicePrev;
+        SimulationResult simulationChoicePrev;
 
         if (modelChoice != null) {
 
-            resultsService.getSimulations().stream()
-                    .filter(sim -> (sim.getModelId().contentEquals(
-                            ((Simulation) modelChoice.getValue()).getModelId())))
+            resultsService.getSimulationResults().stream()
+                    .filter(sim -> (sim.getDao().getModelId()
+                            .contentEquals(((SimulationResult) modelChoice.getValue())
+                                    .getDao().getModelId())))
                     .forEach(sim -> {
                         choices.add(sim);
                     });
-            choices.sort(Comparator.comparing(Simulation::toString));
+            choices.sort(Comparator.comparing(SimulationResult::toString));
 
             simulationChoicePrev = getSimulationChoice();
             if (simulationChoicePrev != null) {
@@ -258,7 +258,7 @@ public class ResultsController implements Initializable
         boolean found = false;
         int index = 0;
 
-        Simulation simulationChoice = getSimulationChoice();
+        SimulationResult simulationChoice = getSimulationChoice();
         Choice elementChoicePrev;
 
         if (simulationChoice != null) {
@@ -266,8 +266,7 @@ public class ResultsController implements Initializable
             List<Object> places = new ArrayList();
             List<Object> transitions = new ArrayList();
 
-            simulationChoice.getElementFilterReferences()
-                    .keySet().stream()
+            simulationChoice.getElements().stream()
                     .filter(elem -> (elem.getElementType() != Element.Type.ARC))
                     .forEach(elem -> {
                         if (elem.getElementType() == Element.Type.PLACE) {
@@ -307,7 +306,7 @@ public class ResultsController implements Initializable
         boolean found = false;
         int index = 0;
 
-        Simulation simulationChoice = getSimulationChoice();
+        SimulationResult simulationChoice = getSimulationChoice();
         Choice elementChoice = getElementChoice();
         Choice valueChoicePrev;
 
@@ -319,7 +318,7 @@ public class ResultsController implements Initializable
 
             if (values.size() == 1) {
 
-                List<String> valueStings = simulationChoice.getElementFilterReferences().get((IElement) values.get(0));
+                List<String> valueStings = simulationChoice.getElementFilter((IElement) values.get(0));
 
                 for (String value : valueStings) {
                     name = resultsService.getValueName(value, simulationChoice);
@@ -370,9 +369,9 @@ public class ResultsController implements Initializable
         return (Choice) choicesModel.getSelectionModel().getSelectedItem();
     }
 
-    private Simulation getSimulationChoice() {
+    private SimulationResult getSimulationChoice() {
         if (choicesSimulation.getSelectionModel().getSelectedItem() != null) {
-            return (Simulation) choicesSimulation.getSelectionModel().getSelectedItem();
+            return (SimulationResult) choicesSimulation.getSelectionModel().getSelectedItem();
         } else {
             return null;
         }
@@ -396,7 +395,7 @@ public class ResultsController implements Initializable
 
     private void addSelectedChoiceToChart() {
 
-        Simulation simulationChoice = getSimulationChoice();
+        SimulationResult simulationChoice = getSimulationChoice();
         Choice elementChoice = getElementChoice();
         Choice valueChoice = getValueChoice();
 
@@ -411,40 +410,38 @@ public class ResultsController implements Initializable
             return;
         }
 
-        List<SimulationData> dataList = new ArrayList();
+        ResultSet result;
         String variable;
         IElement element;
-
-        for (Object var : (List) valueChoice.getValue()) {
-
-            variable = (String) var;
-            element = simulationChoice.getFilterElementReferences().get(variable);
-
-            dataList.add(new SimulationData(simulationChoice, element, variable));
-        }
 
         boolean exceptions = false;
         boolean duplicates = false;
         boolean success = false;
 
-        for (SimulationData data : dataList) {
+        for (Object var : (List) valueChoice.getValue()) {
+            
+            result = null;
 
             try {
-                resultsService.add(lineChart, data);
+                variable = (String) var;
+                element = simulationChoice.getFilterElement(variable);
+                result = new ResultSet(simulationChoice, element, variable);
+
+                resultsService.add(lineChart, result);
                 try {
-                    resultsService.show(lineChart, data);
-                } catch (ResultsServiceException ex) {
+                    resultsService.show(lineChart, result);
+                } catch (ResultsException ex) {
                     exceptions = true;
                     messengerService.addException("Adding data to chart failed!", ex);
                     continue;
                 }
                 success = true;
-            } catch (ResultsServiceException ex) {
+            } catch (ResultsException ex) {
                 duplicates = true;
             }
 
-            if (checkboxAutoAddSelected.isSelected()) {
-                resultsService.addForAutoAdding(lineChart, data);
+            if (result != null && checkboxAutoAddSelected.isSelected()) {
+                resultsService.addForAutoAdding(lineChart, result);
             }
         }
 
@@ -617,7 +614,7 @@ public class ResultsController implements Initializable
             }
             try {
                 resultsService.show(getLineChart(), data);
-            } catch (ResultsServiceException ex) {
+            } catch (ResultsException ex) {
                 setStatus("Failed enabling item(s)!", Status.FAILURE);
                 messengerService.addException("Adding data to chart failed!", ex);
             }
@@ -631,7 +628,7 @@ public class ResultsController implements Initializable
         /**
          * Data selection and filtering.
          */
-        resultsService.getSimulations().addListener(new ListChangeListener()
+        resultsService.getSimulationResults().addListener(new ListChangeListener()
         {
             @Override
             public void onChanged(ListChangeListener.Change change) {
@@ -706,13 +703,13 @@ public class ResultsController implements Initializable
         /**
          * TableView.
          */
-        Callback<TableColumn<SimulationData, Button>, TableCell<SimulationData, Button>> columnDropCellFactory;
-        Callback<TableColumn<SimulationData, CheckBox>, TableCell<SimulationData, CheckBox>> columnAutoAddCellFactory, columnEnableCellFactory;
+        Callback<TableColumn<ResultSet, Button>, TableCell<ResultSet, Button>> columnDropCellFactory;
+        Callback<TableColumn<ResultSet, CheckBox>, TableCell<ResultSet, CheckBox>> columnAutoAddCellFactory, columnEnableCellFactory;
 
         tableView.setItems(FXCollections.observableArrayList());
         try {
             resultsService.add(lineChart, tableView);
-        } catch (ResultsServiceException ex) {
+        } catch (ResultsException ex) {
             System.out.println(ex.getMessage());
         }
 
@@ -738,9 +735,9 @@ public class ResultsController implements Initializable
         });
 
         columnDateTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDateTime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss"))));
-        columnModel.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getModelName()));
-        columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementId()));
-        columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElementName()));
+        columnModel.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDao().getModelName()));
+        columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getId()));
+        columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getName()));
         columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(resultsService.getValueName(cellData.getValue().getVariable(), cellData.getValue().getSimulation())));
         columnValueStart.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getStartValue(cellData.getValue().getSeries().getData())));
         columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getEndValue(cellData.getValue().getSeries().getData())));
@@ -767,7 +764,7 @@ public class ResultsController implements Initializable
                 if (cb.selectedProperty().getValue()) {
                     try {
                         resultsService.show(getLineChart(), cellData.getValue());
-                    } catch (ResultsServiceException ex) {
+                    } catch (ResultsException ex) {
                         messengerService.addException("Updating data failed!", ex);
                     }
                 } else {
@@ -808,7 +805,7 @@ public class ResultsController implements Initializable
         return lineChart;
     }
 
-    public TableView<SimulationData> getTableView() {
+    public TableView<ResultSet> getTableView() {
         return tableView;
     }
 

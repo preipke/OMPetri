@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.io;
 
-import edu.unibi.agbi.gnius.core.model.entity.simulation.SimulationData;
+import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
@@ -51,7 +51,7 @@ public class XmlResultsConverter
         // ...
     }
 
-    public void exportXml(File file, List<SimulationData> simulationDataList) throws Exception {
+    public void exportXml(File file, List<ResultSet> resultSets) throws Exception {
 
         Document dom;
         NamedNodeMap attributes;
@@ -65,7 +65,7 @@ public class XmlResultsConverter
         
         models = dom.createElement(tagModels); // root element
         
-        for (SimulationData simulationData : simulationDataList) {
+        for (ResultSet resultSet : resultSets) {
             
             model = null;
             simulations = null;
@@ -74,13 +74,13 @@ public class XmlResultsConverter
             element = null;
             data = null;
 
-            modelAuthor = simulationData.getSimulation().getAuthorName();
-            modelId = simulationData.getSimulation().getModelId();
-            modelName = simulationData.getSimulation().getModelName();
-            simulationDateTime = simulationData.getSimulation().getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
-            elementId = simulationData.getElementId();
-            elementName = simulationData.getElementName();
-            variableName = simulationData.getVariable();
+            modelAuthor = resultSet.getSimulation().getDao().getAuthor();
+            modelId = resultSet.getSimulation().getDao().getModelId();
+            modelName = resultSet.getSimulation().getDao().getModelName();
+            simulationDateTime = resultSet.getSimulation().getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
+            elementId = resultSet.getElement().getId();
+            elementName = resultSet.getElement().getName();
+            variableName = resultSet.getVariable();
             
             /**
              * check if model element exists
@@ -158,22 +158,8 @@ public class XmlResultsConverter
             variable.setAttribute(attrId, variableName);
             data.appendChild(variable);
             
-            int index = 0;
-            boolean found = false;
-            for (String var : simulationData.getSimulation().getVariables()) {
-                if (var.contentEquals(variableName)) {
-                    found = true;
-                    break;
-                }
-                index++;
-            }
-            
-            if (!found) {
-                throw new Exception("Variable not found in results data set!");
-            }
-            
-            List<Object> timePoints = simulationData.getSimulation().getResults()[0];
-            List<Object> dataPoints = simulationData.getSimulation().getResults()[index];
+            List<Object> timePoints = resultSet.getSimulation().getTimeData();
+            List<Object> dataPoints = resultSet.getData();
             Element datapoint;
             
             for (int i = 0; i < timePoints.size(); i++) {

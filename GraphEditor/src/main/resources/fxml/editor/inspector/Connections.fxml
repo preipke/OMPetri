@@ -12,23 +12,23 @@
     <children>
         <VBox spacing="5.0">
             <children>
-                <Label text="Incoming Arcs:" />
+                <Label fx:id="labelListConnectionsIn" text="Incoming Arcs:" />
                 <HBox spacing="5.0" VBox.vgrow="ALWAYS">
                     <children>
                         <ListView fx:id="listConnectionsIncoming" prefHeight="95.0" HBox.hgrow="ALWAYS" />
                         <VBox alignment="TOP_CENTER" spacing="5.0">
                             <children>
-                                <Button fx:id="buttonArcFromDisable" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable Arc">
+                                <Button fx:id="buttonArcFromDisable" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable">
                                     <tooltip>
                                         <Tooltip text="Disable or enable the connection to the selected node" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcFromEdit" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit Arc">
+                                <Button fx:id="buttonArcFromEdit" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit">
                                     <tooltip>
                                         <Tooltip text="Edit details for the connection to the selected node" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcFromShow" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Arc">
+                                <Button fx:id="buttonArcFromShow" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show">
                                     <tooltip>
                                         <Tooltip text="Show the connection to the selected node in graph" />
                                     </tooltip>
@@ -53,23 +53,23 @@
         <Separator orientation="VERTICAL" />
         <VBox spacing="5.0">
             <children>
-                <Label text="Outgoing Arcs:" />
+                <Label fx:id="labelListConnectionsOut" text="Outgoing Arcs:" />
                 <HBox spacing="5.0" VBox.vgrow="ALWAYS">
                     <children>
                         <ListView fx:id="listConnectionsOutgoing" prefHeight="95.0" HBox.hgrow="ALWAYS" />
                         <VBox alignment="TOP_CENTER" spacing="5.0">
                             <children>
-                                <Button fx:id="buttonArcToDisable" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable Arc">
+                                <Button fx:id="buttonArcToDisable" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable">
                                     <tooltip>
                                         <Tooltip text="Disable or enable the connection to the selected node" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcToEdit" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit Arc">
+                                <Button fx:id="buttonArcToEdit" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit">
                                     <tooltip>
                                         <Tooltip text="Edit details for the connection to the selected node" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcToShow" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Arc">
+                                <Button fx:id="buttonArcToShow" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show">
                                     <tooltip>
                                         <Tooltip text="Show the connection to the selected node in graph" />
                                     </tooltip>

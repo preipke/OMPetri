@@ -14,7 +14,7 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.util.Calculator;
@@ -399,7 +399,7 @@ public class MouseEventHandler
             if (eventTarget instanceof IGraphNode) {
                 try {
                     dataService.connect(dataService.getDao(), arcTemp.getSource(), (IGraphNode) eventTarget);
-                } catch (DataServiceException ex) {
+                } catch (DataException ex) {
                     messengerService.printMessage("Cannot connect nodes!");
                     messengerService.setStatusAndAddExceptionToLog("Selected nodes cannot be connected!", ex);
                 }
@@ -408,7 +408,7 @@ public class MouseEventHandler
             selectionService.unhighlight(arcTemp.getSource());
             try {
                 dataService.remove(arcTemp);
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 messengerService.addException(ex);
             }
 
@@ -422,7 +422,7 @@ public class MouseEventHandler
             if (isPrimaryButtonDown) {
                 try {
                     dataService.CreateNode(dataService.getDao(), editorToolsController.getCreateNodeType(), event.getX(), event.getY());
-                } catch (DataServiceException ex) {
+                } catch (DataException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }
             }
@@ -432,7 +432,7 @@ public class MouseEventHandler
             if (isPrimaryButtonDown) {
                 try {
                     dataService.CreateClone(dataService.getDao(), data, event.getX(), event.getY());
-                } catch (DataServiceException ex) {
+                } catch (DataException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }
             }

@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
@@ -210,7 +210,7 @@ public class PropertiesController implements Initializable
                 } else {
                     dataService.setTransitionFunction(transition, inputLatestValid);
                 }
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
             }
         }

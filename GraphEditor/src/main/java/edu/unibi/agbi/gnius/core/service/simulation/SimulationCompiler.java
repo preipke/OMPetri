@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service.simulation;
 
-import edu.unibi.agbi.gnius.core.service.exception.SimulationServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.util.Utility;
 import edu.unibi.agbi.petrinet.model.References;
@@ -46,9 +46,9 @@ public final class SimulationCompiler
      *
      * @param dao
      * @return String representing the path to the simulation executable
-     * @throws SimulationServiceException
+     * @throws SimulationException
      */
-    public References compile(DataDao dao) throws SimulationServiceException {
+    public References compile(DataDao dao) throws SimulationException {
 
         final Process process;
         ProcessBuilder pb;
@@ -67,8 +67,8 @@ public final class SimulationCompiler
                 simWorkingDirectory = getWorkingDirectory();
             }
             dirStorage = createStorageDirectory(simWorkingDirectory);
-        } catch (SimulationServiceException ex) {
-            throw new SimulationServiceException("Failed to get the required directories! [" + ex.getMessage() + "]");
+        } catch (SimulationException ex) {
+            throw new SimulationException("Failed to get the required directories! [" + ex.getMessage() + "]");
         }
 
         /**
@@ -80,7 +80,7 @@ public final class SimulationCompiler
             omExporter.exportMO(dao.getModelName(), dao.getModel(), fileMo);
             simulationReferences = omExporter.exportMOS(dao.getModelName(), dao.getModel(), fileMos, fileMo, simWorkingDirectory);
         } catch (IOException ex) {
-            throw new SimulationServiceException("Failed to export the data for OpenModelica! [" + ex.getMessage() + "]");
+            throw new SimulationException("Failed to export the data for OpenModelica! [" + ex.getMessage() + "]");
         }
 
         /**
@@ -91,7 +91,7 @@ public final class SimulationCompiler
         try {
             process = pb.start();
         } catch (IOException ex) {
-            throw new SimulationServiceException("Failed to start the build process! [" + ex.getMessage() + "]");
+            throw new SimulationException("Failed to start the build process! [" + ex.getMessage() + "]");
         }
 
         /**
@@ -100,7 +100,7 @@ public final class SimulationCompiler
         try {
             process.waitFor();
         } catch (InterruptedException ex) {
-            throw new SimulationServiceException("Failed to wait for the build process! [" + ex.getMessage() + "]");
+            throw new SimulationException("Failed to wait for the build process! [" + ex.getMessage() + "]");
         }
 
         /**
@@ -119,16 +119,16 @@ public final class SimulationCompiler
      * sources.
      *
      * @return
-     * @throws SimulationServiceException
+     * @throws SimulationException
      */
-    private File getWorkingDirectory() throws SimulationServiceException {
+    private File getWorkingDirectory() throws SimulationException {
 
         File dir;
         String[] subDir;
 
         dir = new File(System.getProperty(directoryProperty));
         if (!dir.exists() || !dir.isDirectory()) {
-            throw new SimulationServiceException("Application's working directory not accessible!");
+            throw new SimulationException("Application's working directory not accessible!");
         }
 
         subDir = workingDirectory.split("/");
@@ -149,7 +149,7 @@ public final class SimulationCompiler
      *
      * @return
      */
-    private File createStorageDirectory(File workingDirectory) throws SimulationServiceException {
+    private File createStorageDirectory(File workingDirectory) throws SimulationException {
 
         File dir;
 
@@ -165,9 +165,9 @@ public final class SimulationCompiler
      * Gets the path of the OMC compiler.
      *
      * @return
-     * @throws SimulationServiceException
+     * @throws SimulationException
      */
-    private String getOpenModelicaCompilerPath() throws SimulationServiceException {
+    private String getOpenModelicaCompilerPath() throws SimulationException {
 
         String pathOpenModelica, pathCompiler;
         File dirOpenModelica;
@@ -175,7 +175,7 @@ public final class SimulationCompiler
         pathOpenModelica = System.getenv(openModelicaHomeDir);
 
         if (pathOpenModelica == null) {
-            throw new SimulationServiceException("'" + openModelicaHomeDir + "' environment variable is not set! Please install OpenModelica or set the variable correctly.");
+            throw new SimulationException("'" + openModelicaHomeDir + "' environment variable is not set! Please install OpenModelica or set the variable correctly.");
         }
 
         dirOpenModelica = new File(pathOpenModelica);
@@ -194,7 +194,7 @@ public final class SimulationCompiler
             return pathCompiler;
 
         } else {
-            throw new SimulationServiceException("'" + openModelicaHomeDir + "' environment variable is not set correctly! Please set the variable correctly or reinstall OpenModelica.");
+            throw new SimulationException("'" + openModelicaHomeDir + "' environment variable is not set correctly! Please set the variable correctly or reinstall OpenModelica.");
         }
     }
 
@@ -203,9 +203,9 @@ public final class SimulationCompiler
      *
      * @param input
      * @return
-     * @throws SimulationServiceException
+     * @throws SimulationException
      */
-    private String parseInput(InputStream input) throws SimulationServiceException {
+    private String parseInput(InputStream input) throws SimulationException {
 
         byte[] bytes;
         String output;
@@ -215,7 +215,7 @@ public final class SimulationCompiler
             input.read(bytes);
             output = new String(bytes);
         } catch (IOException ex) {
-            throw new SimulationServiceException("Exception reading the simulation build process output! [" + ex.getMessage() + "]");
+            throw new SimulationException("Exception reading the simulation build process output! [" + ex.getMessage() + "]");
         }
 
         return output;
@@ -228,7 +228,7 @@ public final class SimulationCompiler
      * @param output
      * @return
      */
-    private String parseSimulationExecutablePath(final String output) throws SimulationServiceException {
+    private String parseSimulationExecutablePath(final String output) throws SimulationException {
 
         String path;
         
@@ -236,11 +236,11 @@ public final class SimulationCompiler
             path = output.substring(output.lastIndexOf("{"));
             path = Utility.parseSubstring(path, "\"", "\"");
         } catch (Exception ex) {
-            throw new SimulationServiceException("Path to simulation executable can not be parsed. Output: \n" + output);
+            throw new SimulationException("Path to simulation executable can not be parsed. Output: \n" + output);
         }
 
         if (path == null) {
-            throw new SimulationServiceException("Build failed. Output: \n" + output);
+            throw new SimulationException("Build failed. Output: \n" + output);
         }
 
         if (Utility.isOsWindows()) {

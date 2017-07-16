@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
-import edu.unibi.agbi.gnius.core.service.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
+import edu.unibi.agbi.gnius.core.service.exception.ParameterException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
@@ -90,12 +90,12 @@ public class DataService
      * Adds a colour.
      *
      * @param colour
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized void add(Colour colour) throws DataServiceException {
+    public synchronized void add(Colour colour) throws DataException {
         dataDao.setHasChanges(true);
         if (dataDao.getModel().getColours().contains(colour)) {
-            throw new DataServiceException("Conflict! Another colour has already been stored using the same ID!");
+            throw new DataException("Conflict! Another colour has already been stored using the same ID!");
         }
         dataDao.getModel().add(colour);
     }
@@ -106,13 +106,13 @@ public class DataService
      * @param dao
      * @param arc
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphArc add(DataDao dao, IGraphArc arc) throws DataServiceException {
+    public synchronized IGraphArc add(DataDao dao, IGraphArc arc) throws DataException {
         if (arc.getData() != null) {
             if (arc.getData().getType() != DataType.CLUSTERARC) {
                 if (dao.getModel().containsAndNotEqual(arc.getData())) {
-                    throw new DataServiceException("Conflict! Another arc has already been stored using the same ID!");
+                    throw new DataException("Conflict! Another arc has already been stored using the same ID!");
                 } else {
                     dao.getModel().add(arc.getData());
                 }
@@ -129,13 +129,13 @@ public class DataService
      * @param dao
      * @param node
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphNode add(DataDao dao, IGraphNode node) throws DataServiceException {
+    public synchronized IGraphNode add(DataDao dao, IGraphNode node) throws DataException {
         if (node.getData() != null) {
             if (node.getData().getType() != DataType.CLUSTER) {
                 if (dao.getModel().containsAndNotEqual(node.getData())) {
-                    throw new DataServiceException("Conflict! Another node has already been stored using the same ID!");
+                    throw new DataException("Conflict! Another node has already been stored using the same ID!");
                 } else {
                     dao.getModel().add(node.getData());
                 }
@@ -146,7 +146,7 @@ public class DataService
         return node;
     }
 
-    public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataServiceException {
+    public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataException {
 
         switch (element.getType()) {
 
@@ -186,9 +186,9 @@ public class DataService
      * @param source
      * @param target
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphArc connect(DataDao dao, IGraphNode source, IGraphNode target) throws DataServiceException {
+    public synchronized IGraphArc connect(DataDao dao, IGraphNode source, IGraphNode target) throws DataException {
         IGraphArc arc;
         validateConnection(source, target);
         arc = CreateConnection(source, target, null);
@@ -207,9 +207,9 @@ public class DataService
      * @param posX
      * @param posY
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public IGraphNode CreateClone(DataDao dao, IDataNode data, double posX, double posY) throws DataServiceException {
+    public IGraphNode CreateClone(DataDao dao, IDataNode data, double posX, double posY) throws DataException {
         IGraphNode clone;
         switch (data.getType()) {
             case PLACE:
@@ -219,7 +219,7 @@ public class DataService
                 clone = new GraphTransition(getGraphNodeId(dataDao), (DataTransition) data);
                 break;
             default:
-                throw new DataServiceException("Cannot clone the given type of element! [" + data.getType() + "]");
+                throw new DataException("Cannot clone the given type of element! [" + data.getType() + "]");
         }
         Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
         clone.translateXProperty().set(pos.getX() - clone.getCenterOffsetX());
@@ -237,9 +237,9 @@ public class DataService
      * @param posX
      * @param posY
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphNode CreateNode(DataDao dao, DataType type, double posX, double posY) throws DataServiceException {
+    public synchronized IGraphNode CreateNode(DataDao dao, DataType type, double posX, double posY) throws DataException {
         IGraphNode shape;
         switch (type) {
             case PLACE:
@@ -256,7 +256,7 @@ public class DataService
                 break;
 
             default:
-                throw new DataServiceException("Cannot create element of undefined type!");
+                throw new DataException("Cannot create element of undefined type!");
         }
         Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
         if (isGridEnabled()) {
@@ -348,15 +348,15 @@ public class DataService
      *
      * @param arc
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphArc remove(IGraphArc arc) throws DataServiceException {
+    public synchronized IGraphArc remove(IGraphArc arc) throws DataException {
         validateRemoval(arc);
         removeShape(arc);
         try {
             removeData(arc.getData());
         } catch (Exception ex) {
-            throw new DataServiceException(ex.getMessage());
+            throw new DataException(ex.getMessage());
         }
         dataDao.setHasChanges(true);
         return arc;
@@ -368,9 +368,9 @@ public class DataService
      *
      * @param node
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphNode remove(IGraphNode node) throws DataServiceException {
+    public synchronized IGraphNode remove(IGraphNode node) throws DataException {
         validateRemoval(node);
         try {
             IGraphArc arc;
@@ -383,7 +383,7 @@ public class DataService
             removeData(node.getData());
             dataDao.setHasChanges(true);
         } catch (Exception ex) {
-            throw new DataServiceException(ex.getMessage());
+            throw new DataException(ex.getMessage());
         }
         return node;
     }
@@ -401,7 +401,7 @@ public class DataService
                 } else {
                     remove((IGraphNode) element);
                 }
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 messengerService.printMessage("Cannot remove element(s)!");
                 messengerService.addException("Cannot remove element '" + element.getData().getId() + "'!", ex);
             }
@@ -417,9 +417,9 @@ public class DataService
      * @param nodes
      * @param cut
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized List<IGraphNode> paste(DataDao dao, List<IGraphNode> nodes, boolean cut) throws DataServiceException {
+    public synchronized List<IGraphNode> paste(DataDao dao, List<IGraphNode> nodes, boolean cut) throws DataException {
 
         List<IGraphNode> shapes = new ArrayList();
         IGraphNode shape;
@@ -467,9 +467,9 @@ public class DataService
      * its data element.
      *
      * @param element
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public void styleElement(IGraphElement element) throws DataServiceException {
+    public void styleElement(IGraphElement element) throws DataException {
         switch (element.getData().getType()) {
             case ARC:
                 styleArc((DataArc) element.getData());
@@ -488,7 +488,7 @@ public class DataService
                 styleTransition((DataTransition) element.getData());
                 break;
             default:
-                throw new DataServiceException("Cannot style element of undefined type!");
+                throw new DataException("Cannot style element of undefined type!");
         }
     }
 
@@ -510,14 +510,14 @@ public class DataService
      *
      * @param arc
      * @param type
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private void changeArcType(DataArc arc, DataArc.Type type) throws DataServiceException {
+    private void changeArcType(DataArc arc, DataArc.Type type) throws DataException {
         DataArc.Type typeOld = arc.getArcType();
         arc.setArcType(type);
         try {
             validateArc(arc);
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             arc.setArcType(typeOld);
             throw ex;
         }
@@ -531,9 +531,9 @@ public class DataService
      *
      * @param place
      * @param type
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private void changePlaceType(DataPlace place, DataPlace.Type type) throws DataServiceException {
+    private void changePlaceType(DataPlace place, DataPlace.Type type) throws DataException {
         DataPlace.Type typeOld = place.getPlaceType();
         place.setPlaceType(type);
         try {
@@ -543,7 +543,7 @@ public class DataService
             for (IArc arc : place.getArcsOut()) {
                 validateArc((IDataArc) arc);
             }
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             place.setPlaceType(typeOld);
             throw ex;
         }
@@ -557,9 +557,9 @@ public class DataService
      *
      * @param transition
      * @param type
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private void changeTransitionType(DataTransition transition, DataTransition.Type type) throws DataServiceException {
+    private void changeTransitionType(DataTransition transition, DataTransition.Type type) throws DataException {
         DataTransition.Type typeOld = transition.getTransitionType();
         transition.setTransitionType(type);
         try {
@@ -569,7 +569,7 @@ public class DataService
             for (IArc arc : transition.getArcsOut()) {
                 validateArc((IDataArc) arc);
             }
-        } catch (DataServiceException ex) {
+        } catch (DataException ex) {
             transition.setTransitionType(typeOld);
             throw ex;
         }
@@ -622,9 +622,9 @@ public class DataService
      *
      * @param arc
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private IGraphArc removeShape(IGraphArc arc) throws DataServiceException {
+    private IGraphArc removeShape(IGraphArc arc) throws DataException {
 
         dataDao.getGraph().remove(arc);
         if (arc.getData() != null) {
@@ -644,9 +644,9 @@ public class DataService
      *
      * @param node
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private IGraphNode removeShape(IGraphNode node) throws DataServiceException {
+    private IGraphNode removeShape(IGraphNode node) throws DataException {
         dataDao.getGraph().remove(node);
         if (node.getData() != null) {
             node.getData().getShapes().remove(node);
@@ -672,7 +672,7 @@ public class DataService
         }
     }
 
-    private void styleArc(DataArc arc) throws DataServiceException {
+    private void styleArc(DataArc arc) throws DataException {
         if (arc.getArcType() != null) {
             switch (arc.getArcType()) {
                 case INHIBITORY:
@@ -708,12 +708,12 @@ public class DataService
                     setElementStyle(arc, styleArcTest, styleArcTestHead);
                     break;
                 default:
-                    throw new DataServiceException("Cannot style shape for an undefined arc type!");
+                    throw new DataException("Cannot style shape for an undefined arc type!");
             }
         }
     }
 
-    private void stylePlace(DataPlace place) throws DataServiceException {
+    private void stylePlace(DataPlace place) throws DataException {
         switch (place.getPlaceType()) {
             case CONTINUOUS:
                 place.getShapes().forEach(s -> {
@@ -730,11 +730,11 @@ public class DataService
                 setElementStyle(place, stylePlace, stylePlace);
                 break;
             default:
-                throw new DataServiceException("Cannot style shape for an undefined place type!");
+                throw new DataException("Cannot style shape for an undefined place type!");
         }
     }
 
-    private void styleTransition(DataTransition transition) throws DataServiceException {
+    private void styleTransition(DataTransition transition) throws DataException {
         switch (transition.getTransitionType()) {
             case CONTINUOUS:
                 transition.getShapes().forEach(s -> {
@@ -758,7 +758,7 @@ public class DataService
                 setElementStyle(transition, styleTransitionStoch, styleTransitionStoch);
                 break;
             default:
-                throw new DataServiceException("Cannot style shape for an undefined transition type!");
+                throw new DataException("Cannot style shape for an undefined transition type!");
         }
     }
 
@@ -767,9 +767,9 @@ public class DataService
      *
      * @param arc
      * @param typeArc
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private void validateArc(IDataArc arc) throws DataServiceException {
+    private void validateArc(IDataArc arc) throws DataException {
 
         DataPlace place;
         DataTransition transition;
@@ -780,13 +780,13 @@ public class DataService
                 case NORMAL:
                     break;
                 case INHIBITORY:
-                    throw new DataServiceException("A transition cannot inhibit a place!");
+                    throw new DataException("A transition cannot inhibit a place!");
                 case TEST:
-                    throw new DataServiceException("A transition cannot test a place!");
+                    throw new DataException("A transition cannot test a place!");
                 case READ:
-                    throw new DataServiceException("A transition cannot read a place!");
+                    throw new DataException("A transition cannot read a place!");
                 default:
-                    throw new DataServiceException("Validation for arc type '" + arc.getArcType() + "' is undefined!");
+                    throw new DataException("Validation for arc type '" + arc.getArcType() + "' is undefined!");
             }
 
             transition = (DataTransition) arc.getSource();
@@ -799,9 +799,9 @@ public class DataService
                         case CONTINUOUS:
                             break;
                         case DISCRETE:
-                            throw new DataServiceException("A continuous transition cannot be connected to a discrete place!");
+                            throw new DataException("A continuous transition cannot be connected to a discrete place!");
                         default:
-                            throw new DataServiceException("Arc validation for place type '" + place.getPlaceType() + "' has not been defined!");
+                            throw new DataException("Arc validation for place type '" + place.getPlaceType() + "' has not been defined!");
                     }
                 }
                 break;
@@ -813,7 +813,7 @@ public class DataService
                     break;
 
                 default:
-                    throw new DataServiceException("Arc validation for transition type '" + transition.getTransitionType() + "' has not been defined!");
+                    throw new DataException("Arc validation for transition type '" + transition.getTransitionType() + "' has not been defined!");
             }
 
         } else {
@@ -828,19 +828,19 @@ public class DataService
                 case DISCRETE: {
                     switch (transition.getTransitionType()) { // target
                         case CONTINUOUS:
-                            throw new DataServiceException("A discrete place cannot be connected to a continuous transition!");
+                            throw new DataException("A discrete place cannot be connected to a continuous transition!");
                         case DISCRETE:
                             break;
                         case STOCHASTIC:
                             break;
                         default:
-                            throw new DataServiceException("Arc validation for transition type '" + transition.getTransitionType() + "' has not been defined!");
+                            throw new DataException("Arc validation for transition type '" + transition.getTransitionType() + "' has not been defined!");
                     }
                 }
                 break;
 
                 default:
-                    throw new DataServiceException("Arc validation for place type '" + place.getPlaceType() + "' has not been defined!");
+                    throw new DataException("Arc validation for place type '" + place.getPlaceType() + "' has not been defined!");
             }
         }
     }
@@ -850,9 +850,9 @@ public class DataService
      *
      * @param source
      * @param target
-     * @throws DataServiceException thrown in case the connection is not valid
+     * @throws DataException thrown in case the connection is not valid
      */
-    private void validateConnection(IGraphNode source, IGraphNode target) throws DataServiceException {
+    private void validateConnection(IGraphNode source, IGraphNode target) throws DataException {
 
         IDataNode dataSource = source.getData();
         IDataNode dataTarget = target.getData();
@@ -864,13 +864,13 @@ public class DataService
          * Ensuring the connection to be valid.
          */
         if (source.getClass().equals(target.getClass())) {
-            throw new DataServiceException("Nodes of the same type cannot be connected.");
+            throw new DataException("Nodes of the same type cannot be connected.");
         }
         if (source instanceof GraphCluster || target instanceof GraphCluster) {
-            throw new DataServiceException("Cannot create connection to a cluster from the outside.");
+            throw new DataException("Cannot create connection to a cluster from the outside.");
         }
         if (source.getChildren().contains(target) || target.getParents().contains(source)) {
-            throw new DataServiceException("The nodes are already connected.");
+            throw new DataException("The nodes are already connected.");
         }
         for (IGraphElement relatedSourceElement : dataSource.getShapes()) {
 
@@ -878,7 +878,7 @@ public class DataService
             for (IGravisNode shape : relatedSourceShape.getChildren()) {
                 relatedSourceShapeChild = (IGraphNode) shape;
                 if (dataTarget == relatedSourceShapeChild.getData()) {
-                    throw new DataServiceException("The nodes are already connected by a related element.");
+                    throw new DataException("The nodes are already connected by a related element.");
                 }
             }
         }
@@ -888,20 +888,20 @@ public class DataService
      * Validates the potential removal of a graph arc.
      *
      * @param arc
-     * @throws DataServiceException thrown in case the graph arc can not be
+     * @throws DataException thrown in case the graph arc can not be
      *                              deleted
      */
-    private void validateRemoval(IGraphArc arc) throws DataServiceException {
+    private void validateRemoval(IGraphArc arc) throws DataException {
         IDataArc data = arc.getData();
         if (data != null) {
             if (data.getType() == DataType.CLUSTER) {
-                throw new DataServiceException("Cannot delete an arc that connects to a cluster!");
+                throw new DataException("Cannot delete an arc that connects to a cluster!");
             }
             if (data.getShapes().size() <= 1) {
                 try {
                     parameterService.ValidateRemoval(data);
-                } catch (ParameterServiceException ex) {
-                    throw new DataServiceException(ex.getMessage());
+                } catch (ParameterException ex) {
+                    throw new DataException(ex.getMessage());
                 }
             }
         }
@@ -911,12 +911,12 @@ public class DataService
      * Validates the potential removal of a graph node.
      *
      * @param node
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private void validateRemoval(IGraphNode node) throws DataServiceException {
+    private void validateRemoval(IGraphNode node) throws DataException {
         IDataNode data = node.getData();
         if (data.getType() == DataType.CLUSTER) {
-            throw new DataServiceException("Cannot delete a cluster! Restore it first or delete nodes within.");
+            throw new DataException("Cannot delete a cluster! Restore it first or delete nodes within.");
         }
         for (IGravisConnection connection : node.getConnections()) {
             validateRemoval((IGraphArc) connection);
@@ -924,8 +924,8 @@ public class DataService
         if (data.getShapes().size() <= 1) {
             try {
                 parameterService.ValidateRemoval(data);
-            } catch (ParameterServiceException ex) {
-                throw new DataServiceException(ex.getMessage());
+            } catch (ParameterException ex) {
+                throw new DataException(ex.getMessage());
             }
         }
     }
@@ -1005,12 +1005,12 @@ public class DataService
         dataDao.setHasChanges(true);
     }
 
-    public synchronized void setTransitionFunction(DataTransition transition, String functionString) throws DataServiceException {
+    public synchronized void setTransitionFunction(DataTransition transition, String functionString) throws DataException {
         try {
             parameterService.setTransitionFunction(dataDao.getModel(), transition, functionString);
             dataDao.setHasChanges(true);
         } catch (Exception ex) {
-            throw new DataServiceException(ex.getMessage());
+            throw new DataException(ex.getMessage());
         }
     }
 

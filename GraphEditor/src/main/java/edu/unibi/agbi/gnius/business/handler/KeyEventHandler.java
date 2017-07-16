@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.business.handler;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.gnius.core.service.SelectionService;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
@@ -77,7 +77,7 @@ public class KeyEventHandler
                     } else {
                         selectionService.selectAll(dataService.paste(dataService.getDao(), nodes, isCutting));
                     }
-                } catch (DataServiceException ex) {
+                } catch (DataException ex) {
                     messengerService.addException(ex);
                 }
             }

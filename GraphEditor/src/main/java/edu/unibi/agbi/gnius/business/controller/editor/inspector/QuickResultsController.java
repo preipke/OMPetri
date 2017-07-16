@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
-import edu.unibi.agbi.gnius.core.model.entity.simulation.Simulation;
+import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
 import java.net.URL;
@@ -47,7 +47,7 @@ public class QuickResultsController implements Initializable
     private void setButtonMenuItems(IDataElement element) {
         
         String modelId;
-        List<Simulation> simulations;
+        List<SimulationResult> results;
         
         buttonMenuResults.getItems().clear();
         
@@ -56,15 +56,16 @@ public class QuickResultsController implements Initializable
         }
         
         modelId = dataService.getDao().getModelId();
-        simulations = new ArrayList();
+        results = new ArrayList();
         
         /**
          * Grab relevant simulations.
          */
-        for (Simulation simulation : resultsService.getSimulations()) {
-            if (simulation.getModelId().contentEquals(modelId)) { // check if model is the same
-                if (simulation.getElementFilterReferences().get(element) != null) { // check if element is available
-                    simulations.add(simulation);
+        for (SimulationResult result : resultsService.getSimulationResults()) {
+            if (result.getDao().getModelId()
+                    .contentEquals(modelId)) { // check if model is the same
+                if (result.getElementFilter(element) != null) { // check if element is available
+                    results.add(result);
                 }
             }
         }
@@ -73,7 +74,7 @@ public class QuickResultsController implements Initializable
          * Create buttons.
          */
         
-        simulations.forEach(simulation -> {
+        results.forEach(simulation -> {
                 
             CheckBox checkBox = new CheckBox();
             checkBox.setOnAction(cl -> {
@@ -93,11 +94,11 @@ public class QuickResultsController implements Initializable
         });
     }
     
-    private void addSimulationData(Simulation simulation, IDataElement element) {
+    private void addSimulationData(SimulationResult simulation, IDataElement element) {
         System.out.print("Adding data");
     }
     
-    private void removeSimulationData(Simulation simulation, IDataElement element) {
+    private void removeSimulationData(SimulationResult simulation, IDataElement element) {
         System.out.print("Removing data");
     }
     

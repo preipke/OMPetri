@@ -3,83 +3,107 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gnius.core.model.entity.simulation;
+package edu.unibi.agbi.gnius.core.model.entity.result;
 
+import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.util.List;
 import java.util.Objects;
 import javafx.scene.chart.XYChart;
 
 /**
- * Data structure for data added to the LineChart. Contains the data series
- * aswell as references to the related simulation, element and value.
+ * Data structure for storing a result set. Contains a data series aswell as
+ * references to the related simulation, element and value.
  *
  * @author PR
  */
-public class SimulationData
+public class ResultSet
 {
-    private final Simulation simulation;
+    private final SimulationResult simulation;
     private final IElement element;
     private final String variable;
+
+    private int dataProcessIndex;
     private XYChart.Series series;
-    
+
     private boolean isAutoAdding;
     private boolean isShown;
     private long timeLastStatusChange;
 
-    public SimulationData(Simulation simulation, IElement element, String value) {
+    public ResultSet(SimulationResult simulation, IElement element, String variable) throws ResultsException {
         this.simulation = simulation;
         this.element = element;
-        this.variable = value;
+        this.variable = variable;
+        if (simulation.getData(variable) == null) {
+            throw new ResultsException("Data for variable '" + variable + "' cannot be found in the associated simulation results!");
+        }
     }
 
-    public Simulation getSimulation() {
+    public SimulationResult getSimulation() {
         return simulation;
     }
-    
+
     public IElement getElement() {
         return element;
-    }
-    
-    public String getElementId() {
-        return element.getId();
-    }
-    
-    public String getElementName() {
-        return element.getName();
     }
 
     public String getVariable() {
         return variable;
     }
-    
-    public void setSeries(XYChart.Series series) {
-        this.series = series;
+
+    public List<Object> getData() {
+        return simulation.getData(variable);
+    }
+
+    /**
+     * Gets the index that indicates which data points have already been
+     * processed for producing the line chart series.
+     *
+     * @return
+     */
+    public int getDataProcessedIndex() {
+        return dataProcessIndex;
+    }
+
+    /**
+     * Sets the index to which data points have already been processed for
+     * producing the line chart series.
+     *
+     * @param dataProcessIndex
+     */
+    public void setDataProcessedIndex(int dataProcessIndex) {
+        this.dataProcessIndex = dataProcessIndex;
     }
 
     public XYChart.Series getSeries() {
         return series;
     }
-    
+
+    public void setSeries(XYChart.Series series) {
+        this.series = series;
+    }
+
     public void setAutoAdding(boolean value) {
         isAutoAdding = value;
     }
-    
+
     public boolean isAutoAdding() {
         return isAutoAdding;
     }
-    
+
     public void setShown(boolean value) {
         isShown = value;
         timeLastStatusChange = System.currentTimeMillis();
     }
-    
+
     public boolean isShown() {
         return isShown;
     }
 
     /**
      * Gets the time in milliseconds the for the latest shown status change.
-     * @return 
+     *
+     * @return
      */
     public long getTimeLastShownStatusChange() {
         return timeLastStatusChange;
@@ -90,14 +114,14 @@ public class SimulationData
         if (object == null) {
             return false;
         }
-        if (!(object instanceof SimulationData)) {
+        if (!(object instanceof ResultSet)) {
             return false;
         }
-        SimulationData data = (SimulationData) object;
+        ResultSet data = (ResultSet) object;
         if (!data.getSimulation().equals(simulation)) {
             return false;
         }
-        if (!data.getElementId().contentEquals(element.getId())) {
+        if (!data.getElement().getId().contentEquals(element.getId())) {
             return false;
         }
         return data.getVariable().contentEquals(variable);

@@ -9,9 +9,13 @@ package edu.unibi.agbi.gnius.core.service.exception;
  *
  * @author PR
  */
-public class ParameterServiceException extends Exception
+public class SimulationException extends Exception
 {
-    public ParameterServiceException(String msg) {
+    public SimulationException(String msg) {
         super(msg);
+    }
+    
+    public SimulationException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

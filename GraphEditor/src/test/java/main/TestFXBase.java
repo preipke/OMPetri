@@ -1,7 +1,7 @@
 package main;
 
 import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
@@ -118,7 +118,7 @@ public class TestFXBase extends ApplicationTest {
         return (T) lookup(fxId).queryAll().iterator().next();
     }
 
-    protected void ConnectNodes(List<IGraphNode> places, List<IGraphNode> transitions) throws DataServiceException {
+    protected void ConnectNodes(List<IGraphNode> places, List<IGraphNode> transitions) throws DataException {
 
         AtomicBoolean isFinished = new AtomicBoolean(false);
         Platform.runLater(() -> {
@@ -129,7 +129,7 @@ public class TestFXBase extends ApplicationTest {
                         CreateArc(transition, place);
                     }
                 }
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -148,7 +148,7 @@ public class TestFXBase extends ApplicationTest {
                 for (int i = 0; i < count; i++) {
                     places.add(CreatePlace());
                 }
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 System.out.println(ex.getMessage());
             } finally {
                 isFinished.set(true);
@@ -169,7 +169,7 @@ public class TestFXBase extends ApplicationTest {
                 for (int i = 0; i < count; i++) {
                     transitions.add(CreateTransition());
                 }
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 System.out.println(ex.getMessage());
             } finally {
                 isFinished.set(true);
@@ -180,7 +180,7 @@ public class TestFXBase extends ApplicationTest {
         return transitions;
     }
     
-    protected IGraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataServiceException {
+    protected IGraphCluster ClusterNodes(List<IGraphNode> places, List<IGraphNode> transitions, int nodesToCluster) throws DataException {
         
         List<IGraphElement> elements = new ArrayList();
         
@@ -202,7 +202,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 cluster.add(hierarchyService.cluster(dataService.getDao(), elements, dataService.getClusterId(dataService.getDao())));
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -236,7 +236,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 dataService.remove(arc);
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -251,7 +251,7 @@ public class TestFXBase extends ApplicationTest {
         Platform.runLater(() -> {
             try {
                 dataService.remove(node);
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
                 isFinished.set(true);
@@ -260,15 +260,15 @@ public class TestFXBase extends ApplicationTest {
         waitForFxThread(isFinished);
     }
 
-    private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataServiceException {
+    private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataException {
         return dataService.connect(dataService.getDao(), source, target);
     }
 
-    private IGraphNode CreatePlace() throws DataServiceException {
+    private IGraphNode CreatePlace() throws DataException {
         return dataService.CreateNode(dataService.getDao(), DataType.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
-    private IGraphNode CreateTransition() throws DataServiceException {
+    private IGraphNode CreateTransition() throws DataException {
         return dataService.CreateNode(dataService.getDao(), DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 

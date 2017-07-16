@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.service;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.HierarchyController;
 import edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
-import edu.unibi.agbi.gnius.core.service.exception.DataServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataClusterArc;
@@ -86,9 +86,9 @@ public class HierarchyService
      * @param selected
      * @param clusterId
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    public synchronized IGraphCluster cluster(DataDao dao, List<IGraphElement> selected, String clusterId) throws DataServiceException {
+    public synchronized IGraphCluster cluster(DataDao dao, List<IGraphElement> selected, String clusterId) throws DataException {
 
         if (selected.isEmpty()) {
             messengerService.addWarning("Nothing was selected for clustering!");
@@ -149,7 +149,7 @@ public class HierarchyService
         for (IGraphCluster cluster : clusters) {
             try {
                 remove(cluster);
-            } catch (DataServiceException ex) {
+            } catch (DataException ex) {
                 messengerService.addException("Cannot ungroup cluster!", ex);
             }
         }
@@ -162,9 +162,9 @@ public class HierarchyService
      * @param nodes
      * @param clusters
      * @return
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private IGraphCluster create(DataDao dao, Set<IGraphNode> nodes, Set<GraphCluster> clusters, String clusterId) throws DataServiceException {
+    private IGraphCluster create(DataDao dao, Set<IGraphNode> nodes, Set<GraphCluster> clusters, String clusterId) throws DataException {
 
         DataCluster dataCluster;
         GraphCluster cluster;
@@ -251,7 +251,7 @@ public class HierarchyService
      * @param cluster
      * @return
      */
-    private void remove(IGraphCluster cluster) throws DataServiceException {
+    private void remove(IGraphCluster cluster) throws DataException {
 
         Graph graphChild = cluster.getGraph();
         Graph graph = graphChild.getParentGraph();
@@ -368,16 +368,16 @@ public class HierarchyService
      * @param source      source of the connection
      * @param target      target of the connection
      * @param arcRelated  arc that will be stored in the cluster arc
-     * @throws DataServiceException
+     * @throws DataException
      */
-    private IGraphArc getClusterArc(Collection<IGraphArc> clusterArcs, IGraphNode source, IGraphNode target, IGraphArc arcRelated) throws DataServiceException {
+    private IGraphArc getClusterArc(Collection<IGraphArc> clusterArcs, IGraphNode source, IGraphNode target, IGraphArc arcRelated) throws DataException {
 
         IGraphArc shape, shapeNew = null;
         DataClusterArc data, dca;
         Optional<IGraphArc> existingArc;
 
         if (source.getType() != GravisType.CLUSTER && target.getType() != GravisType.CLUSTER) {
-            throw new DataServiceException("Trying to create cluster arc without source or target being a cluster!");
+            throw new DataException("Trying to create cluster arc without source or target being a cluster!");
         }
 
         String idShape = dataService.getConnectionId(source, target);

@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.gnius.core.service;
 
-import edu.unibi.agbi.gnius.core.service.exception.ParameterServiceException;
+import edu.unibi.agbi.gnius.core.service.exception.ParameterException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
@@ -42,9 +42,9 @@ public class ParameterService
      * Attempts to add a parameter.
      *
      * @param param
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void add(Parameter param) throws ParameterServiceException {
+    public void add(Parameter param) throws ParameterException {
         add(dataService.getModel(), param);
     }
 
@@ -53,31 +53,31 @@ public class ParameterService
      *
      * @param model
      * @param param
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void add(Model model, Parameter param) throws ParameterServiceException {
+    public void add(Model model, Parameter param) throws ParameterException {
         if (Parameter.Type.GLOBAL == param.getType()) {
             if (model.contains(param)) {
-                throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
+                throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
             }
             model.add(param);
         } else {
             if (param.getRelatedElement() == null) {
-                throw new ParameterServiceException("A reference element is required for storing non global parameters.");
+                throw new ParameterException("A reference element is required for storing non global parameters.");
             }
             if (Parameter.Type.LOCAL == param.getType()) {
                 if (param.getRelatedElement() instanceof DataTransition) {
                     DataTransition transition = (DataTransition) param.getRelatedElement();
                     if (transition.getParameter(param.getId()) != null) {
-                        throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
+                        throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
                     }
                     transition.addParameter(param);
                 } else {
-                    throw new ParameterServiceException("Trying to store LOCAL parameter for non-transition element.");
+                    throw new ParameterException("Trying to store LOCAL parameter for non-transition element.");
                 }
             } else {
                 if (model.contains(param)) {
-                    throw new ParameterServiceException("Conflict: Another parameter has already been stored using the same ID.");
+                    throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
                 }
                 model.add(param);
             }
@@ -91,7 +91,7 @@ public class ParameterService
      * @param model
      * @param transition
      * @param functionString
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
     public void setTransitionFunction(Model model, Transition transition, String functionString) throws Exception {
         clearTransitionFunctionParameterReferences(model, transition);
@@ -107,7 +107,7 @@ public class ParameterService
      *
      * @param transition
      */
-    private void setTransitionFunctionParameterReferences(Model model, Transition transition) throws ParameterServiceException {
+    private void setTransitionFunctionParameterReferences(Model model, Transition transition) throws ParameterException {
         for (String id : transition.getFunction().getParameterIds()) {
             Parameter param = transition.getParameter(id);
             if (param == null) {
@@ -117,7 +117,7 @@ public class ParameterService
                 param.getUsingElements()
                         .add(transition);
             } else {
-                throw new ParameterServiceException("Unavailable parameter '" + id + "' refered to by '" + transition.toString() + "'.");
+                throw new ParameterException("Unavailable parameter '" + id + "' refered to by '" + transition.toString() + "'.");
             }
         }
     }
@@ -128,7 +128,7 @@ public class ParameterService
      *
      * @param transition
      */
-    private void clearTransitionFunctionParameterReferences(Model model, Transition transition) throws ParameterServiceException {
+    private void clearTransitionFunctionParameterReferences(Model model, Transition transition) throws ParameterException {
         for (String id : transition.getFunction().getParameterIds()) {
             Parameter param = transition.getParameter(id);
             if (param == null) {
@@ -138,7 +138,7 @@ public class ParameterService
                 param.getUsingElements()
                         .remove(transition);
             } else {
-                throw new ParameterServiceException("Unavailable parameter '" + id + "' refered to by '" + transition.toString() + "'.");
+                throw new ParameterException("Unavailable parameter '" + id + "' refered to by '" + transition.toString() + "'.");
             }
         }
     }
@@ -282,9 +282,9 @@ public class ParameterService
      * @param model
      * @param candidate
      * @return
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    private Parameter getReferencingParameter(Model model, String candidate) throws ParameterServiceException {
+    private Parameter getReferencingParameter(Model model, String candidate) throws ParameterException {
 
         IElement element;
 
@@ -347,7 +347,7 @@ public class ParameterService
                                 break;
 
                             default:
-                                throw new ParameterServiceException("Cannot get parameter. Unexpected element type for arc source. '" + source.getElementType() + "' in candidate '" + candidate + "'.");
+                                throw new ParameterException("Cannot get parameter. Unexpected element type for arc source. '" + source.getElementType() + "' in candidate '" + candidate + "'.");
                         }
 
                         if (candidate.matches(regexParamPlaceFlowTotal)) {
@@ -370,9 +370,9 @@ public class ParameterService
      * @param id
      * @param value
      * @param element
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    private Parameter CreateReferencingParameter(Model model, String id, String value, IElement element) throws ParameterServiceException {
+    private Parameter CreateReferencingParameter(Model model, String id, String value, IElement element) throws ParameterException {
         Parameter param = new Parameter(id, value, "", Parameter.Type.REFERENCE, element);
         add(model, param);
         return param;
@@ -382,16 +382,16 @@ public class ParameterService
      * Attempts to remove a parameter.
      *
      * @param param
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void remove(Parameter param) throws ParameterServiceException {
+    public void remove(Parameter param) throws ParameterException {
         ValidateRemoval(param);
         if (param.getType() == Parameter.Type.LOCAL) {
             if (param.getRelatedElement() != null
                     && param.getRelatedElement() instanceof DataTransition) {
                 ((DataTransition) param.getRelatedElement()).getParameters().remove(param);
             } else {
-                throw new ParameterServiceException("Inconsistency found. LOCAL parameter related to non-transition element.");
+                throw new ParameterException("Inconsistency found. LOCAL parameter related to non-transition element.");
             }
         } else {
             dataService.getModel().remove(param);
@@ -405,9 +405,9 @@ public class ParameterService
      *
      * @param function
      * @param element
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void ValidateFunction(DataTransition element, String function) throws ParameterServiceException {
+    public void ValidateFunction(DataTransition element, String function) throws ParameterException {
         ValidateFunction(dataService.getModel(), element, function);
     }
 
@@ -419,9 +419,9 @@ public class ParameterService
      * @param model
      * @param function
      * @param transition
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void ValidateFunction(Model model, Transition transition, String function) throws ParameterServiceException {
+    public void ValidateFunction(Model model, Transition transition, String function) throws ParameterException {
 
         Parameter param;
         String[] candidates;
@@ -441,7 +441,7 @@ public class ParameterService
                         param = getReferencingParameter(model, candidate);
                     }
                     if (param == null) {
-                        throw new ParameterServiceException("Parameter '" + candidate + "' does not exist");
+                        throw new ParameterException("Parameter '" + candidate + "' does not exist");
                     }
                 }
             }
@@ -453,11 +453,11 @@ public class ParameterService
      * is not referenced by any other elements.
      *
      * @param param
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void ValidateRemoval(Parameter param) throws ParameterServiceException {
+    public void ValidateRemoval(Parameter param) throws ParameterException {
         if (!param.getUsingElements().isEmpty()) {
-            throw new ParameterServiceException("Cannot delete parameter! It is referenced by another element.");
+            throw new ParameterException("Cannot delete parameter! It is referenced by another element.");
         }
     }
 
@@ -466,9 +466,9 @@ public class ParameterService
      * is not related to any parameters that are referenced by other elements.
      *
      * @param element
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    public void ValidateRemoval(IDataElement element) throws ParameterServiceException {
+    public void ValidateRemoval(IDataElement element) throws ParameterException {
         for (Parameter param : element.getRelatedParameters()) {
             ValidateRemoval(param, element);
         }
@@ -481,19 +481,19 @@ public class ParameterService
      *
      * @param param
      * @param element
-     * @throws ParameterServiceException
+     * @throws ParameterException
      */
-    private void ValidateRemoval(Parameter param, IDataElement element) throws ParameterServiceException {
+    private void ValidateRemoval(Parameter param, IDataElement element) throws ParameterException {
         if (param.getUsingElements().contains(element)) {
             param.getUsingElements().remove(element);
             if (!param.getUsingElements().isEmpty()) {
                 param.getUsingElements().add(element);
-                throw new ParameterServiceException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
+                throw new ParameterException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
             }
             param.getUsingElements().add(element);
         } else {
             if (!param.getUsingElements().isEmpty()) {
-                throw new ParameterServiceException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
+                throw new ParameterException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
             }
         }
     }

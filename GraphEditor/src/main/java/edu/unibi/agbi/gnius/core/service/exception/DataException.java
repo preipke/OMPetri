@@ -9,13 +9,13 @@ package edu.unibi.agbi.gnius.core.service.exception;
  *
  * @author PR
  */
-public class SimulationServiceException extends Exception
+public class DataException extends Exception 
 {
-    public SimulationServiceException(String msg) {
+    public DataException(String msg) {
         super(msg);
     }
     
-    public SimulationServiceException(String msg, Throwable cause) {
+    public DataException(String msg, Throwable cause) {
         super(msg, cause);
     }
 }

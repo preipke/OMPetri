@@ -9,13 +9,9 @@ package edu.unibi.agbi.gnius.core.service.exception;
  *
  * @author PR
  */
-public class DataServiceException extends Exception 
+public class ParameterException extends Exception
 {
-    public DataServiceException(String msg) {
+    public ParameterException(String msg) {
         super(msg);
-    }
-    
-    public DataServiceException(String msg, Throwable cause) {
-        super(msg, cause);
     }
 }
