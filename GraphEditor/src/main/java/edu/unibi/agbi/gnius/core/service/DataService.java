@@ -119,7 +119,7 @@ public class DataService
             }
         }
         dao.getGraph().add(arc);
-        styleElement(arc);
+        StyleElement(arc);
         return arc;
     }
 
@@ -142,7 +142,7 @@ public class DataService
             }
         }
         dao.getGraph().add(node);
-        styleElement(node);
+        StyleElement(node);
         return node;
     }
 
@@ -179,8 +179,8 @@ public class DataService
     }
 
     /**
-     * Connects the given graph nodes.Validates the connection, then creates
- and adds a new graph arc to the scene.
+     * Connects the given graph nodes.Validates the connection, then creates and
+     * adds a new graph arc to the scene.
      *
      * @param dao
      * @param source
@@ -189,9 +189,8 @@ public class DataService
      * @throws DataException
      */
     public synchronized IGraphArc connect(DataDao dao, IGraphNode source, IGraphNode target) throws DataException {
-        IGraphArc arc;
+        IGraphArc arc = CreateConnection(source, target, null);
         validateConnection(source, target);
-        arc = CreateConnection(source, target, null);
         validateArc(arc.getData());
         add(dao, arc);
         dao.setHasChanges(true);
@@ -210,6 +209,15 @@ public class DataService
      * @throws DataException
      */
     public IGraphNode CreateClone(DataDao dao, IDataNode data, double posX, double posY) throws DataException {
+        
+        /**
+         * Adjust data's enabled state.
+         */
+        if (data.isDisabled()) {
+            data.setDisabled(false);
+            data.getShapes().forEach(shape -> shape.setElementDisabled(true));
+        }
+        
         IGraphNode clone;
         switch (data.getType()) {
             case PLACE:
@@ -224,6 +232,7 @@ public class DataService
         Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
         clone.translateXProperty().set(pos.getX() - clone.getCenterOffsetX());
         clone.translateYProperty().set(pos.getY() - clone.getCenterOffsetY());
+        clone.getLabel().setText(data.getLabelText());
         clone = add(dao, clone);
         dataDao.setHasChanges(true);
         return clone;
@@ -469,7 +478,7 @@ public class DataService
      * @param element
      * @throws DataException
      */
-    public void styleElement(IGraphElement element) throws DataException {
+    public void StyleElement(IGraphElement element) throws DataException {
         switch (element.getData().getType()) {
             case ARC:
                 styleArc((DataArc) element.getData());
@@ -494,9 +503,10 @@ public class DataService
 
     /**
      * Updates cluster shapes visual disabled states.
+     * @param graph
      */
-    public void UpdateClusterShapes() {
-        for (IGravisCluster cluster : getGraph().getClusters()) {
+    public void UpdateClusterShapes(Graph graph) {
+        for (IGravisCluster cluster : graph.getClusters()) {
             boolean isDisabled = ((GraphCluster) cluster).getData().isDisabled();
             for (GravisShapeHandle handle : cluster.getElementHandles()) {
                 handle.setDisabled(isDisabled);
@@ -888,8 +898,7 @@ public class DataService
      * Validates the potential removal of a graph arc.
      *
      * @param arc
-     * @throws DataException thrown in case the graph arc can not be
-     *                              deleted
+     * @throws DataException thrown in case the graph arc can not be deleted
      */
     private void validateRemoval(IGraphArc arc) throws DataException {
         IDataArc data = arc.getData();

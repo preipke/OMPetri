@@ -6,9 +6,7 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<HBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" 
-      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.inspector.ConnectionsController">
+<HBox spacing="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.inspector.ConnectionsController">
     <children>
         <VBox spacing="5.0">
             <children>
@@ -18,19 +16,19 @@
                         <ListView fx:id="listConnectionsIncoming" prefHeight="95.0" HBox.hgrow="ALWAYS" />
                         <VBox alignment="TOP_CENTER" spacing="5.0">
                             <children>
-                                <Button fx:id="buttonArcFromDisable" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable">
+                                <Button fx:id="buttonArcFromShow" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show">
                                     <tooltip>
-                                        <Tooltip text="Disable or enable the connection to the selected node" />
+                                        <Tooltip text="Shows the selected element in the graph" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcFromEdit" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit">
+                                <Button fx:id="buttonArcFromEdit" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit">
                                     <tooltip>
-                                        <Tooltip text="Edit details for the connection to the selected node" />
+                                        <Tooltip text="Shows the selected element in the element insepctor" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcFromShow" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show">
+                                <Button fx:id="buttonArcFromDisable" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable">
                                     <tooltip>
-                                        <Tooltip text="Show the connection to the selected node in graph" />
+                                        <Tooltip text="Disables or enables the selected element" />
                                     </tooltip>
                                 </Button>
                             </children>
@@ -45,9 +43,16 @@
                 <Label text="Graph Entities:" />
                 <HBox spacing="5.0" VBox.vgrow="ALWAYS">
                     <children>
-                        <ListView fx:id="listGraphEntities" prefHeight="95.0" HBox.hgrow="ALWAYS" />
+                        <ListView fx:id="listGraphEntities" prefHeight="85.0" HBox.hgrow="ALWAYS" />
                     </children>
                 </HBox>
+            <HBox alignment="CENTER" spacing="5.0">
+               <children>
+                  <Button fx:id="buttonElementDisable" disable="true" mnemonicParsing="false" text="Disable" />
+                  <Button fx:id="buttonAllDisable" mnemonicParsing="false" text="Disable All" />
+                  <Button fx:id="buttonAllEnable" mnemonicParsing="false" text="Enable All" />
+               </children>
+            </HBox>
             </children>
         </VBox>
         <Separator orientation="VERTICAL" />
@@ -59,19 +64,19 @@
                         <ListView fx:id="listConnectionsOutgoing" prefHeight="95.0" HBox.hgrow="ALWAYS" />
                         <VBox alignment="TOP_CENTER" spacing="5.0">
                             <children>
-                                <Button fx:id="buttonArcToDisable" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable">
+                                <Button fx:id="buttonArcToShow" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show">
                                     <tooltip>
-                                        <Tooltip text="Disable or enable the connection to the selected node" />
+                                        <Tooltip text="Shows the selected element in the graph" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcToEdit" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit">
+                                <Button fx:id="buttonArcToEdit" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Edit">
                                     <tooltip>
-                                        <Tooltip text="Edit details for the connection to the selected node" />
+                                        <Tooltip text="Shows the selected element in the element insepctor" />
                                     </tooltip>
                                 </Button>
-                                <Button fx:id="buttonArcToShow" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show">
+                                <Button fx:id="buttonArcToDisable" disable="true" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Disable">
                                     <tooltip>
-                                        <Tooltip text="Show the connection to the selected node in graph" />
+                                        <Tooltip text="Disables or enables the selected element" />
                                     </tooltip>
                                 </Button>
                             </children>

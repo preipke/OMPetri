@@ -16,4 +16,6 @@ import edu.unibi.agbi.gravisfx.entity.IGravisParent;
 public interface IGraphElement extends IGravisElement, IGravisParent
 {
     public IDataElement getData();
+    public boolean isElementDisabled();
+    public void setElementDisabled(boolean value);
 }

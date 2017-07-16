@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangle;
@@ -17,6 +18,7 @@ import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangle;
 public class GraphTransition extends GravisRectangle implements IGraphNode {
     
     private final DataTransition dataTransition;
+    private boolean isDisabled = false;
     
     public GraphTransition(String id, DataTransition dataTransition) {
         super(id, GravisType.NODE);
@@ -28,5 +30,22 @@ public class GraphTransition extends GravisRectangle implements IGraphNode {
     @Override
     public DataTransition getData() {
         return dataTransition;
+    }
+
+    @Override
+    public boolean isElementDisabled() {
+        return isDisabled;
+    }
+
+    @Override
+    public void setElementDisabled(boolean value) {
+        if (value != isDisabled) {
+            isDisabled = value;
+            getElementHandles().forEach(handle -> handle.setDisabled(value));
+            getConnections().forEach(conn -> {
+                IGraphArc arc = (IGraphArc) conn;
+                arc.getData().setDisabled(value);
+            });
+        }
     }
 }

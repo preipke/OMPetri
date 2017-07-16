@@ -209,7 +209,7 @@ public class GraphController implements Initializable
             stackPaneActive.getChildren().add(paneHierarchy);
             stackPaneActive.getChildren().add(panePanel);
             stackPaneActive.getChildren().add(paneZoom);
-            dataService.UpdateClusterShapes();
+            dataService.UpdateClusterShapes(dataService.getGraph());
         }
     }
     

@@ -22,13 +22,13 @@ public class DataArc extends Arc implements IDataArc
 {
     private final DataType dataType;
     private final Set<IGraphElement> shapes;
-    
+
     private String description;
-    
+
     public DataArc(String id, IDataNode source, Arc.Type arctype) {
         this(id, source, null, arctype);
     }
-    
+
     public DataArc(String id, IDataNode source, IDataNode target, Arc.Type arctype) {
         super(id, source, target, arctype);
         super.name = id;
@@ -50,12 +50,56 @@ public class DataArc extends Arc implements IDataArc
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
     @Override
     public void setDisabled(boolean value) {
         super.setDisabled(value);
+
+        IGraphArc arc;
         for (IGraphElement shape : shapes) {
-            ((IGraphArc) shape).getElementHandles().forEach(handle -> handle.setDisabled(value));
+
+            arc = (IGraphArc) shape;
+            arc.getElementHandles().forEach(handle -> handle.setDisabled(value));
+
+            if (value) { // experimentary - automatically adjusts related nodes styles based on active connections
+
+                boolean active;
+
+                if (!arc.getSource().getData().isDisabled()) { // if node data is not disabled, 
+
+                    active = arc.getSource().getConnections().stream() // for all related connections
+                            .anyMatch(conn -> !((IGraphArc) conn).getData().isDisabled()); // check if any is not disabled
+
+                    if (!active) { // if no active connection is to be found, indicate that node is disabled
+                        arc.getSource().setElementDisabled(value);
+//                        arc.getSource().getElementHandles().forEach(handle -> handle.setDisabled(value));
+                    }
+
+                }
+
+                if (!arc.getTarget().getData().isDisabled()) {
+
+                    active = arc.getTarget().getConnections().stream() // for all related connections
+                            .anyMatch(conn -> !((IGraphArc) conn).getData().isDisabled()); // check if any is not disabled
+
+                    if (!active) { // if no active connection is to be found, indicate that node is disabled
+                        arc.getTarget().setElementDisabled(value);
+//                        arc.getTarget().getElementHandles().forEach(handle -> handle.setDisabled(value));
+                    }
+
+                }
+
+            } else {
+
+                if (!arc.getSource().getData().isDisabled()) { // if node data is not disabled, indicate that node is enabled as connected arc is enabled
+                    arc.getSource().setElementDisabled(value);
+//                    arc.getSource().getElementHandles().forEach(handle -> handle.setDisabled(value));
+                }
+                if (!arc.getTarget().getData().isDisabled()) { // same here
+                    arc.getTarget().setElementDisabled(value);
+//                    arc.getTarget().getElementHandles().forEach(handle -> handle.setDisabled(value));
+                }
+            }
         }
     }
 
@@ -75,12 +119,12 @@ public class DataArc extends Arc implements IDataArc
 
     @Override
     public boolean isSticky() {
-        throw new UnsupportedOperationException("Not supported."); 
+        throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override
     public void setSticky(boolean value) {
-        throw new UnsupportedOperationException("Not supported."); 
+        throw new UnsupportedOperationException("Not supported.");
     }
 
     @Override

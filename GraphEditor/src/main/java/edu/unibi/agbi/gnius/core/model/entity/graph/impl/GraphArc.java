@@ -6,7 +6,6 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
@@ -34,6 +33,16 @@ public class GraphArc extends GravisFlexEdge implements IGraphArc
     @Override
     public IDataArc getData() {
         return dataArc;
+    }
+
+    @Override
+    public boolean isElementDisabled() {
+        return dataArc.isDisabled();
+    }
+
+    @Override
+    public void setElementDisabled(boolean value) {
+        dataArc.setDisabled(value);
     }
 
     @Override

@@ -429,7 +429,7 @@ public class XmlModelConverter
                         arc = new GraphArc(tmp.getAttribute(attrId), source, target, data);
 
                         dataService.add(dao, arc);
-                        dataService.styleElement(arc);
+                        dataService.StyleElement(arc);
                     }
                 }
             }
@@ -565,7 +565,7 @@ public class XmlModelConverter
                         }
                         
                         dataService.add(dao, shape);
-                        dataService.styleElement(shape);
+                        dataService.StyleElement(shape);
                     }
                 }
             }

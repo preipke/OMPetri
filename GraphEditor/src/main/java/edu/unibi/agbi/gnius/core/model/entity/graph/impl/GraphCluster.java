@@ -9,10 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangle;
-import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -51,9 +48,14 @@ public class GraphCluster extends GravisRectangle implements IGraphCluster {
     public Graph getGraph() {
         return dataCluster.getGraph();
     }
-    
-//    @Override
-//    public List<GravisShapeHandle> getChildElementHandles() {
-//        return new ArrayList();
-//    }
+
+    @Override
+    public boolean isElementDisabled() {
+        return dataCluster.isDisabled();
+    }
+
+    @Override
+    public void setElementDisabled(boolean value) {
+        dataCluster.setDisabled(value);
+    }
 }

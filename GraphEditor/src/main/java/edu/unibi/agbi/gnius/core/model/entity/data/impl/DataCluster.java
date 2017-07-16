@@ -47,7 +47,7 @@ public class DataCluster implements IDataNode
     public void UpdateShape() {
         boolean isDisabled = isDisabled();
         for (IGraphElement shape : shapes) {
-            ((IGraphNode) shape).getElementHandles().forEach(handle -> handle.setDisabled(isDisabled));
+            shape.getElementHandles().forEach(handle -> handle.setDisabled(isDisabled));
         }
     }
 
@@ -70,7 +70,7 @@ public class DataCluster implements IDataNode
     public boolean isDisabled() {
         boolean isDisabled = true;
         for (IGravisElement element : graph.getNodes()) {
-            isDisabled = ((IGraphElement) element).getData().isDisabled();
+            isDisabled = ((IGraphElement) element).isElementDisabled();
             if (!isDisabled) { // if at least one node is not disabled, show shape as enabled
                 break;
             }
@@ -81,10 +81,10 @@ public class DataCluster implements IDataNode
     @Override
     public void setDisabled(boolean value) {
         for (IGravisElement element : graph.getNodes()) {
-            ((IGraphElement) element).getData().setDisabled(value);
+            ((IGraphElement) element).setElementDisabled(value);
         }
         for (IGravisElement element : graph.getConnections()) {
-            ((IGraphElement) element).getData().setDisabled(value);
+            ((IGraphElement) element).setElementDisabled(value);
         }
         UpdateShape();
     }

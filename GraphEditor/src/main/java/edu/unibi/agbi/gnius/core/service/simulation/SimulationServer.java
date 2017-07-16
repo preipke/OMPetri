@@ -16,6 +16,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import javafx.application.Platform;
 
 /**
  *

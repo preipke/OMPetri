@@ -39,10 +39,11 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,7 +85,9 @@ public class ElementController implements Initializable
     @FXML private TextArea inputDescription;
     
     @FXML private Button buttonClone;
-    @FXML private Button buttonDisable;
+    @FXML private SplitMenuButton buttonDisable;
+    @FXML private MenuItem buttonDisableAll;
+    @FXML private MenuItem buttonEnableAll;
     @FXML private Button buttonDisableClustered;
 
     // Colour
@@ -103,6 +106,7 @@ public class ElementController implements Initializable
     @FXML private TextField inputPlaceTokenMin;
     @FXML private TextField inputPlaceTokenMax;
 
+    private IGraphElement element;
     private IDataElement data;
     private String inputLatestValid;
 
@@ -118,9 +122,12 @@ public class ElementController implements Initializable
             return;
         }
 
-        data = element.getData();
+        this.element = element;
+        this.data = element.getData();
+        System.out.println("Data: " + data.isDisabled());
+        System.out.println("Element: " + element.isElementDisabled());
 
-        LoadGuiElements(data);
+        LoadGuiElements(element);
         LoadElementInfo(data);
         LoadElementType(data);
         LoadElementProperties(data);
@@ -131,9 +138,9 @@ public class ElementController implements Initializable
      *
      * @param element
      */
-    private void LoadGuiElements(IDataElement element) {
+    private void LoadGuiElements(IGraphElement element) {
 
-        setDisableButton(data);
+        setDisableButton(element);
         setDisableClusteredButton(null);
         elementFrame.getChildren().clear();
         elementFrame.getChildren().add(identifierPane);
@@ -143,7 +150,7 @@ public class ElementController implements Initializable
         buttonDisableClustered.setDisable(true);
         buttonEditClustered.setDisable(true);
 
-        switch (element.getType()) {
+        switch (element.getData().getType()) {
             
             case ARC:
                 buttonClone.setDisable(true);
@@ -433,16 +440,21 @@ public class ElementController implements Initializable
         }
     }
     
-    private void setDisableButton(IDataElement element) {
-        if (element.getType() == DataType.CLUSTER
-                || element.getType() == DataType.CLUSTERARC) {
-            if (element.isDisabled()) {
+    private void setDisableButton(IGraphElement element) {
+        buttonDisable.getItems().clear();
+        if (data.getType() == DataType.CLUSTER
+                || data.getType() == DataType.CLUSTERARC) {
+            if (data.isDisabled()) {
                 buttonDisable.setText("Enable All");
             } else {
                 buttonDisable.setText("Disable All");
             }
         } else {
-            if (element.isDisabled()) {
+            if (data.getShapes().size() > 1) {
+                buttonDisable.getItems().add(buttonDisableAll);
+                buttonDisable.getItems().add(buttonEnableAll);
+            }
+            if (element.isElementDisabled()) {
                 buttonDisable.setText("Enable");
             } else {
                 buttonDisable.setText("Disable");
@@ -487,10 +499,24 @@ public class ElementController implements Initializable
             }
         });
         buttonDisable.setOnAction(eh -> {
-            data.setDisabled(!data.isDisabled());
-            setDisableButton(data);
+            if (data.getShapes().size() == 1) {
+                data.setDisabled(!data.isDisabled());
+            } else {
+                element.setElementDisabled(!element.isElementDisabled());
+            }
+            setDisableButton(element);
             LoadElementProperties(data);
         });
+        buttonDisableAll.setOnAction(eh -> data.setDisabled(true));
+        buttonEnableAll.setOnAction(eh -> data.setDisabled(false));
+        buttonEdit.setOnAction(eh -> graphController.ShowInspector(data));
+        buttonEditClustered.setOnAction(eh -> {
+            if (listClusteredElements.getSelectionModel().getSelectedItem() != null) {
+                IGraphElement elem = listClusteredElements.getSelectionModel().getSelectedItem();
+                graphController.ShowInspector(listClusteredElements.getSelectionModel().getSelectedItem().getData());
+            }
+        });
+        
         buttonDisableClustered.setOnAction(eh -> {
             if (listClusteredElements.getSelectionModel().getSelectedItem() != null) {
                 int index = listClusteredElements.getSelectionModel().getSelectedIndex();
@@ -499,17 +525,10 @@ public class ElementController implements Initializable
                 listClusteredElements.getItems().remove(elem);
                 listClusteredElements.getItems().add(index, elem);
             }
-            setDisableButton(data);
+            setDisableButton(element);
             setDisableClusteredButton(listClusteredElements.getSelectionModel().getSelectedItem());
             if (data.getType() == DataType.CLUSTER) { // should be mandatory
                 ((DataCluster) data).UpdateShape();
-            }
-        });
-        buttonEdit.setOnAction(eh -> graphController.ShowInspector(data));
-        buttonEditClustered.setOnAction(eh -> {
-            if (listClusteredElements.getSelectionModel().getSelectedItem() != null) {
-                IGraphElement elem = listClusteredElements.getSelectionModel().getSelectedItem();
-                graphController.ShowInspector(listClusteredElements.getSelectionModel().getSelectedItem().getData());
             }
         });
 

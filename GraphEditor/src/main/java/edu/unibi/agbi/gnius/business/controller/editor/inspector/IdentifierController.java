@@ -124,7 +124,7 @@ public class IdentifierController implements Initializable
 
         try {
             paneSample.getChildren().addAll(sample.getShapes());
-            dataService.styleElement(sample);
+            dataService.StyleElement(sample);
         } catch (DataException ex) {
             messengerService.addException("Cannot render sample shape.", ex);
         } finally {

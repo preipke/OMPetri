@@ -66,9 +66,7 @@ public class SimulationService
             threads.remove(t);
         });
 
-        Platform.runLater(() -> {
-            messengerService.printMessage("Starting simulation...");
-        });
+        Platform.runLater(() -> messengerService.printMessage("Starting simulation..."));
         SimulationThread thread = new SimulationThread();
         thread.start();
         threads.add(thread);
@@ -126,9 +124,7 @@ public class SimulationService
                 /**
                  * Start server.
                  */
-                Platform.runLater(() -> {
-                    messengerService.addMessage("Simulation: Creating socket...");
-                });
+                Platform.runLater(() -> messengerService.addMessage("Simulation: Creating socket..."));
                 simulationServer = new SimulationServer();
                 simulationServer.start();
                 synchronized (simulationServer) {
@@ -149,9 +145,7 @@ public class SimulationService
                 /**
                  * Start simulation.
                  */
-                Platform.runLater(() -> {
-                    messengerService.addMessage("Simulation: Executing...");
-                });
+                Platform.runLater(() -> messengerService.addMessage("Simulation: Executing..."));
                 simulationExecuter = new SimulationExecuter(simulationReferences, simulationCompiler, simulationServer);
                 simulationExecuter.setSimulationStopTime(simulationController.getSimulationStopTime());
                 simulationExecuter.setSimulationIntervals(simulationController.getSimulationIntervals());
@@ -216,13 +210,11 @@ public class SimulationService
                 try {
                     synchronized (this) {
                         if (simulationServer.isRunning()) {
-                            messengerService.addMessage("Simulation: Reading and storing results...");
+                            Platform.runLater(() -> messengerService.addMessage("Simulation: Reading and storing results..."));
                         }
                         while (simulationServer.isRunning()) {
                             double progress = simulationServer.getSimulationTime() / stopTime;
-                            Platform.runLater(() -> {
-                                simulationController.setSimulationProgress(progress);
-                            });
+                            Platform.runLater(() -> simulationController.setSimulationProgress(progress));
                             this.wait(125);
                         }
                     }
@@ -236,7 +228,7 @@ public class SimulationService
                     Platform.runLater(() -> { // SimulationResult output.
                         if (simulationExecuterOutputReader != null) {
                             try {
-                                messengerService.addMessage("Simulation: [START] Output");
+                                messengerService.addMessage("Simulation: Output [START]");
                                 String line;
                                 while ((line = simulationExecuterOutputReader.readLine()) != null) {
                                     if (line.length() > 0) {
@@ -246,7 +238,7 @@ public class SimulationService
                             } catch (IOException e) {
                                 e.printStackTrace();
                             } finally {
-                                messengerService.addMessage("Simulation: [END] Output");
+                                messengerService.addMessage("Simulation: Output [END]");
                                 try {
                                     simulationExecuterOutputReader.close();
                                 } catch (IOException ex) {

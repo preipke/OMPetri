@@ -391,7 +391,7 @@ public class SbmlModelConverter
 
         dao.getGraphRoot().add(node);
         try {
-            dataService.styleElement(node);
+            dataService.StyleElement(node);
         } catch (DataException ex) {
             throw new IOException(ex);
         }
@@ -559,7 +559,7 @@ public class SbmlModelConverter
         dao.getModel().add(data);
         dao.getGraphRoot().add(connection);
         try {
-            dataService.styleElement(connection);
+            dataService.StyleElement(connection);
         } catch (DataException ex) {
             throw new IOException(ex);
         }

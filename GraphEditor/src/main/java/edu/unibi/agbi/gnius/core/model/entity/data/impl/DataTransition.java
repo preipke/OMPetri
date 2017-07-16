@@ -51,7 +51,7 @@ public final class DataTransition extends Transition implements IDataNode
     public void setDisabled(boolean value) {
         super.setDisabled(value);
         for (IGraphElement shape : shapes) {
-            ((IGraphNode) shape).getElementHandles().forEach(handle -> handle.setDisabled(value));
+            shape.setElementDisabled(value);
         }
     }
 

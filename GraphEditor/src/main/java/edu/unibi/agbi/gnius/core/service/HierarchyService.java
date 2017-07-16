@@ -73,7 +73,7 @@ public class HierarchyService
      */
     public void show(Graph graph) {
         dataService.setGraph(graph);
-        dataService.UpdateClusterShapes();
+        dataService.UpdateClusterShapes(graph);
         hierarchyController.update();
         selectionService.unselectAll();
         zoomController.CenterNodes();
@@ -119,6 +119,7 @@ public class HierarchyService
 
         IGraphCluster cluster = create(dao, nodes, clusters, clusterId);
         dao.setHasChanges(true);
+        dataService.UpdateClusterShapes(dao.getGraph());
 
         return cluster;
     }
@@ -198,7 +199,7 @@ public class HierarchyService
          * Add and style the cluster node.
          */
         graph.add(cluster);
-        dataService.styleElement(cluster);
+        dataService.StyleElement(cluster);
 
         Point2D pos = calculator.getCenterN(nodes);
         if (dataService.isGridEnabled()) {
@@ -239,7 +240,7 @@ public class HierarchyService
 
         for (IGraphArc conn : clusterArcs) {
             graph.add(conn);
-            dataService.styleElement(conn);
+            dataService.StyleElement(conn);
         }
 
         return cluster;
@@ -349,7 +350,7 @@ public class HierarchyService
                     arc = getClusterArc(clusterArcs, source, target, storedArc);
                     if (arc != null) {
                         graph.add(arc);
-                        dataService.styleElement(arc);
+                        dataService.StyleElement(arc);
                     }
                 }
             }
@@ -357,7 +358,7 @@ public class HierarchyService
 
         for (IGraphArc a : arcs) {
             graph.add(a);
-//            dataService.styleElement(a);
+//            dataService.StyleElement(a);
         }
     }
 

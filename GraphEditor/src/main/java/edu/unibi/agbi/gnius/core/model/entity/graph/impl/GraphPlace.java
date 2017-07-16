@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircle;
@@ -17,6 +18,7 @@ import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircle;
 public class GraphPlace extends GravisCircle implements IGraphNode
 {
     private final DataPlace dataPlace;
+    private boolean isDisabled = false;
     
     public GraphPlace(String id, DataPlace dataPlace) {
         super(id, GravisType.NODE);
@@ -28,5 +30,22 @@ public class GraphPlace extends GravisCircle implements IGraphNode
     @Override
     public DataPlace getData() {
         return dataPlace;
+    }
+
+    @Override
+    public boolean isElementDisabled() {
+        return isDisabled;
+    }
+
+    @Override
+    public void setElementDisabled(boolean value) {
+        if (value != isDisabled) {
+            isDisabled = value;
+            getElementHandles().forEach(handle -> handle.setDisabled(value));
+            getConnections().forEach(conn -> {
+                IGraphArc arc = (IGraphArc) conn;
+                arc.getData().setDisabled(value);
+            });
+        }
     }
 }
