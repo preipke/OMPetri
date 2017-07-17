@@ -979,7 +979,7 @@ public class DataService
         return dataDao.getModel();
     }
 
-    public ObservableList getDaos() {
+    public ObservableList<DataDao> getDaos() {
         return dataDaos;
     }
 

@@ -26,21 +26,16 @@ import java.util.Objects;
 public class SimulationResult
 {
     private final DataDao dao;
-    private final LocalDateTime dateTime;
     private final String[] variables;
     private final References variableReferences;
-    private final List<Object>[] results;
     private final Map<String, List<Object>> resultsMap;
+    private LocalDateTime dateTime;
 
     public SimulationResult(DataDao dataDao, String[] variables, References variableReferences) throws ResultsException {
         this.dao = dataDao;
         this.dateTime = LocalDateTime.now();
         this.variables = variables;
         this.variableReferences = variableReferences;
-        this.results = new ArrayList[variables.length];
-        for (int i = 0; i < results.length; i++) {
-            this.results[i] = new ArrayList();
-        }
         this.resultsMap = new HashMap();
         for (String variable : variables) {
             if (this.resultsMap.containsKey(variable)) {
@@ -76,6 +71,10 @@ public class SimulationResult
      */
     public LocalDateTime getDateTime() {
         return dateTime;
+    }
+    
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 
     /**
@@ -118,7 +117,7 @@ public class SimulationResult
     }
 
     public List<Object> getTimeData() {
-        return resultsMap.get(variables[0]);
+        return resultsMap.get("time");
     }
 
     @Override

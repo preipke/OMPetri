@@ -195,7 +195,6 @@ public class FileMenuController implements Initializable
             try {
                 Open(file);
             } catch (Exception ex) {
-                ex.printStackTrace();
                 messengerService.printMessage("File import failed!");
                 messengerService.setStatusAndAddExceptionToLog("Importing data from '" + file.getName() + "' failed!", ex);
             }

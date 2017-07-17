@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -627,12 +626,14 @@ public class OpenModelicaExporter
                 if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
 
                     filter = "'" + arc.getSource().getId() + "'.tokenFlow.outflow[" + index + "]";
+                    references.addElementReference(arc, filter);
                     references.addElementReference(place, filter);
-                    references.addFilterReference(filter, arc);
+                    references.addFilterReference(filter, place);
 
                     filter = "der(" + filter + ")";
+                    references.addElementReference(arc, filter);
                     references.addElementReference(place, filter);
-                    references.addFilterReference(filter, arc);
+                    references.addFilterReference(filter, place);
                 }
                 index++;
             }
@@ -644,12 +645,14 @@ public class OpenModelicaExporter
                 if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
 
                     filter = "'" + arc.getTarget().getId() + "'.tokenFlow.inflow[" + index + "]";
+                    references.addElementReference(arc, filter);
                     references.addElementReference(place, filter);
-                    references.addFilterReference(filter, arc);
+                    references.addFilterReference(filter, place);
 
                     filter = "der(" + filter + ")";
+                    references.addElementReference(arc, filter);
                     references.addElementReference(place, filter);
-                    references.addFilterReference(filter, arc);
+                    references.addFilterReference(filter, place);
                 }
                 index++;
             }
@@ -670,10 +673,6 @@ public class OpenModelicaExporter
 
         String filter;
 
-        // uncomment if making public
-//        if (references.getElementToFilterReferences().containsKey(transition)) {
-//            references.getElementToFilterReferences().get(transition).clear();
-//        }
         if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
             filter = "'" + transition.getId() + "'.actualSpeed";
             references.addElementReference(transition, filter);

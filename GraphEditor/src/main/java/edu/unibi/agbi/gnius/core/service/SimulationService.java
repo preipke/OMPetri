@@ -7,7 +7,6 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.SimulationController;
 import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
-import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
 import edu.unibi.agbi.gnius.core.service.exception.SimulationException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
@@ -30,24 +29,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class SimulationService
 {
-    private final ResultsDao resultsDao;
-    private final List<SimulationThread> threads;
-
     @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private ResultsService resultsService;
     @Autowired private SimulationController simulationController;
     @Autowired private SimulationCompiler simulationCompiler;
-
-    @Autowired
-    public SimulationService(ResultsDao resultsDao) {
-        this.resultsDao = resultsDao;
-        this.threads = new ArrayList();
-    }
+    
+    private final List<SimulationThread> threads = new ArrayList();
 
     public SimulationResult InitResultsStorage(DataDao dataDao, String[] variables, References variableReferences) throws ResultsException {
         SimulationResult results = new SimulationResult(dataDao, variables, variableReferences);
-        resultsDao.add(results);
+        resultsService.add(results);
         return results;
     }
 

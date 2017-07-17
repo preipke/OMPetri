@@ -60,6 +60,10 @@ public class ResultsDao
         chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).get(data.getElement()).add(data.getVariable());
     }
     
+    public boolean contains(SimulationResult result) {
+        return results.contains(result);
+    }
+    
     public boolean contains(LineChart lineChart) {
         return chartSimulationDataTableViews.containsKey(lineChart);
     }

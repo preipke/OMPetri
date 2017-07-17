@@ -122,7 +122,6 @@ public class ResultsController implements Initializable
     @Autowired
     public ResultsController() {
         fileChooser = new FileChooser();
-        fileChooser.setTitle("Save selected data to XML file");
         fileChooser.getExtensionFilters().add(new ExtensionFilter("XML file(s) (*.xml)", "*.xml", "*.XML"));
     }
 
@@ -225,8 +224,8 @@ public class ResultsController implements Initializable
 
             resultsService.getSimulationResults().stream()
                     .filter(sim -> (sim.getDao().getModelId()
-                            .contentEquals(((SimulationResult) modelChoice.getValue())
-                                    .getDao().getModelId())))
+                    .contentEquals(((SimulationResult) modelChoice.getValue())
+                            .getDao().getModelId())))
                     .forEach(sim -> {
                         choices.add(sim);
                     });
@@ -279,8 +278,16 @@ public class ResultsController implements Initializable
                         choices.add(choice);
                     });
             choices.sort(Comparator.comparing(Choice::toString));
-            choices.add(0, new Choice("<ALL PLACES>", places));
-            choices.add(1, new Choice("<ALL TRANSITIONS>", transitions));
+            if (!places.isEmpty()) {
+                choices.add(0, new Choice("<ALL PLACES>", places));
+            }
+            if (!transitions.isEmpty()) {
+                if (places.isEmpty()) {
+                    choices.add(0, new Choice("<ALL TRANSITIONS>", transitions));
+                } else {
+                    choices.add(1, new Choice("<ALL TRANSITIONS>", transitions));
+                }
+            }
 
             elementChoicePrev = getElementChoice();
             if (elementChoicePrev != null) {
@@ -335,16 +342,17 @@ public class ResultsController implements Initializable
 
                 Map<String, List<String>> valuesMap = resultsService.getSharedValues(simulationChoice, values);
 
-                for (String key : valuesMap.keySet()) {
-                    name = "<ALL> " + key;
-                    choice = new Choice(name, new ArrayList());
-                    ((List) choice.getValue()).addAll(valuesMap.get(key));
-                    choices.add(choice);
+                if (valuesMap != null) {
+                    for (String key : valuesMap.keySet()) {
+                        name = "<ALL> " + key;
+                        choice = new Choice(name, new ArrayList());
+                        ((List) choice.getValue()).addAll(valuesMap.get(key));
+                        choices.add(choice);
+                    }
                 }
             }
 
-//            choices.sort(Comparator.comparing(Choice::toString));
-
+            choices.sort(Comparator.comparing(Choice::toString));
             valueChoicePrev = getValueChoice();
             if (valueChoicePrev != null) {
                 for (Object vc : choices) {
@@ -360,7 +368,7 @@ public class ResultsController implements Initializable
         if (found) {
             choicesValue.getSelectionModel().select(index);
         } else {
-            choicesValue.getSelectionModel().select(choicesValue.getItems().size() - 1);
+            choicesValue.getSelectionModel().select(0);
         }
         FilterChoices(choicesValue, inputValueFilter.getText());
     }
@@ -419,7 +427,7 @@ public class ResultsController implements Initializable
         boolean success = false;
 
         for (Object var : (List) valueChoice.getValue()) {
-            
+
             result = null;
 
             try {
@@ -520,18 +528,37 @@ public class ResultsController implements Initializable
 
     private void exportData() {
         try {
+            fileChooser.setTitle("Export results data to XML file");
             xmlResultsConverter.exportXml(
                     fileChooser.showSaveDialog(stage),
                     resultsService.getChartData(lineChart)
             );
-            setStatus("Data successfully exported!", Status.SUCCESS);
+            setStatus("Simulation data export successful!", Status.SUCCESS);
         } catch (Exception ex) {
-            setStatus("Export to XML file failed!", Status.FAILURE);
+            setStatus("Simulation data export failed!", Status.FAILURE);
         }
     }
 
     private void importData() {
-        System.out.println("TODO!");
+        try {
+            fileChooser.setTitle("Import results data from XML file");
+            List<SimulationResult> simulationResults
+                    = xmlResultsConverter.importXml(fileChooser.showOpenDialog(stage));
+            boolean skipped = false;
+            for (SimulationResult result : simulationResults) {
+                if (!resultsService.add(result)) {
+                    System.out.println("Skipped import!");
+                    skipped = true;
+                }
+            }
+            if (skipped) {
+                setStatus("Simulation data import successful but skipped already present results!", Status.WARNING);
+            } else {
+                setStatus("Simulation data import successful!", Status.SUCCESS);
+            }
+        } catch (Exception ex) {
+            setStatus("Simulation data import failed!", Status.FAILURE);
+        }
     }
 
     private Double getStartValue(List<Data> data) {
