@@ -10,6 +10,8 @@ import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import edu.unibi.agbi.gnius.core.service.ResultsService;
 import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
 import edu.unibi.agbi.gnius.core.io.XmlResultsConverter;
+import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.IElement;
@@ -47,6 +49,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,9 +72,27 @@ public class ResultsController implements Initializable
     private final String mainCss = "/styles/main.css";
 
     @Autowired private ApplicationContext applicationContext;
+    @Autowired private DataService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private ResultsService resultsService;
     @Autowired private XmlResultsConverter xmlResultsConverter;
+    
+    @FXML private Menu menuExportModel;
+    @FXML private MenuItem itemExportAll;
+    @FXML private MenuItem itemExportSelected;
+    @FXML private MenuItem itemImport;
+    
+    @FXML private MenuItem itemDropAll;
+    @FXML private MenuItem itemDisableAll;
+    @FXML private MenuItem itemEnableAll;
+    @FXML private MenuItem itemRefresh;
+    
+    @FXML private CustomMenuItem itemChartTitle;
+    @FXML private CustomMenuItem itemChartLabelX;
+    @FXML private CustomMenuItem itemChartLabelY;
+    @FXML private TextField inputChartTitle;
+    @FXML private TextField inputChartLabelX;
+    @FXML private TextField inputChartLabelY;
 
     @FXML private ChoiceBox choicesModel;
     @FXML private ChoiceBox choicesSimulation;
@@ -82,13 +106,6 @@ public class ResultsController implements Initializable
     @FXML private Button buttonClearFilter;
     @FXML private CheckBox checkboxAutoAddSelected;
     @FXML private Label statusMessageLabel;
-
-    @FXML private Button buttonExportData;
-    @FXML private Button buttonImportData;
-    @FXML private Button buttonEnableAll;
-    @FXML private Button buttonDisableAll;
-    @FXML private Button buttonDropAll;
-    @FXML private Button buttonRefresh;
 
     @FXML private TableView<ResultSet> tableView;
     @FXML private TableColumn<ResultSet, CheckBox> columnAutoAdd;
@@ -105,11 +122,6 @@ public class ResultsController implements Initializable
     @FXML private TableColumn<ResultSet, Button> columnDrop;
 
     @FXML private LineChart lineChart;
-    @FXML private TextField inputChartTitle;
-    @FXML private TextField inputChartLabelX;
-    @FXML private TextField inputChartLabelY;
-//    @FXML private TextField inputChartResolution;
-//    @FXML private CheckBox checkboxChartAnimated;
 
     @Value("${results.tableview.decimalplaces}") private Integer decimalPlaces;
     @Value("${results.linechart.default.title}") private String defaultTitle;
@@ -161,8 +173,46 @@ public class ResultsController implements Initializable
     public void setStage(Stage stage) {
         this.stage = stage;
     }
+    
+    private void RefreshExportMenu() {
+        
+        Menu menu;
+        MenuItem item;
+        
+        menuExportModel.getItems().clear();
+        menuExportModel.getItems().add(itemExportAll);
+        menuExportModel.getItems().add(new SeparatorMenuItem());
+        
+        for (DataDao dao : dataService.getDaos()) {
+            
+            List<SimulationResult> simulationResults = new ArrayList();
 
-    public synchronized void RefreshModelChoices() {
+            resultsService.getSimulationResults().forEach(result -> {
+                if (result.getDao().getModelId().contentEquals(dao.getModelId())) {
+                    simulationResults.add(result);
+                }
+            });
+            simulationResults.sort((r1, r2) -> r1.getDateTime().compareTo(r2.getDateTime()));
+            
+            item = new MenuItem("< ALL Results >");
+            item.setOnAction(e -> exportResults(simulationResults));
+            
+            menu = new Menu(dao.getModelName() + " - " + dao.getAuthor());
+            menu.getItems().add(item);
+            menu.getItems().add(new SeparatorMenuItem());
+            
+            for (SimulationResult simulationResult : simulationResults) {
+                
+                item = new MenuItem(simulationResult.toString());
+                item.setOnAction(e -> exportResult(simulationResult));
+                menu.getItems().add(item);
+            }
+            
+            menuExportModel.getItems().add(menu);
+        }
+    }
+
+    private synchronized void RefreshModelChoices() {
 
         Choice choiceModel = getModelChoice();
         String modelId;
@@ -211,7 +261,7 @@ public class ResultsController implements Initializable
         FilterChoices(choicesModel, inputModelFilter.getText());
     }
 
-    public synchronized void RefreshSimulationChoices() {
+    private synchronized void RefreshSimulationChoices() {
 
         ObservableList choices = FXCollections.observableArrayList();
         boolean found = false;
@@ -525,13 +575,32 @@ public class ResultsController implements Initializable
         inputElementFilter.clear();
         inputValueFilter.clear();
     }
+    
+    private void exportResult(SimulationResult result) {
+        List<SimulationResult> results = new ArrayList();
+        results.add(result);
+        exportResults(results);
+    }
 
-    private void exportData() {
+    private void exportResults(List<SimulationResult> results) {
         try {
-            fileChooser.setTitle("Export results data to XML file");
-            xmlResultsConverter.exportXml(
+            fileChooser.setTitle("Export model results to XML file");
+            xmlResultsConverter.ExportSimulationResults(
                     fileChooser.showSaveDialog(stage),
-                    resultsService.getChartData(lineChart)
+                    results
+            );
+            setStatus("Simulation data export successful!", Status.SUCCESS);
+        } catch (Exception ex) {
+            setStatus("Simulation data export failed!", Status.FAILURE);
+        }
+    }
+
+    private void exportData(List<ResultSet> results) {
+        try {
+            fileChooser.setTitle("Export selected data to XML file");
+            xmlResultsConverter.ExportResultSets(
+                    fileChooser.showSaveDialog(stage),
+                    results
             );
             setStatus("Simulation data export successful!", Status.SUCCESS);
         } catch (Exception ex) {
@@ -557,6 +626,7 @@ public class ResultsController implements Initializable
                 setStatus("Simulation data import successful!", Status.SUCCESS);
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             setStatus("Simulation data import failed!", Status.FAILURE);
         }
     }
@@ -659,6 +729,7 @@ public class ResultsController implements Initializable
         {
             @Override
             public void onChanged(ListChangeListener.Change change) {
+                RefreshExportMenu();
                 RefreshModelChoices();
                 change.next();
                 if (change.wasAdded()) {
@@ -706,15 +777,16 @@ public class ResultsController implements Initializable
         buttonAddSelected.setOnAction(e -> addSelectedChoiceToChart());
 
         /**
-         * IO buttons.
+         * Menu Items.
          */
-        buttonImportData.setOnAction(e -> importData());
-        buttonExportData.setOnAction(e -> exportData());
+        itemExportAll.setOnAction(e -> exportResults(resultsService.getSimulationResults()));
+        itemExportSelected.setOnAction(e -> exportData(resultsService.getChartData(getLineChart())));
+        itemImport.setOnAction(e -> importData());
 
-        buttonEnableAll.setOnAction(e -> EnableAllItems());
-        buttonDisableAll.setOnAction(e -> DisableAllItems());
-        buttonDropAll.setOnAction(e -> ClearAllItems());
-        buttonRefresh.setOnAction(e -> getTableView().refresh());
+        itemDropAll.setOnAction(e -> ClearAllItems());
+        itemDisableAll.setOnAction(e -> DisableAllItems());
+        itemEnableAll.setOnAction(e -> EnableAllItems());
+        itemRefresh.setOnAction(e -> getTableView().refresh());
 
         /**
          * LineChart.
@@ -723,6 +795,9 @@ public class ResultsController implements Initializable
         lineChart.titleProperty().bind(inputChartTitle.textProperty());
         lineChart.getXAxis().labelProperty().bind(inputChartLabelX.textProperty());
         lineChart.getYAxis().labelProperty().bind(inputChartLabelY.textProperty());
+        itemChartTitle.setHideOnClick(false);
+        itemChartLabelX.setHideOnClick(false);
+        itemChartLabelY.setHideOnClick(false);
         inputChartTitle.setText(defaultTitle);
         inputChartLabelX.setText(defaultXLabel);
         inputChartLabelY.setText(defaultYLabel);
@@ -825,6 +900,7 @@ public class ResultsController implements Initializable
             return cell;
         });
 
+        RefreshExportMenu();
         RefreshModelChoices();
     }
 

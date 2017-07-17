@@ -6,6 +6,8 @@
 package edu.unibi.agbi.gnius.core.io;
 
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
 import edu.unibi.agbi.gnius.core.service.DataService;
@@ -38,10 +40,10 @@ import org.w3c.dom.*;
 public class XmlResultsConverter
 {
     @Autowired private DataService dataService;
-    
+
     private final String formatDateTime = "yy-MM-dd HH:mm:ss";
     private final String dtdResultsData = "results.dtd";
-    
+
     private final String attrAuthor = "author";
     private final String attrDateTime = "dateTime";
     private final String attrId = "id";
@@ -49,7 +51,7 @@ public class XmlResultsConverter
     private final String attrType = "type";
     private final String attrSubtype = "subtype";
     private final String attrShow = "showing";
-    
+
     private final String tagData = "Data";
     private final String tagElement = "Element";
     private final String tagModel = "Model";
@@ -60,6 +62,8 @@ public class XmlResultsConverter
     private final String tagReferences = "References";
     private final String tagVariable = "Variable";
     
+    // <editor-fold defaultstate="collapsed" desc="File import and related methods">
+
     public List<SimulationResult> importXml(File file) throws Exception {
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -73,7 +77,7 @@ public class XmlResultsConverter
         References references;
         DataDao dao;
         String[] variables;
-        
+
         List<DataDao> daos = new ArrayList();
         List<SimulationResult> simulations = new ArrayList();
 
@@ -84,9 +88,9 @@ public class XmlResultsConverter
         for (int i = 0; i < nlm.getLength(); i++) {
             if (nlm.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 model = (Element) nlm.item(i);
-                
+
                 dao = getDao(daos, model);
-                
+
                 /**
                  * Simulations.
                  */
@@ -100,14 +104,14 @@ public class XmlResultsConverter
                          */
                         references = getReferences(dao, sim.getElementsByTagName(tagElement));
                         references.addFilterReference("time", null); // time must be present in variables
-                        
+
                         variables = new String[references.getFilterToElementReferences().keySet().size()];
                         variables = references.getFilterToElementReferences().keySet().toArray(variables);
-                        
+
                         simulation = new SimulationResult(dao, variables, references);
                         simulation.setDateTime(LocalDateTime.parse(sim.getAttribute(attrDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
                         simulations.add(simulation);
-                        
+
                         /**
                          * Results.
                          */
@@ -118,12 +122,12 @@ public class XmlResultsConverter
         }
         return simulations;
     }
-    
+
     private void addResults(SimulationResult simulation, final NodeList nld) {
 
         Element data;
         List<Object> values;
-        
+
         for (int k = 0; k < nld.getLength(); k++) {
             if (nld.item(k).getNodeType() == Node.ELEMENT_NODE) {
                 data = (Element) nld.item(k);
@@ -134,39 +138,39 @@ public class XmlResultsConverter
             }
         }
     }
-    
+
     private IElement getElement(DataDao dao, final Element elem) {
-        
+
         IElement element;
         Type type;
         String id, name, subtype;
-        
+
         id = elem.getAttribute(attrId);
         name = elem.getAttribute(attrName);
         type = Type.valueOf(elem.getAttribute(attrType));
         subtype = elem.getAttribute(attrSubtype);
-        
+
         element = dao.getModel().getElement(id);
         if (element == null) {
             switch (type) {
                 case PLACE:
-                    element = new Place(id, Place.Type.valueOf(subtype));
+                    element = new DataPlace(id, Place.Type.valueOf(subtype));
                     element.setName(name);
                     dao.getModel().add((INode) element);
                     break;
                 case TRANSITION:
-                    element = new Transition(id, Transition.Type.valueOf(subtype));
+                    element = new DataTransition(id, Transition.Type.valueOf(subtype));
                     element.setName(name);
                     dao.getModel().add((INode) element);
                     break;
             }
         }
-        
+
         return element;
     }
-    
+
     private References getReferences(DataDao dao, final NodeList nle) throws IOException {
-        
+
         NodeList nlr;
         Element elem, var;
         References references = new References();
@@ -189,26 +193,26 @@ public class XmlResultsConverter
                 }
             }
         }
-        
+
         return references;
     }
-    
+
     private DataDao getDao(List<DataDao> daos, final Element elem) {
-        
+
         String author, id, name;
         DataDao dao = null;
-        
+
         author = elem.getAttribute(attrAuthor);
         id = elem.getAttribute(attrId);
         name = elem.getAttribute(attrName);
-        
+
         for (DataDao d : dataService.getDaos()) {
             if (d.getModelId().contentEquals(id)) {
                 dao = d;
                 break;
             }
         }
-        
+
         if (dao == null) {
             for (DataDao d : daos) {
                 if (d.getModelId().contentEquals(id)) {
@@ -217,139 +221,120 @@ public class XmlResultsConverter
                 }
             }
         }
-        
+
         if (dao == null) {
             dao = new DataDao();
             dao.setAuthor(author);
             dao.setModelId(id);
             dao.setModelName(name);
         }
-        
+
         return dao;
     }
+    
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="File export and related methods">
 
-    public void exportXml(File file, List<ResultSet> resultSets) throws Exception {
+    public void ExportSimulationResults(File file, List<SimulationResult> simulationResults) throws Exception {
 
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); 
+        DocumentBuilder db = dbf.newDocumentBuilder(); 
         Document dom;
+        
         NamedNodeMap attributes;
-        Element models, model, simulations, simulation, elements, element, results;
-        String modelAuthor, modelName, modelId, simulationDateTime, elementId, elementName, elementType, elementSubtype, variableId;
-        boolean isShown;
+        Element models, simulation, elements, element, results;
 
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance(); // instance of a DocumentBuilderFactory
-        DocumentBuilder db = dbf.newDocumentBuilder(); // use factory to get an instance of document builder
-        dom = db.newDocument(); // create instance of DOM
+        dom = db.newDocument();
+        models = dom.createElement(tagModels);
         
-        models = dom.createElement(tagModels); // root element
-        
-        for (ResultSet resultSet : resultSets) {
-            
-            model = null;
-            simulations = null;
-            simulation = null;
-            elements = null; 
-            element = null;
-            results = null;
+        for (SimulationResult simulationResult : simulationResults) {
 
-            modelAuthor = resultSet.getSimulation().getDao().getAuthor();
-            modelId = resultSet.getSimulation().getDao().getModelId();
-            modelName = resultSet.getSimulation().getDao().getModelName();
-            simulationDateTime = resultSet.getSimulation().getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
-            elementId = resultSet.getElement().getId();
-            elementName = resultSet.getElement().getName();
-            elementType = resultSet.getElement().getElementType().toString();
-            switch (resultSet.getElement().getElementType()) {
-                case PLACE:
-                    elementSubtype = ((Place) resultSet.getElement()).getPlaceType().toString();
-                    break;
-                case TRANSITION:
-                    elementSubtype = ((Transition) resultSet.getElement()).getTransitionType().toString();
-                    break;
-                default:
-                    elementSubtype = "";
-            }
-            variableId = resultSet.getVariable();
-            isShown = resultSet.isShown();
+            simulation = getSimulationElement(simulationResult, dom, models);
+            elements = (Element) simulation.getElementsByTagName(tagReferences).item(0);
+            results = (Element) simulation.getElementsByTagName(tagResults).item(0);
             
-            /**
-             * Check if model exists.
-             */
-            for (int i = 0; i < models.getChildNodes().getLength(); i++) {
-                attributes = models.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(attrName).getNodeValue().matches(modelName)) {
-                    if (attributes.getNamedItem(attrAuthor).getNodeValue().matches(modelAuthor)) {
-                        model = (Element) models.getChildNodes().item(i);
-                        simulations = (Element) models.getElementsByTagName(tagSimulations).item(0);
+            for (IElement elem : simulationResult.getElements()) {
+
+                element = null;
+                
+                if (elem.getElementType() == Type.ARC) {
+                    continue; // skip arcs, data stored in places
+                }
+                
+                /**
+                 * Check if element exists.
+                 */
+                for (int i = 0; i < elements.getChildNodes().getLength(); i++) {
+                    attributes = elements.getChildNodes().item(i).getAttributes();
+                    if (attributes.getNamedItem(attrId).getNodeValue().matches(elem.getId())) {
+                        element = (Element) elements.getChildNodes().item(i);
                         break;
                     }
                 }
-            }
-            if (model == null) {
-                model = dom.createElement(tagModel);
-                model.setAttribute(attrAuthor, modelAuthor);
-                model.setAttribute(attrId, modelId);
-                model.setAttribute(attrName, modelName);
-                models.appendChild(model);
-            }
-            if (simulations == null) {
-                simulations = dom.createElement(tagSimulations);
-                model.appendChild(simulations);
-            }
+                if (element == null) {
+                    element = getElementElement(dom.createElement(tagElement), elem);
+                    elements.appendChild(element);
+                }
+                
+                for (String variable : simulationResult.getElementFilter(elem)) {
 
-            /**
-             * Check if simulation exists.
-             */
-            for (int i = 0; i < simulations.getChildNodes().getLength(); i++) {
-                attributes = simulations.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(attrDateTime).getNodeValue().matches(simulationDateTime)) {
-                    simulation = (Element) simulations.getChildNodes().item(i);
-                    elements = (Element) simulation.getElementsByTagName(tagReferences).item(0);
-                    results = (Element) simulation.getElementsByTagName(tagResults).item(0);
-                    break;
+                    element.appendChild(getVariableElement(dom, variable, false));
+                    results.appendChild(getDataElement(dom, variable, simulationResult.getData(variable)));
                 }
             }
-            if (simulation == null) {
-                simulation = dom.createElement(tagSimulation);
-                simulation.setAttribute(attrDateTime, simulationDateTime);
-                simulations.appendChild(simulation);
-            }
-            if (elements == null) {
-                elements = dom.createElement(tagReferences);
-                simulation.appendChild(elements);
-            }
-            if (results == null) {
-                results = dom.createElement(tagResults);
-                results.appendChild(getDataElement(dom, "time", resultSet.getSimulation().getTimeData())); // append time data
-                simulation.appendChild(results);
-            }
+        }
+        dom.appendChild(models);
+        
+        sendToFile(dom, file);
+    }
+
+    public void ExportResultSets(File file, List<ResultSet> resultSets) throws Exception {
+
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        DocumentBuilder db = dbf.newDocumentBuilder(); 
+        Document dom;
+        
+        NamedNodeMap attributes;
+        Element models, simulation, elements, element, results;
+
+        dom = db.newDocument();
+        models = dom.createElement(tagModels);
+
+        for (ResultSet resultSet : resultSets) {
+
+            simulation = getSimulationElement(resultSet.getSimulation(), dom, models);
+            elements = (Element) simulation.getElementsByTagName(tagReferences).item(0);
+            results = (Element) simulation.getElementsByTagName(tagResults).item(0);
+            element = null;
+
             /**
              * Check if element exists.
              */
             for (int i = 0; i < elements.getChildNodes().getLength(); i++) {
                 attributes = elements.getChildNodes().item(i).getAttributes();
-                if (attributes.getNamedItem(attrId).getNodeValue().matches(elementId)) {
+                if (attributes.getNamedItem(attrId).getNodeValue().matches(resultSet.getElement().getId())) {
                     element = (Element) elements.getChildNodes().item(i);
                     break;
                 }
             }
             if (element == null) {
-                element = dom.createElement(tagElement);
-                element.setAttribute(attrId, elementId);
-                element.setAttribute(attrName, elementName);
-                element.setAttribute(attrType, elementType);
-                element.setAttribute(attrSubtype, elementSubtype);
+                element = getElementElement(dom.createElement(tagElement), resultSet.getElement());
                 elements.appendChild(element);
             }
-            
+
             /**
              * Append data.
              */
-            element.appendChild(getVariableElement(dom, variableId, isShown));
-            results.appendChild(getDataElement(dom, variableId, resultSet.getData()));
+            element.appendChild(getVariableElement(dom, resultSet.getVariable(), resultSet.isShown()));
+            results.appendChild(getDataElement(dom, resultSet.getVariable(), resultSet.getData()));
         }
-
         dom.appendChild(models);
-
+        
+        sendToFile(dom, file);
+    }
+    
+    private void sendToFile(Document dom, File file) throws Exception {
         Transformer tr = TransformerFactory.newInstance().newTransformer();
         tr.setOutputProperty(OutputKeys.INDENT, "yes");
         tr.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -361,35 +346,124 @@ public class XmlResultsConverter
         tr.transform(new DOMSource(dom),
                 new StreamResult(new FileOutputStream(file)));
     }
-    
-    
+
+    private Element getSimulationElement(SimulationResult simulationResult, Document dom, final Element models) {
+
+        Element model, simulations, simulation, elements, results;
+        NamedNodeMap attributes;
+        String modelAuthor, modelName, modelId, simulationDateTime;
+
+        modelAuthor = simulationResult.getDao().getAuthor();
+        modelId = simulationResult.getDao().getModelId();
+        modelName = simulationResult.getDao().getModelName();
+        simulationDateTime = simulationResult.getDateTime().format(DateTimeFormatter.ofPattern(formatDateTime));
+
+        model = null;
+        simulations = null;
+        simulation = null;
+        elements = null;
+        results = null;
+
+        /**
+         * Check if model exists.
+         */
+        for (int i = 0; i < models.getChildNodes().getLength(); i++) {
+            attributes = models.getChildNodes().item(i).getAttributes();
+            if (attributes.getNamedItem(attrName).getNodeValue().matches(modelName)) {
+                if (attributes.getNamedItem(attrAuthor).getNodeValue().matches(modelAuthor)) {
+                    model = (Element) models.getChildNodes().item(i);
+                    simulations = (Element) models.getElementsByTagName(tagSimulations).item(0);
+                    break;
+                }
+            }
+        }
+        if (model == null) {
+            model = dom.createElement(tagModel);
+            model.setAttribute(attrAuthor, modelAuthor);
+            model.setAttribute(attrId, modelId);
+            model.setAttribute(attrName, modelName);
+            models.appendChild(model);
+        }
+        if (simulations == null) {
+            simulations = dom.createElement(tagSimulations);
+            model.appendChild(simulations);
+        }
+
+        /**
+         * Check if simulation exists.
+         */
+        for (int i = 0; i < simulations.getChildNodes().getLength(); i++) {
+            attributes = simulations.getChildNodes().item(i).getAttributes();
+            if (attributes.getNamedItem(attrDateTime).getNodeValue().matches(simulationDateTime)) {
+                simulation = (Element) simulations.getChildNodes().item(i);
+                break;
+            }
+        }
+        if (simulation == null) {
+            simulation = dom.createElement(tagSimulation);
+            simulation.setAttribute(attrDateTime, simulationDateTime);
+            simulations.appendChild(simulation);
+        }
+        if (elements == null) {
+            elements = dom.createElement(tagReferences);
+            simulation.appendChild(elements);
+        }
+        if (results == null) {
+            results = dom.createElement(tagResults);
+            results.appendChild(getDataElement(dom, "time", simulationResult.getTimeData())); // append time data
+            simulation.appendChild(results);
+        }
+
+        return simulation;
+    }
+
+    private Element getElementElement(final Element elem, IElement element) {
+
+        elem.setAttribute(attrId, element.getId());
+        elem.setAttribute(attrName, element.getName());
+        elem.setAttribute(attrType, element.getElementType().toString());
+
+        switch (element.getElementType()) {
+            case PLACE:
+                elem.setAttribute(attrSubtype, ((Place) element).getPlaceType().toString());
+                break;
+            case TRANSITION:
+                elem.setAttribute(attrSubtype, ((Transition) element).getTransitionType().toString());
+                break;
+        }
+
+        return elem;
+    }
+
     private Element getVariableElement(Document dom, String variableId, boolean show) {
-        
+
         final Element elem;
 
         elem = dom.createElement(tagVariable);
         elem.setAttribute(attrId, variableId);
         elem.setAttribute(attrShow, Boolean.toString(show));
-        
+
         return elem;
     }
-    
+
     private Element getDataElement(Document dom, String variableId, List<Object> data) {
-        
+
         final Element elem;
         String dataString;
-        
+
         elem = dom.createElement(tagData);
         elem.setAttribute(attrId, variableId);
-        
+
         dataString = "";
         for (Object obj : data) {
             dataString += obj.toString() + ",";
         }
         dataString = dataString.substring(0, dataString.length() - 1);
-        
+
         elem.setTextContent(dataString);
-        
+
         return elem;
     }
+    
+    // </editor-fold>
 }

@@ -217,8 +217,12 @@ public class ResultsService
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
                 node = (IDataNode) simulation.getFilterElement(value);
-                arc = (IDataArc) node.getArcsIn().get(index);
-                return "Token from " + arc.getSource().toString() + " [ACTUAL]";
+                if (node.getArcsIn().isEmpty()) {
+                    return "Token from <" + index + "> [ACTUAL]";
+                } else {
+                    arc = (IDataArc) node.getArcsIn().get(index);
+                    return "Token from " + arc.getSource().toString() + " [ACTUAL]";
+                }
             } else {
                 return null;
             }
@@ -227,8 +231,12 @@ public class ResultsService
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
                 node = (IDataNode) simulation.getFilterElement(value);
-                arc = (IDataArc) node.getArcsIn().get(index);
-                return "Token from " + arc.getSource().toString() + " [TOTAL]";
+                if (node.getArcsIn().isEmpty()) {
+                    return "Token from <" + index + "> [TOTAL]";
+                } else {
+                    arc = (IDataArc) node.getArcsIn().get(index);
+                    return "Token from " + arc.getSource().toString() + " [TOTAL]";
+                }
             } else {
                 return null;
             }
@@ -237,8 +245,12 @@ public class ResultsService
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
                 node = (IDataNode) simulation.getFilterElement(value);
-                arc = (IDataArc) node.getArcsOut().get(index);
-                return "Token to " + arc.getTarget().toString() + " [ACTUAL]";
+                if (node.getArcsOut().isEmpty()) {
+                    return "Token to <" + index + "> [ACTUAL]";
+                } else {
+                    arc = (IDataArc) node.getArcsOut().get(index);
+                    return "Token to " + arc.getTarget().toString() + " [ACTUAL]";
+                }
             } else {
                 return null;
             }
@@ -247,8 +259,12 @@ public class ResultsService
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
                 node = (IDataNode) simulation.getFilterElement(value);
-                arc = (IDataArc) node.getArcsOut().get(index);
-                return "Token to " + arc.getTarget().toString() + " [TOTAL]";
+                if (node.getArcsOut().isEmpty()) {
+                    return "Token to <" + index + "> [TOTAL]";
+                } else {
+                    arc = (IDataArc) node.getArcsOut().get(index);
+                    return "Token to " + arc.getTarget().toString() + " [TOTAL]";
+                }
             } else {
                 return null;
             }
