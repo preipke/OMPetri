@@ -12,7 +12,6 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.DataService;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -33,13 +32,12 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ConnectionsController implements Initializable
 {
-    @Autowired private DataService dataService;
     @Autowired private InspectorController inspectorController;
     @Autowired private GraphController graphController;
 
     @FXML private Label labelListConnectionsIn;
     @FXML private Label labelListConnectionsOut;
-    
+
     @FXML private ListView<IDataArc> listConnectionsIncoming;
     @FXML private ListView<IDataArc> listConnectionsOutgoing;
     @FXML private ListView<IGraphElement> listGraphEntities;
@@ -67,13 +65,13 @@ public class ConnectionsController implements Initializable
         setConnections(data);
         setGraphEntities(data);
         if (data instanceof IDataArc) {
-            labelListConnectionsIn.setText("Source Node");
-            labelListConnectionsOut.setText("Target Node");
+            labelListConnectionsIn.setText("Source Node:");
+            labelListConnectionsOut.setText("Target Node:");
             buttonArcFromDisable.setVisible(false);
             buttonArcToDisable.setVisible(false);
         } else {
-            labelListConnectionsIn.setText("Incoming Arcs");
-            labelListConnectionsOut.setText("Outgoing Arcs");
+            labelListConnectionsIn.setText("Incoming Arcs:");
+            labelListConnectionsOut.setText("Outgoing Arcs:");
             buttonArcFromDisable.setVisible(true);
             buttonArcToDisable.setVisible(true);
         }
@@ -122,7 +120,7 @@ public class ConnectionsController implements Initializable
                 listView.getSelectionModel().select(elem);
             }
         }
-        
+
     }
 
     private void ChangeSelectedGraphElementsStatus(ListView<IGraphElement> listView) {
@@ -155,20 +153,39 @@ public class ConnectionsController implements Initializable
     private void EditElement(ListView<IDataArc> listView) {
         IDataArc arc = listView.getSelectionModel().getSelectedItem();
         if (arc != null) {
-            inspectorController.setElement(arc.getShapes().iterator().next().getData());
+            if (data instanceof IDataNode) {
+                inspectorController.setElement(arc.getShapes().iterator().next().getData());
+            } else {
+                if (listView.equals(listConnectionsOutgoing)) {
+                    inspectorController.setElement(arc.getTarget().getShapes().iterator().next().getData());
+                } else {
+                    inspectorController.setElement(arc.getSource().getShapes().iterator().next().getData());
+                }
+            }
         }
     }
 
     private void ShowElement(ListView<IDataArc> listView) {
         IDataArc arc = listView.getSelectionModel().getSelectedItem();
+        IGraphElement element;
         if (arc != null) {
-            graphController.FocusGraphElement(arc.getShapes().iterator().next());
+            if (data instanceof IDataNode) {
+                element = arc.getShapes().iterator().next();
+            } else {
+                if (listView.equals(listConnectionsOutgoing)) {
+                    element = arc.getTarget().getShapes().iterator().next();
+                } else {
+                    element = arc.getSource().getShapes().iterator().next();
+                }
+            }
+            graphController.FocusGraphElement(element);
+            graphController.ShowInfo(element);
         }
     }
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         buttonElementDisable.setOnAction(eh -> ChangeSelectedGraphElementsStatus(listGraphEntities));
         buttonAllDisable.setOnAction(eh -> ChangeAllGraphElementsStatus(listGraphEntities, true));
         buttonAllEnable.setOnAction(eh -> ChangeAllGraphElementsStatus(listGraphEntities, false));
@@ -234,7 +251,7 @@ public class ConnectionsController implements Initializable
                     buttonElementDisable.setText("Disable");
                 }
                 buttonElementDisable.setDisable(false);
-                
+
                 IDataArc arcIn = listConnectionsIncoming.getSelectionModel().getSelectedItem();
                 IDataArc arcOut = listConnectionsOutgoing.getSelectionModel().getSelectedItem();
                 setConnections(data); // redraw connections based on selected element
@@ -372,6 +389,7 @@ public class ConnectionsController implements Initializable
                 setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2) {
                         graphController.FocusGraphElement(item);
+                        graphController.ShowInfo(item);
                     }
                 });
             } else {

@@ -25,6 +25,10 @@ public class DataArc extends Arc implements IDataArc
 
     private String description;
 
+    public DataArc(String id, Arc.Type arctype) {
+        this(id, null, null, arctype);
+    }
+
     public DataArc(String id, IDataNode source, Arc.Type arctype) {
         this(id, source, null, arctype);
     }

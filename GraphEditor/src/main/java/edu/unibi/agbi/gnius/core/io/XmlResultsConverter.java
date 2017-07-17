@@ -6,6 +6,7 @@
 package edu.unibi.agbi.gnius.core.io;
 
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
@@ -14,6 +15,7 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element.Type;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.References;
@@ -153,6 +155,11 @@ public class XmlResultsConverter
         element = dao.getModel().getElement(id);
         if (element == null) {
             switch (type) {
+                case ARC:
+                    element = new DataArc(id, Arc.Type.NORMAL);
+                    element.setName(name);
+//                    dao.getModel().add((INode) element);
+                    break;
                 case PLACE:
                     element = new DataPlace(id, Place.Type.valueOf(subtype));
                     element.setName(name);
@@ -188,6 +195,9 @@ public class XmlResultsConverter
                         var = (Element) nlr.item(l);
 
                         references.addElementReference(element, var.getAttribute(attrId));
+                        if (element.getElementType() == Type.ARC) {
+                            continue; // filter variable is meant to reference node only
+                        }
                         references.addFilterReference(var.getAttribute(attrId), element);
                     }
                 }
@@ -258,10 +268,6 @@ public class XmlResultsConverter
 
                 element = null;
                 
-                if (elem.getElementType() == Type.ARC) {
-                    continue; // skip arcs, data stored in places
-                }
-                
                 /**
                  * Check if element exists.
                  */
@@ -280,6 +286,9 @@ public class XmlResultsConverter
                 for (String variable : simulationResult.getElementFilter(elem)) {
 
                     element.appendChild(getVariableElement(dom, variable, false));
+                    if (elem.getElementType() == Type.ARC) {
+                        continue; // skip arcs, data is stored in places, only need reference
+                    }
                     results.appendChild(getDataElement(dom, variable, simulationResult.getData(variable)));
                 }
             }

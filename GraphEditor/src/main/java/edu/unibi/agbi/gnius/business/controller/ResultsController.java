@@ -15,6 +15,7 @@ import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.MessengerService;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -76,17 +77,17 @@ public class ResultsController implements Initializable
     @Autowired private MessengerService messengerService;
     @Autowired private ResultsService resultsService;
     @Autowired private XmlResultsConverter xmlResultsConverter;
-    
+
     @FXML private Menu menuExportModel;
     @FXML private MenuItem itemExportAll;
     @FXML private MenuItem itemExportSelected;
     @FXML private MenuItem itemImport;
-    
+
     @FXML private MenuItem itemDropAll;
     @FXML private MenuItem itemDisableAll;
     @FXML private MenuItem itemEnableAll;
     @FXML private MenuItem itemRefresh;
-    
+
     @FXML private CustomMenuItem itemChartTitle;
     @FXML private CustomMenuItem itemChartLabelX;
     @FXML private CustomMenuItem itemChartLabelY;
@@ -173,18 +174,18 @@ public class ResultsController implements Initializable
     public void setStage(Stage stage) {
         this.stage = stage;
     }
-    
+
     private void RefreshExportMenu() {
-        
+
         Menu menu;
         MenuItem item;
-        
+
         menuExportModel.getItems().clear();
         menuExportModel.getItems().add(itemExportAll);
         menuExportModel.getItems().add(new SeparatorMenuItem());
-        
+
         for (DataDao dao : dataService.getDaos()) {
-            
+
             List<SimulationResult> simulationResults = new ArrayList();
 
             resultsService.getSimulationResults().forEach(result -> {
@@ -193,21 +194,21 @@ public class ResultsController implements Initializable
                 }
             });
             simulationResults.sort((r1, r2) -> r1.getDateTime().compareTo(r2.getDateTime()));
-            
+
             item = new MenuItem("< ALL Results >");
             item.setOnAction(e -> exportResults(simulationResults));
-            
+
             menu = new Menu(dao.getModelName() + " - " + dao.getAuthor());
             menu.getItems().add(item);
             menu.getItems().add(new SeparatorMenuItem());
-            
+
             for (SimulationResult simulationResult : simulationResults) {
-                
+
                 item = new MenuItem(simulationResult.toString());
                 item.setOnAction(e -> exportResult(simulationResult));
                 menu.getItems().add(item);
             }
-            
+
             menuExportModel.getItems().add(menu);
         }
     }
@@ -566,7 +567,7 @@ public class ResultsController implements Initializable
                 statusMessageLabel.setTextFill(Color.RED);
                 break;
         }
-        statusMessageLabel.setText("[" + LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME) + "] " + msg);
+        statusMessageLabel.setText("[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] " + msg);
     }
 
     private void clearFilterInputs() {
@@ -575,7 +576,7 @@ public class ResultsController implements Initializable
         inputElementFilter.clear();
         inputValueFilter.clear();
     }
-    
+
     private void exportResult(SimulationResult result) {
         List<SimulationResult> results = new ArrayList();
         results.add(result);
@@ -585,10 +586,11 @@ public class ResultsController implements Initializable
     private void exportResults(List<SimulationResult> results) {
         try {
             fileChooser.setTitle("Export model results to XML file");
-            xmlResultsConverter.ExportSimulationResults(
-                    fileChooser.showSaveDialog(stage),
-                    results
-            );
+            File file = fileChooser.showSaveDialog(stage);
+            if (file == null) {
+                return;
+            }
+            xmlResultsConverter.ExportSimulationResults(file, results);
             setStatus("Simulation data export successful!", Status.SUCCESS);
         } catch (Exception ex) {
             setStatus("Simulation data export failed!", Status.FAILURE);
@@ -598,10 +600,11 @@ public class ResultsController implements Initializable
     private void exportData(List<ResultSet> results) {
         try {
             fileChooser.setTitle("Export selected data to XML file");
-            xmlResultsConverter.ExportResultSets(
-                    fileChooser.showSaveDialog(stage),
-                    results
-            );
+            File file = fileChooser.showSaveDialog(stage);
+            if (file == null) {
+                return;
+            }
+            xmlResultsConverter.ExportResultSets(file, results);
             setStatus("Simulation data export successful!", Status.SUCCESS);
         } catch (Exception ex) {
             setStatus("Simulation data export failed!", Status.FAILURE);
@@ -609,11 +612,18 @@ public class ResultsController implements Initializable
     }
 
     private void importData() {
+        
+        File file;
+        List<SimulationResult> simulationResults;
+        boolean skipped = false;
+        
         try {
             fileChooser.setTitle("Import results data from XML file");
-            List<SimulationResult> simulationResults
-                    = xmlResultsConverter.importXml(fileChooser.showOpenDialog(stage));
-            boolean skipped = false;
+            file = fileChooser.showOpenDialog(stage);
+            if (file == null) {
+                return;
+            }
+            simulationResults = xmlResultsConverter.importXml(file);
             for (SimulationResult result : simulationResults) {
                 if (!resultsService.add(result)) {
                     System.out.println("Skipped import!");
@@ -626,7 +636,6 @@ public class ResultsController implements Initializable
                 setStatus("Simulation data import successful!", Status.SUCCESS);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             setStatus("Simulation data import failed!", Status.FAILURE);
         }
     }

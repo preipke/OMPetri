@@ -160,7 +160,7 @@
                             <children>
                                 <LineChart fx:id="lineChart" animated="false" VBox.vgrow="ALWAYS">
                                     <xAxis>
-                                        <NumberAxis />
+                                        <NumberAxis side="BOTTOM" />
                                     </xAxis>
                                     <yAxis>
                                         <NumberAxis side="LEFT" />

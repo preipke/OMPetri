@@ -7,12 +7,14 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
 import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
 import edu.unibi.agbi.gnius.util.Utility;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,13 +40,13 @@ public class ResultsService
 
     @Autowired private MessengerService messengerService;
 
-    @Value("${regex.value.fire}") private String valueChoiceFire;
-    @Value("${regex.value.speed}") private String valueChoiceSpeed;
-    @Value("${regex.value.token}") private String valueChoiceToken;
-    @Value("${regex.value.tokenIn.actual}") private String valueChoiceTokenInActual;
-    @Value("${regex.value.tokenIn.total}") private String valueChoiceTokenInTotal;
-    @Value("${regex.value.tokenOut.actual}") private String valueChoiceTokenOutActual;
-    @Value("${regex.value.tokenOut.total}") private String valueChoiceTokenOutTotal;
+    @Value("${regex.value.fire}") private String valueFire;
+    @Value("${regex.value.speed}") private String valueSpeed;
+    @Value("${regex.value.token}") private String valueToken;
+    @Value("${regex.value.tokenIn.actual}") private String valueTokenInActual;
+    @Value("${regex.value.tokenIn.total}") private String valueTokenInTotal;
+    @Value("${regex.value.tokenOut.actual}") private String valueTokenOutActual;
+    @Value("${regex.value.tokenOut.total}") private String valueTokenOutTotal;
 
     @Autowired
     public ResultsService(ResultsDao resultsDao) {
@@ -149,6 +151,69 @@ public class ResultsService
     public synchronized List<ResultSet> getChartData(LineChart lineChart) {
         return resultsDao.getChartResultsList(lineChart);
     }
+    
+    /**
+     * 
+     * @param simulation
+     * @param element
+     * @param variable
+     * @return
+     * @throws ResultsException 
+     */
+    public ResultSet getResultSet(SimulationResult simulation, IElement element, String variable) throws ResultsException {
+        
+        ResultSet result;
+        result = new ResultSet(simulation, element, variable);
+        
+        if (resultsDao.contains(result)) {
+            result = resultsDao.get(result);
+        } else {
+            resultsDao.add(result);
+        }
+        updateSeries(result);
+        result.getSeries().setName(getValueName(variable, simulation) + " (" + simulation.toStringShort() + ")");
+        
+        return result;
+    }
+    
+    /**
+     * Get result sets directly related to a given simulation and element only.
+     * Should only be used for showing results in the inspector, as the isShown
+     * boolean will affect all viewers that have this data in their table.
+     * 
+     * @param simulation
+     * @param element
+     * @return 
+     * @throws ResultsException 
+     */
+    public List<ResultSet> getResultSets(SimulationResult simulation, IElement element) throws ResultsException {
+        
+        List<ResultSet> sets;
+        List<String> variables;
+        
+        if (simulation == null || element == null) {
+            return new ArrayList();
+        }
+        
+        sets = new ArrayList();
+        variables = simulation.getElementFilter(element);
+        
+        if (element.getElementType() == Element.Type.PLACE) {
+            for (String var : variables) {
+                if (var.matches(valueToken)) { // use only .t per default
+                    variables = new ArrayList();
+                    variables.add(var);
+                    break;
+                }
+            }
+        }
+        
+        for (String variable : variables) {
+            sets.add(getResultSet(simulation, element, variable));
+        }
+        
+        return sets;
+    }
 
     /**
      * Removes the given data from the given chart.
@@ -206,13 +271,13 @@ public class ResultsService
         IDataNode node;
         String indexStr;
         int index;
-        if (value.matches(valueChoiceFire)) {
+        if (value.matches(valueFire)) {
             return "Firing";
-        } else if (value.matches(valueChoiceSpeed)) {
+        } else if (value.matches(valueSpeed)) {
             return "Speed";
-        } else if (value.matches(valueChoiceToken)) {
+        } else if (value.matches(valueToken)) {
             return "Token";
-        } else if (value.matches(valueChoiceTokenInActual)) {
+        } else if (value.matches(valueTokenInActual)) {
             indexStr = Utility.parseSubstring(value, "[", "]");
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
@@ -226,7 +291,7 @@ public class ResultsService
             } else {
                 return null;
             }
-        } else if (value.matches(valueChoiceTokenInTotal)) {
+        } else if (value.matches(valueTokenInTotal)) {
             indexStr = Utility.parseSubstring(value, "[", "]");
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
@@ -240,7 +305,7 @@ public class ResultsService
             } else {
                 return null;
             }
-        } else if (value.matches(valueChoiceTokenOutActual)) {
+        } else if (value.matches(valueTokenOutActual)) {
             indexStr = Utility.parseSubstring(value, "[", "]");
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
@@ -254,7 +319,7 @@ public class ResultsService
             } else {
                 return null;
             }
-        } else if (value.matches(valueChoiceTokenOutTotal)) {
+        } else if (value.matches(valueTokenOutTotal)) {
             indexStr = Utility.parseSubstring(value, "[", "]");
             if (indexStr != null) {
                 index = Integer.parseInt(indexStr) - 1;
@@ -374,7 +439,7 @@ public class ResultsService
      * @param resultSet
      * @throws ResultsException
      */
-    private synchronized void updateSeries(ResultSet resultSet) throws ResultsException {
+    public synchronized void updateSeries(ResultSet resultSet) throws ResultsException {
 
 //        Map<String, List<Object>> resultsMap = data.getSimulation().getResultsData();
 //        String variable = data.getVariable();

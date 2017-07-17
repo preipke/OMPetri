@@ -25,14 +25,37 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ResultsDao
 {
+    // create storage for resultsets
     private final ObservableList<SimulationResult> results;
+    private final Map<String, Map<SimulationResult, Map<String, Map<String,ResultSet>>>> resultSetStorageMap;
     private final Map<LineChart, TableView<ResultSet>> chartSimulationDataTableViews;
     private final Map<LineChart, Map<String, Map<IElement, Set<String>>>> chartSimulationDataAutoAdd;
     
     public ResultsDao() {
         results = FXCollections.observableArrayList();
+        resultSetStorageMap = new HashMap();
         chartSimulationDataAutoAdd = new HashMap();
         chartSimulationDataTableViews = new HashMap();
+    }
+    
+    public void add(ResultSet resultSet) {
+        
+        String modelId = resultSet.getSimulation().getDao().getModelId();
+        if (!resultSetStorageMap.containsKey(modelId)) {
+            resultSetStorageMap.put(modelId, new HashMap());
+        }
+
+        SimulationResult simulationResult = resultSet.getSimulation();
+        if (!resultSetStorageMap.get(modelId).containsKey(simulationResult)) {
+            resultSetStorageMap.get(modelId).put(simulationResult, new HashMap());
+
+        }
+        String elementId = resultSet.getElement().getId();
+        if (!resultSetStorageMap.get(modelId).get(simulationResult).containsKey(elementId)) {
+            resultSetStorageMap.get(modelId).get(simulationResult).put(elementId, new HashMap());
+        }
+        
+        resultSetStorageMap.get(modelId).get(simulationResult).get(elementId).put(resultSet.getVariable(), resultSet);
     }
     
     public void add(SimulationResult simulation) {
@@ -60,19 +83,37 @@ public class ResultsDao
         chartSimulationDataAutoAdd.get(lineChart).get(data.getSimulation().getDao().getModelId()).get(data.getElement()).add(data.getVariable());
     }
     
-    public boolean contains(SimulationResult result) {
-        return results.contains(result);
+    public boolean contains(ResultSet resultSet) {
+        
+        String modelId = resultSet.getSimulation().getDao().getModelId();
+        if (resultSetStorageMap.containsKey(modelId)) {
+            
+            SimulationResult simulationResult = resultSet.getSimulation();
+            if (resultSetStorageMap.get(modelId).containsKey(simulationResult)) {
+                
+                String elementId = resultSet.getElement().getId();
+                if (resultSetStorageMap.get(modelId).get(simulationResult).containsKey(elementId)) {
+                    
+                    return resultSetStorageMap.get(modelId).get(simulationResult).get(elementId).containsKey(resultSet.getVariable());
+                }
+            }
+        }
+        return false;
+    }
+    
+    public boolean contains(SimulationResult simulationResult) {
+        return results.contains(simulationResult);
     }
     
     public boolean contains(LineChart lineChart) {
         return chartSimulationDataTableViews.containsKey(lineChart);
     }
     
-    public boolean contains(LineChart lineChart, ResultSet data) {
+    public boolean contains(LineChart lineChart, ResultSet resultSet) {
         if (!chartSimulationDataTableViews.containsKey(lineChart)) {
             return false;
         }
-        return chartSimulationDataTableViews.get(lineChart).getItems().contains(data);
+        return chartSimulationDataTableViews.get(lineChart).getItems().contains(resultSet);
     }
     
     public boolean containsForAutoAdding(LineChart lineChart, ResultSet data) {
@@ -98,6 +139,41 @@ public class ResultsDao
             }
         }
         return false;
+    }
+    
+    public ResultSet get(ResultSet resultSet) {
+        
+        String modelId = resultSet.getSimulation().getDao().getModelId();
+        if (resultSetStorageMap.containsKey(modelId)) {
+            
+            SimulationResult simulationResult = resultSet.getSimulation();
+            if (resultSetStorageMap.get(modelId).containsKey(simulationResult)) {
+                
+                String elementId = resultSet.getElement().getId();
+                if (resultSetStorageMap.get(modelId).get(simulationResult).containsKey(elementId)) {
+                    
+                    return resultSetStorageMap.get(modelId).get(simulationResult).get(elementId).get(resultSet.getVariable());
+                }
+            }
+        }
+        return null;
+    }
+    
+    public void remove(ResultSet resultSet) {
+        
+        String modelId = resultSet.getSimulation().getDao().getModelId();
+        if (resultSetStorageMap.containsKey(modelId)) {
+
+            SimulationResult simulationResult = resultSet.getSimulation();
+            if (resultSetStorageMap.get(modelId).containsKey(simulationResult)) {
+
+                String elementId = resultSet.getElement().getId();
+                if (resultSetStorageMap.get(modelId).get(simulationResult).containsKey(elementId)) {
+                    
+                    resultSetStorageMap.get(modelId).get(simulationResult).get(elementId).remove(resultSet.getVariable());
+                }
+            }
+        }
     }
     
     public void remove(LineChart lineChart) {

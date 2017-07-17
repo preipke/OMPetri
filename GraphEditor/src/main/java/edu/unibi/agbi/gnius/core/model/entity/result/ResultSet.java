@@ -35,7 +35,7 @@ public class ResultSet
         this.element = element;
         this.variable = variable;
         if (simulation.getData(variable) == null) {
-            throw new ResultsException("Data for variable '" + variable + "' cannot be found in the associated simulation results!");
+            throw new ResultsException("Data for variable '" + variable + "' cannot be found in the associated simulation results");
         }
     }
 
