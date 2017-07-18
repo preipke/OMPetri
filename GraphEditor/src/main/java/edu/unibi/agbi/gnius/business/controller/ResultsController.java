@@ -642,23 +642,24 @@ public class ResultsController implements Initializable
 
     private Double getStartValue(List<Data> data) {
         if (data.isEmpty()) {
-            return null;
+            return 0d;
         }
         return round(parseDouble(data.get(0).getYValue()));
     }
 
     private Double getEndValue(List<Data> data) {
         if (data.isEmpty()) {
-            return null;
+            return 0d;
         }
         return round(parseDouble(data.get(data.size() - 1).getYValue()));
     }
 
     private Double getMinValue(List<Data> data) {
+        double value, min;
         if (data.isEmpty()) {
-            return null;
+            return 0d;
         }
-        double value, min = parseDouble(data.get(0).getYValue());
+        min = parseDouble(data.get(0).getYValue());
         for (Data d : data) {
             value = parseDouble(d.getYValue());
             if (value < min) {
@@ -669,10 +670,11 @@ public class ResultsController implements Initializable
     }
 
     private Double getMaxValue(List<Data> data) {
+        double value, max;
         if (data.isEmpty()) {
-            return null;
+            return 0d;
         }
-        double value, max = parseDouble(data.get(0).getYValue());
+        max = parseDouble(data.get(0).getYValue());
         for (Data d : data) {
             value = parseDouble(d.getYValue());
             if (value > max) {

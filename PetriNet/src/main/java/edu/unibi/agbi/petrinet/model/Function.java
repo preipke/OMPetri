@@ -20,7 +20,7 @@ public class Function
 
     private final Type type;
     private String value;
-    private String unit = "1";
+    private String unit;
     
     public Function(Type type) {
         this(null, type);

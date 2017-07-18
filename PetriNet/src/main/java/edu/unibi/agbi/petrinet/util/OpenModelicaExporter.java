@@ -37,6 +37,8 @@ public class OpenModelicaExporter
 {
     private static final String ENDL = System.getProperty("line.separator");
     private static final String INDENT = "  ";
+    private static final String CMNT_START = "/*";
+    private static final String CMNT_END = "*/";
 
     private final String propertiesPath = "/openmodelica.properties";
     private final Properties properties;
@@ -118,7 +120,9 @@ public class OpenModelicaExporter
                 .filter(key -> parameters.get(key).getType() != Parameter.Type.REFERENCE)
                 .forEach(key -> {
                     writer.append(INDENT + "parameter Real '" + key + "'");
-//                    writer.append("(final unit=\"" + parameters.get(key).getUnit() + "\")");
+                    if (parameters.get(key).getUnit() != null && !parameters.get(key).getUnit().isEmpty()) {
+                        writer.append("(final unit=\"" + parameters.get(key).getUnit() + "\")");
+                    }
                     writer.append(" = " + parameters.get(key).getValue() + ";");
                     writer.println();
                 });
@@ -126,7 +130,7 @@ public class OpenModelicaExporter
         /**
          * Places.
          */
-        boolean isFirst;
+        boolean isDisabled, isFirst;
         String functionType, tokenType, tmp1, tmp2, tmp3, unit;
         Function function;
         Token token;
@@ -147,6 +151,11 @@ public class OpenModelicaExporter
             place = itPlaces.next();
 
             writer.append(INDENT);
+            
+            if (place.isDisabled()) {
+                writer.append(CMNT_START);
+            }
+            
             switch (place.getPlaceType()) {
 
                 case CONTINUOUS:
@@ -172,8 +181,8 @@ public class OpenModelicaExporter
                     throw new IOException("Unhandled place type: " + place.getPlaceType());
             }
             writer.append(" '" + place.getId() + "'");
-            writer.append("(nIn=" + place.getArcsIn().size());
-            writer.append(",nOut=" + place.getArcsOut().size());
+            writer.append("(nIn=" + place.getArcsIn().stream().filter(arc -> !arc.isDisabled()).count());
+            writer.append(",nOut=" + place.getArcsOut().stream().filter(arc -> !arc.isDisabled()).count());
 
             isFirst = true;
 
@@ -185,9 +194,9 @@ public class OpenModelicaExporter
             tmp3 = "";
             unit = "";
             
-            for (Colour color : colours) {
+            for (Colour colour : colours) {
 
-                token = place.getToken(color);
+                token = place.getToken(colour);
 
                 if (isColoredPn) {
 
@@ -218,7 +227,7 @@ public class OpenModelicaExporter
                 } else {
 
                     if (token == null) {
-                        throw new IOException("No token for default colour '" + color.getId() + "' available.");
+                        throw new IOException("No token for colour '" + colour.getId() + "' available.");
                     }
                     
                     if (place.getPlaceType() == Place.Type.CONTINUOUS) {
@@ -245,12 +254,17 @@ public class OpenModelicaExporter
             writer.append(",min" + tokenType + "=" + tmp2);
             writer.append(",max" + tokenType + "=" + tmp3);
 
-            if (!isColoredPn) {
-//                writer.append(",t(final unit=\"" + unit + "\")");
+            if (!isColoredPn && unit != null && !unit.isEmpty()) {
+                writer.append(",t(final unit=\"" + unit + "\")");
             }
             writer.append(")");
 //            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
+            
+            if (place.isDisabled()) {
+                writer.append(CMNT_END);
+            }
+            
             writer.println();
         }
 
@@ -297,17 +311,17 @@ public class OpenModelicaExporter
                     throw new IOException("Unhandled transition type: " + transition.getTransitionType());
             }
             writer.append(" '" + transition.getId() + "'");
-            writer.append("(nIn=" + transition.getArcsIn().size());
-            writer.append(",nOut=" + transition.getArcsOut().size());
+            writer.append("(nIn=" + transition.getArcsIn().stream().filter(arc -> !arc.isDisabled()).count());
+            writer.append(",nOut=" + transition.getArcsOut().stream().filter(arc -> !arc.isDisabled()).count());
             writer.append("," + functionType);
 
             // Function and parameters
             function = transition.getFunction();
-            if (function.getUnit() != null && !function.getUnit().matches("")) {
+            if (function.getUnit() != null && !function.getUnit().isEmpty()) {
                 writer.append("(final unit=\"" + function.getUnit() + "\")");
             }
             if (transition.isDisabled()) {
-                writer.append("=0/*" + getFunctionString(model, transition, function) + "*/");
+                writer.append("=0" + CMNT_START + getFunctionString(model, transition, function) + CMNT_END);
             } else {
                 writer.append("=" + getFunctionString(model, transition, function));
             }
@@ -328,36 +342,41 @@ public class OpenModelicaExporter
          * Arcs.
          */
         for (IArc arc : arcs) {
+            
+            if (arc.getArcType() == Arc.Type.NORMAL) {
+                continue;
+            }
+            
+            isDisabled = arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled();
+            
+            writer.append(INDENT);
+            if (isDisabled) {
+                writer.append(CMNT_START);
+            }
 
             switch (arc.getArcType()) {
 
                 case INHIBITORY:
-                    writer.append(INDENT);
                     writer.append(properties.getProperty("pnlib.arc.inhibitory"));
-                    writer.append(" '" + arc.getId() + "';");
-                    writer.println();
-                    break;
-
-                case NORMAL:
                     break;
 
                 case READ:
-                    writer.append(INDENT);
                     writer.append(properties.getProperty("pnlib.arc.read"));
-                    writer.append(" '" + arc.getId() + "';");
-                    writer.println();
                     break;
 
                 case TEST:
-                    writer.append(INDENT);
                     writer.append(properties.getProperty("pnlib.arc.test"));
-                    writer.append(" '" + arc.getId() + "';");
-                    writer.println();
                     break;
 
                 default:
                     throw new IOException("Cannot export unhandled arc type: " + arc.getArcType());
             }
+            
+            writer.append(" '" + arc.getId() + "';");
+            if (isDisabled) {
+                writer.append(CMNT_END);
+            }
+            writer.println();
         }
 
         writer.append("equation");
@@ -400,6 +419,7 @@ public class OpenModelicaExporter
                 default:
                     throw new IOException("Unhandled connection for arc type '" + arc.getArcType() + "'.");
             }
+            
             writer.println();
         }
         
@@ -421,6 +441,9 @@ public class OpenModelicaExporter
         String weight = "", tmp;
 
         for (IArc arc : arcs) {
+            if (arc.isDisabled()) {
+                continue;
+            }
             if (isFirst) {
                 isFirst = false;
             } else {
@@ -495,9 +518,14 @@ public class OpenModelicaExporter
 
     private String getConnectionNormal(IArc arc) throws IOException {
 
+        boolean isDisabled = arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled();
         String connection;
 
-        connection = INDENT + "connect(";
+        connection = INDENT;
+        if (isDisabled) {
+            connection += CMNT_START;
+        }
+        connection += "connect(";
         if (arc.getSource() instanceof Place) {
             connection += "'" + arc.getSource().getId() + "'.outTransition[" + getArcIndexWithTargetNode(arc.getSource().getArcsOut(), arc.getTarget()) + "],";
             connection += "'" + arc.getTarget().getId() + "'.inPlaces[" + getArcIndexWithSourceNode(arc.getTarget().getArcsIn(), arc.getSource()) + "]";
@@ -508,27 +536,43 @@ public class OpenModelicaExporter
         connection += ")";
 //        connection +=" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))";
         connection += ";";
+        if (isDisabled) {
+            connection += CMNT_END;
+        }
 
         return connection;
     }
 
     private String getConnectionNonNormal(IArc arc) throws IOException {
 
+        boolean isDisabled = arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled();
         String connection;
 
         if (arc.getSource() instanceof Place) {
-            connection = INDENT + "connect(";
+            connection = INDENT;
+            if (isDisabled) {
+                connection += CMNT_START;
+            }
+            connection += "connect(";
             connection += "'" + arc.getSource().getId() + "'.outTransition[" + getArcIndexWithTargetNode(arc.getSource().getArcsOut(), arc.getTarget()) + "],";
             connection += "'" + arc.getId() + "'.inPlace";
             connection += ")";
 //            connection +=" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))";
-            connection += ";\n";
-            connection += INDENT + "connect(";
+            connection += ";";
+            if (isDisabled) {
+                connection += CMNT_END + "\n" + INDENT + CMNT_START;
+            } else {
+                connection += "\n" + INDENT;
+            }
+            connection += "connect(";
             connection += "'" + arc.getId() + "'.outTransition,";
             connection += "'" + arc.getTarget().getId() + "'.inPlaces[" + getArcIndexWithSourceNode(arc.getTarget().getArcsIn(), arc.getSource()) + "]";
             connection += ")";
 //            connection +=" annotation(Line(color={0, 0, 0}, points={{0.0,0.0}, {0.0,0.0}}))";
             connection += ";";
+            if (isDisabled) {
+                connection += CMNT_END;
+            }
         } else {
             throw new IOException("Invalid connection found!");
         }
@@ -589,7 +633,9 @@ public class OpenModelicaExporter
     public References getModelReferences(Model model) throws IOException {
         References references = new References();
         for (INode place : model.getPlaces()) {
-            setPlaceReferences(references, (Place) place);
+            if (!place.isDisabled()) {
+                setPlaceReferences(references, (Place) place);
+            }
         }
         for (INode transition : model.getTransitions()) {
             setTransitionReferences(references, (Transition) transition);
@@ -623,6 +669,10 @@ public class OpenModelicaExporter
 
             index = 1;
             for (IArc arc : place.getArcsOut()) {
+                
+                if (arc.isDisabled()) {
+                    continue;
+                }
 
                 transition = (Transition) arc.getTarget();
                 if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
@@ -642,6 +692,10 @@ public class OpenModelicaExporter
 
             index = 1;
             for (IArc arc : place.getArcsIn()) {
+                
+                if (arc.isDisabled()) {
+                    continue;
+                }
 
                 transition = (Transition) arc.getSource();
                 if (transition.getTransitionType() == Transition.Type.CONTINUOUS) {
@@ -694,7 +748,9 @@ public class OpenModelicaExporter
             if (source.equals(a.getSource())) {
                 return index;
             }
-            index++;
+            if (!a.isDisabled()) {
+                index++; // no increment if disabled - handle as if arc does not exist
+            }
         }
         throw new IOException("Node cannot be found to be source of the given arcs!");
     }
@@ -705,7 +761,9 @@ public class OpenModelicaExporter
             if (target.equals(a.getTarget())) {
                 return index;
             }
-            index++;
+            if (!a.isDisabled()) {
+                index++;
+            }
         }
         throw new IOException("Node cannot be found to be target of the given arcs!");
     }

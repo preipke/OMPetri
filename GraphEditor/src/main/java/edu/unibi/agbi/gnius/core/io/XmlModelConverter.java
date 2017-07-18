@@ -804,7 +804,7 @@ public class XmlModelConverter
 
             // Function
             Element f = dom.createElement(tagFunction);
-            if (!data.getFunction().getUnit().isEmpty()) {
+            if (data.getFunction().getUnit() != null && !data.getFunction().getUnit().isEmpty()) {
                 f.setAttribute(attrUnit, data.getFunction().getUnit());
             }
             f.setTextContent(data.getFunction().toString());

@@ -13,7 +13,7 @@ public class Token
 {
     private final Colour colour;
     
-    private String unit = "1";
+    private String unit;
 
     private double valueMin = 0d;
     private double valueMax = Double.MAX_VALUE;
