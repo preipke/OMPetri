@@ -79,6 +79,7 @@ public class XmlModelConverter
 
     private final String attrAuthor = "author";
     private final String attrColourId = "colourId";
+    private final String attrConstant = "constant";
     private final String attrCurrentClusterId = "currentClusterId";
     private final String attrCurrentNodeId = "currentNodeId";
     private final String attrCurrentPlaceId = "currentPlaceId";
@@ -472,6 +473,9 @@ public class XmlModelConverter
         if (elem.getAttribute(attrDisabled) != null) {
             place.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
         }
+        if (elem.getAttribute(attrConstant) != null) {
+            place.setConstant(Boolean.valueOf(elem.getAttribute(attrConstant)));
+        }
         if (elem.getAttribute(attrSticky) != null) {
             place.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
@@ -732,6 +736,9 @@ public class XmlModelConverter
             p.setAttribute(attrType, data.getPlaceType().toString());
             if (data.isDisabled()) {
                 p.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
+            }
+            if (data.isConstant()) {
+                p.setAttribute(attrConstant, Boolean.toString(data.isConstant()));
             }
             if (data.isSticky()) {
                 p.setAttribute(attrSticky, Boolean.toString(data.isSticky()));
