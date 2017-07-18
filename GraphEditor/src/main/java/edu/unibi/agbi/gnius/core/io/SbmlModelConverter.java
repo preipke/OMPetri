@@ -13,11 +13,14 @@ import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
+import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.DataService;
+import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
 import edu.unibi.agbi.gnius.util.Calculator;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
@@ -51,6 +54,7 @@ import org.w3c.dom.NodeList;
 public class SbmlModelConverter
 {
     @Autowired private DataService dataService;
+    @Autowired private HierarchyService hierarchyService;
     @Autowired private ParameterService parameterService;
     @Autowired private FunctionBuilder functionBuilder;
     @Autowired private Calculator calculator;
@@ -61,6 +65,8 @@ public class SbmlModelConverter
     private final String tagConnectionTargets = "listOfProducts";
     private final String tagCoordinateX = "x_Coordinate";
     private final String tagCoordinateY = "y_Coordinate";
+    private final String tagCluster = "coarseNode";
+    private final String tagClusterChild = "child";
     private final String tagDisabled = "knockedOut";
     private final String tagFunction = "maximumSpeed";
     private final String tagLabel = "label";
@@ -130,7 +136,7 @@ public class SbmlModelConverter
         }
 
         /**
-         * Nodes and Parameters.
+         * Nodes and Shapes.
          */
         elems = new ArrayList();
         idReferenceMap = new HashMap();
@@ -148,7 +154,7 @@ public class SbmlModelConverter
                         }
                     }
                 }
-                for (Element e : elems) { // refering nodes
+                for (Element e : elems) { // referencing nodes
                     addNode(e, dao, true, idReferenceMap);
                 }
             }
@@ -211,7 +217,87 @@ public class SbmlModelConverter
             }
         }
 
+        /**
+         * Clustering.
+         */
+        elems = new ArrayList();
+        nl = doc.getElementsByTagName(tagCluster);
+        for (int i = 0; i < nl.getLength(); i++) { // non-refering nodes
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                elem = addCluster((Element) nl.item(i), dao);
+                if (elem != null) {
+                    elems.add(elem);
+                }
+            }
+        }
+        createRemainingClusters(elems, dao);
+
         return dao;
+    }
+    
+    /**
+     * Recursively creates clusters for all remaining elements.
+     * 
+     * @param elements
+     * @param dao
+     * @throws IOException 
+     */
+    private void createRemainingClusters(final List<Element> elements, DataDao dao) throws IOException {
+        
+        List<Element> elementsRemaining = new ArrayList();
+        
+        for (Element element : elements) {
+            
+            element = addCluster(element, dao);
+            if (element != null) {
+                elementsRemaining.add(element);
+            }
+        }
+
+        if (!elementsRemaining.isEmpty()) {
+            createRemainingClusters(elementsRemaining, dao);
+        }
+    }
+
+    /**
+     * Creates a cluster containing a list of nodes. If any of the nodes is a
+     * cluster itself and is not present in the graph yet, the element will be
+     * returned and has to be added again later.
+     *
+     * @param elem
+     * @param dao
+     * @return the Element in case any node was missing, otherwise null
+     * @throws IOException
+     */
+    private Element addCluster(final Element elem, DataDao dao) throws IOException {
+
+        NodeList nl;
+        Element tmp;
+        List<IGraphElement> childNodes = new ArrayList();
+        IGraphCluster cluster;
+
+        nl = elem.getElementsByTagName(tagClusterChild);
+        for (int i = 0; i < nl.getLength(); i++) { // non-refering nodes
+            if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
+                tmp = (Element) nl.item(i);
+
+                if (dao.getGraph().contains(tmp.getAttribute(attrId))) {
+                    childNodes.add((IGraphNode) dao.getGraph().getNode(tmp.getAttribute(attrId)));
+                } else {
+                    return elem; // child node not available, repeat later
+                }
+            }
+        }
+
+        try {
+            cluster = hierarchyService.cluster(dao, childNodes, elem.getAttribute(attrId));
+            cluster.getData().setLabelText(elem.getAttribute(attrLabel));
+            dao.getGraph().add(cluster);
+        } catch (DataException ex) {
+            throw new IOException("Cannot create cluster. " + ex.getMessage());
+        }
+        
+        return null;
     }
 
     private void addParameters(final Element elem, DataDao dao) throws IOException {
@@ -269,13 +355,13 @@ public class SbmlModelConverter
 //                            dao.getModel().add(param);
 //                        } else {
 //                            if (!dao.getModel().getParameter(id).getValue().contentEquals(value)) {
-                                if (transition.getParameter(id) == null) {
+                    if (transition.getParameter(id) == null) {
 //                                    System.out.println("Parameter '" + param.getId() + "' already exists! Storing locally.");
-                                    transition.addParameter(param);
-                                } else {
-                                    throw new IOException("Parameter '" + param.getId() + "' already exists on local scale!");
+                        transition.addParameter(param);
+                    } else {
+                        throw new IOException("Parameter '" + param.getId() + "' already exists on local scale!");
 //                                    throw new IOException("Parameter '" + param.getId() + "' already exists on global and local scale!");
-                                }
+                    }
 //                            } else {
 //                                System.out.println("Parameter '" + param.getId() + "' already exists but equals!");
 //                            }

@@ -521,7 +521,7 @@ public class ElementController implements Initializable
             if (listClusteredElements.getSelectionModel().getSelectedItem() != null) {
                 int index = listClusteredElements.getSelectionModel().getSelectedIndex();
                 IGraphElement elem = listClusteredElements.getSelectionModel().getSelectedItem();
-                elem.getData().setDisabled(!elem.getData().isDisabled());
+                elem.setElementDisabled(!elem.isElementDisabled());
                 listClusteredElements.getItems().remove(elem);
                 listClusteredElements.getItems().add(index, elem);
             }
@@ -568,7 +568,7 @@ public class ElementController implements Initializable
             if (item != null) {
                 setText(item.toString());
                 setOpacity(1.0);
-                if (item.getData().isDisabled()) {
+                if (item.isElementDisabled()) {
                     setOpacity(0.5);
                 }
                 setOnMouseClicked(event -> {
