@@ -74,12 +74,14 @@
         </GridPane>
         <GridPane fx:id="parentPlace" hgap="5.0">
             <children>
-                <Label text="Token" />
-                <Label text="Token (min.)" GridPane.rowIndex="1" />
-                <Label text="Token (max.)" GridPane.rowIndex="2" />
-                <TextField fx:id="inputTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                <TextField fx:id="inputTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                <TextField fx:id="inputToken" text="0" GridPane.columnIndex="1" />
+                <Label text="Constant" />
+                <Label text="Token" GridPane.rowIndex="1" />
+                <Label text="Token (min.)" GridPane.rowIndex="2" />
+                <Label text="Token (max.)" GridPane.rowIndex="3" />
+                <CheckBox fx:id="checkConstant" GridPane.columnIndex="1" />
+                <TextField fx:id="inputToken" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <TextField fx:id="inputTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <TextField fx:id="inputTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
             </children>
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />

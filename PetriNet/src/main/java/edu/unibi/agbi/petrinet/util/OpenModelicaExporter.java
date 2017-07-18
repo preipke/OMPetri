@@ -449,7 +449,9 @@ public class OpenModelicaExporter
     
     private String getWeightString(IArc arc, Colour colour) {
         Weight weight = arc.getWeight(colour);
-        if (arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled() || weight == null) {
+        if (arc.isDisabled() || weight == null
+                || arc.getSource().isConstant() || arc.getSource().isDisabled()
+                || arc.getTarget().isConstant() || arc.getTarget().isDisabled()) {
             return "0";
         } else {
             return weight.getValue();

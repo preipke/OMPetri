@@ -16,7 +16,7 @@ import java.util.List;
  */
 public abstract class Node extends Element implements INode
 {
-    private boolean isConstant = true;
+    private boolean isConstant = false;
 
     private final List<IArc> arcsIn;
     private final List<IArc> arcsOut;

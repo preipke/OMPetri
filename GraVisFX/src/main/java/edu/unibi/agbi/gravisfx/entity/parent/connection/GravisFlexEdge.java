@@ -358,16 +358,37 @@ public class GravisFlexEdge extends Path implements IGravisConnection, IGravisPa
                 double x0 = targetOffsetX.get();
                 double y0 = targetOffsetY.get();
                 double m = slopeReverse.get();
+                
+                double pre, end;
+                double val;
 
                 if (m == 0) {
                     if (x0 < target.translateXProperty().get()) {
-                        return y0 - GravisProperties.ARC_GAP / 2;
+                        val = y0 - GravisProperties.ARC_GAP / 2;
                     } else {
-                        return y0 + GravisProperties.ARC_GAP / 2;
+                        val = y0 + GravisProperties.ARC_GAP / 2;
                     }
                 } else {
-                    return m * lineEndX.get() + y0 - m * x0;
+                    
+//                    pre = m * lineEndX.get();
+//                    end = m * x0;
+//                    
+//                    if (x0 < lineEndX.get()) {
+//                        if (pre < end) {
+                            val = m * lineEndX.get() + y0 - m * x0;
+//                        } else {
+//                            val = -m * lineEndX.get() + y0 + m * x0;
+//                        }
+//                    } else {
+//                        if (pre < end) {
+//                            val = -m * lineEndX.get() + y0 + m * x0;
+//                        } else {
+//                            val = m * lineEndX.get() + y0 - m * x0;
+//                        }
+//                    }
                 }
+                
+                return val;
             }
         };
 

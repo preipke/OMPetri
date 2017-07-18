@@ -7,6 +7,7 @@ package edu.unibi.agbi.gnius.business.controller.editor.inspector;
 
 import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
+import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataArc;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataPlace;
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataTransition;
@@ -27,6 +28,7 @@ import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -56,6 +58,7 @@ public class PropertiesController implements Initializable
     @FXML private Parent parentPlace;
     @FXML private Parent parentTransition;
 
+    @FXML private CheckBox checkConstant;
     @FXML private ChoiceBox<Colour> choiceColour;
 //    @FXML private Button buttonColourCreate;
     @FXML private TextArea inputFunction;
@@ -122,6 +125,7 @@ public class PropertiesController implements Initializable
         Token token;
         for (Colour color : choiceColour.getItems()) {
             if ((token = place.getToken(color)) != null) {
+                checkConstant.setSelected(place.isConstant());
                 choiceColour.getSelectionModel().select(color); // must be done here for listener
                 inputToken.setText(Double.toString(token.getValueStart()));
                 inputTokenMin.setText(Double.toString(token.getValueMin()));
@@ -158,6 +162,15 @@ public class PropertiesController implements Initializable
                 } catch (NumberFormatException ex) {
                     messengerService.addException("Exception parsing arc weight!", ex);
                 }
+            }
+        }
+    }
+    
+    private void ParseConstantChoice() {
+        if (data instanceof IDataNode) {
+            IDataNode node = (IDataNode) data;
+            if (node.isConstant() != checkConstant.isSelected()) {
+                node.setConstant(checkConstant.isSelected());
             }
         }
     }
@@ -437,6 +450,7 @@ public class PropertiesController implements Initializable
                 setFunctionReferenceChoices(inputFilter.getText().toLowerCase());
             }
         });
+        checkConstant.selectedProperty().addListener(cl -> ParseConstantChoice());
         inputFilter.textProperty().addListener(cl -> {
             pauseTransition.playFromStart();
         });

@@ -39,12 +39,13 @@ public class GraphTransition extends GravisRectangle implements IGraphNode {
 
     @Override
     public void setElementDisabled(boolean value) {
-        if (value != isDisabled) {
+
+        if (isDisabled != value) {
             isDisabled = value;
             getElementHandles().forEach(handle -> handle.setDisabled(value));
             getConnections().forEach(conn -> {
                 IGraphArc arc = (IGraphArc) conn;
-                arc.getData().setDisabled(value);
+                arc.setElementDisabled(value);
             });
         }
     }

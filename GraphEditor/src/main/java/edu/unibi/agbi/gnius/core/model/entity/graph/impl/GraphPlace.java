@@ -15,18 +15,18 @@ import edu.unibi.agbi.gravisfx.entity.parent.node.GravisCircle;
  *
  * @author PR
  */
-public class GraphPlace extends GravisCircle implements IGraphNode
-{
+public class GraphPlace extends GravisCircle implements IGraphNode {
+
     private final DataPlace dataPlace;
     private boolean isDisabled = false;
-    
+
     public GraphPlace(String id, DataPlace dataPlace) {
         super(id, GravisType.NODE);
         this.dataPlace = dataPlace;
         this.dataPlace.getShapes().add(this);
         this.setInnerRectangleVisible(false);
     }
-    
+
     @Override
     public DataPlace getData() {
         return dataPlace;
@@ -39,7 +39,7 @@ public class GraphPlace extends GravisCircle implements IGraphNode
 
     @Override
     public void setElementDisabled(boolean value) {
-        if (value != isDisabled) {
+        if (isDisabled != value) {
             isDisabled = value;
             getElementHandles().forEach(handle -> handle.setDisabled(value));
             getConnections().forEach(conn -> {

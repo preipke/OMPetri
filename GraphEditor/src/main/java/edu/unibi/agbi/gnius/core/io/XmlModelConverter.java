@@ -400,13 +400,6 @@ public class XmlModelConverter
                 }
             }
         }
-        
-        // Properties
-        if (elem.getAttribute(attrDisabled) != null) {
-            data.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
-        }
-        data.setDescription(elem.getAttribute(attrDescription));
-        data.setName(elem.getAttribute(attrName));
 
         /**
          * Arc Shape.
@@ -434,10 +427,16 @@ public class XmlModelConverter
                 }
             }
         }
+        
+        // Properties
+        if (elem.getAttribute(attrDisabled) != null) {
+            data.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
+        }
         if (elem.getAttribute(attrLabel) != null) {
             data.setLabelText(elem.getAttribute(attrLabel));
         }
-        data.setDisabled(data.isDisabled());
+        data.setDescription(elem.getAttribute(attrDescription));
+        data.setName(elem.getAttribute(attrName));
     }
 
     private void addPlace(DataDao dao, final Element elem) throws Exception {
@@ -564,6 +563,10 @@ public class XmlModelConverter
                                 throw new IOException("Malformed node type '" + data.getType() + "'. Cannot create shape.");
                         }
                         
+//                        if (elem.getAttribute(attrDisabled) != null) { // not useful here as arcs are created later and carry their own disabled state
+//                            shape.setElementDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
+//                        }
+                        
                         dataService.add(dao, shape);
                         dataService.StyleElement(shape);
                     }
@@ -573,7 +576,9 @@ public class XmlModelConverter
         if (elem.getAttribute(attrLabel) != null) {
             data.setLabelText(elem.getAttribute(attrLabel));
         }
-        data.setDisabled(data.isDisabled());
+        if (data.isDisabled()) {
+            data.setDisabled(true);
+        }
     }
 
     private Colour getColour(Element elem) {
@@ -831,7 +836,7 @@ public class XmlModelConverter
                 }
                 
             } else {
-                throw new IOException("False shape associated to arc data!");
+                throw new IOException("Invalid shape associated to arc data!");
             }
         }
         
@@ -871,8 +876,6 @@ public class XmlModelConverter
         for (IGravisCluster cluster : clusters) {
             c = dom.createElement(tagCluster);
             c.setAttribute(attrId, cluster.getId());
-//            c.setAttribute(attrPosX, String.valueOf(cluster.getShape().getTranslateX()));
-//            c.setAttribute(attrPosY, String.valueOf(cluster.getShape().getTranslateY()));
             c.appendChild(getGraphElement(dom, cluster.getGraph()));
             elements.appendChild(c);
         }

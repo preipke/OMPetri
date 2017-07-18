@@ -51,7 +51,7 @@ import org.w3c.dom.NodeList;
  * @author PR
  */
 @Component
-public class SbmlModelConverter
+public class SbmlModelConverter 
 {
     @Autowired private DataService dataService;
     @Autowired private HierarchyService hierarchyService;
@@ -63,6 +63,7 @@ public class SbmlModelConverter
     private final String tagConnectionNode = "speciesReference";
     private final String tagConnectionSources = "listOfReactants";
     private final String tagConnectionTargets = "listOfProducts";
+    private final String tagConstant = "constCheck";
     private final String tagCoordinateX = "x_Coordinate";
     private final String tagCoordinateY = "y_Coordinate";
     private final String tagCluster = "coarseNode";
@@ -86,6 +87,7 @@ public class SbmlModelConverter
     private final String tagWeight = "Function";
 
     private final String attrConnectionNodeId = "species";
+    private final String attrConstant = "constCheck";
     private final String attrCoordinateX = "x_Coordinate";
     private final String attrCoordinateY = "y_Coordinate";
     private final String attrDisabled = "knockedOut";
@@ -170,16 +172,17 @@ public class SbmlModelConverter
                 addConnection(elem, dao);
             }
         }
-        for (Element e : elems) { // disable connections for referencing nodes
-            dao.getGraph()
-                    .getNode(e.getAttribute(attrId))
-                    .getConnections()
-                    .forEach(conn -> {
-                        IGraphArc arc = (IGraphArc) conn;
-                        arc.getData().setDisabled(true);
-                        arc.getElementHandles().forEach(handle -> handle.setDisabled(true));
-                    });
-        }
+//        for (Element e : elems) { // disable connections for referencing nodes
+//            dao.getGraph()
+//                    .getNode(e.getAttribute(attrId))
+//                    .getConnections()
+//                    .forEach(conn -> {
+//                        IGraphArc arc = (IGraphArc) conn;
+//                        arc.setElementDisabled(true);
+//                        arc.getData().setDisabled(true);
+//                        arc.getElementHandles().forEach(handle -> handle.setDisabled(true));
+//                    });
+//        }
 
         /**
          * Parameters.
@@ -234,20 +237,20 @@ public class SbmlModelConverter
 
         return dao;
     }
-    
+
     /**
      * Recursively creates clusters for all remaining elements.
-     * 
+     *
      * @param elements
      * @param dao
-     * @throws IOException 
+     * @throws IOException
      */
     private void createRemainingClusters(final List<Element> elements, DataDao dao) throws IOException {
-        
+
         List<Element> elementsRemaining = new ArrayList();
-        
+
         for (Element element : elements) {
-            
+
             element = addCluster(element, dao);
             if (element != null) {
                 elementsRemaining.add(element);
@@ -296,7 +299,7 @@ public class SbmlModelConverter
         } catch (DataException ex) {
             throw new IOException("Cannot create cluster. " + ex.getMessage());
         }
-        
+
         return null;
     }
 
@@ -387,7 +390,7 @@ public class SbmlModelConverter
         String typeStrings[] = null;
         String dataId, nodeId, label = null;
         double posX = 0, posY = 0;
-        boolean disabled;
+        boolean disabled, constant = false;
 
         edu.unibi.agbi.petrinet.entity.abstr.Element.Type type = null;
         IDataNode data = null;
@@ -406,7 +409,8 @@ public class SbmlModelConverter
         }
 
         /**
-         * Check for reference. If ref available, only create new shape.
+         * Check for reference. If ref available, use associated data for new
+         * shape.
          */
         nl = elem.getElementsByTagName(tagRefAvailable);
         if (nl.getLength() == 1) {
@@ -417,11 +421,10 @@ public class SbmlModelConverter
                     if (nl.getLength() == 1) {
                         if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) { // get ref id
                             tmp = (Element) nl.item(0);
-                            tmp.getAttribute(attrRefId);
                             if (addRefering) {
-                                if (dao.getGraph().contains("spec_" + tmp.getAttribute(attrRefId))) {
+                                if (dao.getGraph().contains("spec_" + tmp.getAttribute(attrRefId))) { // get data
                                     data = ((IGraphNode) dao.getGraph().getNode("spec_" + tmp.getAttribute(attrRefId))).getData();
-                                    idReferenceMap.put(dataId, data.getId());
+                                    idReferenceMap.put(dataId, data.getId()); // set reference
                                 } else {
                                     throw new IOException("Missing node reference '" + ("spec_" + tmp.getAttribute(attrRefId)) + "' for '" + dataId + "' ('" + nodeId + "')");
                                 }
@@ -437,6 +440,16 @@ public class SbmlModelConverter
         if (type == null || typeStrings == null) {
             throw new IOException("Node type not specified for '" + dataId + "' ('" + nodeId + "').");
         }
+        
+        // Constant?
+        nl = elem.getElementsByTagName(tagConstant);
+        if (nl.getLength() == 1) {
+            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                tmp = (Element) nl.item(0);
+                constant = Boolean.parseBoolean(tmp.getAttribute(attrConstant));
+            }
+        }
+        
 
         /**
          * Create element and node.
@@ -447,6 +460,7 @@ public class SbmlModelConverter
                 if (data == null) {
                     data = getPlace(elem, dao, dataId, Place.Type.valueOf(typeStrings[0].toUpperCase()));
                     data.setName(dataId);
+                    data.setConstant(constant);
                     dao.getModel().add(data);
                 }
                 node = new GraphPlace(nodeId, (DataPlace) data);
@@ -456,6 +470,7 @@ public class SbmlModelConverter
                 if (data == null) {
                     data = getTransition(elem, dao, dataId, Transition.Type.valueOf(typeStrings[0].toUpperCase()));
                     data.setName(dataId);
+                    data.setConstant(constant);
                     dao.getModel().add(data);
                 }
                 node = new GraphTransition(nodeId, (DataTransition) data);
@@ -470,8 +485,13 @@ public class SbmlModelConverter
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 tmp = (Element) nl.item(0);
                 disabled = Boolean.valueOf(tmp.getAttribute(attrDisabled));
-                data.setDisabled(disabled);
-                node.getElementHandles().forEach(handle -> handle.setDisabled(disabled));
+                if (disabled) {
+                    data.setDisabled(disabled);
+//                if (disabled || addRefering) {
+//                    node.setElementDisabled(disabled);
+                }
+//                data.setDisabled(disabled);
+//                node.getElementHandles().forEach(handle -> handle.setDisabled(disabled));
             }
         }
 
@@ -522,15 +542,9 @@ public class SbmlModelConverter
 
     private DataPlace getPlace(final Element elem, DataDao dao, String id, Place.Type type) {
 
-        NodeList nl;
-        Element tmp;
-
         DataPlace place = new DataPlace(id, type);
         place.addToken(getToken(elem));
 
-        /**
-         * find and add related param IDs
-         */
         return place;
     }
 
@@ -551,9 +565,6 @@ public class SbmlModelConverter
             }
         }
 
-        /**
-         * find and add related param IDs
-         */
         return transition;
     }
 
@@ -649,10 +660,6 @@ public class SbmlModelConverter
         } catch (DataException ex) {
             throw new IOException(ex);
         }
-
-        /**
-         * find and add related param IDs
-         */
     }
 
     private Token getToken(final Element elem) {

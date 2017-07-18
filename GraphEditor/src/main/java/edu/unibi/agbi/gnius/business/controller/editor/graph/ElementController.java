@@ -34,6 +34,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
@@ -98,6 +99,7 @@ public class ElementController implements Initializable
     // Properties
     @FXML private Button buttonEdit;
     @FXML private Button buttonEditClustered;
+    @FXML private CheckBox checkConstant;
     @FXML private Label statusMessage;
     @FXML private ListView<IGraphElement> listClusteredElements;
     @FXML private TextArea inputTransitionFunction;
@@ -320,6 +322,7 @@ public class ElementController implements Initializable
                     }
                 }
                 token = place.getToken(choicesColour.get(0));
+                checkConstant.setSelected(place.isConstant());
                 choiceColour.getSelectionModel().select(0); // must be done here for listener
                 inputPlaceToken.setText(Double.toString(token.getValueStart()));
                 inputPlaceTokenMin.setText(Double.toString(token.getValueMin()));
@@ -359,6 +362,15 @@ public class ElementController implements Initializable
                 } catch (NumberFormatException ex) {
                     messengerService.addException("Exception parsing weight value!", ex);
                 }
+            }
+        }
+    }
+    
+    private void ParseConstantChoice() {
+        if (data instanceof IDataNode) {
+            IDataNode node = (IDataNode) data;
+            if (node.isConstant() != checkConstant.isSelected()) {
+                node.setConstant(checkConstant.isSelected());
             }
         }
     }
@@ -549,6 +561,7 @@ public class ElementController implements Initializable
         inputDescription.textProperty().addListener(cl -> data.setDescription(getText(inputDescription)));
         
         inputArcWeight.textProperty().addListener(cl -> ParseArcWeight());
+        checkConstant.selectedProperty().addListener(cl -> ParseConstantChoice());
         inputPlaceToken.textProperty().addListener(cl -> ParsePlaceToken());
         inputPlaceTokenMin.textProperty().addListener(cl -> ParsePlaceToken());
         inputPlaceTokenMax.textProperty().addListener(cl -> ParsePlaceToken());
