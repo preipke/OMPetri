@@ -29,7 +29,6 @@ public class Model
     private final Map<String, Colour> colors;
     private final Map<String, Parameter> parameters;
 
-    private final Set<String> nodeIds;
     private final Map<String, Arc> arcs;
     private final Map<String, Place> places;
     private final Map<String, Transition> transitions;
@@ -37,7 +36,6 @@ public class Model
     public Model() {
         this.arcs = new HashMap();
         this.colors = new HashMap();
-        this.nodeIds = new HashSet();
         this.parameters = new HashMap();
         this.places = new HashMap();
         this.transitions = new HashMap();
@@ -51,17 +49,25 @@ public class Model
         parameters.put(param.getId(), param);
     }
 
-    public void add(IArc arc) {
+    public void add(IArc arc) throws Exception {
+        if (arcs.containsKey(arc.getId())) {
+            throw new Exception("An arc has already been stored using the same identifier! (" + arc.getId() + ")");
+        }
         arcs.put(arc.getId(), (Arc) arc);
         arc.getSource().getArcsOut().add(arc);
         arc.getTarget().getArcsIn().add(arc);
     }
 
-    public void add(INode node) {
-        nodeIds.add(node.getId());
+    public void add(INode node) throws Exception {
         if (node instanceof Place) {
+            if (places.containsKey(node.getId())) {
+                throw new Exception("A place has already been stored using the same identifier! (" + node.getId() + ")");
+            }
             places.put(node.getId(), (Place) node);
         } else {
+            if (transitions.containsKey(node.getId())) {
+                throw new Exception("A transition has already been stored using the same identifier! (" + node.getId() + ")");
+            }
             transitions.put(node.getId(), (Transition) node);
         }
     }
@@ -69,7 +75,6 @@ public class Model
     public void clear() {
         colors.clear();
         parameters.clear();
-        nodeIds.clear();
         arcs.clear();
         places.clear();
         transitions.clear();
@@ -80,7 +85,11 @@ public class Model
     }
     
     public boolean contains(String nodeId) {
-        return nodeIds.contains(nodeId);
+        if (places.containsKey(nodeId)) {
+            return true;
+        } else {
+            return transitions.containsKey(nodeId);
+        }
     }
 
     public boolean containsAndNotEqual(IArc arc) {
@@ -91,14 +100,16 @@ public class Model
     }
 
     public boolean containsAndNotEqual(INode node) {
-        if (!nodeIds.contains(node.getId())) {
-            return false;
-        }
         if (node.getElementType() == Element.Type.PLACE) {
-            return !places.get(node.getId()).equals(node);
+            if (places.containsKey(node.getId())) {
+                return !places.get(node.getId()).equals(node);
+            }
         } else {
-            return !transitions.get(node.getId()).equals(node);
+            if (transitions.containsKey(node.getId())) {
+                return !transitions.get(node.getId()).equals(node);
+            }
         }
+        return false;
     }
 
     public IElement remove(IElement element) throws Exception {
@@ -112,8 +123,11 @@ public class Model
     private IArc remove(Arc arc) throws Exception {
         for (Parameter param : arc.getRelatedParameters()) {
             if (param.getUsingElements().size() > 0) {
-                throw new Exception("A related parameter is still being used and cannot be deleted! (" + arc.getId() + " -> " + param.getId() + ")");
+                throw new Exception("A related parameter is still being used by another element and cannot be deleted! "
+                        + "(" + arc.getId() + " -> " + param.getId() + ")");
             }
+        }
+        for (Parameter param : arc.getRelatedParameters()) {
             parameters.remove(param.getId());
         }
         arc.getSource().getArcsOut().remove(arc);
@@ -122,16 +136,15 @@ public class Model
     }
 
     private INode remove(INode node) throws Exception {
-        if (!nodeIds.remove(node.getId())) {
-            return null;
-        }
         for (Parameter param : node.getRelatedParameters()) {
             if (param.getUsingElements().size() > 0) {
                 if (!param.getUsingElements().iterator().next().equals(node)) {
-                    nodeIds.add(node.getId());
-                    throw new Exception("A related parameter is still being used and cannot be deleted! (" + node.getId() + " -> " + param.getId() + ")");
+                    throw new Exception("A related parameter is still being used by another element and cannot be deleted! "
+                            + "(" + node.getId() + " -> " + param.getId() + ")");
                 }
             }
+        }
+        for (Parameter param : node.getRelatedParameters()) {
             parameters.remove(param.getId());
         }
         while (!node.getArcsIn().isEmpty()) {
@@ -196,6 +209,9 @@ public class Model
     }
 
     public Set<String> getNodeIds() {
+        Set<String> nodeIds = new HashSet();
+        nodeIds.addAll(places.keySet());
+        nodeIds.addAll(transitions.keySet());
         return nodeIds;
     }
 

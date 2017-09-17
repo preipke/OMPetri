@@ -17,8 +17,8 @@ import java.util.HashSet;
 public class Function
 {
     private final ArrayList<Function> elements;
-
     private final Type type;
+    
     private String value;
     private String unit;
     
@@ -90,7 +90,7 @@ public class Function
         String function = "";
         for (Function elem : elements) {
             if (elem.getType() == Type.FUNCTION) {
-                function += elem.toString() + " ";
+                function += "( " + elem.toString() + ") ";
             } else {
                 function += elem.getValue() + " ";
             }

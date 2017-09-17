@@ -3,26 +3,27 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.petrinet.model;
+package edu.unibi.agbi.petrinet.util;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Container for references between IElement data objects and filter variables
- * used throughout OpenModelica's simulation.
+ * used in OpenModelica simulations.
  *
  * @author PR
  */
 public class References
 {
-    private String pathSimulationExecutable;
+    private String pathSimulationExecutable; // temporary storage of the executable path
+    
     private final Map<String, IElement> filterToElementReferences;
-    private final Map<IElement, List<String>> elementToFilterReferences;
+    private final Map<IElement, Set<String>> elementToFilterReferences;
 
     public References() {
         filterToElementReferences = new HashMap();
@@ -54,7 +55,7 @@ public class References
      */
     public void addElementReference(IElement element, String filter) {
         if (!elementToFilterReferences.containsKey(element)) {
-            elementToFilterReferences.put(element, new ArrayList());
+            elementToFilterReferences.put(element, new HashSet());
         }
         elementToFilterReferences.get(element).add(filter);
     }
@@ -63,7 +64,7 @@ public class References
         return filterToElementReferences;
     }
 
-    public Map<IElement, List<String>> getElementToFilterReferences() {
+    public Map<IElement, Set<String>> getElementToFilterReferences() {
         return elementToFilterReferences;
     }
 

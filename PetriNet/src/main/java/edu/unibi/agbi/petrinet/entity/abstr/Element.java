@@ -7,7 +7,10 @@ package edu.unibi.agbi.petrinet.entity.abstr;
 
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.model.Parameter;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -16,17 +19,21 @@ import java.util.Set;
  */
 public abstract class Element implements IElement
 {
-    protected Type elementType;
-
-    protected String id;
+    protected final String id;
     protected String name;
-
+    
+    protected final Type elementType;
+    
     protected boolean isDisabled = false;
 
-    protected final Set<Parameter> parameter;
+    protected Map<String,Parameter> parametersLocal;
+    protected Set<Parameter> parametersRelated;
 
-    public Element() {
-        parameter = new HashSet();
+    public Element(String id, Type elementType) {
+        this.elementType = elementType;
+        this.id = id;
+        this.parametersRelated = new HashSet();
+        this.parametersLocal = new HashMap();
     }
 
     @Override
@@ -61,7 +68,22 @@ public abstract class Element implements IElement
 
     @Override
     public Set<Parameter> getRelatedParameters() {
-        return parameter;
+        return parametersRelated;
+    }
+    
+    @Override
+    public void addLocalParameter(Parameter param) {
+        parametersLocal.put(param.getId(), param);
+    }
+    
+    @Override
+    public Collection<Parameter> getLocalParameters() {
+        return parametersLocal.values();
+    }
+    
+    @Override
+    public Parameter getLocalParameter(String id) {
+        return parametersLocal.get(id);
     }
     
     @Override

@@ -27,13 +27,8 @@ public class Arc extends Element implements IArc
 
     private final Map<Colour, Weight> weights;
 
-    public Arc(String id, INode source, Type arcType) {
-        this(id, source, null, arcType);
-    }
-
     public Arc(String id, INode source, INode target, Type arcType) {
-        this.id = id;
-        this.elementType = Element.Type.ARC;
+        super(id, Element.Type.ARC);
         this.weights = new HashMap();
         this.source = source;
         this.target = target;

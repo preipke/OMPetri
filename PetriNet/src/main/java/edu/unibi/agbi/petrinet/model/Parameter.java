@@ -7,7 +7,6 @@ package edu.unibi.agbi.petrinet.model;
 
 import edu.unibi.agbi.petrinet.entity.IElement;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -17,9 +16,10 @@ import java.util.Set;
 public class Parameter
 {
     private final String id;
+    private final Type type;
+    
     private String value;
     private String unit;
-    private final Type type;
 
     private final IElement element;
     private final Set<IElement> elementsUsing;

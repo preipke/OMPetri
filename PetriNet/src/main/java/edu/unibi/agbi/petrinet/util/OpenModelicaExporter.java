@@ -14,7 +14,6 @@ import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
 import java.io.BufferedWriter;
@@ -111,7 +110,7 @@ public class OpenModelicaExporter
             parameters.put("_" + param.getId(), param);
         });
         for (Transition transition : transitions) {
-            transition.getParameters().forEach(param -> {
+            transition.getLocalParameters().forEach(param -> {
                 parameters.put("_" + transition.getId() + "_" + param.getId(), param);
             });
         }

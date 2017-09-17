@@ -16,15 +16,13 @@ import java.util.List;
  */
 public abstract class Node extends Element implements INode
 {
-    private boolean isConstant = false;
+    protected boolean isConstant = false;
 
-    private final List<IArc> arcsIn;
-    private final List<IArc> arcsOut;
+    protected final List<IArc> arcsIn;
+    protected final List<IArc> arcsOut;
 
-    public Node(String internalId) {
-
-        id = internalId;
-
+    public Node(String id, Type elementType) {
+        super(id, elementType);
         arcsIn = new ArrayList();
         arcsOut = new ArrayList();
     }
