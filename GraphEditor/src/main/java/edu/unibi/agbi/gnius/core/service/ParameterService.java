@@ -68,10 +68,10 @@ public class ParameterService
             if (Parameter.Type.LOCAL == param.getType()) {
                 if (param.getRelatedElement() instanceof DataTransition) {
                     DataTransition transition = (DataTransition) param.getRelatedElement();
-                    if (transition.getParameter(param.getId()) != null) {
+                    if (transition.getLocalParameter(param.getId()) != null) {
                         throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
                     }
-                    transition.addParameter(param);
+                    transition.addLocalParameter(param);
                 } else {
                     throw new ParameterException("Trying to store LOCAL parameter for non-transition element.");
                 }
@@ -109,7 +109,7 @@ public class ParameterService
      */
     private void setTransitionFunctionParameterReferences(Model model, Transition transition) throws ParameterException {
         for (String id : transition.getFunction().getParameterIds()) {
-            Parameter param = transition.getParameter(id);
+            Parameter param = transition.getLocalParameter(id);
             if (param == null) {
                 param = model.getParameter(id);
             }
@@ -130,7 +130,7 @@ public class ParameterService
      */
     private void clearTransitionFunctionParameterReferences(Model model, Transition transition) throws ParameterException {
         for (String id : transition.getFunction().getParameterIds()) {
-            Parameter param = transition.getParameter(id);
+            Parameter param = transition.getLocalParameter(id);
             if (param == null) {
                 param = model.getParameter(id);
             }
@@ -186,7 +186,7 @@ public class ParameterService
     public List<Parameter> getLocalParameters(IDataElement elem) {
         List<Parameter> parameters = new ArrayList();
         if (elem instanceof DataTransition) {
-            parameters.addAll(((DataTransition) elem).getParameters());
+            parameters.addAll(((DataTransition) elem).getLocalParameters());
         }
         parameters.sort(Comparator.comparing(Parameter::getId));
         return parameters;
@@ -235,9 +235,9 @@ public class ParameterService
 
         dataService.getModel().getTransitions().forEach(transition -> {
             if (transition.equals(element)) {
-                locals.addAll(transition.getParameters());
+                locals.addAll(transition.getLocalParameters());
             } else {
-                others.addAll(transition.getParameters());
+                others.addAll(transition.getLocalParameters());
             }
         });
 
@@ -389,7 +389,7 @@ public class ParameterService
         if (param.getType() == Parameter.Type.LOCAL) {
             if (param.getRelatedElement() != null
                     && param.getRelatedElement() instanceof DataTransition) {
-                ((DataTransition) param.getRelatedElement()).getParameters().remove(param);
+                ((DataTransition) param.getRelatedElement()).getLocalParameters().remove(param);
             } else {
                 throw new ParameterException("Inconsistency found. LOCAL parameter related to non-transition element.");
             }
@@ -433,7 +433,7 @@ public class ParameterService
             if (!candidate.matches("")) {
                 if (!candidate.matches(functionBuilder.getNumberRegex())) { // candidate is NaN
 
-                    param = transition.getParameter(candidate);
+                    param = transition.getLocalParameter(candidate);
                     if (param == null) {
                         param = model.getParameter(candidate);
                     }

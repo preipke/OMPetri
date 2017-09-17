@@ -6,14 +6,14 @@
 package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.business.controller.editor.graph.SimulationController;
-import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
-import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
-import edu.unibi.agbi.gnius.core.service.exception.SimulationException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
+import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
+import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
+import edu.unibi.agbi.gnius.core.service.exception.SimulationException;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.gnius.core.service.simulation.SimulationServer;
-import edu.unibi.agbi.petrinet.model.References;
+import edu.unibi.agbi.petrinet.util.References;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;

@@ -7,7 +7,6 @@ package edu.unibi.agbi.gnius.core.service;
 
 import edu.unibi.agbi.gnius.core.model.dao.ResultsDao;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
 import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
@@ -17,6 +16,7 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -189,7 +189,7 @@ public class ResultsService
     public List<ResultSet> getResultSets(SimulationResult simulation, IElement element) throws ResultsException {
         
         List<ResultSet> sets;
-        List<String> variables;
+        Set<String> variables;
         
         if (simulation == null || element == null) {
             return new ArrayList();
@@ -201,7 +201,7 @@ public class ResultsService
         if (element.getElementType() == Element.Type.PLACE) {
             for (String var : variables) {
                 if (var.matches(valueToken)) { // use only .t per default
-                    variables = new ArrayList();
+                    variables = new HashSet();
                     variables.add(var);
                     break;
                 }
@@ -342,7 +342,7 @@ public class ResultsService
 
         Map<String, List<String>> valuesTmp, valuesShared = null;
 
-        List<String> values, valuesRemoved;
+        Set<String> values, valuesRemoved;
         String name;
 
         for (IElement element : elements) {
@@ -366,7 +366,7 @@ public class ResultsService
 
             } else {
 
-                valuesRemoved = new ArrayList();
+                valuesRemoved = new HashSet();
 
                 for (String key : valuesShared.keySet()) {
                     if (valuesTmp.containsKey(key)) {

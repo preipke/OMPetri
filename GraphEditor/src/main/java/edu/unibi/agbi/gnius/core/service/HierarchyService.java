@@ -300,7 +300,7 @@ public class HierarchyService
         graph.remove(cluster);
         graph.getChildGraphs().remove(graphChild);
         while (!graphChild.getChildGraphs().isEmpty()) {
-            graphChild.getChildGraphs().get(0).setParentGraph(graph);
+            graphChild.getChildGraphs().iterator().next().setParentGraph(graph);
         }
 
         /**

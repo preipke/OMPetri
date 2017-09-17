@@ -804,7 +804,7 @@ public class XmlModelConverter
             
             // Local Parameters
             Element p = dom.createElement(tagParametersLocal);
-            data.getParameters().forEach(param -> {
+            data.getLocalParameters().forEach(param -> {
                 p.appendChild(getParameterElement(dom, param));
             });
             t.appendChild(p);

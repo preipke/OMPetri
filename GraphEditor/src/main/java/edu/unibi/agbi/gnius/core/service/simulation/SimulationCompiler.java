@@ -8,7 +8,7 @@ package edu.unibi.agbi.gnius.core.service.simulation;
 import edu.unibi.agbi.gnius.core.service.exception.SimulationException;
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.util.Utility;
-import edu.unibi.agbi.petrinet.model.References;
+import edu.unibi.agbi.petrinet.util.References;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import java.io.File;
 import java.io.IOException;

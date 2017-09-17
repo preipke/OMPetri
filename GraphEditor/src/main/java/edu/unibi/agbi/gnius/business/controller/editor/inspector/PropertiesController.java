@@ -391,7 +391,7 @@ public class PropertiesController implements Initializable
         menuLocalParams.getItems().clear();
         menuGlobalParams.getItems().clear();
 
-        transition.getParameters();
+        transition.getLocalParameters();
         parameterService.getParameters();
 
         parameterService.getLocalParameters(transition).stream()

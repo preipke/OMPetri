@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -376,7 +377,7 @@ public class ResultsController implements Initializable
 
             if (values.size() == 1) {
 
-                List<String> valueStings = simulationChoice.getElementFilter((IElement) values.get(0));
+                Set<String> valueStings = simulationChoice.getElementFilter((IElement) values.get(0));
 
                 for (String value : valueStings) {
                     name = resultsService.getValueName(value, simulationChoice);

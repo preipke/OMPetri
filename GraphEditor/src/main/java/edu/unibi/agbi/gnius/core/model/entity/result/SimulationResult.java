@@ -7,16 +7,17 @@ package edu.unibi.agbi.gnius.core.model.entity.result;
 
 import edu.unibi.agbi.gnius.core.model.dao.DataDao;
 import edu.unibi.agbi.gnius.core.service.exception.ResultsException;
-import edu.unibi.agbi.petrinet.model.References;
+import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.util.References;
+import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import edu.unibi.agbi.petrinet.entity.IElement;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * A data structure for storing the results of a simulation.
@@ -83,7 +84,7 @@ public class SimulationResult
      * @param element
      * @return
      */
-    public List<String> getElementFilter(IElement element) {
+    public Set<String> getElementFilter(IElement element) {
         return variableReferences.getElementToFilterReferences().get(element);
     }
 

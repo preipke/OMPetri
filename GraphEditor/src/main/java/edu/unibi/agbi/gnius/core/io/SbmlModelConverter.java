@@ -341,15 +341,15 @@ public class SbmlModelConverter
                      * If param id is same as an existing node, store param
                      * locally.
                      */
-//                    if (transition.getParameter(id) == null) {
-//                        transition.getParameters().put(id, param);
+//                    if (transition.getLocalParameter(id) == null) {
+//                        transition.getLocalParameters().put(id, param);
 //                    } else {
 //                        throw new IOException("Parameter '" + param.getId() + "' already exists for element '" + transition.getId() + "'.");
 //                    }
 //                    if (dao.getModel().contains(id)) {
-//                        if (transition.getParameter(id) == null) {
+//                        if (transition.getLocalParameter(id) == null) {
 //                            System.out.println("Parameter '" + param.getId() + "' already exists as a reference! Storing locally.");
-//                            transition.addParameter(param);
+//                            transition.addLocalParameter(param);
 //                        } else {
 //                            throw new IOException("Parameter '" + param.getId() + "' already exists as a reference and on local scale.");
 //                        }
@@ -357,10 +357,10 @@ public class SbmlModelConverter
 //                        if (!dao.getModel().contains(param)) {
 //                            dao.getModel().add(param);
 //                        } else {
-//                            if (!dao.getModel().getParameter(id).getValue().contentEquals(value)) {
-                    if (transition.getParameter(id) == null) {
+//                            if (!dao.getModel().getLocalParameter(id).getValue().contentEquals(value)) {
+                    if (transition.getLocalParameter(id) == null) {
 //                                    System.out.println("Parameter '" + param.getId() + "' already exists! Storing locally.");
-                        transition.addParameter(param);
+                        transition.addLocalParameter(param);
                     } else {
                         throw new IOException("Parameter '" + param.getId() + "' already exists on local scale!");
 //                                    throw new IOException("Parameter '" + param.getId() + "' already exists on global and local scale!");
@@ -461,7 +461,11 @@ public class SbmlModelConverter
                     data = getPlace(elem, dao, dataId, Place.Type.valueOf(typeStrings[0].toUpperCase()));
                     data.setName(dataId);
                     data.setConstant(constant);
-                    dao.getModel().add(data);
+                    try {
+                        dao.getModel().add(data);
+                    } catch (Exception ex) {
+                        throw new IOException(ex.getMessage());
+                    }
                 }
                 node = new GraphPlace(nodeId, (DataPlace) data);
                 break;
@@ -471,7 +475,11 @@ public class SbmlModelConverter
                     data = getTransition(elem, dao, dataId, Transition.Type.valueOf(typeStrings[0].toUpperCase()));
                     data.setName(dataId);
                     data.setConstant(constant);
-                    dao.getModel().add(data);
+                    try {
+                        dao.getModel().add(data);
+                    } catch (Exception ex) {
+                        throw new IOException(ex.getMessage());
+                    }
                 }
                 node = new GraphTransition(nodeId, (DataTransition) data);
                 break;
@@ -653,7 +661,11 @@ public class SbmlModelConverter
                 data
         );
 
-        dao.getModel().add(data);
+        try {
+            dao.getModel().add(data);
+        } catch (Exception ex) {
+            throw new IOException(ex.getMessage());
+        }
         dao.getGraphRoot().add(connection);
         try {
             dataService.StyleElement(connection);

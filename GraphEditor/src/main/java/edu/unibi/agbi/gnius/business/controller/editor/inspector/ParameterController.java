@@ -72,18 +72,18 @@ public class ParameterController implements Initializable
             setParameters(element);
         } else {
             if (element != null && element.getType() == DataType.TRANSITION) {
-                if (((DataTransition) element).getParameters().size() > 0) {
+                if (((DataTransition) element).getLocalParameters().size() > 0) {
                     setParameters(element);
                 } else {
                     if (dataOld.getType() == DataType.TRANSITION) {
-                        if (((DataTransition) dataOld).getParameters().size() > 0) {
+                        if (((DataTransition) dataOld).getLocalParameters().size() > 0) {
                             setParameters(element);
                         }
                     }
                 }
             } else {
                 if (dataOld.getType() == DataType.TRANSITION) {
-                    if (((DataTransition) dataOld).getParameters().size() > 0) {
+                    if (((DataTransition) dataOld).getLocalParameters().size() > 0) {
                         setParameters(element);
                     }
                 }
@@ -213,7 +213,7 @@ public class ParameterController implements Initializable
         
         try {
             if (scope == Parameter.Type.LOCAL) {
-                param = transition.getParameter(id);
+                param = transition.getLocalParameter(id);
             } else {
                 param = parameterService.getParameter(id);
             }
@@ -296,7 +296,7 @@ public class ParameterController implements Initializable
             if (!inputName.getText().isEmpty()) {
                 if (choiceScope.getSelectionModel().getSelectedItem() == Parameter.Type.LOCAL) {
                     if (choiceNode.getSelectionModel().getSelectedItem() != null) {
-                        if (choiceNode.getSelectionModel().getSelectedItem().getParameter(inputName.getText()) != null) {
+                        if (choiceNode.getSelectionModel().getSelectedItem().getLocalParameter(inputName.getText()) != null) {
                             buttonApply.setDisable(false);
                         } else {
                             buttonCreate.setDisable(false);

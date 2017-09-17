@@ -111,11 +111,16 @@ public class DataService
     public synchronized IGraphArc add(DataDao dao, IGraphArc arc) throws DataException {
         if (arc.getData() != null) {
             if (arc.getData().getType() != DataType.CLUSTERARC) {
-                if (dao.getModel().containsAndNotEqual(arc.getData())) {
-                    throw new DataException("Conflict! Another arc has already been stored using the same ID!");
-                } else {
+                try {
                     dao.getModel().add(arc.getData());
+                } catch (Exception ex) {
+                    throw new DataException("Conflict! Another arc has already been stored using the same ID!", ex);
                 }
+//                if (dao.getModel().containsAndNotEqual(arc.getData())) {
+//                    throw new DataException("Conflict! Another arc has already been stored using the same ID!");
+//                } else {
+//                    dao.getModel().add(arc.getData());
+//                }
             }
         }
         dao.getGraph().add(arc);
@@ -134,11 +139,16 @@ public class DataService
     public synchronized IGraphNode add(DataDao dao, IGraphNode node) throws DataException {
         if (node.getData() != null) {
             if (node.getData().getType() != DataType.CLUSTER) {
-                if (dao.getModel().containsAndNotEqual(node.getData())) {
-                    throw new DataException("Conflict! Another node has already been stored using the same ID!");
-                } else {
+                try {
                     dao.getModel().add(node.getData());
+                } catch (Exception ex) {
+                    throw new DataException("Conflict! Another node has already been stored using the same ID!", ex);
                 }
+//                if (dao.getModel().containsAndNotEqual(node.getData())) {
+//                    throw new DataException("Conflict! Another node has already been stored using the same ID!");
+//                } else {
+//                    dao.getModel().add(node.getData());
+//                }
             }
         }
         dao.getGraph().add(node);
