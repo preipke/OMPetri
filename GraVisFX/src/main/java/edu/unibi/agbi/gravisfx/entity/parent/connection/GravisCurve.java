@@ -9,7 +9,7 @@ import edu.unibi.agbi.gravisfx.GravisProperties;
 import edu.unibi.agbi.gravisfx.entity.GravisType;
 import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;

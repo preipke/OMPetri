@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.entity;
 
+import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import java.util.Collection;
 

@@ -6,8 +6,7 @@
 package edu.unibi.agbi.gravisfx.entity.child;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.entity.IGravisChild;
-import edu.unibi.agbi.gravisfx.entity.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;

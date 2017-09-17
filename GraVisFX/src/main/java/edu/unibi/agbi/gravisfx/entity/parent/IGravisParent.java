@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity;
+package edu.unibi.agbi.gravisfx.entity.parent;
 
+import edu.unibi.agbi.gravisfx.entity.GravisType;
+import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.List;
 

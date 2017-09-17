@@ -12,11 +12,9 @@ import edu.unibi.agbi.gravisfx.entity.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.ConnectionLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javafx.beans.property.SimpleStringProperty;
@@ -49,11 +47,12 @@ public class Graph extends Group
     private final LabelLayer labelLayer;
     private final NodeLayer nodeLayer;
 
-    private final Scale scale;
-
     private final StringProperty name;
-    private final List<Graph> childGraphs;
+    
+    private final Set<Graph> childGraphs;
     private Graph parentGraph;
+
+    private final Scale scale;
 
     public Graph() {
         this(null);
@@ -79,7 +78,7 @@ public class Graph extends Group
         this.scale = new Scale(1.0d, 1.0d);
         this.getTransforms().add(scale);
 
-        this.childGraphs = new ArrayList();
+        this.childGraphs = new HashSet();
         this.parentGraph = parentGraph;
         if (parentGraph != null) {
             parentGraph.getChildGraphs().add(this);
@@ -212,7 +211,7 @@ public class Graph extends Group
         return parentGraph;
     }
 
-    public List<Graph> getChildGraphs() {
+    public Set<Graph> getChildGraphs() {
         return childGraphs;
     }
 

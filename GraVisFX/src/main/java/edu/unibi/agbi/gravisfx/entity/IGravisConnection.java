@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.gravisfx.entity;
 
+import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
 import javafx.beans.property.DoubleProperty;
 
 /**
