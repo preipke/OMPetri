@@ -8,6 +8,7 @@ package edu.unibi.agbi.petrinet.entity.impl;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ public class Place extends Node
         super(id, Element.Type.PLACE);
         this.placeType = placeType;
         this.token = new HashMap();
-        this.parametersRelated = null;
         this.parametersLocal = null;
     }
 
@@ -49,6 +49,21 @@ public class Place extends Node
 
     public final Type getPlaceType() {
         return placeType;
+    }
+    
+    @Override
+    public void addLocalParameter(Parameter param) {
+        throw new UnsupportedOperationException("A place is not supposed to have any local parameters!");
+    }
+    
+    @Override
+    public Parameter getLocalParameter(String id) {
+        throw new UnsupportedOperationException("A place is not supposed to have any local parameters!");
+    }
+    
+    @Override
+    public Collection<Parameter> getLocalParameters() {
+        throw new UnsupportedOperationException("A place is not supposed to have any local parameters!");
     }
 
     public enum Type

@@ -77,13 +77,13 @@ public abstract class Element implements IElement
     }
     
     @Override
-    public Collection<Parameter> getLocalParameters() {
-        return parametersLocal.values();
+    public Parameter getLocalParameter(String id) {
+        return parametersLocal.get(id);
     }
     
     @Override
-    public Parameter getLocalParameter(String id) {
-        return parametersLocal.get(id);
+    public Collection<Parameter> getLocalParameters() {
+        return parametersLocal.values();
     }
     
     @Override

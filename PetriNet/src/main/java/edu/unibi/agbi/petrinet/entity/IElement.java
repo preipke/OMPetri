@@ -30,9 +30,9 @@ public interface IElement
     
     public void addLocalParameter(Parameter param);
     
-    public Collection<Parameter> getLocalParameters();
-    
     public Parameter getLocalParameter(String id);
+    
+    public Collection<Parameter> getLocalParameters();
 
     public Set<Parameter> getRelatedParameters();
 }

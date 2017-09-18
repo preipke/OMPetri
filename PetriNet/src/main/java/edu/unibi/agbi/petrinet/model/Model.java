@@ -12,7 +12,6 @@ import java.util.Map;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.ArrayList;
@@ -48,28 +47,30 @@ public class Model
     public void add(Parameter param) {
         parameters.put(param.getId(), param);
     }
-
-    public void add(IArc arc) throws Exception {
-        if (arcs.containsKey(arc.getId())) {
-            throw new Exception("An arc has already been stored using the same identifier! (" + arc.getId() + ")");
+    
+    public void add(IElement element) throws Exception {
+        if (containsAndNotEqual(element)) {
+            throw new Exception("Another element has already been stored using the same identifier! (" + element.getId() + ")");
         }
+        switch (element.getElementType()) {
+            case ARC:
+                add((Arc) element);
+                break;
+            case PLACE:
+                places.put(element.getId(), (Place) element);
+                break;
+            case TRANSITION:
+                transitions.put(element.getId(), (Transition) element);
+                break;
+            default:
+                throw new Exception("Unhandled element type defined!");
+        }
+    }
+
+    private void add(IArc arc) throws Exception {
         arcs.put(arc.getId(), (Arc) arc);
         arc.getSource().getArcsOut().add(arc);
         arc.getTarget().getArcsIn().add(arc);
-    }
-
-    public void add(INode node) throws Exception {
-        if (node instanceof Place) {
-            if (places.containsKey(node.getId())) {
-                throw new Exception("A place has already been stored using the same identifier! (" + node.getId() + ")");
-            }
-            places.put(node.getId(), (Place) node);
-        } else {
-            if (transitions.containsKey(node.getId())) {
-                throw new Exception("A transition has already been stored using the same identifier! (" + node.getId() + ")");
-            }
-            transitions.put(node.getId(), (Transition) node);
-        }
     }
     
     public void clear() {
@@ -84,39 +85,59 @@ public class Model
         return parameters.containsKey(param.getId());
     }
     
-    public boolean contains(String nodeId) {
-        if (places.containsKey(nodeId)) {
-            return true;
-        } else {
-            return transitions.containsKey(nodeId);
+    public boolean contains(IElement element) throws Exception {
+        switch (element.getElementType()) {
+            case ARC:
+                return !arcs.containsKey(element.getId());
+            case PLACE:
+                return places.containsKey(element.getId());
+            case TRANSITION:
+                return transitions.containsKey(element.getId());
+            default:
+                throw new Exception("Unhandled element type!");
         }
     }
 
-    public boolean containsAndNotEqual(IArc arc) {
-        if (!arcs.containsKey(arc.getId())) {
-            return false;
+    /**
+     * Indicates wether another element has been stored using the exact same
+     * identifier as a given element or not.
+     * 
+     * @param element
+     * @return
+     * @throws Exception 
+     */
+    private boolean containsAndNotEqual(IElement element) throws Exception {
+        switch (element.getElementType()) {
+            case ARC:
+                if (arcs.containsKey(element.getId())) {
+                    return !arcs.get(element.getId()).equals(element);
+                }
+                return false;
+            case PLACE:
+                if (places.containsKey(element.getId())) {
+                    return !places.get(element.getId()).equals(element);
+                }
+                return false;
+            case TRANSITION:
+                if (transitions.containsKey(element.getId())) {
+                    return !transitions.get(element.getId()).equals(element);
+                }
+                return false;
+            default:
+                throw new Exception("Unhandled element type!");
         }
-        return !arcs.get(arc.getId()).equals(arc);
-    }
-
-    public boolean containsAndNotEqual(INode node) {
-        if (node.getElementType() == Element.Type.PLACE) {
-            if (places.containsKey(node.getId())) {
-                return !places.get(node.getId()).equals(node);
-            }
-        } else {
-            if (transitions.containsKey(node.getId())) {
-                return !transitions.get(node.getId()).equals(node);
-            }
-        }
-        return false;
     }
 
     public IElement remove(IElement element) throws Exception {
-        if (element instanceof Arc) {
-            return remove((Arc) element);
-        } else {
-            return remove((INode) element);
+        switch (element.getElementType()) {
+            case ARC:
+                return remove((Arc) element);
+            case PLACE:
+                return remove((INode) element);
+            case TRANSITION:
+                return remove((INode) element);
+            default:
+                throw new Exception("Unhandled element type!");
         }
     }
 
