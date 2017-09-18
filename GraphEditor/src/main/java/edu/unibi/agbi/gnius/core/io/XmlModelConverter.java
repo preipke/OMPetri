@@ -26,8 +26,8 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.core.service.ParameterService;
-import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
@@ -897,8 +897,8 @@ public class XmlModelConverter
         for (IGravisNode node : nodes) {
             n = dom.createElement(tagNode);
             n.setAttribute(attrId, node.getId());
-            n.setAttribute(attrPosX, String.valueOf(node.getShape().getTranslateX()));
-            n.setAttribute(attrPosY, String.valueOf(node.getShape().getTranslateY()));
+            n.setAttribute(attrPosX, String.valueOf(node.translateXProperty().get()));
+            n.setAttribute(attrPosY, String.valueOf(node.translateYProperty().get()));
             elements.appendChild(n);
         }
         

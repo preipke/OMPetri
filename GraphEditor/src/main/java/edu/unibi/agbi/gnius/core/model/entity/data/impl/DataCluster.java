@@ -9,7 +9,7 @@ import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisItem;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
@@ -70,7 +70,7 @@ public class DataCluster implements IDataNode
     @Override
     public boolean isDisabled() {
         boolean isDisabled = true;
-        for (IGravisElement element : graph.getNodes()) {
+        for (IGravisItem element : graph.getNodes()) {
             isDisabled = ((IGraphElement) element).isElementDisabled();
             if (!isDisabled) { // if at least one node is not disabled, show shape as enabled
                 break;
@@ -81,10 +81,10 @@ public class DataCluster implements IDataNode
 
     @Override
     public void setDisabled(boolean value) {
-        for (IGravisElement element : graph.getNodes()) {
+        for (IGravisItem element : graph.getNodes()) {
             ((IGraphElement) element).setElementDisabled(value);
         }
-        for (IGravisElement element : graph.getConnections()) {
+        for (IGravisItem element : graph.getConnections()) {
             ((IGraphElement) element).setElementDisabled(value);
         }
         UpdateShape();

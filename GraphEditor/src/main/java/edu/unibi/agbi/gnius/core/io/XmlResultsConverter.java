@@ -13,7 +13,6 @@ import edu.unibi.agbi.gnius.core.model.entity.result.ResultSet;
 import edu.unibi.agbi.gnius.core.model.entity.result.SimulationResult;
 import edu.unibi.agbi.gnius.core.service.DataService;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.abstr.Element.Type;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
@@ -163,12 +162,12 @@ public class XmlResultsConverter
                 case PLACE:
                     element = new DataPlace(id, Place.Type.valueOf(subtype));
                     element.setName(name);
-                    dao.getModel().add((INode) element);
+                    dao.getModel().add(element);
                     break;
                 case TRANSITION:
                     element = new DataTransition(id, Transition.Type.valueOf(subtype));
                     element.setName(name);
-                    dao.getModel().add((INode) element);
+                    dao.getModel().add(element);
                     break;
             }
         }

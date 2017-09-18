@@ -5,10 +5,10 @@
  */
 package edu.unibi.agbi.gravisfx.graph;
 
-import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.root.GravisType;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
+import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.layer.ConnectionLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.LabelLayer;
 import edu.unibi.agbi.gravisfx.graph.layer.NodeLayer;

@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity;
+package edu.unibi.agbi.gravisfx.entity.root.connection;
 
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import javafx.beans.property.DoubleProperty;
+import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
 
 /**
  * Interface for interactive connections within the graph. Used by parent
@@ -15,7 +16,7 @@ import javafx.beans.property.DoubleProperty;
  *
  * @author PR
  */
-public interface IGravisConnection extends IGravisElement, IGravisParent
+public interface IGravisConnection extends IGravisRoot
 {
     public DoubleProperty endXProperty();
 

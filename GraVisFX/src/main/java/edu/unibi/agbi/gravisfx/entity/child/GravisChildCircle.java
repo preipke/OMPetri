@@ -5,12 +5,12 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
+import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
 
 /**
  *
@@ -19,9 +19,9 @@ import javafx.scene.shape.Shape;
 public class GravisChildCircle extends Circle implements IGravisChild
 {
     private final List<GravisShapeHandle> elementHandles;
-    private final IGravisParent parentElement;
+    private final IGravisRoot parentElement;
 
-    public GravisChildCircle(IGravisParent parentElement) {
+    public GravisChildCircle(IGravisRoot parentElement) {
 
         super();
 
@@ -32,13 +32,13 @@ public class GravisChildCircle extends Circle implements IGravisChild
     }
 
     @Override
-    public IGravisParent getParentShape() {
-        return parentElement;
+    public final double getCenterOffsetX() {
+        return 0;
     }
 
     @Override
-    public Object getBean() {
-        return GravisChildCircle.this;
+    public final double getCenterOffsetY() {
+        return 0;
     }
 
     @Override
@@ -47,8 +47,8 @@ public class GravisChildCircle extends Circle implements IGravisChild
     }
 
     @Override
-    public Shape getShape() {
-        return this;
+    public IGravisRoot getParentShape() {
+        return parentElement;
     }
 
     @Override
@@ -56,15 +56,5 @@ public class GravisChildCircle extends Circle implements IGravisChild
         List<Shape> shapes = new ArrayList();
         shapes.add(this);
         return shapes;
-    }
-
-    @Override
-    public final double getCenterOffsetX() {
-        return 0;
-    }
-
-    @Override
-    public final double getCenterOffsetY() {
-        return 0;
     }
 }

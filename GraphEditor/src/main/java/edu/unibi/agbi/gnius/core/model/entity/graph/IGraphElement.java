@@ -6,14 +6,14 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
+import edu.unibi.agbi.gravisfx.entity.IGravisItem;
 
 /**
  *
  * @author PR
  */
-public interface IGraphElement extends IGravisElement, IGravisParent
+public interface IGraphElement extends IGravisItem, IGravisRoot
 {
     public IDataElement getData();
     public boolean isElementDisabled();

@@ -18,8 +18,8 @@ import edu.unibi.agbi.gnius.core.service.exception.DataException;
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
 import edu.unibi.agbi.gnius.core.service.HierarchyService;
 import edu.unibi.agbi.gnius.util.Calculator;
+import edu.unibi.agbi.gravisfx.entity.IGravisItem;
 import edu.unibi.agbi.gravisfx.entity.child.IGravisChild;
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -101,8 +101,8 @@ public class MouseEventHandler
         eventMouseMoved = event;
 
         if (!isPrimaryButtonDown) {
-            if (event.getTarget() instanceof IGravisElement) {
-                selectionService.hover((IGravisElement) event.getTarget());
+            if (event.getTarget() instanceof IGravisItem) {
+                selectionService.hover((IGravisItem) event.getTarget());
             } else {
                 selectionService.hover(null);
             }
@@ -135,14 +135,14 @@ public class MouseEventHandler
                     selectionService.unselectAll(); // Clearing current selection.
                 }
 
-            } else if (event.getTarget() instanceof IGravisElement) {
+            } else if (event.getTarget() instanceof IGravisItem) {
 
                 /**
                  * Clicking graph elements.
                  */
                 UnlockEditorMode();
 
-                IGravisElement element;
+                IGravisItem element;
                 final IGraphNode node;
 
                 if (event.getTarget() instanceof IGravisChild) {
@@ -473,7 +473,7 @@ public class MouseEventHandler
                     eventTarget = ((IGravisChild) event.getTarget()).getParentShape();
                 }
 
-                if (eventTarget instanceof IGravisElement) {
+                if (eventTarget instanceof IGravisItem) {
 
                     element = (IGraphElement) eventTarget;
 

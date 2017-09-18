@@ -11,13 +11,13 @@ import edu.unibi.agbi.gnius.core.model.entity.data.IDataElement;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.IGravisItem;
+import edu.unibi.agbi.gravisfx.entity.child.IGravisChild;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import edu.unibi.agbi.gravisfx.entity.child.IGravisChild;
 
 /**
  *
@@ -58,7 +58,7 @@ public class SelectionService
      *
      * @param element
      */
-    public void hover(IGravisElement element) {
+    public void hover(IGravisItem element) {
 
         if (highlightedElementsHandles != null) {
 

@@ -23,12 +23,12 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
-import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
+import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
+import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -325,10 +325,10 @@ public class DataService
     public synchronized IGraphArc CreateConnectionTmp(IGraphNode source) {
         GraphArc edge;
         edge = new GraphArc(source.getId() + "null", source);
-        edge.getParentElementHandles().forEach(ele -> {
+        edge.getRootHandles().forEach(ele -> {
             ele.setActiveStyleClass(styleArcDefault);
         });
-        edge.getChildElementHandles().forEach(ele -> {
+        edge.getChildHandles().forEach(ele -> {
             ele.setActiveStyleClass(styleArcDefaultHead);
         });
         edge.setArrowHeadVisible(true);
@@ -683,10 +683,10 @@ public class DataService
      */
     private void setElementStyle(IDataElement element, String styleParent, String styleChildren) {
         for (IGraphElement elem : element.getShapes()) {
-            elem.getParentElementHandles().forEach(s -> {
+            elem.getRootHandles().forEach(s -> {
                 s.setActiveStyleClass(styleParent);
             });
-            elem.getChildElementHandles().forEach(s -> {
+            elem.getChildHandles().forEach(s -> {
                 s.setActiveStyleClass(styleChildren);
             });
         }

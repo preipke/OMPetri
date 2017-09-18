@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity;
+package edu.unibi.agbi.gravisfx.entity.root;
 
 /**
  *

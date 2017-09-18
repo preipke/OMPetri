@@ -5,13 +5,13 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.GravisProperties;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
+import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
 
 /**
  *
@@ -20,9 +20,9 @@ import javafx.scene.shape.Shape;
 public class GravisChildRectangle extends Rectangle implements IGravisChild
 {
     private final List<GravisShapeHandle> elementHandles;
-    private final IGravisParent parentElement;
+    private final IGravisRoot parentElement;
 
-    public GravisChildRectangle(IGravisParent parentNode) {
+    public GravisChildRectangle(IGravisRoot parentNode) {
 
         super();
 
@@ -38,13 +38,13 @@ public class GravisChildRectangle extends Rectangle implements IGravisChild
     }
 
     @Override
-    public IGravisParent getParentShape() {
-        return parentElement;
+    public final double getCenterOffsetX() {
+        return getWidth() / 2;
     }
 
     @Override
-    public Object getBean() {
-        return GravisChildRectangle.this;
+    public final double getCenterOffsetY() {
+        return getHeight() / 2;
     }
 
     @Override
@@ -53,8 +53,8 @@ public class GravisChildRectangle extends Rectangle implements IGravisChild
     }
 
     @Override
-    public Shape getShape() {
-        return this;
+    public IGravisRoot getParentShape() {
+        return parentElement;
     }
 
     @Override
@@ -62,15 +62,5 @@ public class GravisChildRectangle extends Rectangle implements IGravisChild
         List<Shape> shapes = new ArrayList();
         shapes.add(this);
         return shapes;
-    }
-
-    @Override
-    public final double getCenterOffsetX() {
-        return getWidth() / 2;
-    }
-
-    @Override
-    public final double getCenterOffsetY() {
-        return getHeight() / 2;
     }
 }

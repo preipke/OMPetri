@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity.parent.connection;
+package edu.unibi.agbi.gravisfx.entity.root.connection;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.root.GravisType;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
@@ -29,7 +27,7 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisFlexEdge extends Path implements IGravisConnection, IGravisParent
+public class GravisFlexEdge extends Path implements IGravisConnection
 {
     private final DoubleProperty endXProperty;
     private final DoubleProperty endYProperty;
@@ -483,26 +481,6 @@ public class GravisFlexEdge extends Path implements IGravisConnection, IGravisPa
     }
 
     @Override
-    public DoubleProperty endXProperty() {
-        return endXProperty;
-    }
-
-    @Override
-    public DoubleProperty endYProperty() {
-        return endYProperty;
-    }
-
-    @Override
-    public IGravisNode getSource() {
-        return source;
-    }
-
-    @Override
-    public IGravisNode getTarget() {
-        return target;
-    }
-
-    @Override
     public final double getCenterOffsetX() {
         return 0;
     }
@@ -510,6 +488,16 @@ public class GravisFlexEdge extends Path implements IGravisConnection, IGravisPa
     @Override
     public final double getCenterOffsetY() {
         return 0;
+    }
+
+    @Override
+    public DoubleProperty endXProperty() {
+        return endXProperty;
+    }
+
+    @Override
+    public DoubleProperty endYProperty() {
+        return endYProperty;
     }
 
     @Override
@@ -528,14 +516,14 @@ public class GravisFlexEdge extends Path implements IGravisConnection, IGravisPa
     }
 
     @Override
-    public List<GravisShapeHandle> getParentElementHandles() {
+    public List<GravisShapeHandle> getRootHandles() {
         List<GravisShapeHandle> handles = new ArrayList();
         handles.add(elementHandles.get(0));
         return handles;
     }
 
     @Override
-    public List<GravisShapeHandle> getChildElementHandles() {
+    public List<GravisShapeHandle> getChildHandles() {
         List<GravisShapeHandle> handles = new ArrayList();
         handles.addAll(arrow.getElementHandles());
         handles.addAll(circle.getElementHandles());
@@ -543,18 +531,18 @@ public class GravisFlexEdge extends Path implements IGravisConnection, IGravisPa
     }
 
     @Override
-    public Object getBean() {
-        return GravisFlexEdge.this;
-    }
-
-    @Override
-    public Shape getShape() {
-        return this;
-    }
-
-    @Override
     public List<Shape> getShapes() {
         return shapes;
+    }
+
+    @Override
+    public IGravisNode getSource() {
+        return source;
+    }
+
+    @Override
+    public IGravisNode getTarget() {
+        return target;
     }
 
     @Override

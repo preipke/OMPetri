@@ -7,8 +7,8 @@ package edu.unibi.agbi.gnius.core.model.entity.graph.impl;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.impl.DataCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
-import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.parent.node.GravisRectangle;
+import edu.unibi.agbi.gravisfx.entity.root.GravisType;
+import edu.unibi.agbi.gravisfx.entity.root.node.GravisRectangle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 
 /**

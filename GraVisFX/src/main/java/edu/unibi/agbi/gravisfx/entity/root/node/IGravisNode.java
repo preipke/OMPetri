@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity;
+package edu.unibi.agbi.gravisfx.entity.root.node;
 
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import java.util.Collection;
+import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
 
 /**
  * Interface for interactive nodes within the graph. Used by parent components
@@ -15,7 +16,7 @@ import java.util.Collection;
  *
  * @author PR
  */
-public interface IGravisNode extends IGravisElement, IGravisParent
+public interface IGravisNode extends IGravisRoot
 {
     public Collection<IGravisNode> getParents();
 

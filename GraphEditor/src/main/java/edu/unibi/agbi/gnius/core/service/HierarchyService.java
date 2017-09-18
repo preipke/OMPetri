@@ -19,10 +19,10 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.gnius.util.Calculator;
-import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.IGravisCluster;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.root.GravisType;
+import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -270,8 +270,8 @@ public class HierarchyService
         if (dataService.isGridEnabled()) {
             pos = calculator.getPositionInGrid(pos, dataService.getGraph());
         }
-        double translateX = cluster.getShape().getTranslateX() + cluster.getCenterOffsetX() - pos.getX();
-        double translateY = cluster.getShape().getTranslateY() + cluster.getCenterOffsetY() - pos.getY();
+        double translateX = cluster.translateXProperty().get() + cluster.getCenterOffsetX() - pos.getX();
+        double translateY = cluster.translateYProperty().get() + cluster.getCenterOffsetY() - pos.getY();
 
         /**
          * Add all nodes and connections from the child graph (cluster) to the

@@ -5,11 +5,12 @@
  */
 package edu.unibi.agbi.gravisfx.entity.util;
 
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;
 import javafx.css.PseudoClass;
 import javafx.scene.Group;
+import javafx.scene.shape.Shape;
+import edu.unibi.agbi.gravisfx.entity.IGravisItem;
 
 /**
  * Helper class for handling element styling. The defined pseudo classes can be
@@ -28,15 +29,15 @@ public class GravisShapeHandle {
     private static final PseudoClass PSEUDO_CLASS_HOVERED = PseudoClass.getPseudoClass(PSEUDO_CLASS_HOVERED_IDENT);
     private static final PseudoClass PSEUDO_CLASS_SELECTED = PseudoClass.getPseudoClass(PSEUDO_CLASS_SELECTED_IDENT);
 
-    private final IGravisElement element;
+    private final IGravisItem element;
 
     private String activeStyleClass;
 
-    public GravisShapeHandle(IGravisElement element) {
+    public GravisShapeHandle(IGravisItem element) {
         this.element = element;
     }
 
-    public IGravisElement getElement() {
+    public IGravisItem getElement() {
         return element;
     }
 
@@ -48,7 +49,7 @@ public class GravisShapeHandle {
 
         @Override
         public Object getBean() {
-            return element.getBean();
+            return element;
         }
 
         @Override
@@ -65,7 +66,7 @@ public class GravisShapeHandle {
 
         @Override
         public Object getBean() {
-            return element.getBean();
+            return element;
         }
 
         @Override
@@ -82,7 +83,7 @@ public class GravisShapeHandle {
 
         @Override
         public Object getBean() {
-            return element.getBean();
+            return element;
         }
 
         @Override
@@ -99,7 +100,7 @@ public class GravisShapeHandle {
 
         @Override
         public Object getBean() {
-            return element.getBean();
+            return element;
         }
 
         @Override
@@ -155,8 +156,10 @@ public class GravisShapeHandle {
     public void putOnTop() {
         if (element.getParent() != null) {
             Group layer = (Group) element.getParent();
-            layer.getChildren().remove(element.getShape());
-            layer.getChildren().add(element.getShape());
+            for (Shape shape : element.getShapes()) {
+                layer.getChildren().remove(shape);
+                layer.getChildren().add(shape);
+            }
         }
     }
 }

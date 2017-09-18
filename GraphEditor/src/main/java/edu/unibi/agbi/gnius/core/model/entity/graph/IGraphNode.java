@@ -6,7 +6,7 @@
 package edu.unibi.agbi.gnius.core.model.entity.graph;
 
 import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 
 /**
  *

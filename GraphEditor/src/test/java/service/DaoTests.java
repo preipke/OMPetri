@@ -7,8 +7,8 @@ import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
 import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
 import edu.unibi.agbi.gnius.core.service.exception.DataException;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
@@ -112,7 +112,7 @@ public class DaoTests extends TestFXBase {
     }
 
     @Test
-    public void RemoveNodesAndValidate() throws DataException {
+    public void RemoveNodesAndValidate() throws Exception {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
@@ -132,9 +132,7 @@ public class DaoTests extends TestFXBase {
             RemoveNode(node);
 
             Assert.assertEquals(false, dataService.getGraph().contains(node));
-            Assert.assertEquals(false, dataService.getModel().getPlaces().contains(nodeData));
-            Assert.assertEquals(false, dataService.getModel().getTransitions().contains(nodeData));
-            Assert.assertEquals(false, dataService.getModel().contains(nodeData.getId()));
+            Assert.assertEquals(false, dataService.getModel().contains(nodeData));
             
             // removed node can neither be parent nor child of any other node
             for (IGravisNode parent : node.getParents()) {
@@ -159,7 +157,7 @@ public class DaoTests extends TestFXBase {
     }
 
     @Test
-    public void RemoveConnectionsAndValidate() throws DataException {
+    public void RemoveConnectionsAndValidate() throws Exception {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
         List<IGraphNode> transitions = CreateTransitions(transitionCount);
@@ -180,7 +178,7 @@ public class DaoTests extends TestFXBase {
             RemoveArc(arc);
 
             Assert.assertEquals(false, dataService.getGraph().contains(arc));
-            Assert.assertEquals(false, dataService.getModel().getArcs().contains(arcData));
+            Assert.assertEquals(false, dataService.getModel().contains(arcData));
             
             Assert.assertEquals(false, arc.getSource().getConnections().contains(arc));
             Assert.assertEquals(false, arc.getTarget().getConnections().contains(arc));

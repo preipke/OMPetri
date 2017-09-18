@@ -15,24 +15,36 @@ import javafx.scene.Parent;
 import javafx.scene.shape.Shape;
 
 /**
- * Basic interface for all elements visible within the graph. This includes
- * nodes, edges, subelements, labels and so on.
+ * Basic interface for all items that can be visualized within a graph. This
+ * includes nodes, edges, subelements, labels and so on.
  *
  * @author PR
  */
-public interface IGravisElement
+public interface IGravisItem
 {
+    /**
+     * Parent in the JavaFX scene graph. Should be one of the layers defined in
+     * the Graph.
+     *
+     * @return
+     */
     public Parent getParent();
 
-    public Object getBean();
-
-    public Shape getShape();
-
+    /**
+     * Shape objects associated to an item. Can be one or more shapes that are
+     * combined into one element.
+     *
+     * @return
+     */
     public Collection<Shape> getShapes();
 
+    /**
+     * Element handles associated to an item. Can be one or more handles
+     * depending on the number of shapes associated to an item.
+     *
+     * @return
+     */
     public List<GravisShapeHandle> getElementHandles();
-    
-    public void setDisable(boolean value);
 
     public void pseudoClassStateChanged(PseudoClass pseudoClass, boolean active);
 
@@ -41,8 +53,10 @@ public interface IGravisElement
     public DoubleProperty translateXProperty();
 
     public DoubleProperty translateYProperty();
-    
+
     public double getCenterOffsetX();
 
     public double getCenterOffsetY();
+
+    public void setDisable(boolean value);
 }

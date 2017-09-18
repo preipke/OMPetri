@@ -5,14 +5,15 @@
  */
 package edu.unibi.agbi.gravisfx.entity.child;
 
-import edu.unibi.agbi.gravisfx.entity.IGravisElement;
+import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
+import edu.unibi.agbi.gravisfx.entity.IGravisItem;
 
 /**
  * Interface for all elements that are related to a parent element.
  *
  * @author PR
  */
-public interface IGravisChild extends IGravisElement
+public interface IGravisChild extends IGravisItem
 {
-    public IGravisElement getParentShape();
+    public IGravisRoot getParentShape();
 }

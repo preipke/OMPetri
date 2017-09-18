@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.unibi.agbi.gravisfx.entity.parent.connection;
+package edu.unibi.agbi.gravisfx.entity.root.connection;
 
 import edu.unibi.agbi.gravisfx.GravisProperties;
-import edu.unibi.agbi.gravisfx.entity.GravisType;
-import edu.unibi.agbi.gravisfx.entity.IGravisConnection;
-import edu.unibi.agbi.gravisfx.entity.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.parent.IGravisParent;
+import edu.unibi.agbi.gravisfx.entity.root.GravisType;
+import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildArrow;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildCircle;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
@@ -27,7 +25,8 @@ import javafx.scene.shape.Shape;
  *
  * @author PR
  */
-public class GravisEdge extends Path implements IGravisConnection, IGravisParent
+@Deprecated
+public class GravisEdge extends Path implements IGravisConnection
 {
     private final DoubleProperty endXProperty;
     private final DoubleProperty endYProperty;
@@ -304,23 +303,13 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     }
 
     @Override
-    public List<GravisShapeHandle> getElementHandles() {
-        return elementHandles;
+    public final double getCenterOffsetX() {
+        return 0;
     }
 
     @Override
-    public Shape getShape() {
-        return this;
-    }
-
-    @Override
-    public List<Shape> getShapes() {
-        return shapes;
-    }
-
-    @Override
-    public Object getBean() {
-        return GravisEdge.this;
+    public final double getCenterOffsetY() {
+        return 0;
     }
 
     @Override
@@ -334,16 +323,6 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     }
 
     @Override
-    public IGravisNode getSource() {
-        return source;
-    }
-
-    @Override
-    public IGravisNode getTarget() {
-        return target;
-    }
-
-    @Override
     public void setArrowHeadVisible(boolean value) {
         this.arrow.setVisible(value);
     }
@@ -354,33 +333,43 @@ public class GravisEdge extends Path implements IGravisConnection, IGravisParent
     }
 
     @Override
-    public List<GravisShapeHandle> getParentElementHandles() {
+    public List<GravisShapeHandle> getElementHandles() {
+        return elementHandles;
+    }
+
+    @Override
+    public List<GravisShapeHandle> getRootHandles() {
         List<GravisShapeHandle> handles = new ArrayList();
         handles.add(elementHandles.get(0));
         return handles;
     }
 
     @Override
-    public List<GravisShapeHandle> getChildElementHandles() {
+    public List<GravisShapeHandle> getChildHandles() {
         List<GravisShapeHandle> handles = new ArrayList();
         handles.addAll(arrow.getElementHandles());
         handles.addAll(circle.getElementHandles());
         return handles;
     }
+
+    @Override
+    public List<Shape> getShapes() {
+        return shapes;
+    }
+
+    @Override
+    public IGravisNode getSource() {
+        return source;
+    }
+
+    @Override
+    public IGravisNode getTarget() {
+        return target;
+    }
     
     @Override 
     public GravisType getType() {
         return type;
-    }
-
-    @Override
-    public final double getCenterOffsetX() {
-        return 0;
-    }
-
-    @Override
-    public final double getCenterOffsetY() {
-        return 0;
     }
     
     @Override
