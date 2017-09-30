@@ -7,7 +7,7 @@
 
 <HBox maxHeight="-Infinity" maxWidth="-Infinity" spacing="5.0" 
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.graph.ZoomController" >
+      fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController" >
     <children>
         <Button id="buttonCenter" onAction="#CenterNodes" mnemonicParsing="false">
             <tooltip>

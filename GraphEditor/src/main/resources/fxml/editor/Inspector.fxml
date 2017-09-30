@@ -9,7 +9,7 @@
 
 <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="1600.0" 
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.InspectorController">
+      fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.InspectorController">
     <children>
         <fx:include source="inspector/Nodes.fxml" />
         <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">

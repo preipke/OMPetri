@@ -7,12 +7,13 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="parentContainer" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.inspector.PropertiesController">
+<VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:id="parentContainer" fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.inspector.PropertiesController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
     <children>
-        <VBox fx:id="parentTransition" alignment="CENTER_LEFT" spacing="5.0">
+        <VBox fx:id="parentFunction" alignment="CENTER_LEFT" spacing="5.0">
             <children>
                 <Label text="Function:" />
                 <HBox alignment="CENTER" VBox.vgrow="ALWAYS">
@@ -72,7 +73,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
         </GridPane>
-        <GridPane fx:id="parentPlace" hgap="5.0">
+        <GridPane fx:id="parentToken" hgap="5.0">
             <children>
                 <Label text="Constant" />
                 <Label text="Token" GridPane.rowIndex="1" />
@@ -90,19 +91,6 @@
             <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            </rowConstraints>
-        </GridPane>
-        <GridPane fx:id="parentArc" hgap="5.0">
-            <children>
-                <Label text="Weight" />
-                <TextField fx:id="inputWeight" GridPane.columnIndex="1" />
-            </children>
-            <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
-                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
-            </columnConstraints>
-            <rowConstraints>
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
         </GridPane>

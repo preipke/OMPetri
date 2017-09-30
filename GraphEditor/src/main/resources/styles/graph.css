@@ -4,10 +4,6 @@
     -fx-stroke: orange;
     -fx-stroke-width: 2px;
 }
-.arc:hovered {
-    -fx-stroke: orange;
-    -fx-stroke-width: 3px;
-}
 .arc:selected {
     -fx-stroke: red;
     -fx-stroke-width: 3px;

@@ -8,7 +8,7 @@
 
 <VBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" 
       xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="edu.unibi.agbi.gnius.business.controller.editor.inspector.QuickResultsController" >
+      fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.inspector.QuickResultsController" >
     <children>
         <HBox spacing="10.0">
             <children>

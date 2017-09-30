@@ -5,7 +5,7 @@
  */
 package io;
 
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import java.util.List;
 import main.TestFXBase;
 import org.junit.Test;

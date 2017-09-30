@@ -1,15 +1,15 @@
 package main;
 
-import edu.unibi.agbi.gnius.Main;
-import edu.unibi.agbi.gnius.core.service.exception.DataException;
-import edu.unibi.agbi.gnius.core.model.entity.data.DataType;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphElement;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.DataService;
-import edu.unibi.agbi.gnius.core.service.HierarchyService;
-import edu.unibi.agbi.gnius.core.service.SelectionService;
+import edu.unibi.agbi.editor.Main;
+import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.core.data.entity.data.DataType;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphCluster;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.HierarchyService;
+import edu.unibi.agbi.editor.business.service.SelectionService;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class TestFXBase extends ApplicationTest {
 
     private final static boolean HEADLESS = true;
     
-    @Autowired protected DataService dataService;
+    @Autowired protected ModelService dataService;
     @Autowired protected HierarchyService hierarchyService;
     @Autowired protected SelectionService selectionService;
 

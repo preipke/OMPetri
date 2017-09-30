@@ -8,7 +8,9 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox fx:id="elementFrame" maxHeight="-Infinity" maxWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="edu.unibi.agbi.gnius.business.controller.editor.graph.ElementController">
+<VBox fx:id="elementFrame" maxHeight="-Infinity" maxWidth="-Infinity" 
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
+      fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.graph.ElementController">
     <children>
         <TitledPane fx:id="identifierPane" animated="false" text="Identifier">
             <content>
@@ -67,7 +69,7 @@
                     <children>
                         <VBox fx:id="propertiesBox" alignment="TOP_CENTER">
                             <children>
-                                <GridPane fx:id="propertiesSubtype" hgap="5.0">
+                                <GridPane fx:id="parentSubtype" hgap="5.0">
                                     <children>
                                         <Label text="Subtype" />
                                         <ChoiceBox fx:id="choiceSubtype" GridPane.columnIndex="1" GridPane.vgrow="ALWAYS" />
@@ -80,7 +82,7 @@
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     </rowConstraints>
                                 </GridPane>
-                                <GridPane fx:id="propertiesColor" hgap="5.0">
+                                <GridPane fx:id="parentColor" hgap="5.0">
                                     <children>
                                         <Label text="Color" />
                                         <HBox alignment="CENTER_LEFT" spacing="5.0" GridPane.columnIndex="1">
@@ -101,29 +103,16 @@
                                         <Insets />
                                     </VBox.margin>
                                 </GridPane>
-                                <GridPane fx:id="propertiesArc" hgap="5.0">
-                                    <children>
-                                        <Label text="Weight" />
-                                        <TextField fx:id="inputArcWeight" GridPane.columnIndex="1" />
-                                    </children>
-                                    <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
-                                        <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
-                                    </columnConstraints>
-                                    <rowConstraints>
-                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                    </rowConstraints>
-                                </GridPane>
-                                <GridPane fx:id="propertiesPlace" hgap="5.0">
+                                <GridPane fx:id="parentToken" hgap="5.0">
                                     <children>
                                         <Label text="Constant" />
                                         <Label text="Token" GridPane.rowIndex="1" />
                                         <Label text="Token (min.)" GridPane.rowIndex="2" />
                                         <Label text="Token (max.)" GridPane.rowIndex="3" />
                                         <CheckBox fx:id="checkConstant" GridPane.columnIndex="1" />
-                                        <TextField fx:id="inputPlaceToken" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                                        <TextField fx:id="inputPlaceTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                                        <TextField fx:id="inputPlaceTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <TextField fx:id="inputToken" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <TextField fx:id="inputTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <TextField fx:id="inputTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                                     </children>
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
@@ -135,10 +124,10 @@
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                     </rowConstraints>
                                 </GridPane>
-                                <VBox fx:id="propertiesTransition" alignment="CENTER_LEFT" spacing="5.0">
+                                <VBox fx:id="parentFunction" alignment="CENTER_LEFT" spacing="5.0">
                                     <children>
                                         <Label text="Function" />
-                                        <TextArea fx:id="inputTransitionFunction" prefHeight="100.0" prefWidth="200.0" />
+                                        <TextArea fx:id="inputFunction" prefHeight="100.0" prefWidth="200.0" />
                                     </children>
                                     <padding>
                                         <Insets top="5.0" />

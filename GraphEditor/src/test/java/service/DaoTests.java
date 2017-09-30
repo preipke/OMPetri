@@ -1,12 +1,12 @@
 package service;
 
 import main.TestFXBase;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataArc;
-import edu.unibi.agbi.gnius.core.model.entity.data.IDataNode;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphArc;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphCluster;
-import edu.unibi.agbi.gnius.core.model.entity.graph.IGraphNode;
-import edu.unibi.agbi.gnius.core.service.exception.DataException;
+import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
+import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphCluster;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
+import edu.unibi.agbi.editor.business.exception.DataException;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
@@ -29,7 +29,7 @@ public class DaoTests extends TestFXBase {
     IGraphArc tmpArc;
     IGraphNode tmpNode;
 
-    @Test
+    //@Test
     public void CreateNodes() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -54,7 +54,7 @@ public class DaoTests extends TestFXBase {
                 dataService.getGraph().getConnections().size());
     }
 
-    @Test
+    //@Test
     public void ConnectAndValidateNodes() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -111,7 +111,7 @@ public class DaoTests extends TestFXBase {
         }
     }
 
-    @Test
+    //@Test
     public void RemoveNodesAndValidate() throws Exception {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -188,7 +188,7 @@ public class DaoTests extends TestFXBase {
         }
     }
     
-    @Test
+    //@Test
     public void ClusteringNodes() throws DataException {
         
         Collection<IGravisNode> nodesAfterClustering, nodesBeforeClustering;
