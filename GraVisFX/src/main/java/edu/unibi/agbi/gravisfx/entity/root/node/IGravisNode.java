@@ -9,6 +9,7 @@ import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import java.util.Collection;
 import edu.unibi.agbi.gravisfx.entity.root.IGravisRoot;
+import java.util.List;
 
 /**
  * Interface for interactive nodes within the graph. Used by parent components
@@ -24,7 +25,7 @@ public interface IGravisNode extends IGravisRoot
 
     public Collection<IGravisConnection> getConnections();
 
-    public GravisChildLabel getLabel();
+    public List<GravisChildLabel> getLabels();
 
     public void setInnerCircleVisible(boolean value);
 

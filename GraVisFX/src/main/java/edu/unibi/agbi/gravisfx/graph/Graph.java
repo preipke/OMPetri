@@ -92,7 +92,7 @@ public class Graph extends Group
             }
             nodes.put(node.getId(), node);
             nodeLayer.getChildren().addAll(node.getShapes());
-            labelLayer.getChildren().add(node.getLabel());
+            labelLayer.getChildren().addAll(node.getLabels());
         }
     }
 
@@ -160,7 +160,7 @@ public class Graph extends Group
         while (!node.getConnections().isEmpty()) {
             remove(node.getConnections().iterator().next()); // while to prevent concurrent modification exception
         }
-        labelLayer.getChildren().remove(node.getLabel());
+        labelLayer.getChildren().removeAll(node.getLabels());
         nodeLayer.getChildren().removeAll(node.getShapes());
         nodes.remove(node.getId());
         if (node.getType() == GravisType.CLUSTER) {

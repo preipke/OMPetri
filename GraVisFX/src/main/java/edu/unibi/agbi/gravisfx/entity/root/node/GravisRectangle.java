@@ -27,12 +27,12 @@ public class GravisRectangle extends Rectangle implements IGravisNode
 {
     private final List<GravisShapeHandle> shapeHandles = new ArrayList();
     private final List<Shape> shapes = new ArrayList();
+    private final List<GravisChildLabel> labels = new ArrayList();
 
     private final Set<IGravisNode> children = new HashSet();
     private final Set<IGravisNode> parents = new HashSet();
     private final Set<IGravisConnection> connections = new HashSet();
 
-    private final GravisChildLabel label;
     private final GravisChildCircle circle;
     private final GravisChildRectangle rectangle;
     
@@ -53,9 +53,9 @@ public class GravisRectangle extends Rectangle implements IGravisNode
         setArcHeight(GravisProperties.RECTANGLE_ARC_HEIGHT);
         this.type = type;
 
-        label = new GravisChildLabel(this);
-        label.xProperty().bind(translateXProperty().add(getCenterOffsetX() + GravisProperties.LABEL_OFFSET_X));
-        label.yProperty().bind(translateYProperty().add(getCenterOffsetY() + GravisProperties.LABEL_OFFSET_Y));
+        labels.add(new GravisChildLabel(this));
+        labels.get(0).xProperty().bind(translateXProperty().add(getCenterOffsetX() + GravisProperties.LABEL_OFFSET_X));
+        labels.get(0).yProperty().bind(translateYProperty().add(getCenterOffsetY() + GravisProperties.LABEL_OFFSET_Y));
         
         circle = new GravisChildCircle(this);
         circle.setRadius(GravisProperties.CIRCLE_RADIUS - GravisProperties.BASE_INNER_DISTANCE);
@@ -111,8 +111,8 @@ public class GravisRectangle extends Rectangle implements IGravisNode
     }
 
     @Override
-    public final GravisChildLabel getLabel() {
-        return label;
+    public final List<GravisChildLabel> getLabels() {
+        return labels;
     }
 
     @Override
