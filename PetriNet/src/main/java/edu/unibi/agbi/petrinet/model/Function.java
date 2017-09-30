@@ -87,15 +87,20 @@ public class Function
 
     @Override
     public String toString() {
-        String function = "";
-        for (Function elem : elements) {
-            if (elem.getType() == Type.FUNCTION) {
-                function += "( " + elem.toString() + ") ";
-            } else {
-                function += elem.getValue() + " ";
+        if (getType() == Type.FUNCTION) {
+            String function = "";
+            for (Function elem : elements) {
+//                if (elem.getType() == Type.FUNCTION) {
+//                    function += "( " + elem.toString() + ") ";
+//                } else {
+//                    function += elem.getValue() + " ";
+//                }
+                function += elem.toString() + " ";
             }
+            return function.trim();
+        } else {
+            return value;
         }
-        return function.trim();
     }
 
     public Type getType() {

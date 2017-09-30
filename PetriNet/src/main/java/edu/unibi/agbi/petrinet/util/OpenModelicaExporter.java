@@ -6,6 +6,7 @@
 package edu.unibi.agbi.petrinet.util;
 
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
@@ -328,8 +329,15 @@ public class OpenModelicaExporter
             /**
              * Weights.
              */
-            writer.append(",arcWeightIn={" + getWeightString(transition.getArcsIn(), colours) + "}");
-            writer.append(",arcWeightOut={" + getWeightString(transition.getArcsOut(), colours) + "}");
+            tmp1 = getWeightString(model, transition.getArcsIn(), colours);
+            if (!tmp1.isEmpty()) {
+                writer.append(",arcWeightIn={" + tmp1 + "}");
+            }
+            tmp1 = getWeightString(model, transition.getArcsOut(), colours);
+            if (!tmp1.isEmpty()) {
+                writer.append(",arcWeightOut={" + tmp1 + "}");
+            }
+            
             
             writer.append(")");
 //            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
@@ -421,9 +429,8 @@ public class OpenModelicaExporter
             
             writer.println();
         }
-        
-        writer.append(INDENT + "annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
-        writer.println();
+//        writer.append(INDENT + "annotation(Icon(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})), Diagram(coordinateSystem(extent={{0.0,0.0},{0.0,0.0}})));");
+//        writer.println();
 
         writer.append("end '" + name + "';");
         writer.println();
@@ -433,7 +440,7 @@ public class OpenModelicaExporter
         return file;
     }
     
-    private String getWeightString(Collection<IArc> arcs, Collection<Colour> colours) {
+    private String getWeightString(Model model, Collection<IArc> arcs, Collection<Colour> colours) throws IOException {
         
         boolean isFirstColour, isFirst = true;
         boolean isColoredPn = colours.size() != 1;
@@ -457,9 +464,9 @@ public class OpenModelicaExporter
                     tmp += ",";
                 }
                 if (isColoredPn) {
-                    tmp += getWeightString(arc, color);
+                    tmp += getWeightString(model, arc, color);
                 } else {
-                    weight += getWeightString(arc, color);
+                    weight += getWeightString(model, arc, color);
                 }
             }
             if (isColoredPn) {
@@ -469,14 +476,14 @@ public class OpenModelicaExporter
         return weight;
     }
     
-    private String getWeightString(IArc arc, Colour colour) {
+    private String getWeightString(Model model, IArc arc, Colour colour) throws IOException {
         Weight weight = arc.getWeight(colour);
         if (arc.isDisabled() || weight == null
                 || arc.getSource().isConstant() || arc.getSource().isDisabled()
                 || arc.getTarget().isConstant() || arc.getTarget().isDisabled()) {
-            return "0";
+            return "0" + CMNT_START + getFunctionString(model, arc, weight.getFunction()) + CMNT_END;
         } else {
-            return weight.getValue();
+            return getFunctionString(model, arc, weight.getFunction());
         }
     }
     
@@ -484,31 +491,34 @@ public class OpenModelicaExporter
      * Gets the string representing a transition's function. In creation, local
      * parameters will be prioritized over global parameters.
      * 
-     * @param model
-     * @param function
+     * @param model the corresponding Model, will be used to get parameters
+     * @param element the corresponding Element, its ID will be added to specify local parameter names
+     * @param function the Function to convert
      * @return 
      */
-    private String getFunctionString(Model model, Transition transition, Function function) {
+    private String getFunctionString(Model model, IElement element, Function function) throws IOException {
         String functionString = "";
         Parameter parameter;
-        for (Function element : function.getElements()) {
-            switch (element.getType()) {
+        for (Function elem : function.getElements()) {
+            switch (elem.getType()) {
                 case FUNCTION:
-                    functionString += getFunctionString(model, transition, element);
+                    functionString += getFunctionString(model, element, elem);
                     break;
                 case PARAMETER:
-                    if ((parameter = model.getParameter(element.getValue())) != null) {
+                    if ((parameter = model.getParameter(elem.getValue())) != null) {
                         if (parameter.getType() == Parameter.Type.REFERENCE) {
                             functionString += parameter.getValue();
                         } else {
                             functionString += "'_" + parameter.getId() + "'";
                         }
+                    } else if ((element.getLocalParameter(elem.getValue())) != null) {
+                        functionString += "'_" + element.getId() + "_" + elem.getValue() + "'";
                     } else {
-                        functionString += "'_" + transition.getId() + "_" + element.getValue() + "'";
+                        throw new IOException("Invalid parameter! -> '" + elem.getValue() + "'");
                     }
                     break;
                 default:
-                    functionString += element.getValue();
+                    functionString += elem.getValue();
                     break;
             }
         }
@@ -656,10 +666,6 @@ public class OpenModelicaExporter
         String filter;
         int index;
 
-        // uncomment if making public
-//        if (references.getElementToFilterReferences().containsKey(place)) {
-//            references.getElementToFilterReferences().get(place).clear();
-//        }
         filter = "'" + place.getId() + "'.t";
         references.addElementReference(place, filter);
         references.addFilterReference(filter, place);

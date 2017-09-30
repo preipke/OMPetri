@@ -63,7 +63,7 @@ public class Model
                 transitions.put(element.getId(), (Transition) element);
                 break;
             default:
-                throw new Exception("Unhandled element type defined!");
+                throw new Exception("Unhandled element type!");
         }
     }
 
@@ -88,7 +88,7 @@ public class Model
     public boolean contains(IElement element) throws Exception {
         switch (element.getElementType()) {
             case ARC:
-                return !arcs.containsKey(element.getId());
+                return arcs.containsKey(element.getId());
             case PLACE:
                 return places.containsKey(element.getId());
             case TRANSITION:

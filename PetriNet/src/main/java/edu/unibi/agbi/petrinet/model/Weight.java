@@ -12,21 +12,23 @@ package edu.unibi.agbi.petrinet.model;
 public class Weight
 {
     private final Colour colour;
-    private String weight = "1";
+    private Function weight;
 
     public Weight(Colour colour) {
         this.colour = colour;
+        this.weight = new Function(Function.Type.FUNCTION);
+        this.weight.addElement(new Function("1", Function.Type.NUMBER));
     }
 
     public Colour getColour() {
         return colour;
     }
 
-    public String getValue() {
+    public Function getFunction() {
         return weight;
     }
 
-    public void setValue(String weight) {
+    public void setFunction(Function weight) {
         this.weight = weight;
     }
 }

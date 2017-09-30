@@ -132,7 +132,7 @@ public class Parameter
 
     @Override
     public String toString() {
-        if (unit != null) {
+        if (unit != null && !unit.isEmpty()) {
             return id + " = " + getValue() + " [" + getUnit() + "]";
         } else {
             return id + " = " + getValue();
