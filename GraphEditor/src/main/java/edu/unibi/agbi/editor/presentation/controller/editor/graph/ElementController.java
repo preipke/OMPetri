@@ -20,6 +20,7 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -75,6 +76,8 @@ public class ElementController implements Initializable
     @FXML private Parent parentSubtype;
     @FXML private Parent parentColor;
     @FXML private Parent parentToken;
+    @FXML private Parent parentConflictType;
+    @FXML private Parent parentConflictValue;
     @FXML private Parent parentFunction;
 
     // Identifier
@@ -106,6 +109,10 @@ public class ElementController implements Initializable
     @FXML private TextField inputToken;
     @FXML private TextField inputTokenMin;
     @FXML private TextField inputTokenMax;
+    
+    @FXML private ChoiceBox<Place.ConflictResolutionType> choiceConflictRes;
+    @FXML private TextField inputConflictType;
+    @FXML private TextField inputConflictValue;
 
     private IGraphElement element;
     private IDataElement data;
@@ -159,6 +166,7 @@ public class ElementController implements Initializable
                 inputLabel.setDisable(true);
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(parentFunction);
+                propertiesBox.getChildren().add(parentConflictValue);
                 break;
 
             case CLUSTER:
@@ -181,6 +189,7 @@ public class ElementController implements Initializable
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(parentToken);
+                propertiesBox.getChildren().add(parentConflictType);
                 break;
 
             case TRANSITION:
@@ -296,6 +305,12 @@ public class ElementController implements Initializable
                 weight = arc.getWeight(choicesColour.get(0));
                 choiceColour.getSelectionModel().select(0); // must be done here for listener
                 inputFunction.setText(weight.getFunction().toString());
+                if (arc.getSource().getType() == DataType.PLACE) {
+                    inputConflictType.setText(((DataPlace) arc.getSource()).getConflictResolutionType().toString());
+                } else {
+                    inputConflictType.setText(((DataPlace) arc.getTarget()).getConflictResolutionType().toString());
+                }
+                inputConflictValue.setText(Double.toString(arc.getConflictResolutionValue()));
                 break;
 
             case CLUSTER:
@@ -326,6 +341,7 @@ public class ElementController implements Initializable
                 inputToken.setText(Double.toString(token.getValueStart()));
                 inputTokenMin.setText(Double.toString(token.getValueMin()));
                 inputTokenMax.setText(Double.toString(token.getValueMax()));
+                choiceConflictRes.getSelectionModel().select(place.getConflictResolutionType());
                 break;
 
             case TRANSITION:
@@ -340,6 +356,13 @@ public class ElementController implements Initializable
         Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
         if (subtype != null) {
             dataService.ChangeElementSubtype(element, subtype);
+        }
+    }
+    
+    private void StoreConflictResolutionType(IDataElement element) throws DataException {
+        Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
+        if (conflictResType != null) {
+            dataService.ChangeConflictResolutionType(element, conflictResType);
         }
     }
 
@@ -402,6 +425,23 @@ public class ElementController implements Initializable
                 messengerService.addException("Exception parsing token values!", ex);
             }
         }
+    }
+    
+    private void ParseConflictResolutionValue() {
+        
+        if (data instanceof DataArc) {
+            
+            DataArc arc = (DataArc) data;
+            
+            try {
+                if (ValidateNumberInput(inputConflictValue)) {
+                    arc.setConflictResolutionValue(Double.parseDouble(inputConflictValue.getText().replace(",", ".")));
+                }
+            } catch (NumberFormatException ex) {
+                messengerService.addException("Exception parsing conflict resolution value!", ex);
+            }
+        }
+        
     }
 
     private void ParseFunction() {
@@ -555,6 +595,22 @@ public class ElementController implements Initializable
                 }
             }
         });
+        
+        choiceConflictRes.getItems().clear();
+        for (Place.ConflictResolutionType type : Place.ConflictResolutionType.values()) {
+            choiceConflictRes.getItems().add(type);
+        }
+        choiceConflictRes.valueProperty().addListener(cl -> {
+            if (data != null) {
+                try {
+                    StoreConflictResolutionType(data);
+                    setInputStatus(choiceConflictRes, false);
+                } catch (DataException ex) {
+                    setInputStatus(choiceConflictRes, true);
+                    messengerService.addException("Cannot change conflict resolution type!", ex);
+                }
+            }
+        });
 
         inputName.textProperty().addListener(cl -> data.setName(getText(inputName)));
         inputLabel.textProperty().addListener(cl -> data.setLabelText(getText(inputLabel)));
@@ -565,7 +621,8 @@ public class ElementController implements Initializable
         inputToken.textProperty().addListener(cl -> ParsePlaceToken());
         inputTokenMin.textProperty().addListener(cl -> ParsePlaceToken());
         inputTokenMax.textProperty().addListener(cl -> ParsePlaceToken());
-        inputFunction.textProperty().addListener(e -> ParseFunction());
+        inputFunction.textProperty().addListener(cl -> ParseFunction());
+        inputConflictValue.textProperty().addListener(cl -> ParseConflictResolutionValue());
         
         listClusteredElements.setCellFactory(l -> new ClusterCellFormatter());
         listClusteredElements.getSelectionModel().selectedItemProperty().addListener(cl -> {

@@ -29,6 +29,7 @@ import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -144,6 +145,19 @@ public class ModelService
         dao.getGraph().add(node);
         StyleElement(node);
         return node;
+    }
+    
+    public synchronized void ChangeConflictResolutionType(IDataElement element, Place.ConflictResolutionType resolutionType) throws DataException {
+        
+        if (element.getType() != DataType.PLACE) {
+            throw new DataException("Cannot set conflict resolution type for elements other than places!");
+        }
+        
+        DataPlace place = (DataPlace) element;
+        // ...
+        // validate
+        // ...
+        place.setConflictResolutionType(resolutionType);
     }
 
     public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataException {

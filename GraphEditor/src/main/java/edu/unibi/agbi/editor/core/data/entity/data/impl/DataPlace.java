@@ -27,7 +27,7 @@ public final class DataPlace extends Place implements IDataNode
     private boolean isSticky = false;
 
     public DataPlace(String id, Place.Type type) {
-        super(id, type);
+        super(id, type, Place.ConflictResolutionType.PRIORITY);
         super.name = super.id;
         this.dataType = DataType.PLACE;
         this.shapes = new HashSet();
