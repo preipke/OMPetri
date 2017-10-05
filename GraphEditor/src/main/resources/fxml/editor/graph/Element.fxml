@@ -109,15 +109,31 @@
                                         <Label text="Token" GridPane.rowIndex="1" />
                                         <Label text="Token (min.)" GridPane.rowIndex="2" />
                                         <Label text="Token (max.)" GridPane.rowIndex="3" />
+                                        <Label text="Conflict Res." GridPane.rowIndex="5" />
                                         <CheckBox fx:id="checkConstant" GridPane.columnIndex="1" />
                                         <TextField fx:id="inputToken" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                                         <TextField fx:id="inputTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                                         <TextField fx:id="inputTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                                        <CheckBox fx:id="choiceConflictRes" GridPane.columnIndex="5" />
                                     </children>
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
                                     </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    </rowConstraints>
+                                </GridPane>
+                                <GridPane fx:id="parentConflictValue" hgap="5.0">
+                                    <children>
+                                        <Label text="Conflicts" />
+                                        <Label text="Resolution Type" GridPane.rowIndex="1" />
+                                        <Label text="Value" GridPane.rowIndex="2" />
+                                        <TextField fx:id="inputConflictType" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" disabled="true" />
+                                        <TextField fx:id="inputConflictValue" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                    </children>
                                     <rowConstraints>
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />

@@ -21,6 +21,7 @@ import java.util.Map;
 public class Place extends Node
 {
     private Type placeType;
+    private ConflictResolutionType conflictResType;
 
     private final Map<Colour, Token> token;
 
@@ -41,6 +42,14 @@ public class Place extends Node
 
     public final Collection<Token> getTokens() {
         return token.values();
+    }
+    
+    public final void setConflictResolutionType(ConflictResolutionType conflictResType) {
+        this.conflictResType = conflictResType;
+    }
+    
+    public final ConflictResolutionType getConflictResolutionType() {
+        return conflictResType;
     }
 
     public final void setPlaceType(Type placeType) {
@@ -69,5 +78,10 @@ public class Place extends Node
     public enum Type
     {
         CONTINUOUS, DISCRETE;
+    }
+    
+    public enum ConflictResolutionType
+    {
+        PRIORITY, PROBABILITY;
     }
 }
