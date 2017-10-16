@@ -8,7 +8,8 @@
 <?import javafx.scene.layout.*?>
 
 <VBox xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" 
-      fx:id="parentContainer" fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.inspector.PropertiesController">
+      fx:id="parentContainer" fx:controller="edu.unibi.agbi.editor.presentation.controller.editor.inspector.PropertiesController"
+      spacing="20.0" >
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -83,6 +84,42 @@
                 <TextField fx:id="inputToken" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                 <TextField fx:id="inputTokenMin" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                 <TextField fx:id="inputTokenMax" text="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            </children>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+        </GridPane>
+        <GridPane fx:id="parentConflictType" hgap="5.0">
+            <children>
+                <Label text="Conf. Res. Type" />
+                <ChoiceBox fx:id="choiceConflictRes" GridPane.columnIndex="1" />
+            </children>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            </rowConstraints>
+        </GridPane>
+        <GridPane fx:id="parentConflictValue" hgap="5.0">
+            <children>
+                <Label text="Conflict Resolution:" GridPane.columnSpan="2147483647" />
+                <Label text="Type" GridPane.rowIndex="1" />
+                <Label text="Value" GridPane.rowIndex="2" />
+                <TextField fx:id="inputConflictType" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" disable="true" />
+                <HBox fx:id="boxConflictValue" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                    <children>
+                        <TextField fx:id="inputConflictValue" text="0" />
+                        <ChoiceBox fx:id="choiceConflictValue" GridPane.columnIndex="1" />
+                    </children>
+                </HBox>
             </children>
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />

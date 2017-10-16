@@ -20,6 +20,7 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -28,6 +29,7 @@ import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,6 +48,7 @@ import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +78,10 @@ public class ElementController implements Initializable
     // Properties Container
     @FXML private Parent parentSubtype;
     @FXML private Parent parentColor;
-    @FXML private Parent parentToken;
     @FXML private Parent parentConflictType;
     @FXML private Parent parentConflictValue;
     @FXML private Parent parentFunction;
+    @FXML private Parent parentToken;
 
     // Identifier
     @FXML private TextField inputType;
@@ -112,7 +115,10 @@ public class ElementController implements Initializable
     
     @FXML private ChoiceBox<Place.ConflictResolutionType> choiceConflictRes;
     @FXML private TextField inputConflictType;
+    
+    @FXML private HBox boxConflictValue;
     @FXML private TextField inputConflictValue;
+    @FXML private ChoiceBox<String> choiceConflictValue;
 
     private IGraphElement element;
     private IDataElement data;
@@ -296,6 +302,17 @@ public class ElementController implements Initializable
 
             case ARC:
                 DataArc arc = (DataArc) element;
+                DataPlace placeRelated; // related place to arc
+                List<IArc> neighboringArcs; // list of incoming or outgoing arcs that contains this arc
+                
+                if (arc.getSource().getType() == DataType.PLACE) {
+                    placeRelated = (DataPlace) arc.getSource();
+                    neighboringArcs = placeRelated.getArcsOut();
+                } else {
+                    placeRelated = (DataPlace) arc.getTarget();
+                    neighboringArcs = placeRelated.getArcsIn();
+                }
+                
                 Weight weight;
                 for (Colour color : colors) {
                     if (arc.getWeight(color) != null) {
@@ -304,13 +321,32 @@ public class ElementController implements Initializable
                 }
                 weight = arc.getWeight(choicesColour.get(0));
                 choiceColour.getSelectionModel().select(0); // must be done here for listener
+                
                 inputFunction.setText(weight.getFunction().toString());
-                if (arc.getSource().getType() == DataType.PLACE) {
-                    inputConflictType.setText(((DataPlace) arc.getSource()).getConflictResolutionType().toString());
-                } else {
-                    inputConflictType.setText(((DataPlace) arc.getTarget()).getConflictResolutionType().toString());
+                inputConflictType.setText(placeRelated.getConflictResolutionType().toString());
+                
+                boxConflictValue.getChildren().clear();
+                switch (placeRelated.getConflictResolutionType()) {
+                    
+                    case PRIORITY:
+                        boxConflictValue.getChildren().add(choiceConflictValue);
+                        choiceConflictValue.getItems().clear();
+                        
+                        int targetIndex = 0;
+                        for (int i = 0; i < neighboringArcs.size(); i++) {
+                            if (neighboringArcs.get(i).equals(arc)) {
+                                targetIndex = i;
+                            }
+                            choiceConflictValue.getItems().add(Integer.toString(i + 1));
+                        }
+                        choiceConflictValue.getSelectionModel().select(targetIndex);
+                        break;
+                        
+                    case PROBABILITY:
+                        boxConflictValue.getChildren().add(inputConflictValue);
+                        inputConflictValue.setText(Double.toString(arc.getConflictResolutionValue()));
+                        break;
                 }
-                inputConflictValue.setText(Double.toString(arc.getConflictResolutionValue()));
                 break;
 
             case CLUSTER:
@@ -360,9 +396,24 @@ public class ElementController implements Initializable
     }
     
     private void StoreConflictResolutionType(IDataElement element) throws DataException {
-        Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
-        if (conflictResType != null) {
-            dataService.ChangeConflictResolutionType(element, conflictResType);
+        if (element instanceof DataPlace) {
+            DataPlace place = (DataPlace) element;
+
+            Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
+            if (conflictResType != null) {
+                dataService.ChangeConflictResolutionType(dataService.getDao(), place, conflictResType);
+            }
+        }
+    }
+    
+    private void StoreConflictResolutionValue(IDataElement element) throws DataException {
+        if (element instanceof DataArc) {
+            DataArc arc = (DataArc) element;
+
+            int priority = choiceConflictValue.getSelectionModel().getSelectedIndex();
+            if (priority > -1) {
+                dataService.ChangeConflictResolutionPriority(dataService.getDao(), arc, priority);
+            }
         }
     }
 
@@ -428,11 +479,8 @@ public class ElementController implements Initializable
     }
     
     private void ParseConflictResolutionValue() {
-        
         if (data instanceof DataArc) {
-            
             DataArc arc = (DataArc) data;
-            
             try {
                 if (ValidateNumberInput(inputConflictValue)) {
                     arc.setConflictResolutionValue(Double.parseDouble(inputConflictValue.getText().replace(",", ".")));
@@ -441,7 +489,6 @@ public class ElementController implements Initializable
                 messengerService.addException("Exception parsing conflict resolution value!", ex);
             }
         }
-        
     }
 
     private void ParseFunction() {
@@ -608,6 +655,17 @@ public class ElementController implements Initializable
                 } catch (DataException ex) {
                     setInputStatus(choiceConflictRes, true);
                     messengerService.addException("Cannot change conflict resolution type!", ex);
+                }
+            }
+        });
+        choiceConflictValue.valueProperty().addListener(cl -> {
+            if (data != null) {
+                try {
+                    StoreConflictResolutionValue(data);
+                    setInputStatus(choiceConflictValue, false);
+                } catch (DataException ex) {
+                    setInputStatus(choiceConflictValue, true);
+                    messengerService.addException("Cannot change conflict resolution value!", ex);
                 }
             }
         });

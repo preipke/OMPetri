@@ -144,7 +144,12 @@
                                         <Label text="Type" GridPane.rowIndex="1" />
                                         <Label text="Value" GridPane.rowIndex="2" />
                                         <TextField fx:id="inputConflictType" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" disable="true" />
-                                        <TextField fx:id="inputConflictValue" text="0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                        <HBox fx:id="boxConflictValue" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                            <children>
+                                                <TextField fx:id="inputConflictValue" text="0" />
+                                                <ChoiceBox fx:id="choiceConflictValue" GridPane.columnIndex="1" />
+                                            </children>
+                                        </HBox>
                                     </children>
                                     <columnConstraints>
                                         <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />

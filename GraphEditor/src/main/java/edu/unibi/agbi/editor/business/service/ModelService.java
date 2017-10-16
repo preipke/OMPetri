@@ -147,17 +147,27 @@ public class ModelService
         return node;
     }
     
-    public synchronized void ChangeConflictResolutionType(IDataElement element, Place.ConflictResolutionType resolutionType) throws DataException {
-        
-        if (element.getType() != DataType.PLACE) {
-            throw new DataException("Cannot set conflict resolution type for elements other than places!");
-        }
-        
-        DataPlace place = (DataPlace) element;
-        // ...
-        // validate
-        // ...
+    public synchronized void ChangeConflictResolutionType(ModelDao dao, DataPlace place, Place.ConflictResolutionType resolutionType) throws DataException {
+        /**
+         * Validate...
+         */
         place.setConflictResolutionType(resolutionType);
+        dao.setHasChanges(true);
+    }
+    
+    public synchronized  void ChangeConflictResolutionPriority(ModelDao dao, DataArc arc, int priority) throws DataException {
+        List<IArc> arcsList;
+        if (arc.getTarget().getType() == DataType.PLACE) {
+            arcsList = arc.getTarget().getArcsIn();
+        } else {
+            arcsList = arc.getSource().getArcsOut();
+        }
+        if (arcsList.remove(arc)) {
+            arcsList.add(priority, arc);
+        } else {
+            throw new DataException("Arc not stored in the related place!");
+        }
+        dao.setHasChanges(true);
     }
 
     public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataException {
