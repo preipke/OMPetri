@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
@@ -40,7 +39,7 @@ import org.testfx.api.*;
 @SpringBootTest(classes=Main.class)
 public class TestFXBase extends ApplicationTest {
 
-    private final static boolean HEADLESS = true;
+//    private final static boolean HEADLESS = true;
     
     @Autowired protected ModelService dataService;
     @Autowired protected HierarchyService hierarchyService;
@@ -48,13 +47,13 @@ public class TestFXBase extends ApplicationTest {
 
     @BeforeClass
     public static void setupHeadlessMode() {
-        if (HEADLESS) {
-            System.setProperty("java.awt.headless", "true");
-            System.setProperty("testfx.robot", "glass");
-            System.setProperty("testfx.headless", "true");
-            System.setProperty("prism.order", "sw");
-            System.setProperty("prism.text", "t2k");
-        }
+//        if (HEADLESS) {
+//            System.setProperty("java.awt.headless", "true");
+//            System.setProperty("testfx.robot", "glass");
+//            System.setProperty("testfx.headless", "true");
+//            System.setProperty("prism.order", "sw");
+//            System.setProperty("prism.text", "t2k");
+//        }
 //        bundle = ResourceBundle.getBundle("Bundle");
     }
 
@@ -120,7 +119,7 @@ public class TestFXBase extends ApplicationTest {
 
     protected void ConnectNodes(List<IGraphNode> places, List<IGraphNode> transitions) throws DataException {
 
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
                 for (IGraphNode place : places) {
@@ -132,17 +131,20 @@ public class TestFXBase extends ApplicationTest {
             } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
-                isFinished.set(true);
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
         });
-        waitForFxThread(isFinished);
+        System.out.println("ConnectNodes");
+        waitForFxThread(monitor);
     }
 
     protected List<IGraphNode> CreatePlaces(int count) {
 
         final List<IGraphNode> places = new ArrayList();
 
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
                 for (int i = 0; i < count; i++) {
@@ -151,10 +153,13 @@ public class TestFXBase extends ApplicationTest {
             } catch (DataException ex) {
                 System.out.println(ex.getMessage());
             } finally {
-                isFinished.set(true);
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
         });
-        waitForFxThread(isFinished);
+        System.out.println("CreatePlaces");
+        waitForFxThread(monitor);
 
         return places;
     }
@@ -163,7 +168,7 @@ public class TestFXBase extends ApplicationTest {
 
         final List<IGraphNode> transitions = new ArrayList();
 
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
                 for (int i = 0; i < count; i++) {
@@ -172,10 +177,13 @@ public class TestFXBase extends ApplicationTest {
             } catch (DataException ex) {
                 System.out.println(ex.getMessage());
             } finally {
-                isFinished.set(true);
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
         });
-        waitForFxThread(isFinished);
+        System.out.println("CreateTransitions");
+        waitForFxThread(monitor);
 
         return transitions;
     }
@@ -198,17 +206,20 @@ public class TestFXBase extends ApplicationTest {
         
         final List<IGraphCluster> cluster = new ArrayList();
         
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
                 cluster.add(hierarchyService.cluster(dataService.getDao(), elements, dataService.getClusterId(dataService.getDao())));
             } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
-                isFinished.set(true);
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
         });
-        waitForFxThread(isFinished);
+        System.out.println("ClusterNodes");
+        waitForFxThread(monitor);
         
         return cluster.get(0);
     }
@@ -218,12 +229,15 @@ public class TestFXBase extends ApplicationTest {
         final List<IGraphElement> clusters = new ArrayList();
         clusters.add(cluster);
         
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             hierarchyService.restore(clusters);
-            isFinished.set(true);
+            synchronized (monitor) {
+                monitor.notifyAll();
+            }
         });
-        waitForFxThread(isFinished);
+        System.out.println("UngroupCluster");
+        waitForFxThread(monitor);
     }
     
     protected int getRandomIndex(Collection list) {
@@ -232,32 +246,36 @@ public class TestFXBase extends ApplicationTest {
     
     protected void RemoveArc(IGraphArc arc) {
         
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
                 dataService.remove(arc);
             } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
-                isFinished.set(true);
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
         });
-        waitForFxThread(isFinished);
+        waitForFxThread(monitor);
     }
 
     protected void RemoveNode(IGraphNode node) {
         
-        AtomicBoolean isFinished = new AtomicBoolean(false);
+        final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
                 dataService.remove(node);
             } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
-                isFinished.set(true);
+                synchronized (monitor) {
+                    monitor.notifyAll();
+                }
             }
         });
-        waitForFxThread(isFinished);
+        waitForFxThread(monitor);
     }
 
     private IGraphArc CreateArc(IGraphNode source, IGraphNode target) throws DataException {
@@ -272,13 +290,11 @@ public class TestFXBase extends ApplicationTest {
         return dataService.CreateNode(dataService.getDao(), DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 
-    private void waitForFxThread(AtomicBoolean isFinished) {
-        while (!isFinished.get()) {
+    private void waitForFxThread(Object monitor) {
+        synchronized (monitor) {
             try {
-                synchronized (this) {
-                    System.out.println("Waiting...");
-                    wait(50);
-                }
+                System.out.println("Waiting...");
+                monitor.wait();
             } catch (InterruptedException ex) {
                 System.out.println(ex.toString());
             }

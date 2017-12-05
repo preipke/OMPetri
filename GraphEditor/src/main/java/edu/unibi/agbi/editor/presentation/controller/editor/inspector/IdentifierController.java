@@ -46,7 +46,6 @@ public class IdentifierController implements Initializable
     @FXML private Pane paneSample;
     @FXML private ChoiceBox choiceSubtype;
     @FXML private TextArea inputDescription;
-    @FXML private TextField inputId;
     @FXML private TextField inputLabel;
     @FXML private TextField inputName;
     @FXML private TextField inputType;
@@ -68,12 +67,10 @@ public class IdentifierController implements Initializable
             } else {
                 inputLabel.setText("");
             }
-            inputId.setText(element.getId());
-            inputName.setText(element.getName());
+            inputName.setText(element.getId());
             inputType.setText(element.getType().toString());
         } else {
             inputDescription.setText("");
-            inputId.setText("");
             inputLabel.setText("");
             inputName.setText("");
             inputType.setText("");
@@ -207,8 +204,8 @@ public class IdentifierController implements Initializable
         pauseTransition.setOnFinished(e -> nodeListController.Update());
 
         inputName.textProperty().addListener(cl -> {
-            if (data != null && !data.getName().contentEquals(inputName.getText())) {
-                data.setName(inputName.getText());
+            if (data != null && !data.getId().contentEquals(inputName.getText())) {
+                data.setId(inputName.getText());
                 pauseTransition.playFromStart();
             }
         });

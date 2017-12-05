@@ -441,8 +441,6 @@ public class ResultService
      */
     public synchronized void updateSeries(ResultSet resultSet) throws ResultsException {
 
-//        Map<String, List<Object>> resultsMap = data.getSimulation().getResultsData();
-//        String variable = data.getVariable();
         List<Object> data = resultSet.getData();
         List<Object> time = resultSet.getSimulation().getTimeData();
         int indexDataProcessed = resultSet.getDataProcessedIndex();
@@ -452,8 +450,6 @@ public class ResultService
         }
 
         XYChart.Series seriesOld = resultSet.getSeries();
-//        List<Object>[] results = data.getSimulation().getSimulationResults();
-
         if (seriesOld == null || data.size() > indexDataProcessed) { // update only if additional values available
 
             XYChart.Series seriesNew = new XYChart.Series();
@@ -475,12 +471,12 @@ public class ResultService
             resultSet.setDataProcessedIndex(indexDataProcessed);
 
             // Create label
-            if (resultSet.getElement().getName() != null
-                    && !resultSet.getElement().getName().isEmpty()) {
-                seriesNew.setName("'" + resultSet.getElement().getName() + "' (" + resultSet.getSimulation().toStringShort() + ")");
-            } else {
+//            if (resultSet.getElement().getName() != null
+//                    && !resultSet.getElement().getName().isEmpty()) {
+//                seriesNew.setName("'" + resultSet.getElement().getName() + "' (" + resultSet.getSimulation().toStringShort() + ")");
+//            } else {
                 seriesNew.setName("'" + resultSet.getElement().getId() + "' (" + resultSet.getSimulation().toStringShort() + ")");
-            }
+//            }
 
             // Replace in chart
             if (seriesOld != null) {

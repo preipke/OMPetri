@@ -19,8 +19,8 @@ import java.util.Set;
  */
 public abstract class Element implements IElement
 {
-    protected final String id;
-    protected String name;
+    protected String id;
+//    protected String name;
     
     protected final Type elementType;
     
@@ -52,19 +52,24 @@ public abstract class Element implements IElement
     }
 
     @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
     public String getId() {
         return id;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
+//    @Override
+//    public String getName() {
+//        return name;
+//    }
+//
+//    @Override
+//    public void setName(String name) {
+//        this.name = name;
+//    }
 
     @Override
     public Set<Parameter> getRelatedParameters() {
@@ -86,9 +91,14 @@ public abstract class Element implements IElement
         return parametersLocal.values();
     }
     
+//    @Override
+//    public String toString() {
+//        return name + " (" + id + ")";
+//    }
+    
     @Override
     public String toString() {
-        return name + " (" + id + ")";
+        return id;
     }
 
     public enum Type

@@ -27,7 +27,7 @@ public final class DataTransition extends Transition implements IDataNode
 
     public DataTransition(String id, Transition.Type type) {
         super(id, type);
-        super.name = super.id;
+//        super.name = super.id;
         this.dataType = DataType.TRANSITION;
         this.shapes = new HashSet();
     }

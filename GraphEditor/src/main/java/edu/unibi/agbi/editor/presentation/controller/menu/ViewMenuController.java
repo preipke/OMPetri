@@ -5,9 +5,11 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.menu;
 
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.core.util.GuiFactory;
 import edu.unibi.agbi.editor.presentation.controller.LogController;
-import edu.unibi.agbi.editor.presentation.controller.ResultViewerController;
 import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.fxml.FXML;
@@ -22,9 +24,10 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ViewMenuController implements Initializable
 {
+    @Autowired private GuiFactory guiFactory;
     @Autowired private GraphController graphController;
     @Autowired private LogController logController;
-    @Autowired private ResultViewerController resultsController;
+    @Autowired private MessengerService messengerService;
     
     @FXML
     public void ShowElementEditor() {
@@ -43,7 +46,11 @@ public class ViewMenuController implements Initializable
     
     @FXML
     public void OpenResultsWindow() {
-        resultsController.OpenWindow();
+        try {
+            guiFactory.BuildResultsViewer();
+        } catch (IOException ex) {
+            messengerService.addException("Cannot open results viewer!", ex);
+        }
     }
     
     @Override

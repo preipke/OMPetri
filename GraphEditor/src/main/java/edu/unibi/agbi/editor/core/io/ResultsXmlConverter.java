@@ -121,6 +121,7 @@ public class ResultsXmlConverter
                 }
             }
         }
+        
         return simulations;
     }
 
@@ -156,17 +157,17 @@ public class ResultsXmlConverter
             switch (type) {
                 case ARC:
                     element = new DataArc(id, Arc.Type.NORMAL);
-                    element.setName(name);
+//                    element.setName(name);
 //                    dao.getModel().add((INode) element);
                     break;
                 case PLACE:
                     element = new DataPlace(id, Place.Type.valueOf(subtype));
-                    element.setName(name);
+//                    element.setName(name);
                     dao.getModel().add(element);
                     break;
                 case TRANSITION:
                     element = new DataTransition(id, Transition.Type.valueOf(subtype));
-                    element.setName(name);
+//                    element.setName(name);
                     dao.getModel().add(element);
                     break;
             }
@@ -347,6 +348,9 @@ public class ResultsXmlConverter
     }
     
     private void sendToFile(Document dom, File file) throws Exception {
+        
+        FileOutputStream fos = new FileOutputStream(file);
+        
         Transformer tr = TransformerFactory.newInstance().newTransformer();
         tr.setOutputProperty(OutputKeys.INDENT, "yes");
         tr.setOutputProperty(OutputKeys.METHOD, "xml");
@@ -356,7 +360,9 @@ public class ResultsXmlConverter
 
         // send DOM to file
         tr.transform(new DOMSource(dom),
-                new StreamResult(new FileOutputStream(file)));
+                new StreamResult(fos));
+        
+        fos.close();
     }
 
     private Element getSimulationElement(Simulation simulationResult, Document dom, final Element models) {
@@ -432,7 +438,7 @@ public class ResultsXmlConverter
     private Element getElementElement(final Element elem, IElement element) {
 
         elem.setAttribute(attrId, element.getId());
-        elem.setAttribute(attrName, element.getName());
+//        elem.setAttribute(attrName, element.getName());
         elem.setAttribute(attrType, element.getElementType().toString());
 
         switch (element.getElementType()) {

@@ -69,11 +69,6 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ResultViewerController implements Initializable
 {
-    private final String resultsFxml = "/fxml/Results.fxml";
-    private final String resultsTitle = "Application - Results Viewer";
-    private final String mainCss = "/styles/main.css";
-
-    @Autowired private ApplicationContext applicationContext;
     @Autowired private ModelService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private ResultService resultsService;
@@ -137,39 +132,6 @@ public class ResultViewerController implements Initializable
     public ResultViewerController() {
         fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().add(new ExtensionFilter("XML file(s) (*.xml)", "*.xml", "*.XML"));
-    }
-
-    public void OpenWindow() {
-
-        ResultViewerController controller = new ResultViewerController();
-        applicationContext.getAutowireCapableBeanFactory().autowireBean(controller);
-
-        // init results window
-        FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource(resultsFxml));
-        loader.setController(controller);
-        Parent root;
-        try {
-            root = loader.load();
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-            return;
-        }
-
-        Scene scene = new Scene(root);
-        scene.getStylesheets().add(mainCss);
-
-        Stage stg = new Stage();
-        stg.setScene(scene);
-        stg.setTitle(resultsTitle);
-        stg.show();
-        stg.setIconified(false);
-        stg.toFront();
-        stg.setOnCloseRequest(e -> {
-            resultsService.drop(controller.getLineChart());
-        });
-
-        controller.setStage(stg);
     }
 
     public void setStage(Stage stage) {
@@ -851,7 +813,7 @@ public class ResultViewerController implements Initializable
         columnDateTime.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDateTime().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss"))));
         columnModel.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getSimulation().getDao().getModelName()));
         columnElementId.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getId()));
-        columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getName()));
+//        columnElementName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getElement().getName()));
         columnValueName.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(resultsService.getValueName(cellData.getValue().getVariable(), cellData.getValue().getSimulation())));
         columnValueStart.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getStartValue(cellData.getValue().getSeries().getData())));
         columnValueEnd.setCellValueFactory(cellData -> new ReadOnlyDoubleWrapper(getEndValue(cellData.getValue().getSeries().getData())));

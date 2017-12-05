@@ -28,7 +28,7 @@ public final class DataPlace extends Place implements IDataNode
 
     public DataPlace(String id, Place.Type type) {
         super(id, type);
-        super.name = super.id;
+//        super.name = super.id;
         this.dataType = DataType.PLACE;
         this.shapes = new HashSet();
     }

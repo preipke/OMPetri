@@ -250,9 +250,10 @@ public class PropertiesController implements Initializable
         menuTransitions.getItems().clear();
 
         dataService.getModel().getPlaces().stream()
-                .filter(place -> place.getId().toLowerCase().contains(filter)
-                || place.getName().toLowerCase().contains(filter)
-                || ((DataPlace) place).getLabelText().contains(filter))
+                .filter(place
+                        -> place.getId().toLowerCase().contains(filter)
+//                        || place.getName().toLowerCase().contains(filter)
+                        || ((DataPlace) place).getLabelText().contains(filter))
                 .forEach(place -> {
 
 //                    final Menu menuArcsIn = new Menu("Incoming Arcs");
@@ -337,9 +338,10 @@ public class PropertiesController implements Initializable
         }
 
         dataService.getModel().getTransitions().stream()
-                .filter(transition -> transition.getId().toLowerCase().contains(filter)
-                || transition.getName().toLowerCase().contains(filter)
-                || ((DataTransition) transition).getLabelText().contains(filter))
+                .filter(transition
+                        -> transition.getId().toLowerCase().contains(filter)
+//                        || transition.getName().toLowerCase().contains(filter)
+                        || ((DataTransition) transition).getLabelText().contains(filter))
                 .forEach(transition -> {
 
 //                    MenuItem itemSpeed = new MenuItem("Speed | v(t)");

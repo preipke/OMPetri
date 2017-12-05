@@ -31,14 +31,14 @@ public final class DataClusterArc implements IDataArc {
     private final Set<IGraphElement> shapes;
     private final Map<String,IGraphArc> storedArcs;
     
-    private final String id;
+    private String id;
     private String description;
-    private String name;
+//    private String name;
     
     public DataClusterArc(String id) {
         this.dataType = DataType.CLUSTERARC;
         this.id = id;
-        this.name = id;
+//        this.name = id;
         this.shapes = new HashSet();
         this.storedArcs = new HashMap();
     }
@@ -85,6 +85,11 @@ public final class DataClusterArc implements IDataArc {
     public String getId() {
         return id;
     }
+    
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
 
     @Override
     public String getLabelText() {
@@ -95,15 +100,15 @@ public final class DataClusterArc implements IDataArc {
     public void setLabelText(String text) {
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public void setName(String name) {
-        this.name = name;
-    }
+//    @Override
+//    public String getName() {
+//        return name;
+//    }
+//
+//    @Override
+//    public void setName(String name) {
+//        this.name = name;
+//    }
 
     @Override
     public Set<IGraphElement> getShapes() {

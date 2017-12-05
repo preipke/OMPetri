@@ -460,7 +460,7 @@ public class ModelSbmlConverter
             case PLACE:
                 if (data == null) {
                     data = getPlace(elem, dao, dataId, Place.Type.valueOf(typeStrings[0].toUpperCase()));
-                    data.setName(dataId);
+//                    data.setName(dataId);
                     data.setConstant(constant);
                     try {
                         dao.getModel().add(data);
@@ -474,7 +474,7 @@ public class ModelSbmlConverter
             case TRANSITION:
                 if (data == null) {
                     data = getTransition(elem, dao, dataId, Transition.Type.valueOf(typeStrings[0].toUpperCase()));
-                    data.setName(dataId);
+//                    data.setName(dataId);
                     data.setConstant(constant);
                     try {
                         dao.getModel().add(data);
@@ -658,7 +658,7 @@ public class ModelSbmlConverter
         if (source.getData().isDisabled() || target.getData().isDisabled()) {
             data.setDisabled(true);
         }
-        data.setName(elem.getAttribute(attrName));
+//        data.setName(elem.getAttribute(attrName));
 
         nl = elem.getElementsByTagName(tagWeight);
         if (nl.getLength() == 1) {

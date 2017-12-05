@@ -188,7 +188,10 @@ public class SimulationService
                 /**
                  * Start simulation.
                  */
-                Platform.runLater(() -> messengerService.addMessage("Simulation: Executing..."));
+                Platform.runLater(() -> {
+                    messengerService.addMessage("Simulation: Running...");
+                    simulationController.setSimulationStatus("Running...");
+                });
                 simulationExecuter = new SimulationExecuter(SimulationService.this, simulationCompiler, simulationServer);
                 try {
                     simulationExecuter.setSimulationStopTime(simulationController.getSimulationStopTime());
@@ -258,7 +261,10 @@ public class SimulationService
                         }
                         while (simulationServer.isRunning()) {
                             double progress = simulationServer.getSimulationTime() / stopTime;
-                            Platform.runLater(() -> simulationController.setSimulationProgress(progress));
+                            Platform.runLater(() -> {
+                                simulationController.setSimulationProgress(progress);
+//                                simulationController.setSimulationStatus(Double.toString(progress));
+                            });
                             this.wait(125);
                         }
                     }

@@ -79,7 +79,6 @@ public class ElementController implements Initializable
 
     // Identifier
     @FXML private TextField inputType;
-    @FXML private TextField inputId;
     @FXML private TextField inputName;
     @FXML private TextField inputLabel;
     @FXML private TextArea inputDescription;
@@ -267,8 +266,7 @@ public class ElementController implements Initializable
         } else {
             inputLabel.setText("");
         }
-        inputId.setText(element.getId());
-        inputName.setText(element.getName());
+        inputName.setText(element.getId());
     }
 
     /**
@@ -556,7 +554,7 @@ public class ElementController implements Initializable
             }
         });
 
-        inputName.textProperty().addListener(cl -> data.setName(getText(inputName)));
+        inputName.textProperty().addListener(cl -> data.setId(getText(inputName)));
         inputLabel.textProperty().addListener(cl -> data.setLabelText(getText(inputLabel)));
         inputDescription.textProperty().addListener(cl -> data.setDescription(getText(inputDescription)));
         

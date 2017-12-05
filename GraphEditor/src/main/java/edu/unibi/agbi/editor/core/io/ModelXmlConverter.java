@@ -374,7 +374,7 @@ public class ModelXmlConverter
             IGraphCluster cl = hierarchyService.cluster(dao, nodes, clusterElement.getAttribute(attrId));
             cl.getData().setDescription(clusterElement.getAttribute(attrDescription));
             cl.getData().setLabelText(clusterElement.getAttribute(attrLabel));
-            cl.getData().setName(clusterElement.getAttribute(attrName));
+//            cl.getData().setName(clusterElement.getAttribute(attrName));
             return cl;
         }
     }
@@ -448,7 +448,7 @@ public class ModelXmlConverter
             data.setLabelText(elem.getAttribute(attrLabel));
         }
         data.setDescription(elem.getAttribute(attrDescription));
-        data.setName(elem.getAttribute(attrName));
+//        data.setName(elem.getAttribute(attrName));
     }
 
     private void addPlace(ModelDao dao, final Element elem) throws Exception {
@@ -491,7 +491,7 @@ public class ModelXmlConverter
             place.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         place.setDescription(elem.getAttribute(attrDescription));
-        place.setName(elem.getAttribute(attrName));
+//        place.setName(elem.getAttribute(attrName));
 
         /**
          * Node Shapes.
@@ -538,7 +538,7 @@ public class ModelXmlConverter
         }
         transition.setDescription(elem.getAttribute(attrDescription));
         transition.setFunction(getFunction(elem));
-        transition.setName(elem.getAttribute(attrName));
+//        transition.setName(elem.getAttribute(attrName));
         
         /**
          * Node Shapes.
@@ -723,9 +723,9 @@ public class ModelXmlConverter
             if (data.isDisabled()) {
                 a.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
             }
-            if (data.getName() != null && !data.getName().isEmpty()) {
-                a.setAttribute(attrName, data.getName());
-            }
+//            if (data.getName() != null && !data.getName().isEmpty()) {
+//                a.setAttribute(attrName, data.getName());
+//            }
             if (data.getDescription() != null && !data.getDescription().isEmpty()) {
                 a.setAttribute(attrDescription, data.getDescription());
             }
@@ -764,9 +764,9 @@ public class ModelXmlConverter
             if (data.isSticky()) {
                 p.setAttribute(attrSticky, Boolean.toString(data.isSticky()));
             }
-            if (data.getName() != null && !data.getName().isEmpty()) {
-                p.setAttribute(attrName, data.getName());
-            }
+//            if (data.getName() != null && !data.getName().isEmpty()) {
+//                p.setAttribute(attrName, data.getName());
+//            }
             if (data.getLabelText() != null && !data.getLabelText().isEmpty()) {
                 p.setAttribute(attrLabel, data.getLabelText());
             }
@@ -806,9 +806,9 @@ public class ModelXmlConverter
             if (data.isSticky()) {
                 t.setAttribute(attrSticky, Boolean.toString(data.isSticky()));
             }
-            if (data.getName() != null && !data.getName().isEmpty()) {
-                t.setAttribute(attrName, data.getName());
-            }
+//            if (data.getName() != null && !data.getName().isEmpty()) {
+//                t.setAttribute(attrName, data.getName());
+//            }
             if (data.getLabelText() != null && !data.getLabelText().isEmpty()) {
                 t.setAttribute(attrLabel, data.getLabelText());
             }
@@ -905,7 +905,7 @@ public class ModelXmlConverter
             c = dom.createElement(tagCluster);
             c.setAttribute(attrId, cluster.getId());
             c.setAttribute(attrLabel, ((IGraphCluster)cluster).getData().getLabelText());
-            c.setAttribute(attrName, ((IGraphCluster)cluster).getData().getName());
+//            c.setAttribute(attrName, ((IGraphCluster)cluster).getData().getName());
             c.setAttribute(attrDescription, ((IGraphCluster)cluster).getData().getDescription());
             c.appendChild(getGraphElement(dom, cluster.getGraph()));
             elements.appendChild(c);

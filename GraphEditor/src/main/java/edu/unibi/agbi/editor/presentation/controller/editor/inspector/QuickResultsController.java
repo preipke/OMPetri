@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
-import edu.unibi.agbi.editor.presentation.controller.ResultViewerController;
+import edu.unibi.agbi.editor.core.util.GuiFactory;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.result.ResultSet;
@@ -14,10 +14,13 @@ import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ResultService;
 import edu.unibi.agbi.editor.business.exception.ResultsException;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -37,8 +40,8 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class QuickResultsController implements Initializable
 {
+    @Autowired private GuiFactory guiFactory;
     @Autowired private ModelService dataService;
-    @Autowired private ResultViewerController resultsController;
     @Autowired private ResultService resultsService;
     @Autowired private MessengerService messengerService;
 
@@ -197,7 +200,13 @@ public class QuickResultsController implements Initializable
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
-        buttonViewer.setOnAction(eh -> resultsController.OpenWindow());
+        buttonViewer.setOnAction(eh -> {
+            try {
+                guiFactory.BuildResultsViewer();
+            } catch (IOException ex) {
+                messengerService.addException("Cannot open results viewer!", ex);
+            }
+        });
         lineChartResults.setAnimated(false);
         lineChartResults.createSymbolsProperty().set(false);
         resultsService.getSimulationResults().addListener(new ListChangeListener()

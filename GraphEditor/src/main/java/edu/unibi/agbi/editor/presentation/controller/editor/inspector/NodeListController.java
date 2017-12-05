@@ -76,8 +76,9 @@ public class NodeListController implements Initializable
         ObservableList items = FXCollections.observableArrayList();
         items.addAll(
                 nodes.stream()
-                        .filter(n -> n.getId().toLowerCase().contains(filter)
-                                || n.getName().toLowerCase().contains(filter)
+                        .filter(n
+                                -> n.getId().toLowerCase().contains(filter)
+//                                || n.getName().toLowerCase().contains(filter)
                                 || n.getLabelText().toLowerCase().contains(filter))
                         .sorted((n1, n2) -> {
                             if (n1.isSticky() != n2.isSticky()) {

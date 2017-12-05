@@ -29,15 +29,15 @@ public class DataCluster implements IDataNode
     private final DataType dataType;
     private final Graph graph;
 
-    private final String id;
+    private String id;
     private String description;
-    private String name;
+//    private String name;
 
     public DataCluster(String id) {
         this.dataType = DataType.CLUSTER;
         this.graph = new Graph();
         this.id = id;
-        this.name = id;
+//        this.name = id;
         this.shapes = new HashSet();
     }
 
@@ -94,6 +94,12 @@ public class DataCluster implements IDataNode
     public String getId() {
         return id;
     }
+    
+    @Override
+    public void setId(String id) {
+        this.id = id;
+        this.graph.setName(id);
+    }
 
     @Override
     public String getLabelText() {
@@ -110,16 +116,16 @@ public class DataCluster implements IDataNode
         }
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+//    @Override
+//    public String getName() {
+//        return name;
+//    }
 
-    @Override
-    public void setName(String name) {
-        this.name = name;
-        this.graph.setName(name);
-    }
+//    @Override
+//    public void setName(String name) {
+//        this.name = name;
+//        this.graph.setName(name);
+//    }
 
     @Override
     public Set<IGraphElement> getShapes() {

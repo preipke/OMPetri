@@ -313,15 +313,16 @@ public class ParameterService
     private boolean filter(Parameter param, String filter) {
         return param.getId().contains(filter)
                 || param.getRelatedElement().getId().contains(filter)
-                || param.getRelatedElement().getName().contains(filter)
+//                || param.getRelatedElement().getName().contains(filter)
                 || ((IDataElement) param.getRelatedElement()).getLabelText().contains(filter);
     }
 
     public List<DataTransition> getReferenceChoices(String filter) {
         List<DataTransition> list = new ArrayList();
         dataService.getModel().getTransitions().stream()
-                .filter(transition -> transition.getId().toLowerCase().contains(filter)
-                        || transition.getName().toLowerCase().contains(filter)
+                .filter(transition
+                        -> transition.getId().toLowerCase().contains(filter)
+//                        || transition.getName().toLowerCase().contains(filter)
                         || ((DataTransition) transition).getLabelText().toLowerCase().contains(filter))
                 .sorted((t1, t2) -> t1.toString().compareTo(t2.toString()))
                 .forEach(transition -> list.add((DataTransition) transition));

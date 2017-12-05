@@ -5,8 +5,10 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
-import edu.unibi.agbi.editor.presentation.controller.ResultViewerController;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.core.util.GuiFactory;
 import edu.unibi.agbi.editor.business.service.SimulationService;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -28,8 +30,9 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class SimulationController implements Initializable
 {
+    @Autowired private GuiFactory guiFactory;
+    @Autowired private MessengerService messengerService;
     @Autowired private SimulationService simulationService;
-    @Autowired private ResultViewerController resultsController;
     
     @FXML private Button buttonOpenResultsViewer;
     @FXML private Button buttonStart;
@@ -106,7 +109,13 @@ public class SimulationController implements Initializable
     @Override
     public void initialize(URL location , ResourceBundle resources) {
         
-        buttonOpenResultsViewer.setOnAction(e -> resultsController.OpenWindow());
+        buttonOpenResultsViewer.setOnAction(e -> {
+            try {
+                guiFactory.BuildResultsViewer();
+            } catch (IOException ex) {
+                messengerService.addException("Cannot open results viewer!", ex);
+            }
+        });
         
         buttonStart.setOnAction(e -> StartSimulationAndLock());
         buttonStop.setOnAction(e -> StopSimulation());

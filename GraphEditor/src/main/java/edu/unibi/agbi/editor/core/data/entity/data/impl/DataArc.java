@@ -34,7 +34,7 @@ public class DataArc extends Arc implements IDataArc
 
     public DataArc(String id, IDataNode source, IDataNode target, Arc.Type arctype) {
         super(id, source, target, arctype);
-        super.name = id;
+//        super.name = id;
         this.dataType = DataType.ARC;
         this.shapes = new HashSet();
     }

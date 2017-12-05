@@ -29,7 +29,7 @@ public class DaoTests extends TestFXBase {
     IGraphArc tmpArc;
     IGraphNode tmpNode;
 
-    //@Test
+    @Test
     public void CreateNodes() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -54,7 +54,7 @@ public class DaoTests extends TestFXBase {
                 dataService.getGraph().getConnections().size());
     }
 
-    //@Test
+    @Test
     public void ConnectAndValidateNodes() throws DataException {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -111,7 +111,7 @@ public class DaoTests extends TestFXBase {
         }
     }
 
-    //@Test
+    @Test
     public void RemoveNodesAndValidate() throws Exception {
 
         List<IGraphNode> places = CreatePlaces(placeCount);
@@ -122,6 +122,8 @@ public class DaoTests extends TestFXBase {
         IGraphNode node;
         IDataNode nodeData;
         
+        int i = 0;
+        
         while (!dataService.getGraph().getNodes().isEmpty()) {
             
             nodesCopy = copyNodes(dataService.getGraph().getNodes());
@@ -129,6 +131,7 @@ public class DaoTests extends TestFXBase {
             node = (IGraphNode) nodesCopy.remove(getRandomIndex(nodesCopy));
             nodeData = node.getData();
             
+            System.out.println("Remove node: " + i++);
             RemoveNode(node);
 
             Assert.assertEquals(false, dataService.getGraph().contains(node));
@@ -168,6 +171,8 @@ public class DaoTests extends TestFXBase {
         IGraphArc arc;
         IDataArc arcData;
         
+        int i = 0;
+        
         while (!dataService.getGraph().getConnections().isEmpty()) {
             
             arcsCopy = copyConnections(dataService.getGraph().getConnections());
@@ -175,6 +180,7 @@ public class DaoTests extends TestFXBase {
             arc = (IGraphArc) arcsCopy.remove(getRandomIndex(arcsCopy));
             arcData = arc.getData();
             
+            System.out.println("Remove arc: " + i++);
             RemoveArc(arc);
 
             Assert.assertEquals(false, dataService.getGraph().contains(arc));
@@ -188,7 +194,7 @@ public class DaoTests extends TestFXBase {
         }
     }
     
-    //@Test
+    @Test
     public void ClusteringNodes() throws DataException {
         
         Collection<IGravisNode> nodesAfterClustering, nodesBeforeClustering;
