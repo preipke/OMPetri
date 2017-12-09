@@ -5,6 +5,8 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor;
 
+import edu.unibi.agbi.editor.business.service.FactoryService;
+import edu.unibi.agbi.editor.business.service.HierarchyService;
 import edu.unibi.agbi.editor.presentation.controller.editor.graph.ElementController;
 import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.editor.presentation.controller.editor.graph.HierarchyController;
@@ -54,6 +56,8 @@ public class GraphController implements Initializable
 {
     @Autowired private ConfigurableApplicationContext springContext;
     
+    @Autowired private FactoryService factoryService;
+    @Autowired private HierarchyService hierarchyService;
     @Autowired private ModelService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private SelectionService selectionService;
@@ -95,7 +99,7 @@ public class GraphController implements Initializable
         
         final ModelDao dao;
         if (dataDao == null) {
-            dao = dataService.CreateDao();
+            dao = factoryService.CreateDao();
         } else {
             dao = dataDao;
         }
@@ -209,7 +213,7 @@ public class GraphController implements Initializable
             stackPaneActive.getChildren().add(paneHierarchy);
             stackPaneActive.getChildren().add(panePanel);
             stackPaneActive.getChildren().add(paneZoom);
-            dataService.UpdateClusterShapes(dataService.getGraph());
+            hierarchyService.updateClusterShapes(dataService.getGraph());
         }
     }
     

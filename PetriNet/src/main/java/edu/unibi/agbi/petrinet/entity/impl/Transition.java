@@ -45,4 +45,9 @@ public class Transition extends Node
     {
         CONTINUOUS, DISCRETE, STOCHASTIC;
     }
+    
+    public enum FunctionType
+    {
+        
+    }
 }

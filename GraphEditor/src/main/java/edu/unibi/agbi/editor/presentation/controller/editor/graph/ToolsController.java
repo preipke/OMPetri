@@ -7,6 +7,7 @@ package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
 import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.business.service.FactoryService;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
@@ -28,12 +29,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class ToolsController implements Initializable
 {
-    @Autowired private MouseEventHandler mouseEventHandler;
-    @Autowired private HierarchyController hierarchyController;
+    @Autowired private FactoryService factoryService;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private ModelService dataService;
     @Autowired private SelectionService selectionService;
     @Autowired private MessengerService messengerService;
+    
+    @Autowired private MouseEventHandler mouseEventHandler;
+    @Autowired private HierarchyController hierarchyController;
     
     @FXML private MenuItem buttonCreatePlace;
     @FXML private MenuItem buttonCreateTransition;
@@ -57,7 +60,7 @@ public class ToolsController implements Initializable
     
     private void CreateCluster() {
         try {
-            hierarchyService.cluster(dataService.getDao(), selectionService.getSelectedElements(), dataService.getClusterId(dataService.getDao()));
+            hierarchyService.cluster(dataService.getDao(), selectionService.getSelectedElements());
             hierarchyController.update();
         } catch (DataException ex) {
             messengerService.addException(ex);

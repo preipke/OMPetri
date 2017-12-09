@@ -11,7 +11,6 @@ import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataCluster;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataClusterArc;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataPlace;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
@@ -20,7 +19,6 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphCluster;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphArc;
-import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.editor.business.service.ModelService;
@@ -34,6 +32,7 @@ import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
+import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -434,7 +433,6 @@ public class ModelXmlConverter
                         arc = new GraphArc(tmp.getAttribute(attrId), source, target, data);
 
                         dataService.add(dao, arc);
-                        dataService.StyleElement(arc);
                     }
                 }
             }
@@ -537,7 +535,7 @@ public class ModelXmlConverter
             transition.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         transition.setDescription(elem.getAttribute(attrDescription));
-        transition.setFunction(getFunction(elem));
+        transition.setFunction(getFunction(dao.getModel(), elem));
 //        transition.setName(elem.getAttribute(attrName));
         
         /**
@@ -580,7 +578,6 @@ public class ModelXmlConverter
 //                        }
                         
                         dataService.add(dao, shape);
-                        dataService.StyleElement(shape);
                     }
                 }
             }
@@ -613,15 +610,15 @@ public class ModelXmlConverter
         return colour;
     }
 
-    private Function getFunction(Element elem) throws Exception {
+    private Function getFunction(Model model, Element elem) throws Exception {
         NodeList nodes = elem.getElementsByTagName(tagFunction);
         if (nodes.getLength() > 0) {
             if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) nodes.item(0);
-                return functionBuilder.build(elem.getTextContent(), false);
+                return functionBuilder.build(model, elem.getTextContent(), false);
             }
         }
-        return functionBuilder.build("1", false);
+        return functionBuilder.build(model, "1", false);
     }
 
     private Parameter getParameter(Element elem, IElement element) {
@@ -646,7 +643,7 @@ public class ModelXmlConverter
     private Weight getWeight(Element elem, ModelDao dao) throws Exception {
 //        Weight weight = new Weight(new Colour(elem.getAttribute(attrColourId), ""));
         Weight weight = new Weight(dao.getModel().getColour(elem.getAttribute(attrColourId)));
-        weight.setFunction(getFunction(elem));
+        weight.setFunction(getFunction(dao.getModel(), elem));
         return weight;
     }
     

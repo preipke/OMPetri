@@ -56,6 +56,10 @@ public class MessengerService
 
     }
 
+    public void setRightStatus(String msg) {
+        
+    }
+
     public void setRightStatus(String msg, Throwable thr) {
         addException(msg, thr);
     }

@@ -19,10 +19,8 @@ import java.util.Set;
  */
 public abstract class Element implements IElement
 {
-    protected String id;
-//    protected String name;
-    
     protected final Type elementType;
+    protected String id;
     
     protected boolean isDisabled = false;
 
@@ -61,16 +59,6 @@ public abstract class Element implements IElement
         return id;
     }
 
-//    @Override
-//    public String getName() {
-//        return name;
-//    }
-//
-//    @Override
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-
     @Override
     public Set<Parameter> getRelatedParameters() {
         return parametersRelated;
@@ -79,6 +67,7 @@ public abstract class Element implements IElement
     @Override
     public void addLocalParameter(Parameter param) {
         parametersLocal.put(param.getId(), param);
+        getRelatedParameters().add(param);
     }
     
     @Override
@@ -90,11 +79,6 @@ public abstract class Element implements IElement
     public Collection<Parameter> getLocalParameters() {
         return parametersLocal.values();
     }
-    
-//    @Override
-//    public String toString() {
-//        return name + " (" + id + ")";
-//    }
     
     @Override
     public String toString() {

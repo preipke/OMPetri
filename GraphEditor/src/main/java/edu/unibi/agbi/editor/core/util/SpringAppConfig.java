@@ -7,6 +7,7 @@ package edu.unibi.agbi.editor.core.util;
 
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.IOException;
 import java.util.ResourceBundle;
 import org.springframework.context.annotation.Bean;
@@ -18,6 +19,11 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 public class SpringAppConfig {
+    
+    @Bean
+    public ParameterFactory parameterFactory() {
+        return new ParameterFactory();
+    }
     
     @Bean
     public ResourceBundle resourceBundle() {

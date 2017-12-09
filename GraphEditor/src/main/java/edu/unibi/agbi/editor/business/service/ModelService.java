@@ -19,21 +19,15 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphCluster;
-import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphArc;
-import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphPlace;
-import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphTransition;
 import edu.unibi.agbi.editor.core.util.Calculator;
-import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
-import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
@@ -42,7 +36,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -52,37 +45,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class ModelService
 {
-    private static final Colour DEFAULT_COLOUR = new Colour("WHITE", "Default colour");
-    private static final String PREFIX_ID_CLUSTER = "C";
-    private static final String PREFIX_ID_GRAPHNODE = "N";
-    private static final String PREFIX_ID_PLACE = "P";
-    private static final String PREFIX_ID_TRANSITION = "T";
-
     @Autowired private Calculator calculator;
+    @Autowired private FactoryService factoryService;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
 
-    @Value("${css.arc.default}") private String styleArcDefault;
-    @Value("${css.arc.default.child}") private String styleArcDefaultHead;
-    @Value("${css.arc.inhi}") private String styleArcInhi;
-    @Value("${css.arc.inhi.child}") private String styleArcInhiHead;
-    @Value("${css.arc.test}") private String styleArcTest;
-    @Value("${css.arc.test.child}") private String styleArcTestHead;
-
-    @Value("${css.cluster.default}") private String stylceCluster;
-    @Value("${css.clusterarc.default}") private String styleClusterArc;
-
-    @Value("${css.place.default}") private String stylePlace;
-
-    @Value("${css.transition.default}") private String styleTransitionDefault;
-    @Value("${css.transition.stochastic}") private String styleTransitionStoch;
-
-    private final DataArc.Type defaultArcType = DataArc.Type.NORMAL;
-    private DataPlace.Type defaultPlaceType = DataPlace.Type.CONTINUOUS;
-    private DataTransition.Type defaultTransitionType = DataTransition.Type.CONTINUOUS;
-
     private final ObservableList<ModelDao> dataDaos = FXCollections.observableArrayList();
-    private ModelDao dataDao;
+    private ModelDao modelDaoActive;
 
     private final BooleanProperty isGridEnabled = new SimpleBooleanProperty(true);
 
@@ -93,11 +62,11 @@ public class ModelService
      * @throws DataException
      */
     public synchronized void add(Colour colour) throws DataException {
-        dataDao.setHasChanges(true);
-        if (dataDao.getModel().getColours().contains(colour)) {
+        modelDaoActive.setHasChanges(true);
+        if (modelDaoActive.getModel().getColours().contains(colour)) {
             throw new DataException("Conflict! Another colour has already been stored using the same ID!");
         }
-        dataDao.getModel().add(colour);
+        modelDaoActive.getModel().add(colour);
     }
 
     /**
@@ -119,7 +88,7 @@ public class ModelService
             }
         }
         dao.getGraph().add(arc);
-        StyleElement(arc);
+        factoryService.StyleElement(arc);
         return arc;
     }
 
@@ -142,11 +111,81 @@ public class ModelService
             }
         }
         dao.getGraph().add(node);
-        StyleElement(node);
+        factoryService.StyleElement(node);
         return node;
     }
+    
+    /**
+     * Attempts to change the ID/name of a data element.
+     * 
+     * @param data
+     * @param id 
+     */
+    public synchronized void changeId(IDataElement data, String id) throws DataException {
+        
+        final String oldId = data.getId();
+        
+        if (id.contentEquals(oldId)) {
+            return;
+        }
+        
+        try {
 
-    public synchronized void ChangeElementSubtype(IDataElement element, Object subtype) throws DataException {
+            // Validate element ID to be available
+            if (modelDaoActive.getModel().contains(id)) {
+                throw new DataException("The specified ID is already used inside the model!");
+            }
+            modelDaoActive.getModel().changeId(data, id);
+            
+            
+            
+            if (data instanceof IDataNode) {
+                IDataNode node = (IDataNode) data;
+                
+                // Validate IDs for related arcs
+                for (IArc arc: node.getArcsIn()) {
+                    id = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                    if (modelDaoActive.getModel().contains(id)) {
+                        throw new DataException("A resulting arc ID is already used inside the model!");
+                    }
+                }
+                for (IArc arc: node.getArcsOut()) {
+                    id = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                    if (modelDaoActive.getModel().contains(id)) {
+                        throw new DataException("A resulting arc ID is already used inside the model!");
+                    }
+                }
+                
+                // Change IDs for related arcs
+                for (IArc arc: node.getArcsIn()) {
+                    if (arc.getId().matches(".+_" + oldId)) {
+                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                        modelDaoActive.getModel().changeId(arc, id);
+                        
+                        
+                    }
+                }
+                for (IArc arc: node.getArcsOut()) {
+                    if (arc.getId().matches(oldId + "_.+")) {
+                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                        modelDaoActive.getModel().changeId(arc, id);
+                        
+                        
+                    }
+                }
+                
+            }
+            
+            
+        } catch (Exception ex) {
+
+            data.setId(oldId);
+            throw new DataException(ex.getMessage());
+        }
+        
+    }
+
+    public synchronized void changeSubtype(IDataElement element, Object subtype) throws DataException {
 
         switch (element.getType()) {
 
@@ -162,7 +201,7 @@ public class ModelService
                 DataPlace place = (DataPlace) element;
                 DataPlace.Type placeType = (DataPlace.Type) subtype;
                 if (place.getPlaceType() != placeType) {
-                    setPlaceTypeDefault(placeType);
+                    factoryService.setPlaceTypeDefault(placeType);
                     changePlaceType(place, placeType);
                 }
                 break;
@@ -171,7 +210,7 @@ public class ModelService
                 DataTransition transition = (DataTransition) element;
                 DataTransition.Type transitionType = (DataTransition.Type) subtype;
                 if (transition.getTransitionType() != transitionType) {
-                    setTransitionTypeDefault(transitionType);
+                    factoryService.setTransitionTypeDefault(transitionType);
                     changeTransitionType(transition, transitionType);
                 }
                 break;
@@ -189,159 +228,42 @@ public class ModelService
      * @throws DataException
      */
     public synchronized IGraphArc connect(ModelDao dao, IGraphNode source, IGraphNode target) throws DataException {
-        IGraphArc arc = CreateConnection(source, target, null);
+        IGraphArc arc = factoryService.CreateConnection(source, target, null);
         validateConnection(source, target);
         validateArc(arc.getData());
         add(dao, arc);
         dao.setHasChanges(true);
         return arc;
     }
+    
+    public synchronized IGraphNode clone(ModelDao modelDao, IDataNode data, double posX, double posY) throws DataException {
+        IGraphNode node;
+        node = factoryService.CreateClone(modelDao, data, posX, posY);
+        node = add(modelDao, node);
+        modelDao.setHasChanges(true);
+        return node;
+    }
 
-    /**
-     * Creates a cloned node.Results in a node of the same type that references
-     * the given data.
-     *
-     * @param dao
-     * @param data
-     * @param posX
-     * @param posY
-     * @return
-     * @throws DataException
-     */
-    public IGraphNode CreateClone(ModelDao dao, IDataNode data, double posX, double posY) throws DataException {
-        
-        /**
-         * Adjust data's enabled state.
-         */
-        if (data.isDisabled()) {
-            data.setDisabled(false);
-            data.getShapes().forEach(shape -> shape.setElementDisabled(true));
-        }
-        
-        IGraphNode clone;
-        switch (data.getType()) {
-            case PLACE:
-                clone = new GraphPlace(getGraphNodeId(dataDao), (DataPlace) data);
-                clone.getLabels().get(1).setText(((DataPlace) data).getTokenLabelText());
-                break;
-            case TRANSITION:
-                clone = new GraphTransition(getGraphNodeId(dataDao), (DataTransition) data);
-                break;
-            default:
-                throw new DataException("Cannot clone the given type of element! [" + data.getType() + "]");
-        }
-        Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
-        clone.translateXProperty().set(pos.getX() - clone.getCenterOffsetX());
-        clone.translateYProperty().set(pos.getY() - clone.getCenterOffsetY());
-        clone.getLabels().get(0).setText(data.getLabelText());
-        clone = add(dao, clone);
-        dataDao.setHasChanges(true);
-        return clone;
+    public synchronized IGraphNode create(ModelDao modelDao, DataType type, double posX, double posY) throws DataException {
+        IGraphNode node;
+        node = factoryService.CreateNode(modelDao, type, posX, posY);
+        node = add(modelDao, node);
+        modelDao.setHasChanges(true);
+        return node;
     }
 
     /**
-     * Creates a node of the specified type at the given event position.
-     *
-     * @param dao
-     * @param type
-     * @param posX
-     * @param posY
-     * @return
-     * @throws DataException
-     */
-    public synchronized IGraphNode CreateNode(ModelDao dao, DataType type, double posX, double posY) throws DataException {
-        IGraphNode shape;
-        switch (type) {
-            case PLACE:
-                DataPlace place;
-                place = new DataPlace(getPlaceId(dataDao), defaultPlaceType);
-                place.addToken(new Token(DEFAULT_COLOUR));
-                shape = new GraphPlace(getGraphNodeId(dataDao), place);
-                break;
-
-            case TRANSITION:
-                DataTransition transition;
-                transition = new DataTransition(getTransitionId(dataDao), defaultTransitionType);
-                shape = new GraphTransition(getGraphNodeId(dataDao), transition);
-                break;
-
-            default:
-                throw new DataException("Cannot create element of undefined type!");
-        }
-        Point2D pos = calculator.getCorrectedPosition(dataDao.getGraph(), posX, posY);
-        if (isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, getGraph());
-        }
-        shape.translateXProperty().set(pos.getX() - shape.getCenterOffsetX());
-        shape.translateYProperty().set(pos.getY() - shape.getCenterOffsetY());
-        shape = add(dao, shape);
-        dataDao.setHasChanges(true);
-        return shape;
-    }
-
-    /**
-     * Creates an arc connecting the given nodes.
-     *
-     * @param source
-     * @param target
-     * @param dataArc
-     * @return
-     */
-    public IGraphArc CreateConnection(IGraphNode source, IGraphNode target, DataArc dataArc) {
-
-        String id;
-
-        /**
-         * Create data.
-         */
-        id = getArcId(source.getData(), target.getData());
-        if (dataArc == null) {
-            dataArc = new DataArc(id, source.getData(), target.getData(), defaultArcType);
-            dataArc.addWeight(new Weight(DEFAULT_COLOUR));
-        }
-
-        /**
-         * Creating shape.
-         */
-        id = getConnectionId(source, target);
-        return new GraphArc(id, source, target, dataArc);
-    }
-
-    /**
-     * Creates an arc that binds its source to the given node.
+     * Creates an arc that binds its source to the given node. Used when
+     * creating new arcs in the editor.
      *
      * @param source
      * @return
      */
-    public synchronized IGraphArc CreateConnectionTmp(IGraphNode source) {
-        GraphArc edge;
-        edge = new GraphArc(source.getId() + "null", source);
-        edge.getRootHandles().forEach(ele -> {
-            ele.setActiveStyleClass(styleArcDefault);
-        });
-        edge.getChildHandles().forEach(ele -> {
-            ele.setActiveStyleClass(styleArcDefaultHead);
-        });
-        edge.setArrowHeadVisible(true);
-        edge.setCircleHeadVisible(false);
-        dataDao.getGraph().add(edge);
-        return edge;
-    }
-
-    /**
-     * Creates a new data access object.
-     *
-     * @return
-     */
-    public ModelDao CreateDao() {
-        ModelDao dao = new ModelDao();
-        dao.setAuthor(System.getProperty("user.name"));
-        dao.setCreationDateTime(LocalDateTime.now());
-        dao.setModelId(String.valueOf(System.nanoTime()));
-        dao.setModelName("Untitled");
-        dao.getModel().add(DEFAULT_COLOUR);
-        dao.setHasChanges(false);
-        return dao;
+    public synchronized IGraphArc createTmpArc(IGraphNode source) {
+        IGraphArc arc;
+        arc = factoryService.CreateConnectionTmp(source);
+        modelDaoActive.getGraph().add(arc);
+        return arc;
     }
 
     /**
@@ -368,7 +290,7 @@ public class ModelService
         } catch (Exception ex) {
             throw new DataException(ex.getMessage());
         }
-        dataDao.setHasChanges(true);
+        modelDaoActive.setHasChanges(true);
         return arc;
     }
 
@@ -391,7 +313,7 @@ public class ModelService
             }
             removeShape(node);
             removeData(node.getData());
-            dataDao.setHasChanges(true);
+            modelDaoActive.setHasChanges(true);
         } catch (Exception ex) {
             throw new DataException(ex.getMessage());
         }
@@ -416,7 +338,11 @@ public class ModelService
                 messengerService.addException("Cannot remove element '" + element.getData().getId() + "'!", ex);
             }
         }
-        dataDao.setHasChanges(true);
+        modelDaoActive.setHasChanges(true);
+    }
+
+    public IGraphNode copy(IGraphNode target) {
+        return factoryService.copy(modelDaoActive, target);
     }
 
     /**
@@ -435,7 +361,7 @@ public class ModelService
         IGraphNode shape;
 
         Point2D posCenter = calculator.getCenterN(nodes);
-        Point2D posMouse = calculator.getCorrectedMousePositionLatest(dataDao.getGraph());
+        Point2D posMouse = calculator.getCorrectedMousePositionLatest(modelDaoActive.getGraph());
 
         for (int i = 0; i < nodes.size(); i++) {
 
@@ -468,51 +394,8 @@ public class ModelService
             }
         }
 
-        dataDao.setHasChanges(true);
+        modelDaoActive.setHasChanges(true);
         return shapes;
-    }
-
-    /**
-     * Styles the graph element in the scene according to the type assigned to
-     * its data element.
-     *
-     * @param element
-     * @throws DataException
-     */
-    public void StyleElement(IGraphElement element) throws DataException {
-        switch (element.getData().getType()) {
-            case ARC:
-                styleArc((DataArc) element.getData());
-                break;
-            case CLUSTER:
-                setElementStyle(element.getData(), stylceCluster, null);
-                break;
-            case CLUSTERARC:
-                setElementStyle(element.getData(), styleClusterArc, styleClusterArc);
-                ((IGraphArc) element).setCircleHeadVisible(false);
-                break;
-            case PLACE:
-                stylePlace((DataPlace) element.getData());
-                break;
-            case TRANSITION:
-                styleTransition((DataTransition) element.getData());
-                break;
-            default:
-                throw new DataException("Cannot style element of undefined type!");
-        }
-    }
-
-    /**
-     * Updates the cluster shapes visual disabled states.
-     * @param graph
-     */
-    public void UpdateClusterShapes(Graph graph) {
-        for (IGravisCluster cluster : graph.getClusters()) {
-            boolean isDisabled = ((GraphCluster) cluster).getData().isDisabled();
-            for (GravisShapeHandle handle : cluster.getElementHandles()) {
-                handle.setDisabled(isDisabled);
-            }
-        }
     }
 
     /**
@@ -532,8 +415,8 @@ public class ModelService
             arc.setArcType(typeOld);
             throw ex;
         }
-        dataDao.setHasChanges(true);
-        styleArc(arc);
+        modelDaoActive.setHasChanges(true);
+        factoryService.styleArc(arc);
     }
 
     /**
@@ -558,8 +441,8 @@ public class ModelService
             place.setPlaceType(typeOld);
             throw ex;
         }
-        dataDao.setHasChanges(true);
-        stylePlace(place);
+        modelDaoActive.setHasChanges(true);
+        factoryService.stylePlace(place);
     }
 
     /**
@@ -584,32 +467,8 @@ public class ModelService
             transition.setTransitionType(typeOld);
             throw ex;
         }
-        dataDao.setHasChanges(true);
-        styleTransition(transition);
-    }
-
-    /**
-     * Creates a copy of the given node. Results in a node of the same type as
-     * the given node.
-     *
-     * @param target
-     * @return
-     */
-    private IGraphNode copy(IGraphNode target) {
-        IDataNode node = target.getData();
-        switch (node.getType()) {
-            case PLACE:
-                DataPlace place;
-                place = new DataPlace(getPlaceId(dataDao), ((DataPlace) node).getPlaceType());
-                place.addToken(new Token(DEFAULT_COLOUR));
-                return new GraphPlace(getGraphNodeId(dataDao), place);
-            case TRANSITION:
-                DataTransition transition;
-                transition = new DataTransition(getTransitionId(dataDao), ((DataTransition) node).getTransitionType());
-                return new GraphTransition(getGraphNodeId(dataDao), transition);
-            default:
-                return null;
-        }
+        modelDaoActive.setHasChanges(true);
+        factoryService.styleTransition(transition);
     }
 
     /**
@@ -621,7 +480,7 @@ public class ModelService
     private IDataElement removeData(IDataElement element) throws Exception {
         if (element != null) {
             if (element.getShapes().isEmpty()) {
-                dataDao.getModel().remove(element);
+                modelDaoActive.getModel().remove(element);
             }
         }
         return element;
@@ -637,7 +496,7 @@ public class ModelService
      */
     private IGraphArc removeShape(IGraphArc arc) throws DataException {
 
-        dataDao.getGraph().remove(arc);
+        modelDaoActive.getGraph().remove(arc);
         if (arc.getData() != null) {
             arc.getData().getShapes().remove(arc);
         }
@@ -658,119 +517,11 @@ public class ModelService
      * @throws DataException
      */
     private IGraphNode removeShape(IGraphNode node) throws DataException {
-        dataDao.getGraph().remove(node);
+        modelDaoActive.getGraph().remove(node);
         if (node.getData() != null) {
             node.getData().getShapes().remove(node);
         }
         return node;
-    }
-
-    /**
-     * Sets the given style to all elements in the scene that are related to the
-     * given data arc.
-     *
-     * @param element
-     * @param styleParent
-     */
-    private void setElementStyle(IDataElement element, String styleParent, String styleChildren) {
-        for (IGraphElement elem : element.getShapes()) {
-            elem.getRootHandles().forEach(s -> {
-                s.setActiveStyleClass(styleParent);
-            });
-            elem.getChildHandles().forEach(s -> {
-                s.setActiveStyleClass(styleChildren);
-            });
-        }
-    }
-
-    private void styleArc(DataArc arc) throws DataException {
-        if (arc.getArcType() != null) {
-            switch (arc.getArcType()) {
-                case INHIBITORY:
-                    arc.getShapes().forEach(s -> {
-                        IGraphArc a = (IGraphArc) s;
-                        a.setArrowHeadVisible(false);
-                        a.setCircleHeadVisible(true);
-                    });
-                    setElementStyle(arc, styleArcInhi, styleArcInhiHead);
-                    break;
-                case NORMAL:
-                    arc.getShapes().forEach(s -> {
-                        IGraphArc a = (IGraphArc) s;
-                        a.setArrowHeadVisible(true);
-                        a.setCircleHeadVisible(false);
-                    });
-                    setElementStyle(arc, styleArcDefault, styleArcDefaultHead);
-                    break;
-                case READ:
-                    arc.getShapes().forEach(s -> {
-                        IGraphArc a = (IGraphArc) s;
-                        a.setArrowHeadVisible(false);
-                        a.setCircleHeadVisible(true);
-                    });
-                    setElementStyle(arc, styleArcDefault, styleArcDefaultHead);
-                    break;
-                case TEST:
-                    arc.getShapes().forEach(s -> {
-                        IGraphArc a = (IGraphArc) s;
-                        a.setArrowHeadVisible(true);
-                        a.setCircleHeadVisible(false);
-                    });
-                    setElementStyle(arc, styleArcTest, styleArcTestHead);
-                    break;
-                default:
-                    throw new DataException("Cannot style shape for an undefined arc type!");
-            }
-        }
-    }
-
-    private void stylePlace(DataPlace place) throws DataException {
-        switch (place.getPlaceType()) {
-            case CONTINUOUS:
-                place.getShapes().forEach(s -> {
-                    IGraphNode n = (IGraphNode) s;
-                    n.setInnerCircleVisible(true);
-                });
-                setElementStyle(place, stylePlace, stylePlace);
-                break;
-            case DISCRETE:
-                place.getShapes().forEach(s -> {
-                    IGraphNode n = (IGraphNode) s;
-                    n.setInnerCircleVisible(false);
-                });
-                setElementStyle(place, stylePlace, stylePlace);
-                break;
-            default:
-                throw new DataException("Cannot style shape for an undefined place type!");
-        }
-    }
-
-    private void styleTransition(DataTransition transition) throws DataException {
-        switch (transition.getTransitionType()) {
-            case CONTINUOUS:
-                transition.getShapes().forEach(s -> {
-                    IGraphNode n = (IGraphNode) s;
-                    n.setInnerRectangleVisible(true);
-                });
-                setElementStyle(transition, styleTransitionDefault, styleTransitionDefault);
-                break;
-            case DISCRETE:
-                transition.getShapes().forEach(s -> {
-                    IGraphNode n = (IGraphNode) s;
-                    n.setInnerRectangleVisible(false);
-                });
-                setElementStyle(transition, styleTransitionDefault, styleTransitionDefault);
-                break;
-            case STOCHASTIC:
-                transition.getShapes().forEach(s -> {
-                    IGraphNode n = (IGraphNode) s;
-                    n.setInnerRectangleVisible(false);
-                });
-                setElementStyle(transition, styleTransitionStoch, styleTransitionStoch);
-                break;
-            default:
-                throw new DataException("Cannot style shape for an undefined transition type!");
-        }
     }
 
     /**
@@ -940,36 +691,12 @@ public class ModelService
         }
     }
 
-    public synchronized String getArcId(IDataNode source, IDataNode target) {
-        return source.getId() + "_" + target.getId();
-    }
-
-    public synchronized String getConnectionId(IGraphNode source, IGraphNode target) {
-        return source.getId() + "_" + target.getId();
-    }
-
-    public synchronized String getClusterId(ModelDao dao) {
-        return PREFIX_ID_CLUSTER + dao.getNextClusterId();
-    }
-
-    public String getGraphNodeId(ModelDao dao) {
-        return PREFIX_ID_GRAPHNODE + dao.getNextNodeId();
-    }
-
-    public String getPlaceId(ModelDao dao) {
-        return PREFIX_ID_PLACE + dao.getNextPlaceId();
-    }
-
-    public String getTransitionId(ModelDao dao) {
-        return PREFIX_ID_TRANSITION + dao.getNextTransitionId();
-    }
-
     public synchronized Graph getGraph() {
-        return dataDao.getGraph();
+        return modelDaoActive.getGraph();
     }
 
     public synchronized Model getModel() {
-        return dataDao.getModel();
+        return modelDaoActive.getModel();
     }
 
     public synchronized List<ModelDao> getDataDaosWithChanges() {
@@ -987,45 +714,33 @@ public class ModelService
     }
 
     public synchronized ModelDao getDao() {
-        return dataDao;
+        return modelDaoActive;
     }
 
     public synchronized void setDao(ModelDao dataDao) {
         if (!dataDaos.contains(dataDao)) {
             dataDaos.add(dataDao);
         }
-        this.dataDao = dataDao;
+        this.modelDaoActive = dataDao;
     }
 
     public synchronized void setArcWeight(DataArc arc, Weight weight) {
         arc.addWeight(weight);
-        dataDao.setHasChanges(true);
+        modelDaoActive.setHasChanges(true);
     }
 
     public synchronized void setPlaceToken(DataPlace place, Token token) {
         place.addToken(token);
-        dataDao.setHasChanges(true);
+        modelDaoActive.setHasChanges(true);
     }
 
     public synchronized void setElementFunction(IDataElement element, String functionString, Colour colour) throws DataException {
         try {
-            parameterService.setFunction(dataDao.getModel(), element, functionString, colour);
-            dataDao.setHasChanges(true);
+            parameterService.setFunction(modelDaoActive.getModel(), element, functionString, colour);
+            modelDaoActive.setHasChanges(true);
         } catch (Exception ex) {
             throw new DataException(ex.getMessage());
         }
-    }
-
-    public Colour getColourDefault() {
-        return DEFAULT_COLOUR;
-    }
-
-    public void setPlaceTypeDefault(DataPlace.Type type) {
-        defaultPlaceType = type;
-    }
-
-    public void setTransitionTypeDefault(DataTransition.Type type) {
-        defaultTransitionType = type;
     }
 
     public boolean isGridEnabled() {

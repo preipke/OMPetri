@@ -46,8 +46,9 @@ public class Model
 
     public void add(Parameter param) {
         parameters.put(param.getId(), param);
+        param.getRelatedElement().getRelatedParameters().add(param);
     }
-    
+
     public void add(IElement element) throws Exception {
         if (containsAndNotEqual(element)) {
             throw new Exception("Another element has already been stored using the same identifier! (" + element.getId() + ")");
@@ -72,7 +73,7 @@ public class Model
         arc.getSource().getArcsOut().add(arc);
         arc.getTarget().getArcsIn().add(arc);
     }
-    
+
     public void clear() {
         colors.clear();
         parameters.clear();
@@ -80,11 +81,11 @@ public class Model
         places.clear();
         transitions.clear();
     }
-    
-    public boolean contains(Parameter param) {
-        return parameters.containsKey(param.getId());
-    }
-    
+
+//    public boolean contains(Parameter param) {
+//        return parameters.containsKey(param.getId());
+//    }
+
     public boolean contains(IElement element) throws Exception {
         switch (element.getElementType()) {
             case ARC:
@@ -99,33 +100,97 @@ public class Model
     }
 
     /**
+     * Validates if an ID is used within a model. Checks arc, place, transition
+     * and parameter IDs.
+     *
+     * @param id
+     * @return
+     */
+    public boolean contains(String id) {
+        if (arcs.containsKey(id)) {
+            return true;
+        } else if (places.containsKey(id)) {
+            return true;
+        } else if (transitions.containsKey(id)) {
+            return true;
+        } else {
+            return parameters.containsKey(id);
+        }
+    }
+
+    /**
      * Indicates wether another element has been stored using the exact same
      * identifier as a given element or not.
-     * 
+     *
      * @param element
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
     private boolean containsAndNotEqual(IElement element) throws Exception {
+        
         switch (element.getElementType()) {
+            
             case ARC:
                 if (arcs.containsKey(element.getId())) {
                     return !arcs.get(element.getId()).equals(element);
                 }
                 return false;
+                
             case PLACE:
                 if (places.containsKey(element.getId())) {
                     return !places.get(element.getId()).equals(element);
                 }
                 return false;
+                
             case TRANSITION:
                 if (transitions.containsKey(element.getId())) {
                     return !transitions.get(element.getId()).equals(element);
                 }
                 return false;
+                
             default:
                 throw new Exception("Unhandled element type!");
         }
+    }
+    
+    public void changeId(IElement element, String id) throws Exception {
+
+        System.out.println("Changing ID: '" + element.getId() + "' -> '" + id + "'");
+        
+        switch (element.getElementType()) {
+            
+            case ARC:
+                if (arcs.containsKey(element.getId())) {
+                    arcs.remove(element.getId());
+                    arcs.put(id, (Arc) element);
+                } else {
+                    throw new Exception("Trying to change ID for unavailable arc!");
+                }
+                break;
+                
+            case PLACE:
+                if (places.containsKey(element.getId())) {
+                    places.remove(element.getId());
+                    places.put(id, (Place) element);
+                } else {
+                    throw new Exception("Trying to change ID for unavailable place!");
+                }
+                break;
+                
+            case TRANSITION:
+                if (transitions.containsKey(element.getId())) {
+                    transitions.remove(element.getId());
+                    transitions.put(id, (Transition) element);
+                } else {
+                    throw new Exception("Trying to change ID for unavailable transition!");
+                }
+                break;
+
+            default:
+                throw new Exception("Trying to change ID for unhandled element type!");
+        }
+        
+        element.setId(id);
     }
 
     public IElement remove(IElement element) throws Exception {
@@ -208,7 +273,7 @@ public class Model
         }
         return arcsCopy;
     }
-    
+
     public Colour getColour(String id) {
         return colors.get(id);
     }

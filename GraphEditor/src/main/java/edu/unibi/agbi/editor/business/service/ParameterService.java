@@ -6,23 +6,19 @@
 package edu.unibi.agbi.editor.business.service;
 
 import edu.unibi.agbi.editor.business.exception.ParameterException;
-import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
-import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
-import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.entity.INode;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -40,7 +36,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ParameterService
 {
-    @Autowired private ModelService dataService;
+    @Autowired private FactoryService factoryService;
+    @Autowired private ModelService modelService;
+    
+    @Autowired private ParameterFactory parameterFactory;
     @Autowired private FunctionBuilder functionBuilder;
 
     @Value("${regex.param.ident.flow.actual}") private String regexParamPlaceFlowNow;
@@ -53,7 +52,7 @@ public class ParameterService
      * @throws ParameterException
      */
     public void add(Parameter param) throws ParameterException {
-        add(dataService.getModel(), param);
+        add(modelService.getModel(), param);
     }
 
     /**
@@ -64,43 +63,52 @@ public class ParameterService
      * @throws ParameterException
      */
     public void add(Model model, Parameter param) throws ParameterException {
+        
         if (Parameter.Type.GLOBAL == param.getType()) {
-            if (model.contains(param)) {
-                throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
+            
+            if (model.contains(param.getId())) {
+                throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
             }
             model.add(param);
+            
         } else {
-            if (param.getRelatedElement() == null) {
-                throw new ParameterException("A reference element is required for storing non global parameters.");
-            }
+            
             if (Parameter.Type.LOCAL == param.getType()) {
-                if (param.getRelatedElement() instanceof DataTransition) {
-                    DataTransition transition = (DataTransition) param.getRelatedElement();
-                    if (transition.getLocalParameter(param.getId()) != null) {
-                        throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
-                    }
-                    transition.addLocalParameter(param);
-                } else {
-                    throw new ParameterException("Trying to store LOCAL parameter for non-transition element.");
+
+                if (param.getRelatedElement().getLocalParameter(param.getId()) != null) {
+                    throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
                 }
+                param.getRelatedElement().addLocalParameter(param);
+                    
             } else {
-                if (model.contains(param)) {
-                    throw new ParameterException("Conflict: Another parameter has already been stored using the same ID.");
+                
+                if (model.contains(param.getId())) {
+                    throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
                 }
                 model.add(param);
             }
-            param.getRelatedElement().getRelatedParameters().add(param);
         }
     }
 
     /**
-     * Sets the function of an element. Replaces the existing function. Ensures 
+     * Validates if a given ID is free to be used.
+     *
+     * @param id
+     * @return
+     */
+    public boolean isIdAvailable(String id) {
+        return !modelService.getDao().getModel().contains(id);
+    }
+
+    /**
+     * Sets the function of an element. Replaces the existing function. Ensures
      * the integrity of parameter references.
      *
      * @param model
      * @param element
      * @param functionString
-     * @param colour null for transitions, a corresponding colour for arcs
+     * @param colour         null for transitions, a corresponding colour for
+     *                       arcs
      * @throws ParameterException
      */
     public void setFunction(Model model, IElement element, String functionString, Colour colour) throws Exception {
@@ -108,33 +116,40 @@ public class ParameterService
         try {
             switch (element.getElementType()) {
                 case ARC:
-                    ((Arc) element).getWeight(colour).setFunction(functionBuilder.build(functionString, false));
+                    ((Arc) element)
+                            .getWeight(colour)
+                            .setFunction(
+                                    functionBuilder.build(
+                                            functionString, false));
                     break;
-                    
+
                 case TRANSITION:
-                    ((Transition) element).setFunction(functionBuilder.build(functionString, false));
+                    ((Transition) element)
+                            .setFunction(
+                                    functionBuilder.build(
+                                            functionString, false));
                     break;
-                    
+
                 default:
                     throw new ParameterException("The given element cannot be set any Function!");
-                        
+
             }
         } finally {
             setTransitionFunctionParameterReferences(model, element);
         }
     }
-    
+
     /**
      * Gets the IDs for all parameters used by a given Element.
-     * 
+     *
      * @param element
      * @return
-     * @throws ParameterException 
+     * @throws ParameterException
      */
     private Collection<String> getParameterIds(IElement element) throws ParameterException {
-        
+
         HashSet<String> parameterIds;
-        
+
         switch (element.getElementType()) {
             case ARC:
                 parameterIds = new HashSet();
@@ -142,15 +157,15 @@ public class ParameterService
                     parameterIds.addAll(weight.getFunction().getParameterIds());
                 }
                 break;
-                
+
             case TRANSITION:
                 parameterIds = ((DataTransition) element).getFunction().getParameterIds();
                 break;
-                
+
             default:
-            throw new ParameterException("Given element has no function! (" + element.toString() + ")");
+                throw new ParameterException("Given element has no function! (" + element.toString() + ")");
         }
-        
+
         return parameterIds;
     }
 
@@ -208,7 +223,7 @@ public class ParameterService
                 }
             }
         });
-        paramsUnused.forEach(param -> dataService.getModel().remove(param));
+        paramsUnused.forEach(param -> modelService.getModel().remove(param));
     }
 
     /**
@@ -251,7 +266,7 @@ public class ParameterService
      * @return
      */
     public Parameter getParameter(String id) {
-        return dataService.getModel().getParameter(id);
+        return modelService.getModel().getParameter(id);
     }
 
     /**
@@ -260,7 +275,7 @@ public class ParameterService
      * @return
      */
     public Set<String> getParameterIds() {
-        return dataService.getModel().getParameterIds();
+        return modelService.getModel().getParameterIds();
     }
 
     /**
@@ -269,7 +284,7 @@ public class ParameterService
      * @return
      */
     public Collection<Parameter> getParameters() {
-        return dataService.getModel().getParameters();
+        return modelService.getModel().getParameters();
     }
 
     /**
@@ -285,7 +300,7 @@ public class ParameterService
         List<Parameter> locals = new ArrayList();
         List<Parameter> others = new ArrayList();
 
-        dataService.getModel().getTransitions().forEach(transition -> {
+        modelService.getModel().getTransitions().forEach(transition -> {
             if (transition.equals(element)) {
                 locals.addAll(transition.getLocalParameters());
             } else {
@@ -297,9 +312,9 @@ public class ParameterService
                 .filter(param -> filter(param, filter))
                 .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
                 .forEach(param -> all.add(param));
-        dataService.getModel().getParameters().stream()
+        modelService.getModel().getParameters().stream()
                 .filter(param -> param.getType() == Parameter.Type.GLOBAL
-                        && filter(param, filter))
+                && filter(param, filter))
                 .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
                 .forEach(param -> all.add(param));
         others.stream()
@@ -309,21 +324,21 @@ public class ParameterService
 
         return all;
     }
-    
+
     private boolean filter(Parameter param, String filter) {
         return param.getId().contains(filter)
                 || param.getRelatedElement().getId().contains(filter)
-//                || param.getRelatedElement().getName().contains(filter)
+                //                || param.getRelatedElement().getName().contains(filter)
                 || ((IDataElement) param.getRelatedElement()).getLabelText().contains(filter);
     }
 
     public List<DataTransition> getReferenceChoices(String filter) {
         List<DataTransition> list = new ArrayList();
-        dataService.getModel().getTransitions().stream()
+        modelService.getModel().getTransitions().stream()
                 .filter(transition
                         -> transition.getId().toLowerCase().contains(filter)
-//                        || transition.getName().toLowerCase().contains(filter)
-                        || ((DataTransition) transition).getLabelText().toLowerCase().contains(filter))
+                //                        || transition.getName().toLowerCase().contains(filter)
+                || ((DataTransition) transition).getLabelText().toLowerCase().contains(filter))
                 .sorted((t1, t2) -> t1.toString().compareTo(t2.toString()))
                 .forEach(transition -> list.add((DataTransition) transition));
         return list;
@@ -339,97 +354,89 @@ public class ParameterService
      */
     private Parameter getReferencingParameter(Model model, String candidate) throws ParameterException {
 
-        IElement element;
+        IElement element = model.getElement(candidate);
+        Parameter param = null;
 
-        if ((element = model.getElement(candidate)) != null) {
-            switch (element.getElementType()) {
-                case PLACE:
-                    return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.t", element);
-                case TRANSITION:
-                    return CreateReferencingParameter(model, candidate, "'" + element.getId() + "'.actualSpeed", element);
-            }
-
-        } else if (candidate.matches(regexParamPlaceFlowNow) || candidate.matches(regexParamPlaceFlowTotal)) {
-
-            String[] tmp = candidate.split("_");
-            IElement source, target, arc;
-            String idSource, idTarget, value;
-            int index, arcIndex;
-
-            idSource = tmp[0];
-            index = 1;
-            while (((source = model.getElement(idSource)) == null && source instanceof INode) && index < tmp.length) {
-                idSource = idSource + "_" + tmp[index];
-                index++;
-            }
-
-            if (source != null && index < tmp.length - 2) {
-
-                idTarget = tmp[index];
-                while (((target = model.getElement(idTarget)) == null && target instanceof INode) && index < tmp.length) {
-                    idTarget = idTarget + "_" + tmp[index];
-                    index++;
+        if (element != null) {
+            try {
+                switch (element.getElementType()) {
+                    case PLACE:
+                        param = parameterFactory.createReferencingParameter(candidate, element, ReferencingParameter.ReferenceType.TOKEN);
+                    case TRANSITION:
+                        param = parameterFactory.createReferencingParameter(candidate, element, ReferencingParameter.ReferenceType.SPEED);   
                 }
-
-                if (target != null && index == tmp.length - 1) {
-
-                    arc = model.getElement(dataService.getArcId((IDataNode) source, (IDataNode) target));
-                    if (arc != null && arc instanceof IArc) {
-
-                        arcIndex = 1;
-                        switch (source.getElementType()) {
-
-                            case PLACE:
-                                for (IArc a : ((IArc) arc).getSource().getArcsOut()) { // place -> transition
-                                    if (a.equals(arc)) {
-                                        break;
-                                    }
-                                    arcIndex++;
-                                }
-                                value = "'" + idSource + "'.tokenFlow.outflow[" + arcIndex + "]";
-                                break;
-
-                            case TRANSITION:
-                                for (IArc a : ((IArc) arc).getSource().getArcsIn()) { // transition -> place
-                                    if (a.equals(arc)) {
-                                        break;
-                                    }
-                                    arcIndex++;
-                                }
-                                value = "'" + idTarget + "'.tokenFlow.inflow[" + arcIndex + "]";
-                                break;
-
-                            default:
-                                throw new ParameterException("Cannot get parameter. Unexpected element type for arc source. '" + source.getElementType() + "' in candidate '" + candidate + "'.");
-                        }
-
-                        if (candidate.matches(regexParamPlaceFlowTotal)) {
-                            return CreateReferencingParameter(model, candidate, value, arc);
-                        } else {
-                            return CreateReferencingParameter(model, candidate, "der(" + value + ")", arc);
-                        }
-                    }
-                }
+            } catch (Exception ex) {
+                throw new ParameterException(ex.getMessage());
             }
-        }
+        } 
+//        else if (candidate.matches(regexParamPlaceFlowNow) || candidate.matches(regexParamPlaceFlowTotal)) {
+//
+//            String[] tmp = candidate.split("_");
+//            IElement source, target, arc;
+//            String idSource, idTarget, value;
+//            int index, arcIndex;
+//
+//            idSource = tmp[0];
+//            index = 1;
+//            while (((source = model.getElement(idSource)) == null && source instanceof INode) && index < tmp.length) {
+//                idSource = idSource + "_" + tmp[index];
+//                index++;
+//            }
+//
+//            if (source != null && index < tmp.length - 2) {
+//
+//                idTarget = tmp[index];
+//                while (((target = model.getElement(idTarget)) == null && target instanceof INode) && index < tmp.length) {
+//                    idTarget = idTarget + "_" + tmp[index];
+//                    index++;
+//                }
+//
+//                if (target != null && index == tmp.length - 1) {
+//
+//                    arc = model.getElement(factoryService.getArcId((INode) source, (INode) target));
+//                    if (arc != null && arc instanceof IArc) {
+//
+//                        arcIndex = 1;
+//                        switch (source.getElementType()) {
+//
+//                            case PLACE:
+//                                for (IArc a : ((IArc) arc).getSource().getArcsOut()) { // place -> transition
+//                                    if (a.equals(arc)) {
+//                                        break;
+//                                    }
+//                                    arcIndex++;
+//                                }
+//                                value = "'" + idSource + "'.tokenFlow.outflow[" + arcIndex + "]";
+//                                break;
+//
+//                            case TRANSITION:
+//                                for (IArc a : ((IArc) arc).getSource().getArcsIn()) { // transition -> place
+//                                    if (a.equals(arc)) {
+//                                        break;
+//                                    }
+//                                    arcIndex++;
+//                                }
+//                                value = "'" + idTarget + "'.tokenFlow.inflow[" + arcIndex + "]";
+//                                break;
+//
+//                            default:
+//                                throw new ParameterException("Cannot get parameter. Unexpected element type for arc source. '" + source.getElementType() + "' in candidate '" + candidate + "'.");
+//                        }
+//
+//                        if (candidate.matches(regexParamPlaceFlowTotal)) {
+//                            return CreateReferencingParameter(model, candidate, value, arc);
+//                        } else {
+//                            return CreateReferencingParameter(model, candidate, "der(" + value + ")", arc);
+//                        }
+//                    }
+//                }
+//            }
+//        }
 
-        return null;
-    }
-
-    /**
-     * Creates a parameter that references an element.
-     *
-     * @param model
-     * @param id
-     * @param value
-     * @param element
-     * @throws ParameterException
-     */
-    private Parameter CreateReferencingParameter(Model model, String id, String value, IElement element) throws ParameterException {
-        Parameter param = new Parameter(id, value, "", Parameter.Type.REFERENCE, element);
-        add(model, param);
         return param;
     }
+    
+    // find all params that have related element that has its name changed. change value if its of type reference (recreate referncing parameter / reassign value and id)
 
     /**
      * Attempts to remove a parameter.
@@ -447,8 +454,21 @@ public class ParameterService
                 throw new ParameterException("Inconsistency found. LOCAL parameter related to non-transition element.");
             }
         } else {
-            dataService.getModel().remove(param);
+            modelService.getModel().remove(param);
         }
+    }
+    
+    public void UpdateRelatedParameter(IDataElement data) {
+        
+        
+        for (Parameter param : data.getRelatedParameters()) {
+            
+            for (IElement elem : param.getUsingElements()) {
+                
+            }
+            
+        }
+        
     }
 
     /**
@@ -461,7 +481,7 @@ public class ParameterService
      * @throws ParameterException
      */
     public void ValidateFunction(IDataElement element, String function) throws ParameterException {
-        ValidateFunction(dataService.getModel(), element, function);
+        ValidateFunction(modelService.getModel(), element, function);
     }
 
     /**
@@ -492,9 +512,12 @@ public class ParameterService
                     }
                     if (param == null) {
                         param = getReferencingParameter(model, candidate);
+                        if (param != null) {
+                            add(model, param);
+                        }
                     }
                     if (param == null) {
-                        throw new ParameterException("Parameter '" + candidate + "' does not exist");
+                        throw new ParameterException("Parameter for candidate '" + candidate + "' cannot be generated!");
                     }
                 }
             }

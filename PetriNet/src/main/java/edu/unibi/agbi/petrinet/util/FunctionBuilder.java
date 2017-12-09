@@ -51,7 +51,11 @@ public class FunctionBuilder
         return properties.getProperty("regex.function.subfunction");
     }
     
-    public Function build(String functionString, boolean isSubfunction) throws IOException {
+    public Function build(String functionString) throws Exception {
+        return build(functionString, false);
+    }
+    
+    public Function build(String functionString, boolean isSubfunction) throws Exception {
         
         Function function = new Function(Type.FUNCTION);
         Function functionElement;
@@ -129,14 +133,14 @@ public class FunctionBuilder
 
                 } else {
                     
-                    throw new IOException("Unrecognized symbol '" + functionString.toCharArray()[index] + "' at position " + index);
+                    throw new Exception("Unrecognized symbol '" + functionString.toCharArray()[index] + "' at position " + index);
                 }
             }
         }
         return function;
     }
     
-    private String substitute(String functionString) throws IOException {
+    private String substitute(String functionString) throws Exception {
         
         String min = "min(";
         String max = "max(";

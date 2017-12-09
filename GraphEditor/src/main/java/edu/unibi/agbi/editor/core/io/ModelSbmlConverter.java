@@ -7,6 +7,7 @@ package edu.unibi.agbi.editor.core.io;
 
 import edu.unibi.agbi.editor.business.exception.DataException;
 import edu.unibi.agbi.editor.business.exception.ParameterException;
+import edu.unibi.agbi.editor.business.service.FactoryService;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
@@ -19,7 +20,6 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphTransition;
-import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.HierarchyService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
@@ -54,7 +54,7 @@ import org.w3c.dom.NodeList;
 @Component
 public class ModelSbmlConverter 
 {
-    @Autowired private ModelService dataService;
+    @Autowired private FactoryService factoryService;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private ParameterService parameterService;
     @Autowired private FunctionBuilder functionBuilder;
@@ -128,7 +128,7 @@ public class ModelSbmlConverter
         if (nl.getLength() >= 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 model = (Element) nl.item(0);
-                dao = dataService.CreateDao();
+                dao = factoryService.CreateDao();
                 dao.setAuthor("");
                 dao.setModelName(model.getAttribute(attrId));
             } else {
@@ -506,7 +506,7 @@ public class ModelSbmlConverter
 
         dao.getGraphRoot().add(node);
         try {
-            dataService.StyleElement(node);
+            factoryService.StyleElement(node);
         } catch (DataException ex) {
             throw new IOException(ex);
         }
@@ -582,7 +582,7 @@ public class ModelSbmlConverter
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 tmp = (Element) nl.item(0);
                 functionString = tmp.getAttribute(attrFunction);
-                transition.setFunction(functionBuilder.build(functionString, false));
+                transition.setFunction(functionBuilder.build(dao.getModel(), functionString, false));
             }
         }
 
@@ -649,7 +649,7 @@ public class ModelSbmlConverter
         }
 
         DataArc data = new DataArc(
-                dataService.getArcId(source.getData(), target.getData()),
+                factoryService.getArcId(source.getData(), target.getData()),
                 source.getData(),
                 target.getData(),
                 arcType
@@ -663,12 +663,12 @@ public class ModelSbmlConverter
         nl = elem.getElementsByTagName(tagWeight);
         if (nl.getLength() == 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                data.addWeight(getWeight((Element) nl.item(0)));
+                data.addWeight(getWeight(dao, (Element) nl.item(0)));
             }
         }
 
         connection = new GraphArc(
-                dataService.getConnectionId(source, target),
+                factoryService.getConnectionId(source, target),
                 source,
                 target,
                 data
@@ -681,7 +681,7 @@ public class ModelSbmlConverter
         }
         dao.getGraphRoot().add(connection);
         try {
-            dataService.StyleElement(connection);
+            factoryService.StyleElement(connection);
         } catch (DataException ex) {
             throw new IOException(ex);
         }
@@ -692,7 +692,7 @@ public class ModelSbmlConverter
         NodeList nl;
         Element tmp;
 
-        Token token = new Token(dataService.getColourDefault());
+        Token token = new Token(factoryService.getColourDefault());
 
         nl = elem.getElementsByTagName(tagTokenStart);
         if (nl.getLength() == 1) {
@@ -719,10 +719,10 @@ public class ModelSbmlConverter
         return token;
     }
 
-    private Weight getWeight(Element elem) throws IOException {
-        Weight weight = new Weight(dataService.getColourDefault());
+    private Weight getWeight(ModelDao dao, Element elem) throws IOException {
+        Weight weight = new Weight(factoryService.getColourDefault());
 //        Weight weight = new Weight(dao.getModel().getColour(elem.getAttribute(attrColourId)));
-        weight.setFunction(functionBuilder.build(elem.getAttribute(attrWeight), false));
+        weight.setFunction(functionBuilder.build(dao.getModel(), elem.getAttribute(attrWeight), false));
 //        weight.setValue(elem.getAttribute(attrWeight));
         return weight;
     }

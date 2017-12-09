@@ -13,32 +13,29 @@ import java.util.Set;
  *
  * @author PR
  */
-public class Parameter
+public abstract class Parameter
 {
     private final String id;
-    private final Type type;
+    protected final Type type;
     
     private String value;
     private String unit;
 
     private final IElement element;
     private final Set<IElement> elementsUsing;
-
+    
     /**
-     * Default constructor.
-     *
+     * 
      * @param id      identifier for this parameter
-     * @param unit    an optional note
      * @param value   the parameter value
      * @param type    the type or scope of this parameter
      * @param element the related element in case this is parameter is of type
      *                local or reference
      */
-    public Parameter(String id, String value, String unit, Type type, IElement element) {
-        this.id = id;
-        this.unit = unit;
-        this.value = value;
+    protected Parameter(Type type, String id, String value, IElement element) {
         this.type = type;
+        this.id = id;
+        this.value = value;
         this.element = element;
         this.elementsUsing = new HashSet();
     }

@@ -28,6 +28,8 @@ import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
 import java.net.URL;
 import java.util.Collection;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -57,7 +59,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ElementController implements Initializable
 {
-    @Autowired private ModelService dataService;
+    @Autowired private ModelService modelService;
     @Autowired private FunctionBuilder functionBuilder;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
@@ -146,7 +148,6 @@ public class ElementController implements Initializable
         elementFrame.getChildren().add(identifierPane);
         propertiesBox.getChildren().clear();
         propertiesBox.getChildren().add(parentSubtype);
-        propertiesBox.getChildren().add(parentColor);
         buttonDisableClustered.setDisable(true);
         buttonEditClustered.setDisable(true);
 
@@ -157,6 +158,7 @@ public class ElementController implements Initializable
                 buttonEdit.setDisable(false);
                 inputLabel.setDisable(true);
                 elementFrame.getChildren().add(propertiesPane);
+                propertiesBox.getChildren().add(parentColor);
                 propertiesBox.getChildren().add(parentFunction);
                 break;
 
@@ -179,6 +181,7 @@ public class ElementController implements Initializable
                 buttonEdit.setDisable(false);
                 inputLabel.setDisable(false);
                 elementFrame.getChildren().add(propertiesPane);
+                propertiesBox.getChildren().add(parentColor);
                 propertiesBox.getChildren().add(parentToken);
                 break;
 
@@ -244,6 +247,7 @@ public class ElementController implements Initializable
                 }
                 break;
         }
+        
         if (typeIndex > -1) {
             choiceSubtype.setItems(choicesSubtype);
             choiceSubtype.getSelectionModel().select(typeIndex);
@@ -277,7 +281,7 @@ public class ElementController implements Initializable
     private void LoadElementProperties(IDataElement element) {
 
         ObservableList<Colour> choicesColour = FXCollections.observableArrayList();
-        Collection<Colour> colors = dataService.getModel().getColours();
+        Collection<Colour> colors = modelService.getModel().getColours();
 
         choiceColour.setItems(choicesColour); // assign upfront, input listeners accesses on text change
 
@@ -337,7 +341,7 @@ public class ElementController implements Initializable
     private void StoreElementType(IDataElement element) throws DataException {
         Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
         if (subtype != null) {
-            dataService.ChangeElementSubtype(element, subtype);
+            modelService.changeSubtype(element, subtype);
         }
     }
 
@@ -390,7 +394,7 @@ public class ElementController implements Initializable
                 if (ValidateNumberInput(inputTokenMax)) {
                     token.setValueMax(Double.parseDouble(inputTokenMax.getText().replace(",", ".")));
                 }
-                dataService.setPlaceToken(place, token);
+                modelService.setPlaceToken(place, token);
                 if (token.getValueStart() != 0) {
                     place.setTokenLabelText(Double.toString(token.getValueStart()));
                 } else {
@@ -418,9 +422,9 @@ public class ElementController implements Initializable
         
         try {
             if (inputFunction.getText().isEmpty()) {
-                dataService.setElementFunction(data, "1", (Colour) choiceColour.getSelectionModel().getSelectedItem());
+                modelService.setElementFunction(data, "1", (Colour) choiceColour.getSelectionModel().getSelectedItem());
             } else {
-                dataService.setElementFunction(data, inputLatestValid, (Colour) choiceColour.getSelectionModel().getSelectedItem());
+                modelService.setElementFunction(data, inputLatestValid, (Colour) choiceColour.getSelectionModel().getSelectedItem());
             }
         } catch (DataException ex) {
             messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
@@ -554,7 +558,15 @@ public class ElementController implements Initializable
             }
         });
 
-        inputName.textProperty().addListener(cl -> data.setId(getText(inputName)));
+        inputName.textProperty().addListener(cl -> {
+            try {
+                modelService.changeId(data, inputName.getText());
+                setInputStatus(inputName, false);
+            } catch (DataException ex) {
+                setInputStatus(inputName, true);
+                messengerService.addException("Cannot change element name!", ex);
+            }
+        });
         inputLabel.textProperty().addListener(cl -> data.setLabelText(getText(inputLabel)));
         inputDescription.textProperty().addListener(cl -> data.setDescription(getText(inputDescription)));
         

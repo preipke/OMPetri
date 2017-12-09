@@ -23,6 +23,7 @@ import edu.unibi.agbi.gravisfx.entity.root.GravisType;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
+import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,18 +43,23 @@ import org.springframework.stereotype.Service;
 public class HierarchyService
 {
     @Autowired private Calculator calculator;
-    @Autowired private ModelService dataService;
+    @Autowired private FactoryService factoryService;
     @Autowired private MessengerService messengerService;
-    @Autowired private HierarchyController hierarchyController;
     @Autowired private SelectionService selectionService;
+
+    @Autowired private HierarchyController hierarchyController;
     @Autowired private ZoomController zoomController;
 
+    private static final String PREFIX_ID_CLUSTER = "C";
+    
     /**
      * Climbs one level in the graph layer hierarchy.
+     *
+     * @param dao
      */
-    public void climb() {
-        if (dataService.getGraph().getParentGraph() != null) {
-            show(dataService.getGraph().getParentGraph());
+    public void climb(ModelDao dao) {
+        if (dao.getGraph().getParentGraph() != null) {
+            show(dao.getGraph().getParentGraph(), dao);
         }
     }
 
@@ -61,22 +67,28 @@ public class HierarchyService
      * Opens a cluster, showing its graph layers.
      *
      * @param cluster
+     * @param dao
      */
-    public void open(IGraphCluster cluster) {
-        show(cluster.getGraph());
+    public void open(IGraphCluster cluster, ModelDao dao) {
+        show(cluster.getGraph(), dao);
     }
 
     /**
      * Shows a graph layer.
      *
      * @param graph
+     * @param dao
      */
-    public void show(Graph graph) {
-        dataService.getDao().getGraphPane().setGraph(graph);
-        dataService.UpdateClusterShapes(graph);
+    public void show(Graph graph, ModelDao dao) {
+        dao.getGraphPane().setGraph(graph);
+        updateClusterShapes(graph);
         hierarchyController.update();
         selectionService.unselectAll();
         zoomController.CenterNodes();
+    }
+    
+    public synchronized IGraphCluster cluster(ModelDao dao, List<IGraphElement> selected) throws DataException {
+        return cluster(dao, selected, getClusterId(dao));
     }
 
     /**
@@ -119,7 +131,7 @@ public class HierarchyService
 
         IGraphCluster cluster = create(dao, nodes, clusters, clusterId);
         dao.setHasChanges(true);
-        dataService.UpdateClusterShapes(dao.getGraph());
+        updateClusterShapes(dao.getGraph());
 
         return cluster;
     }
@@ -154,6 +166,10 @@ public class HierarchyService
                 messengerService.addException("Cannot ungroup cluster!", ex);
             }
         }
+    }
+
+    public synchronized String getClusterId(ModelDao dao) {
+        return PREFIX_ID_CLUSTER + dao.getNextClusterId();
     }
 
     /**
@@ -199,12 +215,12 @@ public class HierarchyService
          * Add and style the cluster node.
          */
         graph.add(cluster);
-        dataService.StyleElement(cluster);
+        factoryService.StyleElement(cluster);
 
-        Point2D pos = calculator.getCenterN(nodes);
-        if (dataService.isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, graph);
-        }
+        Point2D pos;
+        pos = calculator.getCenterN(nodes);
+        pos = calculator.getPositionInGrid(pos, graph);
+
         cluster.setTranslateX(pos.getX() - cluster.getCenterOffsetX());
         cluster.setTranslateY(pos.getY() - cluster.getCenterOffsetY());
 
@@ -240,7 +256,7 @@ public class HierarchyService
 
         for (IGraphArc conn : clusterArcs) {
             graph.add(conn);
-            dataService.StyleElement(conn);
+            factoryService.StyleElement(conn);
         }
 
         return cluster;
@@ -266,10 +282,10 @@ public class HierarchyService
         /**
          * Calculate translation offset.
          */
-        Point2D pos = calculator.getCenter(graphChild.getNodes());
-        if (dataService.isGridEnabled()) {
-            pos = calculator.getPositionInGrid(pos, dataService.getGraph());
-        }
+        Point2D pos;
+        pos = calculator.getCenter(graphChild.getNodes());
+        pos = calculator.getPositionInGrid(pos, graph);
+
         double translateX = cluster.translateXProperty().get() + cluster.getCenterOffsetX() - pos.getX();
         double translateY = cluster.translateYProperty().get() + cluster.getCenterOffsetY() - pos.getY();
 
@@ -323,7 +339,7 @@ public class HierarchyService
                     storedArc.getData().getShapes().add(storedArc);
 
                 } else { // must be a connection to a lower level cluster
-                    
+
                     Set<IGraphArc> clusterArcs = new HashSet();
 
                     if (clusterArc.getSource().equals(cluster)) { // cluster arc target remains
@@ -350,7 +366,7 @@ public class HierarchyService
                     arc = getClusterArc(clusterArcs, source, target, storedArc);
                     if (arc != null) {
                         graph.add(arc);
-                        dataService.StyleElement(arc);
+                        factoryService.StyleElement(arc);
                     }
                 }
             }
@@ -381,8 +397,8 @@ public class HierarchyService
             throw new DataException("Trying to create cluster arc without source or target being a cluster!");
         }
 
-        String idShape = dataService.getConnectionId(source, target);
-        String idData = dataService.getArcId(source.getData(), target.getData());
+        String idShape = factoryService.getConnectionId(source, target);
+        String idData = factoryService.getArcId(source.getData(), target.getData());
 
         /**
          * Check if connection already exists.
@@ -400,7 +416,7 @@ public class HierarchyService
 
             data = new DataClusterArc(idData);
             shape = new GraphArc(idShape, source, target, data);
-            
+
             shapeNew = shape;
             clusterArcs.add(shapeNew);
         }
@@ -422,7 +438,7 @@ public class HierarchyService
             arcRelated.getData().getShapes().clear(); // remove reference to currently hidden shape
             arcRelated.getData().getShapes().add(shape); // replace by reference to cluster arc shape
         }
-        
+
         return shapeNew;
     }
 
@@ -445,6 +461,21 @@ public class HierarchyService
                 }
             }
             return false;
+        }
+    }
+
+    /**
+     * Updates the shapes of all clusters in a graph. Sets the style to visually
+     * represent disabled or enabled cluster according to its nodes state.
+     *
+     * @param graph
+     */
+    public void updateClusterShapes(Graph graph) {
+        for (IGravisCluster cluster : graph.getClusters()) {
+            boolean isDisabled = ((GraphCluster) cluster).getData().isDisabled();
+            for (GravisShapeHandle handle : cluster.getElementHandles()) {
+                handle.setDisabled(isDisabled);
+            }
         }
     }
 }

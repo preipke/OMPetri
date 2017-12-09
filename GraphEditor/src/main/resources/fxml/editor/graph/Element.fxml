@@ -129,6 +129,19 @@
                                         <Insets top="5.0" />
                                     </padding>
                                 </VBox>
+                        <GridPane fx:id="parentFunctionType" hgap="5.0">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" prefWidth="125.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <Label text="Func. Type" />
+                              <ChoiceBox fx:id="choiceFunctionType" GridPane.columnIndex="1" />
+                           </children>
+                        </GridPane>
                             </children>
                         </VBox>
                         <Label fx:id="statusMessage" alignment="CENTER" maxWidth="200.0" />

@@ -176,7 +176,10 @@ public class MouseEventHandler
                      */
                     if (event.getClickCount() == 2) {
                         if (node instanceof GraphCluster) {
-                            hierarchyService.open((GraphCluster) node);
+                            hierarchyService.open(
+                                    (GraphCluster) node, 
+                                    dataService.getDao()
+                            );
                             return;
                         }
                     }
@@ -190,7 +193,7 @@ public class MouseEventHandler
                             try {
                                 selectionService.unselectAll();
                                 selectionService.highlight(node);
-                                arcTemp = dataService.CreateConnectionTmp(node);
+                                arcTemp = dataService.createTmpArc(node);
                                 setEditorMode(isInArcCreationMode);
                             } catch (Exception ex) {
                                 messengerService.addException("Cannot switch to arc creation mode!", ex);
@@ -421,7 +424,12 @@ public class MouseEventHandler
              */
             if (isPrimaryButtonDown) {
                 try {
-                    dataService.CreateNode(dataService.getDao(), editorToolsController.getCreateNodeType(), event.getX(), event.getY());
+                    dataService.create(
+                            dataService.getDao(), 
+                            editorToolsController.getCreateNodeType(), 
+                            event.getX(), 
+                            event.getY()
+                    );
                 } catch (DataException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }
@@ -431,7 +439,7 @@ public class MouseEventHandler
 
             if (isPrimaryButtonDown) {
                 try {
-                    dataService.CreateClone(dataService.getDao(), data, event.getX(), event.getY());
+                    dataService.clone(dataService.getDao(), data, event.getX(), event.getY());
                 } catch (DataException ex) {
                     messengerService.addException("Cannot create node!", ex);
                 }
@@ -551,7 +559,7 @@ public class MouseEventHandler
     }
 
     /**
-     * Enables the Event Handler to CreateNode nodes on the graph pane.
+     * Enables the Event Handler to create nodes on the graph pane.
      *
      * @throws Exception
      */

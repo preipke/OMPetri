@@ -44,10 +44,12 @@ public class KeyEventHandler
     private void onKeyPressed(KeyEvent event) {
 
         if (event.getCode().equals(KeyCode.ESCAPE)) {
+            
             mouseEventHandler.UnlockEditorMode();
             selectionService.unselectAll();
-        } 
-        else if (event.getCode().equals(KeyCode.DELETE)) {
+            
+        } else if (event.getCode().equals(KeyCode.DELETE)) {
+            
             /**
              * Delete selected nodes.
              */
@@ -55,9 +57,13 @@ public class KeyEventHandler
                 dataService.remove(selectionService.getSelectedElements());
                 selectionService.unselectAll();
             });
+            
         } else if (event.getCode().equals(KeyCode.BACK_SPACE)) {
-            hierarchyService.climb();
+            
+            hierarchyService.climb(dataService.getDao());
+            
         } else if (event.isControlDown()) {
+            
             /**
              * Copy, cut or paste selected nodes.
              */

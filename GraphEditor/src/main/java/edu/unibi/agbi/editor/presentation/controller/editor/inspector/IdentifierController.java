@@ -6,6 +6,7 @@
 package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.business.service.FactoryService;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataPlace;
@@ -25,9 +26,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Control;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -39,6 +42,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class IdentifierController implements Initializable
 {
+    @Autowired private FactoryService factoryService;
     @Autowired private ModelService dataService;
     @Autowired private MessengerService messengerService;
     @Autowired private NodeListController nodeListController;
@@ -76,10 +80,10 @@ public class IdentifierController implements Initializable
             inputType.setText("");
         }
         LoadElementSubtype(element);
-        LoadSampleShape(element);
+        DisplaySampleShape(element);
     }
 
-    private void LoadSampleShape(IDataElement element) {
+    private void DisplaySampleShape(IDataElement element) {
 
         IGraphElement sample;
         double width = 115;
@@ -121,7 +125,7 @@ public class IdentifierController implements Initializable
 
         try {
             paneSample.getChildren().addAll(sample.getShapes());
-            dataService.StyleElement(sample);
+            factoryService.StyleElement(sample);
         } catch (DataException ex) {
             messengerService.addException("Cannot render sample shape.", ex);
         } finally {
@@ -193,7 +197,7 @@ public class IdentifierController implements Initializable
     private void StoreElementType(IDataElement element) throws DataException {
         Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
         if (subtype != null) {
-            dataService.ChangeElementSubtype(element, subtype);
+            dataService.changeSubtype(element, subtype);
         }
     }
 
@@ -205,8 +209,14 @@ public class IdentifierController implements Initializable
 
         inputName.textProperty().addListener(cl -> {
             if (data != null && !data.getId().contentEquals(inputName.getText())) {
-                data.setId(inputName.getText());
-                pauseTransition.playFromStart();
+                try {
+                    dataService.changeId(data, inputName.getText());
+                    inputName.setStyle("-fx-border-color: green");
+                    pauseTransition.playFromStart();
+                } catch (DataException ex) {
+                    inputName.setStyle("-fx-border-color: red");
+                    messengerService.addException("Cannot change element name!", ex);
+                }
             }
         });
         inputLabel.textProperty().addListener(cl -> {
@@ -225,7 +235,7 @@ public class IdentifierController implements Initializable
             if (data != null) {
                 try {
                     StoreElementType(data);
-                    LoadSampleShape(data);
+                    DisplaySampleShape(data);
                     choiceSubtype.setStyle("");
                 } catch (DataException ex) {
                     choiceSubtype.setStyle("-fx-border-color: red");

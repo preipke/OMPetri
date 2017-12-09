@@ -7,13 +7,13 @@ package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
 import edu.unibi.agbi.editor.business.exception.InputValidationException;
 import edu.unibi.agbi.editor.business.exception.ParameterException;
-import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.animation.PauseTransition;
@@ -37,6 +37,7 @@ import org.springframework.stereotype.Controller;
 public class ParameterController implements Initializable
 {
     @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private ParameterFactory parameterFactory;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
 
@@ -46,30 +47,30 @@ public class ParameterController implements Initializable
     @Value("${regex.param.ident.flowOut.total}") private String regexParamIdentFlowOutTotal;
     @Value("${regex.param.ident.speed}") private String regexParamIdentSpeed;
     @Value("${regex.param.ident.token}") private String regexParamIdentToken;
-    
+
     @FXML private Button buttonApply;
     @FXML private Button buttonCreate;
     @FXML private Button buttonClear;
     @FXML private Button buttonEdit;
     @FXML private Button buttonRemove;
     @FXML private ChoiceBox<Parameter.Type> choiceScope;
-    @FXML private ChoiceBox<DataTransition> choiceNode;
+    @FXML private ChoiceBox<IDataElement> choiceNode;
     @FXML private ListView<Parameter> listParameters;
     @FXML private TextField inputName;
     @FXML private TextField inputUnit;
     @FXML private TextField inputValue;
     @FXML private TextField inputFilterNode;
     @FXML private TextField inputFilterParam;
-    
+
     private IDataElement data;
-    
+
     private PauseTransition pauseTransition;
-    
+
     public void setElement(IDataElement element) {
 //        IDataElement dataOld = data;
         data = element;
 //        if (dataOld == null) {
-            setParameters(element);
+        setParameters(element);
 //        } else { // avoid redundant loading of available parameters. needs fix. must also check if model dao changed!
 //            if (element != null && element.getType() == DataType.TRANSITION) {
 //                if (((DataTransition) element).getLocalParameters().size() > 0) {
@@ -90,7 +91,7 @@ public class ParameterController implements Initializable
 //            }
 //        }
     }
-    
+
     public void Clear() {
         buttonApply.setDisable(true);
         buttonCreate.setDisable(true);
@@ -108,13 +109,13 @@ public class ParameterController implements Initializable
         choiceScope.getSelectionModel().selectFirst();
         choiceNode.getItems().clear();
     }
-    
+
     private void ShowParameter(Parameter param) {
-        
+
         if (param == null) {
             return;
         }
-        
+
         inputName.setText(param.getId());
         if (param.getUnit() != null) {
             inputUnit.setText(param.getUnit());
@@ -123,16 +124,20 @@ public class ParameterController implements Initializable
         }
         inputValue.setText(param.getValue());
         choiceScope.getSelectionModel().select(param.getType());
-        
+        if (choiceScope.getSelectionModel().getSelectedItem() == Parameter.Type.LOCAL) {
+            choiceNode.getSelectionModel().select((DataTransition) param.getRelatedElement());
+        }
+
         buttonApply.setDisable(true);
         buttonCreate.setDisable(true);
     }
-    
+
     private void setParameters(IDataElement element) {
+        listParameters.setStyle("");
         listParameters.getItems().clear();
         listParameters.getItems().addAll(parameterService.getFilteredAndSortedParameterList(element, inputFilterParam.getText().toLowerCase()));
     }
-    
+
     private void RemoveParameter(Parameter param) {
         try {
             parameterService.remove(param);
@@ -157,32 +162,20 @@ public class ParameterController implements Initializable
     private void ValidateAndCreateParameter() {
 
         Parameter param;
-        
+
         String id = inputName.getText();
         String value = inputValue.getText();
         String unit = inputUnit.getText();
         Parameter.Type scope = choiceScope.getSelectionModel().getSelectedItem();
-        DataTransition transition = choiceNode.getSelectionModel().getSelectedItem();
+        IDataElement transition = choiceNode.getSelectionModel().getSelectedItem();
 
-        // Validate id
+        // Validate ID
         try {
-            if (id.isEmpty() | !id.matches(functionBuilder.getParameterRegex())) {
-                throw new InputValidationException("Trying to create parameter using restricted identifier format");
+            if (!isNameInputValid()) {
+                throw new InputValidationException("Cannot create parameter using invalid name!");
             }
-            String[] restrictedRegex = new String[]{
-                regexParamIdentFlowInActual, regexParamIdentFlowInTotal,
-                regexParamIdentFlowOutActual, regexParamIdentFlowOutTotal,
-                regexParamIdentSpeed, regexParamIdentToken
-            };
-            for (String regex : restrictedRegex) {
-                if (id.matches(regex)) {
-                    throw new InputValidationException("Trying to create parameter using restricted identifier format");
-                }
-            }
-            inputName.setStyle("");
         } catch (InputValidationException ex) {
-            inputName.setStyle("-fx-border-color: red");
-            messengerService.addException("Trying to create parameter with invalid name!", ex);
+            messengerService.addException(ex);
             return;
         }
 
@@ -195,7 +188,9 @@ public class ParameterController implements Initializable
             inputValue.setStyle("");
         } catch (InputValidationException ex) {
             inputValue.setStyle("-fx-border-color: red");
-            messengerService.addException("Trying to create parameter with invalid value!", ex);
+            messengerService.setRightStatus(
+                    "Cannot create parameter with invalid value!", 
+                    ex);
             return;
         }
 
@@ -204,13 +199,15 @@ public class ParameterController implements Initializable
             if (transition == null) {
                 choiceScope.setStyle("-fx-border-color: red");
                 choiceNode.setStyle("-fx-border-color: red");
-                messengerService.addException("Trying to create local parameter without specifying a node!", new ParameterException("Must specify a related node for local parameters."));
+                messengerService.setRightStatus(
+                        "Cannot create local parameter without specifying a related node!", 
+                        new ParameterException("Must specify a related node for local parameters."));
                 return;
             }
         }
         choiceScope.setStyle("");
         choiceNode.setStyle("");
-        
+
         try {
             if (scope == Parameter.Type.LOCAL) {
                 param = transition.getLocalParameter(id);
@@ -219,22 +216,29 @@ public class ParameterController implements Initializable
             }
             if (param != null) {
                 param.setValue(value);
-                param.setUnit(value);
+                param.setUnit(unit);
             } else {
-                parameterService.add(new Parameter(id, value, unit, scope, transition));
+                if (scope == Parameter.Type.GLOBAL) {
+                    param = parameterFactory.createGlobalParameter(id, value, unit);
+                } else {
+                    param = parameterFactory.createLocalParameter(id, value, unit, transition);
+                }
+                parameterService.add(param);
                 buttonCreate.setDisable(true);
             }
             setParameters(data);
             listParameters.setStyle("-fx-border-color: green");
         } catch (ParameterException ex) {
-            messengerService.addException("Parameter creation failed!", ex);
+            messengerService.setRightStatus(
+                    "Parameter creation failed!", 
+                    ex);
             listParameters.setStyle("-fx-border-color: red");
         }
     }
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         pauseTransition = new PauseTransition(Duration.seconds(1));
         pauseTransition.setOnFinished(e -> setParameters(data));
 
@@ -243,22 +247,23 @@ public class ParameterController implements Initializable
         buttonClear.setOnAction(eh -> Clear());
         buttonEdit.setOnAction(eh -> ShowParameter(listParameters.getSelectionModel().getSelectedItem()));
         buttonRemove.setOnAction(eh -> RemoveParameter(listParameters.getSelectionModel().getSelectedItem()));
-                
+
         inputName.textProperty().addListener(cl -> setButtons());
         inputValue.textProperty().addListener(cl -> setButtons());
         inputUnit.textProperty().addListener(cl -> setButtons());
-        
+
         choiceScope.getItems().add(Parameter.Type.GLOBAL);
         choiceScope.getItems().add(Parameter.Type.LOCAL);
+        choiceScope.getSelectionModel().selectFirst();
         choiceScope.getSelectionModel().selectedItemProperty().addListener(cl -> {
             setReferenceChoices();
             setButtons();
         });
         choiceNode.getSelectionModel().selectedItemProperty().addListener(cl -> setButtons());
-        
+
         inputFilterNode.textProperty().addListener(cl -> setReferenceChoices());
         inputFilterParam.textProperty().addListener(cl -> pauseTransition.playFromStart());
-        
+
         listParameters.setCellFactory(l -> new ParameterCellFormatter());
         listParameters.getSelectionModel().selectedItemProperty().addListener(cl -> {
             listParameters.setStyle("");
@@ -271,7 +276,7 @@ public class ParameterController implements Initializable
             }
         });
     }
-    
+
     private void setReferenceChoices() {
         if (choiceScope.getSelectionModel().getSelectedItem() != null) {
             choiceNode.getItems().clear();
@@ -288,31 +293,84 @@ public class ParameterController implements Initializable
             }
         }
     }
-    
+
+    private boolean isNameInputValid() {
+
+        String id = inputName.getText();
+        
+        // Validate ID
+        if (!parameterService.isIdAvailable(id)) {
+
+            // ID not related to another parameter?
+            if (parameterService.getParameter(id) == null) {
+                
+                inputName.setStyle("-fx-border-color: red");
+                messengerService.setRightStatus("Parameter ID is already used by another element!");
+                return false;
+            }
+            
+        } else {
+
+            // Validate ID format
+            
+            if (id.isEmpty() | !id.matches(functionBuilder.getParameterRegex())) {
+                inputName.setStyle("-fx-border-color: red");
+                messengerService.setRightStatus("Cannot create parameter using restricted name format!");
+                return false;
+            }
+
+            String[] restrictedRegex = new String[]{
+                regexParamIdentFlowInActual, regexParamIdentFlowInTotal,
+                regexParamIdentFlowOutActual, regexParamIdentFlowOutTotal,
+                regexParamIdentSpeed, regexParamIdentToken
+            };
+
+            for (String regex : restrictedRegex) {
+                if (id.matches(regex)) {
+                    inputName.setStyle("-fx-border-color: red");
+                    messengerService.setRightStatus("Cannot create parameter using restricted name format!");
+                    return false;
+                }
+            }
+        }
+
+        messengerService.setRightStatus("");
+        inputName.setStyle("-fx-border-color: green");
+        return true;
+    }
+
     private void setButtons() {
+
         buttonApply.setDisable(true);
         buttonCreate.setDisable(true);
+
         if (inputName.getText() != null) {
             if (!inputName.getText().isEmpty()) {
-                if (choiceScope.getSelectionModel().getSelectedItem() == Parameter.Type.LOCAL) {
-                    if (choiceNode.getSelectionModel().getSelectedItem() != null) {
-                        if (choiceNode.getSelectionModel().getSelectedItem().getLocalParameter(inputName.getText()) != null) {
+                if (isNameInputValid()) {
+
+                    if (choiceScope.getSelectionModel().getSelectedItem() == Parameter.Type.LOCAL) {
+
+                        if (choiceNode.getSelectionModel().getSelectedItem() != null) {
+                            if (choiceNode.getSelectionModel().getSelectedItem().getLocalParameter(inputName.getText()) != null) {
+                                buttonApply.setDisable(false);
+                            } else {
+                                buttonCreate.setDisable(false);
+                            }
+                        }
+
+                    } else {
+
+                        if (parameterService.getParameter(inputName.getText()) != null) {
                             buttonApply.setDisable(false);
                         } else {
                             buttonCreate.setDisable(false);
                         }
                     }
-                } else {
-                    if (parameterService.getParameter(inputName.getText()) != null) {
-                        buttonApply.setDisable(false);
-                    } else {
-                        buttonCreate.setDisable(false);
-                    }
                 }
             }
         }
     }
-    
+
     private class ParameterCellFormatter extends ListCell<Parameter>
     {
         @Override

@@ -32,7 +32,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class HierarchyController implements Initializable
 {
-    @Autowired private ModelService dataService;
+    @Autowired private ModelService modelService;
     @Autowired private HierarchyService hierarchyService;
 
     @FXML private TitledPane hierarchyPane;
@@ -68,7 +68,7 @@ public class HierarchyController implements Initializable
             getItems(childItem);
         });
         item.setExpanded(true);
-        if (dataService.getGraph().equals(graph)) {
+        if (modelService.getGraph().equals(graph)) {
             treeGraphHierarchy.getSelectionModel().select(item);
             return true;
         } else {
@@ -81,7 +81,10 @@ public class HierarchyController implements Initializable
         treeGraphHierarchy.setEventDispatcher(new TreeMouseEventDispatcher(treeGraphHierarchy.getEventDispatcher()));
         treeGraphHierarchy.setOnKeyPressed(keyEvent -> {
             if (keyEvent.getCode() == KeyCode.ENTER) {
-                hierarchyService.show(treeGraphHierarchy.getSelectionModel().getSelectedItem().getValue().getGraph());
+                hierarchyService.show(
+                        treeGraphHierarchy.getSelectionModel().getSelectedItem().getValue().getGraph(), 
+                        modelService.getDao()
+                );
             }
         });
     }
@@ -118,7 +121,10 @@ public class HierarchyController implements Initializable
                 if (event.getEventType().equals(MouseEvent.MOUSE_PRESSED)) {
                     MouseEvent mouseEvent = (MouseEvent) event;
                     if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && mouseEvent.getClickCount() == 2) {
-                        hierarchyService.show(treeGraphHierarchy.getSelectionModel().getSelectedItem().getValue().getGraph());
+                        hierarchyService.show(
+                                treeGraphHierarchy.getSelectionModel().getSelectedItem().getValue().getGraph(),
+                                modelService.getDao()
+                        );
                         event.consume();
                     }
                 }

@@ -2,6 +2,7 @@ package main;
 
 import edu.unibi.agbi.editor.Main;
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.business.service.FactoryService;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphCluster;
@@ -41,6 +42,7 @@ public class TestFXBase extends ApplicationTest {
 
 //    private final static boolean HEADLESS = true;
     
+    @Autowired protected FactoryService factoryService;
     @Autowired protected ModelService dataService;
     @Autowired protected HierarchyService hierarchyService;
     @Autowired protected SelectionService selectionService;
@@ -60,7 +62,7 @@ public class TestFXBase extends ApplicationTest {
     @Before
     public void setUpClass() throws Exception {
         ApplicationTest.launch(Main.class); // verifies that MainApp is a JavaFX application (extends Application)
-        dataService.setDao(dataService.CreateDao());
+        dataService.setDao(factoryService.CreateDao());
     }
 
     @Override
@@ -209,7 +211,7 @@ public class TestFXBase extends ApplicationTest {
         final Object monitor = new Object();
         Platform.runLater(() -> {
             try {
-                cluster.add(hierarchyService.cluster(dataService.getDao(), elements, dataService.getClusterId(dataService.getDao())));
+                cluster.add(hierarchyService.cluster(dataService.getDao(), elements));
             } catch (DataException ex) {
                 System.out.println(ex.toString());
             } finally {
@@ -283,11 +285,11 @@ public class TestFXBase extends ApplicationTest {
     }
 
     private IGraphNode CreatePlace() throws DataException {
-        return dataService.CreateNode(dataService.getDao(), DataType.PLACE, Math.random() * 1000, Math.random() * 800);
+        return dataService.create(dataService.getDao(), DataType.PLACE, Math.random() * 1000, Math.random() * 800);
     }
 
     private IGraphNode CreateTransition() throws DataException {
-        return dataService.CreateNode(dataService.getDao(), DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
+        return dataService.create(dataService.getDao(), DataType.TRANSITION, Math.random() * 1000, Math.random() * 800);
     }
 
     private void waitForFxThread(Object monitor) {
