@@ -36,7 +36,7 @@ import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
-import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -70,7 +70,7 @@ import org.w3c.dom.NodeList;
 @Component
 public class ModelXmlConverter
 {
-    @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private FunctionFactory functionBuilder;
     @Autowired private ModelService dataService;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private ParameterService parameterService;
@@ -256,13 +256,13 @@ public class ModelXmlConverter
         for (Transition transition : dao.getModel().getTransitions()) {
             String functionString = transition.getFunction().toString();
             Function function = parameterService.validateAndGetFunction(dao.getModel(), transition, functionString);
-            parameterService.setFunction(dao.getModel(), transition, function, null);
+            parameterService.setElementFunction(dao.getModel(), transition, function, null);
         }
         for (Arc arc : dao.getModel().getArcs()) {
             for (Weight weight : arc.getWeights()) {
                 String functionString = weight.getFunction().toString();
                 Function function = parameterService.validateAndGetFunction(dao.getModel(), arc, functionString);
-                parameterService.setFunction(dao.getModel(), arc, function, weight.getColour());
+                parameterService.setElementFunction(dao.getModel(), arc, function, weight.getColour());
             }
         }
         

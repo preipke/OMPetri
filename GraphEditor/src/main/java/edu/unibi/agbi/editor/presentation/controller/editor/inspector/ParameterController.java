@@ -13,7 +13,7 @@ import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
 import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -37,7 +37,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ParameterController implements Initializable
 {
-    @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private FunctionFactory functionBuilder;
     @Autowired private ParameterFactory parameterFactory;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;

@@ -211,9 +211,9 @@ public class DaoTests extends TestFXBase {
         nodesBeforeClustering = copyNodes(dataService.getGraph().getNodes());
         connectionsBeforeCluster = copyConnections(dataService.getGraph().getConnections());
         
-        arcsBeforeClustering = dataService.getModel().getArcsCopy();
-        placesBeforeClustering = dataService.getModel().getPlacesCopy();
-        transitionsBeforeClustering = dataService.getModel().getTransitionsCopy();
+        arcsBeforeClustering = copyArcs(dataService.getModel().getArcs());
+        placesBeforeClustering = copyPlaces(dataService.getModel().getPlaces());
+        transitionsBeforeClustering = copyTransitions(dataService.getModel().getTransitions());
         
         /**
          * Creating cluster.

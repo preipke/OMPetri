@@ -17,7 +17,7 @@ import edu.unibi.agbi.petrinet.entity.abstr.Element.Type;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
-import edu.unibi.agbi.petrinet.util.References;
+import edu.unibi.agbi.petrinet.model.References;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

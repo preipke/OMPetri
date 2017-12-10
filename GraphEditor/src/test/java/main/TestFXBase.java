@@ -13,9 +13,16 @@ import edu.unibi.agbi.editor.business.service.HierarchyService;
 import edu.unibi.agbi.editor.business.service.SelectionService;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
+import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.petrinet.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -90,6 +97,30 @@ public class TestFXBase extends ApplicationTest {
         } catch (InterruptedException ex) {
             System.out.println(ex);
         }
+    }
+
+    public List<Arc> copyArcs(Collection<Arc> arcs) {
+        List<Arc> arcsCopy = new ArrayList();
+        for (Arc arc : arcs) {
+            arcsCopy.add(arc);
+        }
+        return arcsCopy;
+    }
+
+    public List<Place> copyPlaces(Collection<Place> places) {
+        List<Place> placesCopy = new ArrayList();
+        for (Place place : places) {
+            placesCopy.add(place);
+        }
+        return placesCopy;
+    }
+
+    public List<Transition> copyTransitions(Collection<Transition> transitions) {
+        List<Transition> transitionCopy = new ArrayList();
+        for (Transition transition : transitions) {
+            transitionCopy.add(transition);
+        }
+        return transitionCopy;
     }
 
     protected List<IGravisConnection> copyConnections(Collection<IGravisConnection> connections) {

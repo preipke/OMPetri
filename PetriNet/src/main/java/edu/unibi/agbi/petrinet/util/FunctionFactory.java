@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  *
  * @author PR
  */
-public class FunctionBuilder
+public class FunctionFactory
 {
     private final String propertiesPath = "/function.properties";
     private final Properties properties;
@@ -26,9 +26,9 @@ public class FunctionBuilder
     private final Map<String,Function> subfunctions = new HashMap();
     private int subfunctionsCount = 0;
     
-    public FunctionBuilder() throws IOException {
+    public FunctionFactory() throws IOException {
         properties = new Properties();
-        properties.load(FunctionBuilder.class.getResourceAsStream(propertiesPath));
+        properties.load(FunctionFactory.class.getResourceAsStream(propertiesPath));
     }
     
     public String getNumberRegex() {

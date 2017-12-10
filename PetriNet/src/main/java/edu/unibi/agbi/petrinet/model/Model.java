@@ -14,6 +14,8 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
+import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter.ReferenceType;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,9 +46,42 @@ public class Model
         colors.put(color.getId(), color);
     }
 
-    public void add(Parameter param) {
-        parameters.put(param.getId(), param);
-//        param.getRelatedElement().getRelatedParameters().add(param);
+    /**
+     * Attempts to add a parameter.
+     *
+     * @param param
+     * @throws Exception
+     */
+    public void add(Parameter param) throws Exception {
+
+        switch (param.getType()) {
+
+            case GLOBAL:
+
+                if (containsParameter(param.getId())) {
+                    throw new Exception("Conflict! Another parameter has already been stored using the same ID!");
+                }
+                parameters.put(param.getId(), param);
+                break;
+
+            case LOCAL:
+
+                if (param.getRelatedElement().getLocalParameter(param.getId()) != null) {
+                    throw new Exception("Conflict! Another parameter has already been stored using the same ID!");
+                }
+                param.getRelatedElement().addLocalParameter(param);
+                break;
+
+            case REFERENCE:
+
+                param.getRelatedElement().getRelatedParameters().add(param);
+                break;
+
+            default:
+                throw new Exception("Unhandled parameter type detected!");
+
+        }
+
     }
 
     public void add(IElement element) throws Exception {
@@ -81,10 +116,6 @@ public class Model
         places.clear();
         transitions.clear();
     }
-
-//    public boolean contains(Parameter param) {
-//        return parameters.containsKey(param.getId());
-//    }
 
     public boolean contains(IElement element) throws Exception {
         switch (element.getElementType()) {
@@ -162,36 +193,36 @@ public class Model
         }
     }
     
-    public void changeId(IElement element, String id) throws Exception {
+    public void changeId(IElement element, String elementIdNew) throws Exception {
 
-        System.out.println("Changing ID: '" + element.getId() + "' -> '" + id + "'");
+//        System.out.println("Changing ID: '" + element.getId() + "' -> '" + elementIdNew + "'");
         
         switch (element.getElementType()) {
             
             case ARC:
                 if (arcs.containsKey(element.getId())) {
                     arcs.remove(element.getId());
-                    arcs.put(id, (Arc) element);
+                    arcs.put(elementIdNew, (Arc) element);
                 } else {
-                    throw new Exception("Trying to change ID for unavailable arc!");
+                    throw new Exception("Trying to change ID for non-existing arc!");
                 }
                 break;
                 
             case PLACE:
                 if (places.containsKey(element.getId())) {
                     places.remove(element.getId());
-                    places.put(id, (Place) element);
+                    places.put(elementIdNew, (Place) element);
                 } else {
-                    throw new Exception("Trying to change ID for unavailable place!");
+                    throw new Exception("Trying to change ID for non-existing place!");
                 }
                 break;
                 
             case TRANSITION:
                 if (transitions.containsKey(element.getId())) {
                     transitions.remove(element.getId());
-                    transitions.put(id, (Transition) element);
+                    transitions.put(elementIdNew, (Transition) element);
                 } else {
-                    throw new Exception("Trying to change ID for unavailable transition!");
+                    throw new Exception("Trying to change ID for non-existing transition!");
                 }
                 break;
 
@@ -199,7 +230,70 @@ public class Model
                 throw new Exception("Trying to change ID for unhandled element type!");
         }
         
-        element.setId(id);
+        element.setId(elementIdNew);
+    }
+
+    public Parameter findParameter(ParameterFactory parameterFactory, String paramId, IElement element) {
+
+        Parameter param;
+        param = null;
+
+        // highest priority - LOCAL param
+        if (element != null) {
+            param = element.getLocalParameter(paramId);
+        }
+
+        // GLOBAL param
+        if (param == null) {
+            param = getParameter(paramId);
+        }
+
+        // REFERENCE param
+        if (param == null) {
+            param = findReferencingParameter(parameterFactory, paramId);
+        }
+
+        return param;
+    }
+
+    private Parameter findReferencingParameter(ParameterFactory parameterFactory, final String paramId) {
+
+        ReferenceType referenceType;
+        Parameter param;
+        param = null;
+
+        String elementId;
+        elementId = parameterFactory.recoverElementIdFromReferencingParameterId(paramId);
+
+        IElement element;
+        element = getElement(elementId);
+
+        if (element != null) {
+
+            for (Parameter par : element.getRelatedParameters()) {
+
+                // TODO use regex pattern to detect variations of referencing parameters for the same element
+                if (par.getId().contentEquals(paramId)) {
+                    param = par;
+                }
+            }
+
+            if (param == null) {
+
+                try {
+
+                    referenceType = parameterFactory.recoverReferenceTypeFromParameterId(element, paramId);
+                    param = parameterFactory.createReferencingParameter(element, paramId, referenceType);
+                    add(param);
+
+                } catch (Exception ex) {
+                    System.out.println("Exception in generating referencing parameter: " + ex.getMessage());
+                    param = null;
+                }
+            }
+        }
+
+        return param;
     }
 
     public IElement remove(IElement element) throws Exception {
@@ -224,9 +318,6 @@ public class Model
                 }
             }
         }
-//        for (Parameter param : arc.getRelatedParameters()) {
-//            parameters.remove(param.getId());
-//        }
         arc.getSource().getArcsOut().remove(arc);
         arc.getTarget().getArcsIn().remove(arc);
         return arcs.remove(arc.getId());
@@ -241,9 +332,6 @@ public class Model
                 }
             }
         }
-//        for (Parameter param : node.getRelatedParameters()) {
-//            parameters.remove(param.getId());
-//        }
         while (!node.getArcsIn().isEmpty()) {
             remove(node.getArcsIn().remove(0));
         }
@@ -255,9 +343,6 @@ public class Model
         } else {
             node = remove((Transition) node);
         }
-        node.getRelatedParameters().forEach((param) -> {
-            parameters.remove(param.getId());
-        });
         return node;
     }
 
@@ -275,14 +360,6 @@ public class Model
 
     public Collection<Arc> getArcs() {
         return arcs.values();
-    }
-
-    public List<Arc> getArcsCopy() {
-        List<Arc> arcsCopy = new ArrayList();
-        for (Arc arc : arcs.values()) {
-            arcsCopy.add(arc);
-        }
-        return arcsCopy;
     }
 
     public Colour getColour(String id) {
@@ -328,23 +405,7 @@ public class Model
         return places.values();
     }
 
-    public List<Place> getPlacesCopy() {
-        List<Place> placesCopy = new ArrayList();
-        for (Place place : places.values()) {
-            placesCopy.add(place);
-        }
-        return placesCopy;
-    }
-
     public Collection<Transition> getTransitions() {
         return transitions.values();
-    }
-
-    public List<Transition> getTransitionsCopy() {
-        List<Transition> transitionCopy = new ArrayList();
-        for (Transition transition : transitions.values()) {
-            transitionCopy.add(transition);
-        }
-        return transitionCopy;
     }
 }

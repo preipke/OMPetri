@@ -24,11 +24,15 @@ import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
+import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.beans.property.BooleanProperty;
@@ -50,6 +54,7 @@ public class ModelService
     @Autowired private FactoryService factoryService;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
+    @Autowired private ParameterFactory parameterFactory;
 
     private final ObservableList<ModelDao> dataDaos = FXCollections.observableArrayList();
     private ModelDao modelDaoActive;
@@ -115,96 +120,113 @@ public class ModelService
         factoryService.StyleElement(node);
         return node;
     }
-    
+
     /**
-     * Validate an ID to be available.
-     * 
+     * Validates an ID to be available.
+     *
      * @param id
-     * @throws DataException 
+     * @throws DataException
      */
-    private void validateIdAvailable(String id) throws DataException {
+    public void validateIdAvailable(String id) throws DataException {
         if (modelDaoActive.getModel().containsElement(id)) {
-            throw new DataException("The specified ID is already used by another element!");
+            throw new DataException("The specified ID is already used by an element!");
         }
         if (modelDaoActive.getModel().containsParameter(id)) {
             throw new DataException("The specified ID is already used by a parameter!");
         }
     }
-    
-    private void changeElementsId(IDataElement data, String id) {
-        
-        
-    }
-    
+
     /**
      * Attempts to change the ID/name of a data element.
-     * 
-     * @param data
-     * @param id 
-     * @throws DataException 
+     *
+     * @param element
+     * @param elementIdNew
+     * @throws DataException
      */
-    public synchronized void changeId(IDataElement data, String id) throws DataException {
-        
-        final String oldId = data.getId();
-        
-        if (id.contentEquals(oldId)) {
+    public synchronized void changeElementId(final IDataElement element, final String elementIdNew) throws DataException {
+        changeElementId(element, elementIdNew, false);
+    }
+
+    /**
+     *
+     * @param element
+     * @param elementIdNew
+     * @param reverse      indicates whether or not this action is reversing a
+     *                     previous id change that will occur upon exception
+     * @throws DataException
+     */
+    private void changeElementId(final IDataElement element, final String elementIdNew, boolean reverse) throws DataException {
+
+        final String elementIdOld = element.getId();
+        String arcIdNew;
+
+        if (elementIdNew.contentEquals(elementIdOld)) {
             return;
         }
-        
+
         try {
 
             // Validate ID 
-            validateIdAvailable(id);
-            modelDaoActive.getModel().changeId(data, id);
-            
-            
-            if (data instanceof IDataNode) {
-                IDataNode node = (IDataNode) data;
-                
+            validateChangingElementId(element, elementIdNew);
+
+            // Update ID
+            modelDaoActive.getModel().changeId(element, elementIdNew);
+            parameterService.updateRelatedParameterIds(element, elementIdNew);
+
+            if (element instanceof IDataNode) {
+                IDataNode node = (IDataNode) element;
+
                 // Validate IDs for related arcs
                 try {
+
                     for (IArc arc : node.getArcsIn()) {
-                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
-                        validateIdAvailable(id);
+                        arcIdNew = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                        validateChangingElementId(arc, arcIdNew);
                     }
+
                     for (IArc arc : node.getArcsOut()) {
-                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
-                        validateIdAvailable(id);
+                        arcIdNew = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                        validateChangingElementId(arc, arcIdNew);
                     }
+
                 } catch (DataException ex) {
-                    throw new DataException("The resulting ID of a related arc is already used inside the model!");
+                    throw new DataException("The new ID of a related arc or an associated parameter is already being used within the model!");
                 }
-                
+
                 // Change IDs for related arcs
-                for (IArc arc: node.getArcsIn()) {
-                    if (arc.getId().matches(".+_" + oldId)) {
-                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
-                        modelDaoActive.getModel().changeId(arc, id);
-                        
-                        
+                for (IArc arc : node.getArcsIn()) {
+                    if (arc.getId().matches(".+_" + elementIdOld)) {
+
+                        arcIdNew = factoryService.getArcId(arc.getSource(), arc.getTarget());
+
+                        modelDaoActive.getModel().changeId(arc, arcIdNew);
+                        parameterService.updateRelatedParameterIds(arc, arcIdNew);
                     }
                 }
-                for (IArc arc: node.getArcsOut()) {
-                    if (arc.getId().matches(oldId + "_.+")) {
-                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
-                        modelDaoActive.getModel().changeId(arc, id);
-                        
-                        
+
+                for (IArc arc : node.getArcsOut()) {
+                    if (arc.getId().matches(elementIdOld + "_.+")) {
+
+                        arcIdNew = factoryService.getArcId(arc.getSource(), arc.getTarget());
+
+                        modelDaoActive.getModel().changeId(arc, arcIdNew);
+                        parameterService.updateRelatedParameterIds(arc, arcIdNew);
                     }
                 }
-                
             }
-            
-            
+
         } catch (Exception ex) {
+
             try {
-                modelDaoActive.getModel().changeId(data, oldId);
+                if (!reverse) {
+                    changeElementId(element, elementIdOld, true);
+                }
             } catch (Exception exFatal) {
                 throw new DataException("A conflict was detected when changing an ID, but revoking the action failed! Possible data integrity breach!", exFatal);
             }
             throw new DataException(ex.getMessage());
         }
-        
+
     }
 
     public synchronized void changeSubtype(IDataElement element, Object subtype) throws DataException {
@@ -257,7 +279,7 @@ public class ModelService
         dao.setHasChanges(true);
         return arc;
     }
-    
+
     public synchronized IGraphNode clone(ModelDao modelDao, IDataNode data, double posX, double posY) throws DataException {
         IGraphNode node;
         node = factoryService.CreateClone(modelDao, data, posX, posY);
@@ -630,6 +652,34 @@ public class ModelService
     }
 
     /**
+     * Validates that an element's related parameter ids do not clash with
+     * other elements or parameters upon changing the element's id.
+     * 
+     * @param element
+     * @param elementIdNew
+     * @throws DataException 
+     */
+    public void validateChangingElementId(IElement element, String elementIdNew) throws DataException {
+
+        String paramIdNew;
+        ReferencingParameter.ReferenceType referenceType;
+
+        validateIdAvailable(elementIdNew);
+
+        if (element.getLocalParameter(elementIdNew) != null) {
+            throw new DataException("The element id is already assigned to a local parameter inside that element!");
+        }
+
+        for (Parameter param : element.getRelatedParameters()) {
+
+            referenceType = parameterFactory.recoverReferenceTypeFromParameterValue(param.getValue());
+            paramIdNew = parameterFactory.generateIdForReferencingParameter(elementIdNew, referenceType);
+
+            validateIdAvailable(paramIdNew);
+        }
+    }
+
+    /**
      * Validates a connection between two graph nodes.
      *
      * @param source
@@ -758,7 +808,7 @@ public class ModelService
 
     public synchronized void setElementFunction(IDataElement element, Function function, Colour colour) throws DataException {
         try {
-            parameterService.setFunction(modelDaoActive.getModel(), element, function, colour);
+            parameterService.setElementFunction(modelDaoActive.getModel(), element, function, colour);
             modelDaoActive.setHasChanges(true);
         } catch (Exception ex) {
             throw new DataException(ex.getMessage());

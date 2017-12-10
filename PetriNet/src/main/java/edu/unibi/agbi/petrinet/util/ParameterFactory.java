@@ -6,11 +6,13 @@
 package edu.unibi.agbi.petrinet.util;
 
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.parameter.GlobalParameter;
 import edu.unibi.agbi.petrinet.model.parameter.LocalParameter;
 import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter;
+import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter.ReferenceType;
+import java.io.IOException;
+import java.util.Properties;
 
 /**
  *
@@ -18,6 +20,13 @@ import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter;
  */
 public class ParameterFactory
 {
+    private final String propertiesPath = "/parameter.properties";
+    private final Properties properties;
+    
+    public ParameterFactory() throws IOException {
+        properties = new Properties();
+        properties.load(ParameterFactory.class.getResourceAsStream(propertiesPath));
+    }
     
     public Parameter createLocalParameter(String id, String value, String unit, IElement reference) {
         
@@ -29,55 +38,111 @@ public class ParameterFactory
         return new GlobalParameter(id, value, unit);
     }
     
-    public Parameter createReferencingParameter(String id, IElement reference, ReferencingParameter.ReferenceType type) throws Exception {
+    public Parameter createReferencingParameter(IElement element, String paramId, ReferenceType type) throws Exception {
         
-        Element.Type elementType = reference.getElementType();
-        String value;
+        String value = generateValueForReferencingParamter(element.getId(), type);
         
-        switch (elementType) {
-            
-            case ARC:
-                
-                switch (type) {
-                    
-                    default:
-                        throw new Exception("Unhandled referencing type for arc parameter! Check factory implementation!");
-                    
-                }
-//                break;
-            
-            case PLACE:
-                
-                switch (type) {
-                    
-                    case TOKEN:
-                        value = "'" + reference.getId() + "'.t";
-                        break;
+        return new ReferencingParameter(paramId, value, element, type);
+    }
 
-                    default:
-                        throw new Exception("Unhandled referencing type for place parameter! Check factory implementation!");
+    public String generateIdForReferencingParameter(String elementId, ReferenceType referenceType) {
 
-                }
-                break;
-            
-            case TRANSITION:
-                
-                switch (type) {
-                    
-                    case SPEED:
-                        value = "'" + reference.getId() + "'.actualSpeed";
-                        break;
+        // TODO generate pattern for additional types
+        switch (referenceType) {
 
-                    default:
-                        throw new Exception("Unhandled referencing type for transition parameter! Check factory implementation!");
-                    
-                }
-                break;
+            case SPEED:
+                return elementId;
+
+            case TOKEN:
+                return elementId;
 
             default:
-                throw new Exception("Unhandled element type for referencing parameter! Check factory implementation!");
+                return null;
         }
+    }
+    
+    public String generateValueForReferencingParamter(String elementId, ReferenceType type) throws Exception {
+
+        switch (type) {
+
+            case TOKEN:
+                return properties.getProperty("regex.place.token").replace(".+", elementId);
+//                return "'" + elementId + "'.t";
+
+            case SPEED:
+                return properties.getProperty("regex.transition.speed").replace(".+", elementId);
+
+            default:
+                throw new Exception("Value generation for given reference type not yet implemented!");
+        }
+    }
+
+    public String recoverElementIdFromReferencingParameterId(String paramId) {
+
+        String elementId;
+
+        // TODO use regex pattern detection for additional types
+        elementId = paramId; // simplest and only yet implemented case, paramId matches elementId
+
+        return elementId;
+    }
+
+    public ReferenceType recoverReferenceTypeFromParameterId(IElement element, String parameterId) {
+
+        // TODO use regex pattern detection for additional types
+        switch (element.getElementType()) {
+
+            case PLACE:
+                return ReferenceType.TOKEN;
+
+            case TRANSITION:
+                return ReferenceType.SPEED;
+
+            default:
+                return null;
+        }
+    }
+    
+    public ReferenceType recoverReferenceTypeFromParameterValue(String parameterValue) {
         
-        return new ReferencingParameter(id, value, reference, type);
+        if (parameterValue.matches(
+                properties.getProperty("regex.arc.tokenIn.actual"))) {
+            
+            return null;
+            
+        } else if (parameterValue.matches(
+                properties.getProperty("regex.arc.tokenIn.total"))) {
+            
+            return null;
+            
+        } else if (parameterValue.matches(
+                properties.getProperty("regex.arc.tokenOut.actual"))) {
+            
+            return null;
+            
+        } else if (parameterValue.matches(
+                properties.getProperty("regex.arc.tokenOut.total"))) {
+            
+            return null;
+            
+        } else if (parameterValue.matches(
+                properties.getProperty("regex.place.token"))) {
+            
+            return ReferenceType.TOKEN;
+            
+        } else if (parameterValue.matches(
+                properties.getProperty("regex.transition.speed"))) {
+            
+            return ReferenceType.SPEED;
+            
+        } else if (parameterValue.matches(
+                properties.getProperty("regex.transition.fire"))) {
+            
+            return null;
+            
+        } else {
+            
+            return null;
+        }
     }
 }

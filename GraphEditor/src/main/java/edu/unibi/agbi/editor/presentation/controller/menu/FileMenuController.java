@@ -13,8 +13,8 @@ import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -46,6 +46,7 @@ public class FileMenuController implements Initializable
     @Autowired private GraphController graphController;
     @Autowired private MainController mainController;
 
+    @Autowired private ParameterFactory parameterFactory;
     @Autowired private OpenModelicaExporter omExporter;
     @Autowired private ModelSbmlConverter sbmlModelConverter;
     @Autowired private ModelXmlConverter xmlModelConverter;
@@ -145,7 +146,7 @@ public class FileMenuController implements Initializable
 
     private boolean SaveOm(ModelDao dao, File file) {
         try {
-            omExporter.exportMO(dao.getModelName(), dao.getModel(), file);
+            omExporter.exportMO(dao.getModelName(), dao.getModel(), file, parameterFactory);
             messengerService.printMessage("OpenModelica export complete!");
         } catch (IOException ex) {
             messengerService.printMessage("OpenModelica export failed!");

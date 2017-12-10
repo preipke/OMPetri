@@ -24,13 +24,11 @@ import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
-import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
 import java.net.URL;
 import java.util.Collection;
 import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -39,8 +37,6 @@ import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Control;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
@@ -49,7 +45,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -61,7 +56,7 @@ import org.springframework.stereotype.Controller;
 public class ElementController implements Initializable
 {
     @Autowired private ModelService modelService;
-    @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private FunctionFactory functionFactory;
     @Autowired private MessengerService messengerService;
     @Autowired private ParameterService parameterService;
     @Autowired private MouseEventHandler mouseEventHandler;
@@ -97,11 +92,10 @@ public class ElementController implements Initializable
     @FXML private ChoiceBox choiceColour;
 //    @FXML private Button buttonColourCreate;
 
-    // Properties
+    // Other Properties
     @FXML private Button buttonEdit;
     @FXML private Button buttonEditClustered;
     @FXML private CheckBox checkConstant;
-    @FXML private Label statusMessage;
     @FXML private ListView<IGraphElement> listClusteredElements;
     
     @FXML private TextArea inputFunction;
@@ -410,7 +404,7 @@ public class ElementController implements Initializable
 
     private boolean isNumberInputValid(TextField input) {
         String value = input.getText().replace(",", ".");
-        if (value.matches(functionBuilder.getNumberRegex())) {
+        if (value.matches(functionFactory.getNumberRegex())) {
             input.setStyle("-fx-border-color: green");
             return true;
         } else {
@@ -525,7 +519,7 @@ public class ElementController implements Initializable
 
         inputName.textProperty().addListener(cl -> {
             try {
-                modelService.changeId(data, inputName.getText());
+                modelService.changeElementId(data, inputName.getText());
                 inputName.setStyle("-fx-border-color: green");
             } catch (DataException ex) {
                 inputName.setStyle("-fx-border-color: red");

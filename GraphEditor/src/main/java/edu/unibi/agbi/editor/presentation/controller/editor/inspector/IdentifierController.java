@@ -210,7 +210,7 @@ public class IdentifierController implements Initializable
         inputName.textProperty().addListener(cl -> {
             if (data != null && !data.getId().contentEquals(inputName.getText())) {
                 try {
-                    dataService.changeId(data, inputName.getText());
+                    dataService.changeElementId(data, inputName.getText());
                     inputName.setStyle("-fx-border-color: green");
                     pauseTransition.playFromStart();
                 } catch (DataException ex) {

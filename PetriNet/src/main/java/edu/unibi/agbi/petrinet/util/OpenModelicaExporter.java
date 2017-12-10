@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.util;
 
+import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.INode;
@@ -48,8 +49,8 @@ public class OpenModelicaExporter
         properties.load(OpenModelicaExporter.class.getResourceAsStream(propertiesPath));
     }
 
-    public References export(String name, Model model, File fileMOS, File fileMO, File workDirectory) throws IOException {
-        fileMO = exportMO(name, model, fileMO);
+    public References export(String name, Model model, File fileMOS, File fileMO, File workDirectory, ParameterFactory parameterFactory) throws IOException {
+        fileMO = exportMO(name, model, fileMO, parameterFactory);
         return exportMOS(name, model, fileMOS, fileMO, workDirectory);
     }
 
@@ -58,10 +59,11 @@ public class OpenModelicaExporter
      * @param name
      * @param model
      * @param file
+     * @param parameterFactory
      * @return
      * @throws IOException
      */
-    public File exportMO(String name, Model model, File file) throws IOException {
+    public File exportMO(String name, Model model, File file, ParameterFactory parameterFactory) throws IOException {
 
         PrintWriter writer = new PrintWriter(file);
 
@@ -321,19 +323,19 @@ public class OpenModelicaExporter
                 writer.append("(final unit=\"" + function.getUnit() + "\")");
             }
             if (transition.isDisabled()) {
-                writer.append("=0" + CMNT_START + getFunctionString(model, transition, function) + CMNT_END);
+                writer.append("=0" + CMNT_START + getFunctionValueString(parameterFactory, model, transition, function) + CMNT_END);
             } else {
-                writer.append("=" + getFunctionString(model, transition, function));
+                writer.append("=" + getFunctionValueString(parameterFactory, model, transition, function));
             }
 
             /**
              * Weights.
              */
-            tmp1 = getWeightString(model, transition.getArcsIn(), colours);
+            tmp1 = getWeightString(parameterFactory, model, transition.getArcsIn(), colours);
             if (!tmp1.isEmpty()) {
                 writer.append(",arcWeightIn={" + tmp1 + "}");
             }
-            tmp1 = getWeightString(model, transition.getArcsOut(), colours);
+            tmp1 = getWeightString(parameterFactory, model, transition.getArcsOut(), colours);
             if (!tmp1.isEmpty()) {
                 writer.append(",arcWeightOut={" + tmp1 + "}");
             }
@@ -440,7 +442,7 @@ public class OpenModelicaExporter
         return file;
     }
     
-    private String getWeightString(Model model, Collection<IArc> arcs, Collection<Colour> colours) throws IOException {
+    private String getWeightString(ParameterFactory parameterFactory, Model model, Collection<IArc> arcs, Collection<Colour> colours) throws IOException {
         
         boolean isFirstColour, isFirst = true;
         boolean isColoredPn = colours.size() != 1;
@@ -464,9 +466,9 @@ public class OpenModelicaExporter
                     tmp += ",";
                 }
                 if (isColoredPn) {
-                    tmp += getWeightString(model, arc, color);
+                    tmp += getWeightString(parameterFactory, model, arc, color);
                 } else {
-                    weight += getWeightString(model, arc, color);
+                    weight += getWeightString(parameterFactory, model, arc, color);
                 }
             }
             if (isColoredPn) {
@@ -476,50 +478,63 @@ public class OpenModelicaExporter
         return weight;
     }
     
-    private String getWeightString(Model model, IArc arc, Colour colour) throws IOException {
+    private String getWeightString(ParameterFactory parameterFactory, Model model, IArc arc, Colour colour) throws IOException {
+        
         Weight weight = arc.getWeight(colour);
+        Function function;
+        
+        if (weight != null) {
+            function = weight.getFunction();
+        } else {
+            function = null;
+        }
+        
         if (arc.isDisabled() || weight == null
                 || arc.getSource().isConstant() || arc.getSource().isDisabled()
                 || arc.getTarget().isConstant() || arc.getTarget().isDisabled()) {
-            return "0" + CMNT_START + getFunctionString(model, arc, weight.getFunction()) + CMNT_END;
+            return "0" + CMNT_START + getFunctionValueString(parameterFactory, model, arc, function) + CMNT_END;
         } else {
-            return getFunctionString(model, arc, weight.getFunction());
+            return getFunctionValueString(parameterFactory, model, arc, weight.getFunction());
         }
     }
     
     /**
-     * Gets the string representing a transition's function. In creation, local
-     * parameters will be prioritized over global parameters.
+     * Gets the string representing an element's function. 
      * 
+     * @param parameterFactory
      * @param model the corresponding Model, will be used to get parameters
-     * @param element the corresponding Element, its ID will be added to specify local parameter names
+     * @param dataElement the corresponding Element, its ID will be added to specify local parameter names
      * @param function the Function to convert
-     * @return 
+     * @return
+     * @throws IOException 
      */
-    private String getFunctionString(Model model, IElement element, Function function) throws IOException {
+    private String getFunctionValueString(ParameterFactory parameterFactory, Model model, IElement dataElement, Function function) throws IOException {
+        
         String functionString = "";
-        Parameter parameter;
-        for (Function elem : function.getElements()) {
-            switch (elem.getType()) {
-                case FUNCTION:
-                    functionString += getFunctionString(model, element, elem);
-                    break;
-                case PARAMETER:
-                    if ((parameter = model.getParameter(elem.getValue())) != null) {
-                        if (parameter.getType() == Parameter.Type.REFERENCE) {
-                            functionString += parameter.getValue();
-                        } else {
-                            functionString += "'_" + parameter.getId() + "'";
-                        }
-                    } else if ((element.getLocalParameter(elem.getValue())) != null) {
-                        functionString += "'_" + element.getId() + "_" + elem.getValue() + "'";
-                    } else {
-                        throw new IOException("Invalid parameter! -> '" + elem.getValue() + "'");
-                    }
-                    break;
-                default:
-                    functionString += elem.getValue();
-                    break;
+        Parameter param;
+        
+        if (function != null) {
+
+            for (Function functionElement : function.getElements()) {
+
+                switch (functionElement.getType()) {
+
+                    case FUNCTION:
+
+                        functionString += getFunctionValueString(parameterFactory, model, dataElement, functionElement);
+                        break;
+
+                    case PARAMETER:
+
+                        param = model.findParameter(parameterFactory, functionElement.getValue(), dataElement);
+                        functionString += param.getValue();
+                        break;
+
+                    default:
+
+                        functionString += functionElement.getValue();
+                        break;
+                }
             }
         }
         return functionString;

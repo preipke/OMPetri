@@ -30,7 +30,7 @@ import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
-import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class ModelSbmlConverter
     @Autowired private FactoryService factoryService;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private ParameterService parameterService;
-    @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private FunctionFactory functionBuilder;
     @Autowired private ParameterFactory parameterFactory;
     @Autowired private Calculator calculator;
 
@@ -217,7 +217,7 @@ public class ModelSbmlConverter
             try {
                 String functionString = transition.getFunction().toString();
                 Function function = parameterService.validateAndGetFunction(dao.getModel(), transition, functionString);
-                parameterService.setFunction(dao.getModel(), transition, function, null);
+                parameterService.setElementFunction(dao.getModel(), transition, function, null);
             } catch (ParameterException ex) {
                 throw new IOException(ex);
             }

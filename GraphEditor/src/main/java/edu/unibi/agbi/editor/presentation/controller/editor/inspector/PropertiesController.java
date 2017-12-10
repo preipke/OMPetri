@@ -17,7 +17,7 @@ import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
-import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
 import java.awt.image.BufferedImage;
@@ -48,7 +48,7 @@ import org.springframework.stereotype.Controller;
 public class PropertiesController implements Initializable
 {
     @Autowired private ModelService modelService;
-    @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private FunctionFactory functionBuilder;
     @Autowired private ParameterService parameterService;
     @Autowired private MessengerService messengerService;
 

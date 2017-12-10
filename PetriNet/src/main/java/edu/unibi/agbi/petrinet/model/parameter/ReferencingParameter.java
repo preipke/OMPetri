@@ -20,6 +20,10 @@ public class ReferencingParameter extends Parameter
         super(Parameter.Type.REFERENCE, id, value, reference);
     }
     
+    public ReferenceType getReferenceType() {
+        return referenceType;
+    }
+    
     public enum ReferenceType {
         TOKEN, SPEED
     }

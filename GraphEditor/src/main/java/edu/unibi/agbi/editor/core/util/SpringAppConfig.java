@@ -5,7 +5,7 @@
  */
 package edu.unibi.agbi.editor.core.util;
 
-import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.IOException;
@@ -21,18 +21,18 @@ import org.springframework.context.annotation.Configuration;
 public class SpringAppConfig {
     
     @Bean
-    public ParameterFactory parameterFactory() {
-        return new ParameterFactory();
-    }
-    
-    @Bean
     public ResourceBundle resourceBundle() {
         return ResourceBundle.getBundle("application");
     }
     
     @Bean
-    public FunctionBuilder functionBuilder() throws IOException {
-        return new FunctionBuilder();
+    public FunctionFactory functionFactory() throws IOException {
+        return new FunctionFactory();
+    }
+    
+    @Bean
+    public ParameterFactory parameterFactory() throws IOException {
+        return new ParameterFactory();
     }
     
     @Bean

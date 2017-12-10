@@ -15,9 +15,9 @@ import java.util.Set;
  */
 public abstract class Parameter
 {
-    private final String id;
     protected final Type type;
     
+    private String id;
     private String value;
     private String unit;
 
@@ -39,63 +39,46 @@ public abstract class Parameter
         this.element = element;
         this.elementsUsing = new HashSet();
     }
+    
+    public void setId(String id) throws Exception {
+        
+        switch (type) {
+            
+            case REFERENCE:
+                this.id = id;
+                break;
+                
+            default:
+                throw new Exception("The ID for non-reference parameters should not be changed!");
+        }
+    }
 
-    /**
-     * Gets the identifier for this parameter.
-     *
-     * @return
-     */
     public String getId() {
         return id;
     }
 
-    /**
-     * Sets the unit for this parameter.
-     *
-     * @param unit
-     */
     public void setUnit(String unit) {
         this.unit = unit;
     }
-
-    /**
-     * Gets the unit for this parameter.
-     *
-     * @return
-     */
+    
     public String getUnit() {
         return unit;
     }
 
-    /**
-     * Sets the value for this parameter.
-     *
-     * @param value
-     */
     public void setValue(String value) {
         this.value = value;
     }
 
-    /**
-     * Gets the value set to this parameter.
-     *
-     * @return
-     */
     public String getValue() {
         return value;
     }
 
-    /**
-     * Gets the indicator for the parameter's type and scope.
-     *
-     * @return
-     */
     public Type getType() {
         return type;
     }
 
     /**
-     * Gets the ID for the element this parameter is related to.
+     * Gets the element this parameter is related to.
      *
      * @return
      */
@@ -104,7 +87,7 @@ public abstract class Parameter
     }
 
     /**
-     * Gets the set of nodes currently using this parameter.
+     * Gets the set of elements currently using this parameter.
      *
      * @return
      */

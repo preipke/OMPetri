@@ -9,8 +9,9 @@ import edu.unibi.agbi.editor.business.exception.SimulationException;
 import edu.unibi.agbi.editor.business.service.SimulationService;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.util.Utility;
-import edu.unibi.agbi.petrinet.util.References;
+import edu.unibi.agbi.petrinet.model.References;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -28,16 +29,18 @@ public final class SimulationCompiler extends Thread
     private final SimulationService simulationService;
     private final ModelDao modelDao;
     private final OpenModelicaExporter omExporter;
+    private final ParameterFactory parameterFactory;
     
     private String simOptionalArcs;
     private Process buildProcess;
     private References simReferences;
     private SimulationException simException;
     
-    public SimulationCompiler(SimulationService simulationService, ModelDao modelDao, OpenModelicaExporter omExporter) {
+    public SimulationCompiler(SimulationService simulationService, ModelDao modelDao, OpenModelicaExporter omExporter, ParameterFactory parameterFactory) {
         this.simulationService = simulationService;
         this.modelDao = modelDao;
         this.omExporter = omExporter;
+        this.parameterFactory = parameterFactory;
     }
 
     public void setCompilerOptionalArgs(String optionalArgs) {
@@ -95,7 +98,7 @@ public final class SimulationCompiler extends Thread
         try {
             fileMo = new File(dirStorage + File.separator + "model.mo");
             fileMos = new File(dirStorage + File.separator + "model.mos");
-            omExporter.exportMO(modelDao.getModelName(), modelDao.getModel(), fileMo);
+            omExporter.exportMO(modelDao.getModelName(), modelDao.getModel(), fileMo, parameterFactory);
             simulationReferences = omExporter.exportMOS(modelDao.getModelName(), modelDao.getModel(), fileMos, fileMo, dirWorking);
         } catch (IOException ex) {
             simException = new SimulationException("Failed to export the data for OpenModelica! [" + ex.getMessage() + "]");

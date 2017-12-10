@@ -6,36 +6,36 @@
 package edu.unibi.agbi.petrinet.model;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * A class used to represent mathematical functions.
- * 
+ *
  * @author preipke
  */
 public class Function
 {
     private final ArrayList<Function> elements;
     private final Type type;
-    
+
     private String value;
     private String unit;
-    
+
     public Function(Type type) {
         this(null, type);
     }
-    
+
     public Function(String value, Type type) {
         this.value = value;
         this.type = type;
         this.elements = new ArrayList();
     }
-    
+
     public void setValue(String value) {
         this.value = value;
     }
-    
+
     public String getValue() {
         return value;
     }
@@ -47,16 +47,22 @@ public class Function
     public String getUnit() {
         return unit;
     }
-    
+
     public void addElement(Function element) {
         elements.add(element);
     }
-    
+
     public void addElement(int index, Function element) {
         elements.add(0, element);
     }
-    
-    public Collection<Function> getElements() {
+
+    /**
+     * Gets all elements associated to this function. Recursively inclused
+     * elements of all subfunctions.
+     *
+     * @return
+     */
+    public List<Function> getElements() {
         ArrayList<Function> elementsRecursive = new ArrayList();
         for (Function elem : elements) {
             if (elem.getType() == Type.FUNCTION) {

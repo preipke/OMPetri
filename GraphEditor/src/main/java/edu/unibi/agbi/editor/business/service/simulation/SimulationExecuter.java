@@ -7,7 +7,7 @@ package edu.unibi.agbi.editor.business.service.simulation;
 
 import edu.unibi.agbi.editor.business.exception.SimulationException;
 import edu.unibi.agbi.editor.business.service.SimulationService;
-import edu.unibi.agbi.petrinet.util.References;
+import edu.unibi.agbi.petrinet.model.References;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

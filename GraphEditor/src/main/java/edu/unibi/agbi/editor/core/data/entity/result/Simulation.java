@@ -8,7 +8,7 @@ package edu.unibi.agbi.editor.core.data.entity.result;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.business.exception.ResultsException;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.util.References;
+import edu.unibi.agbi.petrinet.model.References;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

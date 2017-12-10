@@ -15,7 +15,8 @@ import edu.unibi.agbi.editor.business.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.editor.business.service.simulation.SimulationServer;
 import edu.unibi.agbi.editor.core.util.Utility;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
-import edu.unibi.agbi.petrinet.util.References;
+import edu.unibi.agbi.petrinet.model.References;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -34,9 +35,12 @@ import org.springframework.stereotype.Service;
 public class SimulationService
 {
     @Autowired private OpenModelicaExporter omExporter;
-    @Autowired private ModelService dataService;
+    @Autowired private ParameterFactory parameterFactory;
+    
+    @Autowired private ModelService modelService;
     @Autowired private MessengerService messengerService;
     @Autowired private ResultService resultsService;
+    
     @Autowired private SimulationController simulationController;
     
     @Value("${directory.property}") private String directoryProperty;
@@ -139,7 +143,7 @@ public class SimulationService
         public void run() {
 
             BufferedReader simulationExecuterOutputReader;
-            ModelDao modelDao = dataService.getDao();
+            ModelDao modelDao = modelService.getDao();
             double stopTime = simulationController.getSimulationStopTime();
             Throwable thr = null;
             
@@ -152,7 +156,7 @@ public class SimulationService
                     messengerService.addMessage("Simulation: Initializing...");
                     messengerService.addMessage("Simulation: Building...");
                 });
-                simulationCompiler = new SimulationCompiler(SimulationService.this, modelDao, omExporter);
+                simulationCompiler = new SimulationCompiler(SimulationService.this, modelDao, omExporter, parameterFactory);
                 simulationCompiler.setCompilerOptionalArgs(simulationController.getCompilerArgs());
                 simulationCompiler.start();
                 synchronized (simulationCompiler) {
