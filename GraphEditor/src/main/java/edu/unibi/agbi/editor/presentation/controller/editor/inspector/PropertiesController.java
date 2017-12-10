@@ -14,6 +14,9 @@ import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.editor.core.data.entity.data.DataType;
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -22,18 +25,22 @@ import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.animation.PauseTransition;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Orientation;
 import javafx.scene.Parent;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import javax.swing.SwingUtilities;
@@ -54,6 +61,8 @@ public class PropertiesController implements Initializable
 
     @FXML private VBox parentContainer;
     @FXML private Parent parentColor;
+    @FXML private Parent parentConflictType;
+    @FXML private Parent parentConflictValue;
     @FXML private Parent parentFunction;
     @FXML private Parent parentToken;
 
@@ -66,6 +75,13 @@ public class PropertiesController implements Initializable
     @FXML private TextField inputTokenMin;
     @FXML private TextField inputTokenMax;
     @FXML private SwingNode imageFunction;
+    
+    @FXML private ChoiceBox<Place.ConflictResolutionType> choiceConflictRes;
+    @FXML private TextField inputConflictType;
+    
+    @FXML private HBox boxConflictValue;
+    @FXML private TextField inputConflictValue;
+    @FXML private ChoiceBox<String> choiceConflictValue;
 
     @FXML private Menu menuLocalParams;
     @FXML private Menu menuGlobalParams;
@@ -91,12 +107,15 @@ public class PropertiesController implements Initializable
                 case ARC:
                     parentContainer.getChildren().add(parentColor);
                     parentContainer.getChildren().add(parentFunction);
+                    parentContainer.getChildren().add(new Separator(Orientation.HORIZONTAL));
+                    parentContainer.getChildren().add(parentConflictValue);
                     setArc((DataArc) element);
                     break;
 
                 case PLACE:
                     parentContainer.getChildren().add(parentColor);
                     parentContainer.getChildren().add(parentToken);
+                    parentContainer.getChildren().add(parentConflictType);
                     setPlace((DataPlace) element);
                     break;
 
@@ -117,6 +136,43 @@ public class PropertiesController implements Initializable
             }
         }
         
+        DataPlace placeRelated; // related place to arc
+        List<IArc> neighboringArcs; // list of incoming or outgoing arcs that contains this arc
+
+        if (arc.getSource().getType() == DataType.PLACE) {
+            placeRelated = (DataPlace) arc.getSource();
+            neighboringArcs = placeRelated.getArcsOut();
+        } else {
+            placeRelated = (DataPlace) arc.getTarget();
+            neighboringArcs = placeRelated.getArcsIn();
+        }
+        
+        inputConflictType.setText(placeRelated.getConflictResolutionType().toString());
+        
+        boxConflictValue.getChildren().clear();
+        switch (placeRelated.getConflictResolutionType()) {
+
+            case PRIORITY:
+                boxConflictValue.getChildren().add(choiceConflictValue);
+                choiceConflictValue.getItems().clear();
+
+                int targetIndex = 0;
+                for (int i = 0; i < neighboringArcs.size(); i++) {
+                    if (neighboringArcs.get(i).equals(arc)) {
+                        targetIndex = i;
+                    }
+                    choiceConflictValue.getItems().add(Integer.toString(i + 1));
+                }
+                choiceConflictValue.getSelectionModel().select(targetIndex);
+
+                break;
+
+            case PROBABILITY:
+                boxConflictValue.getChildren().add(inputConflictValue);
+                inputConflictValue.setText(Double.toString(arc.getConflictResolutionValue()));
+                break;
+        }
+        
         inputCaretPosition = inputFunction.getText().length();
 
         setFunctionReferenceChoices(inputFilter.getText().toLowerCase());
@@ -132,6 +188,7 @@ public class PropertiesController implements Initializable
                 inputToken.setText(Double.toString(token.getValueStart()));
                 inputTokenMin.setText(Double.toString(token.getValueMin()));
                 inputTokenMax.setText(Double.toString(token.getValueMax()));
+                choiceConflictRes.getSelectionModel().select(place.getConflictResolutionType());
                 break;
             }
         }
@@ -151,6 +208,19 @@ public class PropertiesController implements Initializable
             IDataNode node = (IDataNode) data;
             if (node.isConstant() != checkConstant.isSelected()) {
                 node.setConstant(checkConstant.isSelected());
+            }
+        }
+    }
+    
+    private void ParseConflictResolutionValue() {
+        if (data instanceof DataArc) {
+            DataArc arc = (DataArc) data;
+            try {
+                if (ValidateNumberInput(inputConflictValue)) {
+                    arc.setConflictResolutionValue(Double.parseDouble(inputConflictValue.getText().replace(",", ".")));
+                }
+            } catch (NumberFormatException ex) {
+                messengerService.addException("Exception parsing conflict resolution value!", ex);
             }
         }
     }
@@ -410,6 +480,28 @@ public class PropertiesController implements Initializable
             menuGlobalParams.setDisable(false);
         }
     }
+    
+    private void StoreConflictResolutionType(IDataElement element) throws DataException {
+        if (element instanceof DataPlace) {
+            DataPlace place = (DataPlace) element;
+
+            Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
+            if (conflictResType != null) {
+                modelService.ChangeConflictResolutionType(modelService.getDao(), place, conflictResType);
+            }
+        }
+    }
+    
+    private void StoreConflictResolutionValue(IDataElement element) throws DataException {
+        if (element instanceof DataArc) {
+            DataArc arc = (DataArc) element;
+
+            int priority = choiceConflictValue.getSelectionModel().getSelectedIndex();
+            if (priority > -1) {
+                modelService.ChangeConflictResolutionPriority(modelService.getDao(), arc, priority);
+            }
+        }
+    }
 
     private boolean ValidateNumberInput(TextField input) {
         String value = input.getText().replace(",", ".");
@@ -456,5 +548,28 @@ public class PropertiesController implements Initializable
         inputTokenMin.textProperty().addListener(cl -> ParsePlaceToken(data));
         inputTokenMax.textProperty().addListener(cl -> ParsePlaceToken(data));
 //        inputWeight.textProperty().addListener(cl -> ParseArcWeight(data));
+
+        choiceConflictRes.getItems().clear();
+        for (Place.ConflictResolutionType type : Place.ConflictResolutionType.values()) {
+            choiceConflictRes.getItems().add(type);
+        }
+        choiceConflictRes.valueProperty().addListener(cl -> {
+            if (data != null) {
+                try {
+                    StoreConflictResolutionType(data);
+                } catch (DataException ex) {
+                    messengerService.addException("Cannot change conflict resolution type!", ex);
+                }
+            }
+        });
+        choiceConflictValue.valueProperty().addListener(cl -> {
+            if (data != null) {
+                try {
+                    StoreConflictResolutionValue(data);
+                } catch (DataException ex) {
+                    messengerService.addException("Cannot change conflict resolution value!", ex);
+                }
+            }
+        });
     }
 }

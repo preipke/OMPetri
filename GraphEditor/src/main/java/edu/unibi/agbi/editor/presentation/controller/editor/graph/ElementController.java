@@ -20,6 +20,8 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -28,6 +30,7 @@ import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
 import java.net.URL;
 import java.util.Collection;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -44,6 +47,7 @@ import javafx.scene.control.SplitMenuButton;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -72,8 +76,10 @@ public class ElementController implements Initializable
     // Properties Container
     @FXML private Parent parentSubtype;
     @FXML private Parent parentColor;
-    @FXML private Parent parentToken;
+    @FXML private Parent parentConflictType;
+    @FXML private Parent parentConflictValue;
     @FXML private Parent parentFunction;
+    @FXML private Parent parentToken;
 
     // Identifier
     @FXML private TextField inputType;
@@ -102,6 +108,13 @@ public class ElementController implements Initializable
     @FXML private TextField inputToken;
     @FXML private TextField inputTokenMin;
     @FXML private TextField inputTokenMax;
+    
+    @FXML private ChoiceBox<Place.ConflictResolutionType> choiceConflictRes;
+    @FXML private TextField inputConflictType;
+    
+    @FXML private HBox boxConflictValue;
+    @FXML private TextField inputConflictValue;
+    @FXML private ChoiceBox<String> choiceConflictValue;
 
     private IGraphElement element;
     private IDataElement data;
@@ -154,6 +167,7 @@ public class ElementController implements Initializable
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(parentColor);
                 propertiesBox.getChildren().add(parentFunction);
+                propertiesBox.getChildren().add(parentConflictValue);
                 break;
 
             case CLUSTER:
@@ -177,6 +191,7 @@ public class ElementController implements Initializable
                 elementFrame.getChildren().add(propertiesPane);
                 propertiesBox.getChildren().add(parentColor);
                 propertiesBox.getChildren().add(parentToken);
+                propertiesBox.getChildren().add(parentConflictType);
                 break;
 
             case TRANSITION:
@@ -283,6 +298,17 @@ public class ElementController implements Initializable
 
             case ARC:
                 DataArc arc = (DataArc) element;
+                DataPlace placeRelated; // related place to arc
+                List<IArc> neighboringArcs; // list of incoming or outgoing arcs that contains this arc
+                
+                if (arc.getSource().getType() == DataType.PLACE) {
+                    placeRelated = (DataPlace) arc.getSource();
+                    neighboringArcs = placeRelated.getArcsOut();
+                } else {
+                    placeRelated = (DataPlace) arc.getTarget();
+                    neighboringArcs = placeRelated.getArcsIn();
+                }
+                
                 Weight weight;
                 for (Colour color : colors) {
                     if (arc.getWeight(color) != null) {
@@ -291,7 +317,32 @@ public class ElementController implements Initializable
                 }
                 weight = arc.getWeight(choicesColour.get(0));
                 choiceColour.getSelectionModel().select(0); // must be done here for listener
+                
                 inputFunction.setText(weight.getFunction().toString());
+                inputConflictType.setText(placeRelated.getConflictResolutionType().toString());
+                
+                boxConflictValue.getChildren().clear();
+                switch (placeRelated.getConflictResolutionType()) {
+                    
+                    case PRIORITY:
+                        boxConflictValue.getChildren().add(choiceConflictValue);
+                        choiceConflictValue.getItems().clear();
+                        
+                        int targetIndex = 0;
+                        for (int i = 0; i < neighboringArcs.size(); i++) {
+                            if (neighboringArcs.get(i).equals(arc)) {
+                                targetIndex = i;
+                            }
+                            choiceConflictValue.getItems().add(Integer.toString(i + 1));
+                        }
+                        choiceConflictValue.getSelectionModel().select(targetIndex);
+                        break;
+                        
+                    case PROBABILITY:
+                        boxConflictValue.getChildren().add(inputConflictValue);
+                        inputConflictValue.setText(Double.toString(arc.getConflictResolutionValue()));
+                        break;
+                }
                 break;
 
             case CLUSTER:
@@ -322,6 +373,7 @@ public class ElementController implements Initializable
                 inputToken.setText(Double.toString(token.getValueStart()));
                 inputTokenMin.setText(Double.toString(token.getValueMin()));
                 inputTokenMax.setText(Double.toString(token.getValueMax()));
+                choiceConflictRes.getSelectionModel().select(place.getConflictResolutionType());
                 break;
 
             case TRANSITION:
@@ -336,6 +388,28 @@ public class ElementController implements Initializable
         Object subtype = choiceSubtype.getSelectionModel().getSelectedItem();
         if (subtype != null) {
             modelService.changeSubtype(element, subtype);
+        }
+    }
+    
+    private void StoreConflictResolutionType(IDataElement element) throws DataException {
+        if (element instanceof DataPlace) {
+            DataPlace place = (DataPlace) element;
+
+            Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
+            if (conflictResType != null) {
+                modelService.ChangeConflictResolutionType(modelService.getDao(), place, conflictResType);
+            }
+        }
+    }
+    
+    private void StoreConflictResolutionValue(IDataElement element) throws DataException {
+        if (element instanceof DataArc) {
+            DataArc arc = (DataArc) element;
+
+            int priority = choiceConflictValue.getSelectionModel().getSelectedIndex();
+            if (priority > -1) {
+                modelService.ChangeConflictResolutionPriority(modelService.getDao(), arc, priority);
+            }
         }
     }
     
@@ -374,6 +448,19 @@ public class ElementController implements Initializable
                 }
             } catch (NumberFormatException ex) {
                 messengerService.addException("Exception parsing token values!", ex);
+            }
+        }
+    }
+    
+    private void ParseConflictResolutionValue() {
+        if (data instanceof DataArc) {
+            DataArc arc = (DataArc) data;
+            try {
+                if (isNumberInputValid(inputConflictValue)) {
+                    arc.setConflictResolutionValue(Double.parseDouble(inputConflictValue.getText().replace(",", ".")));
+                }
+            } catch (NumberFormatException ex) {
+                messengerService.addException("Exception parsing conflict resolution value!", ex);
             }
         }
     }
@@ -516,6 +603,33 @@ public class ElementController implements Initializable
                 }
             }
         });
+        
+        choiceConflictRes.getItems().clear();
+        for (Place.ConflictResolutionType type : Place.ConflictResolutionType.values()) {
+            choiceConflictRes.getItems().add(type);
+        }
+        choiceConflictRes.valueProperty().addListener(cl -> {
+            if (data != null) {
+                try {
+                    StoreConflictResolutionType(data);
+                    choiceConflictRes.setStyle("-fx-border-color: green");
+                } catch (DataException ex) {
+                    choiceConflictRes.setStyle("-fx-border-color: red");
+                    messengerService.addException("Cannot change conflict resolution type!", ex);
+                }
+            }
+        });
+        choiceConflictValue.valueProperty().addListener(cl -> {
+            if (data != null) {
+                try {
+                    StoreConflictResolutionValue(data);
+                    choiceConflictValue.setStyle("-fx-border-color: green");
+                } catch (DataException ex) {
+                    choiceConflictValue.setStyle("-fx-border-color: red");
+                    messengerService.addException("Cannot change conflict resolution value!", ex);
+                }
+            }
+        });
 
         inputName.textProperty().addListener(cl -> {
             try {
@@ -535,6 +649,7 @@ public class ElementController implements Initializable
         inputTokenMin.textProperty().addListener(cl -> ParsePlaceToken());
         inputTokenMax.textProperty().addListener(cl -> ParsePlaceToken());
         inputFunction.textProperty().addListener(e -> ParseAndSetFunction());
+        inputConflictValue.textProperty().addListener(cl -> ParseConflictResolutionValue());
         
         listClusteredElements.setCellFactory(l -> new ClusterCellFormatter());
         listClusteredElements.getSelectionModel().selectedItemProperty().addListener(cl -> {

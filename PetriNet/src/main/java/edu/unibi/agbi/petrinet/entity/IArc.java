@@ -23,6 +23,10 @@ public interface IArc extends IElement
     public INode getSource();
 
     public INode getTarget();
+    
+    public double getConflictResolutionValue();
+    
+    public void setConflictResolutionValue(double conflictResValue);
 
     public void addWeight(Weight weight);
 

@@ -25,6 +25,7 @@ import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import edu.unibi.agbi.petrinet.entity.impl.Place.ConflictResolutionType;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
@@ -119,6 +120,29 @@ public class ModelService
         dao.getGraph().add(node);
         factoryService.StyleElement(node);
         return node;
+    }
+    
+    public synchronized void ChangeConflictResolutionType(ModelDao dao, DataPlace place, ConflictResolutionType resolutionType) throws DataException {
+        /**
+         * Validate...
+         */
+        place.setConflictResolutionType(resolutionType);
+        dao.setHasChanges(true);
+    }
+    
+    public synchronized  void ChangeConflictResolutionPriority(ModelDao dao, DataArc arc, int priority) throws DataException {
+        List<IArc> arcsList;
+        if (arc.getTarget().getType() == DataType.PLACE) {
+            arcsList = arc.getTarget().getArcsIn();
+        } else {
+            arcsList = arc.getSource().getArcsOut();
+        }
+        if (arcsList.remove(arc)) {
+            arcsList.add(priority, arc);
+        } else {
+            throw new DataException("Arc not stored in the related place!");
+        }
+        dao.setHasChanges(true);
     }
 
     /**

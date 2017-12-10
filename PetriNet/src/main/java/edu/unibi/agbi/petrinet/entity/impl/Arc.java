@@ -26,10 +26,13 @@ public class Arc extends Element implements IArc
     protected INode source;
 
     private final Map<Colour, Weight> weights;
+//    private final Map<Colour, Double> conflicts; // conflict resolution based on colours
+    private double conflictResValue = 1.0d;
 
     public Arc(String id, INode source, INode target, Type arcType) {
         super(id, Element.Type.ARC);
         this.weights = new HashMap();
+//        this.conflicts = new HashMap();
         this.source = source;
         this.target = target;
         this.arcType = arcType;
@@ -68,6 +71,16 @@ public class Arc extends Element implements IArc
     @Override
     public Type getArcType() {
         return arcType;
+    }
+
+    @Override
+    public double getConflictResolutionValue() {
+        return conflictResValue;
+    }
+
+    @Override
+    public void setConflictResolutionValue(double conflictResValue) {
+        this.conflictResValue = conflictResValue;
     }
 
     public enum Type
