@@ -31,6 +31,7 @@ import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class ModelSbmlConverter
     @Autowired private HierarchyService hierarchyService;
     @Autowired private ParameterService parameterService;
     @Autowired private FunctionBuilder functionBuilder;
+    @Autowired private ParameterFactory parameterFactory;
     @Autowired private Calculator calculator;
 
     private final String tagConnection = "reaction";
@@ -214,8 +216,8 @@ public class ModelSbmlConverter
             }
             try {
                 String functionString = transition.getFunction().toString();
-                parameterService.ValidateFunction(dao.getModel(), transition, functionString);
-                parameterService.setFunction(dao.getModel(), transition, functionString, null);
+                Function function = parameterService.validateAndGetFunction(dao.getModel(), transition, functionString);
+                parameterService.setFunction(dao.getModel(), transition, function, null);
             } catch (ParameterException ex) {
                 throw new IOException(ex);
             }
@@ -336,14 +338,14 @@ public class ModelSbmlConverter
                             }
                         }
                     }
-                    param = new Parameter(id, value, unit, Parameter.Type.LOCAL, transition);
+                    param = parameterFactory.createLocalParameter(id, value, unit, transition);
 
                     /**
                      * If param id is same as an existing node, store param
                      * locally.
                      */
 //                    if (transition.getLocalParameter(id) == null) {
-//                        transition.getLocalParameters().put(id, param);
+//                        transition.getSortedLocalParameters().put(id, param);
 //                    } else {
 //                        throw new IOException("Parameter '" + param.getId() + "' already exists for element '" + transition.getId() + "'.");
 //                    }
@@ -384,7 +386,7 @@ public class ModelSbmlConverter
      * @return node elements that refer another node
      * @throws IOException
      */
-    private Element addNode(final Element elem, ModelDao dao, boolean addRefering, Map<String, String> idReferenceMap) throws IOException {
+    private Element addNode(final Element elem, ModelDao dao, boolean addRefering, Map<String, String> idReferenceMap) throws Exception {
 
         NodeList nl;
         Element tmp;
@@ -569,7 +571,7 @@ public class ModelSbmlConverter
         return place;
     }
 
-    private DataTransition getTransition(final Element elem, ModelDao dao, String id, Transition.Type type) throws IOException {
+    private DataTransition getTransition(final Element elem, ModelDao dao, String id, Transition.Type type) throws Exception {
 
         NodeList nl;
         Element tmp;
@@ -582,14 +584,14 @@ public class ModelSbmlConverter
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 tmp = (Element) nl.item(0);
                 functionString = tmp.getAttribute(attrFunction);
-                transition.setFunction(functionBuilder.build(dao.getModel(), functionString, false));
+                transition.setFunction(functionBuilder.build(functionString));
             }
         }
 
         return transition;
     }
 
-    private void addConnection(final Element elem, ModelDao dao) throws IOException {
+    private void addConnection(final Element elem, ModelDao dao) throws Exception {
 
         NodeList nl;
         Element tmp;
@@ -719,10 +721,10 @@ public class ModelSbmlConverter
         return token;
     }
 
-    private Weight getWeight(ModelDao dao, Element elem) throws IOException {
+    private Weight getWeight(ModelDao dao, Element elem) throws Exception {
         Weight weight = new Weight(factoryService.getColourDefault());
 //        Weight weight = new Weight(dao.getModel().getColour(elem.getAttribute(attrColourId)));
-        weight.setFunction(functionBuilder.build(dao.getModel(), elem.getAttribute(attrWeight), false));
+        weight.setFunction(functionBuilder.build(elem.getAttribute(attrWeight)));
 //        weight.setValue(elem.getAttribute(attrWeight));
         return weight;
     }

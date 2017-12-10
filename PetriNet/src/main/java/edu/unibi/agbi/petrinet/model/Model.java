@@ -46,7 +46,7 @@ public class Model
 
     public void add(Parameter param) {
         parameters.put(param.getId(), param);
-        param.getRelatedElement().getRelatedParameters().add(param);
+//        param.getRelatedElement().getRelatedParameters().add(param);
     }
 
     public void add(IElement element) throws Exception {
@@ -106,16 +106,25 @@ public class Model
      * @param id
      * @return
      */
-    public boolean contains(String id) {
+    public boolean containsElement(String id) {
         if (arcs.containsKey(id)) {
             return true;
         } else if (places.containsKey(id)) {
             return true;
-        } else if (transitions.containsKey(id)) {
-            return true;
         } else {
-            return parameters.containsKey(id);
+            return transitions.containsKey(id);
         }
+    }
+
+    /**
+     * Validates if an ID is used within a model. Checks arc, place, transition
+     * and parameter IDs.
+     *
+     * @param id
+     * @return
+     */
+    public boolean containsParameter(String id) {
+        return parameters.containsKey(id);
     }
 
     /**
@@ -209,13 +218,15 @@ public class Model
     private IArc remove(Arc arc) throws Exception {
         for (Parameter param : arc.getRelatedParameters()) {
             if (param.getUsingElements().size() > 0) {
-                throw new Exception("A related parameter is still being used by another element and cannot be deleted! "
-                        + "(" + arc.getId() + " -> " + param.getId() + ")");
+                if (!param.getUsingElements().iterator().next().equals(arc)) {
+                    throw new Exception("A related parameter is still being used by another element and cannot be deleted! "
+                            + "(" + arc.getId() + " -> " + param.getId() + ")");
+                }
             }
         }
-        for (Parameter param : arc.getRelatedParameters()) {
-            parameters.remove(param.getId());
-        }
+//        for (Parameter param : arc.getRelatedParameters()) {
+//            parameters.remove(param.getId());
+//        }
         arc.getSource().getArcsOut().remove(arc);
         arc.getTarget().getArcsIn().remove(arc);
         return arcs.remove(arc.getId());
@@ -230,9 +241,9 @@ public class Model
                 }
             }
         }
-        for (Parameter param : node.getRelatedParameters()) {
-            parameters.remove(param.getId());
-        }
+//        for (Parameter param : node.getRelatedParameters()) {
+//            parameters.remove(param.getId());
+//        }
         while (!node.getArcsIn().isEmpty()) {
             remove(node.getArcsIn().remove(0));
         }

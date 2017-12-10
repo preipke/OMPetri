@@ -13,6 +13,7 @@ import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -38,12 +39,9 @@ public class ParameterService
 {
     @Autowired private FactoryService factoryService;
     @Autowired private ModelService modelService;
-    
+
     @Autowired private ParameterFactory parameterFactory;
     @Autowired private FunctionBuilder functionBuilder;
-
-    @Value("${regex.param.ident.flow.actual}") private String regexParamPlaceFlowNow;
-    @Value("${regex.param.ident.flow.total}") private String regexParamPlaceFlowTotal;
 
     /**
      * Attempts to add a parameter.
@@ -63,42 +61,95 @@ public class ParameterService
      * @throws ParameterException
      */
     public void add(Model model, Parameter param) throws ParameterException {
-        
-        if (Parameter.Type.GLOBAL == param.getType()) {
-            
-            if (model.contains(param.getId())) {
-                throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
-            }
-            model.add(param);
-            
-        } else {
-            
-            if (Parameter.Type.LOCAL == param.getType()) {
+
+        switch (param.getType()) {
+
+            case GLOBAL:
+
+                if (model.containsParameter(param.getId())) {
+                    throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
+                }
+                model.add(param);
+                break;
+
+            case LOCAL:
 
                 if (param.getRelatedElement().getLocalParameter(param.getId()) != null) {
                     throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
                 }
                 param.getRelatedElement().addLocalParameter(param);
-                    
-            } else {
-                
-                if (model.contains(param.getId())) {
-                    throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
-                }
-                model.add(param);
-            }
+                break;
+
+            case REFERENCE: // reference parameters are never being added manually
+
+                Parameter tmp;
+                tmp = findReferencingParameter(model, param.getId());
+
+//                if (tmp != null) {
+//                    
+//                    tmp.getUsingElements()
+//                            .addAll(param.getUsingElements());
+//                    
+//                } else {
+//                    
+//                    
+//                    
+//                }
+//                
+//                if (model.contains(param.getId())) {
+//                    throw new ParameterException("Conflict! Another parameter has already been stored using the same ID!");
+//                }
+//                model.add(param);
+                break;
+
+            default:
+                throw new ParameterException("Unhandled parameter type detected!");
+
         }
+
     }
 
-    /**
-     * Validates if a given ID is free to be used.
-     *
-     * @param id
-     * @return
-     */
-    public boolean isIdAvailable(String id) {
-        return !modelService.getDao().getModel().contains(id);
+    public void validateRelatedParameterNameChange(IElement element, String newId) throws ParameterException {
+
+        if (element.getLocalParameter(newId) != null) {
+            throw new ParameterException("The element name is already assigned to a local parameter inside that element!");
+        }
+
+        for (Parameter param : element.getRelatedParameters()) {
+
+//            if (param.) {
+//
+//            }
+        }
+
     }
+
+    public void updateParameter(Parameter param, String value, String unit) throws ParameterException {
+        switch (param.getType()) {
+
+            case GLOBAL:
+                break;
+
+            case LOCAL:
+                break;
+
+            default:
+                throw new ParameterException("Cannot update parameters other than local or global!");
+
+        }
+        param.setValue(value);
+        param.setUnit(unit);
+    }
+
+//    /**
+//     * Validates if a given ID is free to be used.
+//     *
+//     * @param id
+//     * @return
+//     */
+//    public boolean isIdAvailable(String id) {
+//        return !modelService.getDao().getModel().contains(id);
+//    }
 
     /**
      * Sets the function of an element. Replaces the existing function. Ensures
@@ -106,37 +157,275 @@ public class ParameterService
      *
      * @param model
      * @param element
-     * @param functionString
+     * @param function
      * @param colour         null for transitions, a corresponding colour for
      *                       arcs
      * @throws ParameterException
      */
-    public void setFunction(Model model, IElement element, String functionString, Colour colour) throws Exception {
-        clearTransitionFunctionParameterReferences(model, element);
+    public void setFunction(Model model, IElement element, Function function, Colour colour) throws Exception {
+        clearFunctionParameterReferences(model, element);
         try {
             switch (element.getElementType()) {
                 case ARC:
                     ((Arc) element)
                             .getWeight(colour)
-                            .setFunction(
-                                    functionBuilder.build(
-                                            functionString, false));
+                            .setFunction(function);
                     break;
 
                 case TRANSITION:
                     ((Transition) element)
-                            .setFunction(
-                                    functionBuilder.build(
-                                            functionString, false));
+                            .setFunction(function);
                     break;
 
                 default:
-                    throw new ParameterException("The given element cannot be set any Function!");
-
+                    throw new ParameterException("The given element is not using functions!");
             }
         } finally {
-            setTransitionFunctionParameterReferences(model, element);
+            setFunctionParameterReferences(model, element);
         }
+    }
+
+    public Parameter findParameter(String id, IElement element) {
+        return findParameter(modelService.getModel(), id, element);
+    }
+
+    public Parameter findParameter(Model model, String id, IElement element) {
+
+        Parameter param;
+        param = null;
+
+        // highest priority - LOCAL param
+        if (element != null) {
+            param = element.getLocalParameter(id);
+        }
+
+        // GLOBAL param
+        if (param == null) {
+            param = model.getParameter(id);
+        }
+
+        // REFERENCE param
+        if (param == null) {
+            param = findReferencingParameter(model, id);
+        }
+
+        return param;
+    }
+
+    private Parameter findReferencingParameter(Model model, String id) {
+
+        Parameter param;
+        param = null;
+        
+        IElement element;
+        element = model.getElement(id);
+
+        if (element != null) {
+            
+            for (Parameter par : element.getRelatedParameters()) {
+
+                // TODO use regex pattern to detect variations of referencing parameters for the same element
+                if (par.getId().contentEquals(id)) {
+                    param = par;
+                }
+            }
+            
+            if (param == null) {
+                
+                try {
+
+                    // TODO use regex pattern to detect variations of referencing parameters for the same element
+                    switch (element.getElementType()) {
+
+                        case PLACE:
+                            param = parameterFactory.createReferencingParameter(id, element, ReferencingParameter.ReferenceType.TOKEN);
+                            break;
+
+                        case TRANSITION:
+                            param = parameterFactory.createReferencingParameter(id, element, ReferencingParameter.ReferenceType.SPEED);
+                            break;
+                    }
+                    
+                    if (param != null) {
+                        param.getRelatedElement().getRelatedParameters().add(param);
+                    }
+
+                } catch (Exception ex) {
+                    
+                    
+                }
+            }
+        }
+
+        return param;
+    }
+
+    /**
+     * Removes references for all parameters used in a function.
+     *
+     * @param model
+     * @param element
+     * @throws ParameterException
+     */
+    private void clearFunctionParameterReferences(Model model, IElement element) throws ParameterException {
+
+        for (String id : getIdsForUsedParameters(element)) {
+
+            Parameter param;
+            param = findParameter(model, id, element);
+
+            if (param == null) {
+                throw new ParameterException("Unavailable parameter '" + id + "' used by '" + element.toString() + "'.");
+            }
+
+            param.getUsingElements()
+                    .remove(element);
+        }
+    }
+
+    /**
+     * Adds references to a transition for all parameters used in its function.
+     *
+     * @param element
+     */
+    private void setFunctionParameterReferences(Model model, IElement element) throws ParameterException {
+        
+        for (String id : getIdsForUsedParameters(element)) {
+
+            Parameter param;
+            param = findParameter(model, id, element);
+            
+            if (param == null) {
+                throw new ParameterException("Unavailable parameter '" + id + "' refered to by '" + element.toString() + "'.");
+            }
+            
+            param.getUsingElements()
+                    .add(element);
+        }
+    }
+
+    /**
+     * Gets the parameter with the given id from the current dao.
+     *
+     * @param id
+     * @return
+     */
+    public Parameter getParameter(String id) {
+        return modelService.getModel().getParameter(id);
+    }
+
+    /**
+     * Gets the set of IDs representing all parameters from the current dao.
+     *
+     * @return
+     */
+    public Set<String> getParameterIds() {
+        return modelService.getModel().getParameterIds();
+    }
+
+    /**
+     * Gets all global parameters for a given model. List is sorted by parameter
+     * ids (natural string order).
+     *
+     * @param model
+     * @return
+     */
+    public Collection<Parameter> getSortedGlobalParameters(Model model) {
+        List<Parameter> params;
+        params = new ArrayList();
+        params.addAll(model.getParameters());
+        params.sort(Comparator.comparing(Parameter::getId));
+        return params;
+    }
+
+    /**
+     * Gets all parameters usable for an element. List is sorted by parameter
+     * ids (natural string order).
+     *
+     * @param elem
+     * @return
+     */
+    public List<Parameter> getSortedLocalParameters(IDataElement elem) {
+        List<Parameter> parameters = new ArrayList();
+        if (elem instanceof DataTransition) {
+            parameters.addAll(((DataTransition) elem).getLocalParameters());
+        }
+        parameters.sort(Comparator.comparing(Parameter::getId));
+        return parameters;
+    }
+
+    /**
+     * Gets a collection of all parameters for the currently active model.
+     * Also applies the given filter.
+     *
+     * @param element
+     * @param filter
+     * @return
+     */
+    public List<Parameter> getFilteredAndSortedParameterList(IDataElement element, String filter) {
+
+        List<Parameter> all = new ArrayList();
+        List<Parameter> locals = new ArrayList();
+        List<Parameter> others = new ArrayList();
+
+        modelService.getModel().getArcs().forEach(arc -> {
+            if (arc.equals(element)) {
+                locals.addAll(arc.getLocalParameters());
+            } else {
+                others.addAll(arc.getLocalParameters());
+            }
+        });
+
+        modelService.getModel().getTransitions().forEach(transition -> {
+            if (transition.equals(element)) {
+                locals.addAll(transition.getLocalParameters());
+            } else {
+                others.addAll(transition.getLocalParameters());
+            }
+        });
+
+        locals.stream()
+                .filter(param -> filter(param, filter))
+                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
+                .forEach(param -> all.add(param));
+        modelService.getModel().getParameters().stream()
+                .filter(param -> param.getType() == Parameter.Type.GLOBAL && filter(param, filter))
+                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
+                .forEach(param -> all.add(param));
+        others.stream()
+                .filter(param -> filter(param, filter))
+                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
+                .forEach(param -> all.add(param));
+
+        return all;
+    }
+    
+    /**
+     * Gets a list of all elements that can store and use local parameters.
+     * Applies the given filter.
+     * 
+     * @param filter
+     * @return 
+     */
+    public List<IDataElement> getFilteredChoicesForLocalParameters(String filter) {
+        
+        List<IDataElement> list = new ArrayList();
+        
+        modelService.getModel().getTransitions().stream()
+                .filter(elen -> 
+                        elen.getId().toLowerCase().contains(filter) || 
+                                ((IDataElement) elen).getLabelText().toLowerCase().contains(filter))
+                .sorted((e1, e2) -> e1.toString().compareTo(e2.toString()))
+                .forEach(elem -> list.add((IDataElement) elem));
+        
+        modelService.getModel().getArcs().stream()
+                .filter(elem -> 
+                        elem.getId().toLowerCase().contains(filter) || 
+                                ((IDataElement) elem).getLabelText().toLowerCase().contains(filter))
+                .sorted((e1, e2) -> e1.toString().compareTo(e2.toString()))
+                .forEach(elem -> list.add((IDataElement) elem));
+        
+        return list;
     }
 
     /**
@@ -146,7 +435,7 @@ public class ParameterService
      * @return
      * @throws ParameterException
      */
-    private Collection<String> getParameterIds(IElement element) throws ParameterException {
+    private Collection<String> getIdsForUsedParameters(IElement element) throws ParameterException {
 
         HashSet<String> parameterIds;
 
@@ -170,181 +459,6 @@ public class ParameterService
     }
 
     /**
-     * Adds references to a transition for all parameters used in its function.
-     *
-     * @param element
-     */
-    private void setTransitionFunctionParameterReferences(Model model, IElement element) throws ParameterException {
-        for (String id : getParameterIds(element)) {
-            Parameter param = element.getLocalParameter(id);
-            if (param == null) {
-                param = model.getParameter(id);
-            }
-            if (param != null) {
-                param.getUsingElements()
-                        .add(element);
-            } else {
-                throw new ParameterException("Unavailable parameter '" + id + "' refered to by '" + element.toString() + "'.");
-            }
-        }
-    }
-
-    /**
-     * Removes references to a transition for all parameters used in its
-     * function.
-     *
-     * @param element
-     */
-    private void clearTransitionFunctionParameterReferences(Model model, IElement element) throws ParameterException {
-        for (String id : getParameterIds(element)) {
-            Parameter param = element.getLocalParameter(id);
-            if (param == null) {
-                param = model.getParameter(id);
-            }
-            if (param != null) {
-                param.getUsingElements()
-                        .remove(element);
-            } else {
-                throw new ParameterException("Unavailable parameter '" + id + "' refered to by '" + element.toString() + "'.");
-            }
-        }
-    }
-
-    /**
-     * Removes any unused parameters that are references to an element.
-     */
-    private void removeUnusedReferencingParameters(Model model) {
-        List<Parameter> paramsUnused = new ArrayList();
-        model.getParameters().forEach(param -> {
-            if (param.getType() == Parameter.Type.REFERENCE) {
-                if (param.getUsingElements().isEmpty()) {
-                    param.getRelatedElement().getRelatedParameters().remove(param);
-                    paramsUnused.add(param);
-                }
-            }
-        });
-        paramsUnused.forEach(param -> modelService.getModel().remove(param));
-    }
-
-    /**
-     * Gets all global parameters. List is sorted by parameter ids (natural
-     * string order).
-     *
-     * @return
-     */
-    public List<Parameter> getGlobalParameters() {
-        List<Parameter> parameters = new ArrayList();
-        for (Parameter param : getParameters()) {
-            if (param.getType() == Parameter.Type.GLOBAL) {
-                parameters.add(param);
-            }
-        }
-        parameters.sort(Comparator.comparing(Parameter::getId));
-        return parameters;
-    }
-
-    /**
-     * Gets all parameters usable for an element. List is sorted by parameter
-     * ids (natural string order).
-     *
-     * @param elem
-     * @return
-     */
-    public List<Parameter> getLocalParameters(IDataElement elem) {
-        List<Parameter> parameters = new ArrayList();
-        if (elem instanceof DataTransition) {
-            parameters.addAll(((DataTransition) elem).getLocalParameters());
-        }
-        parameters.sort(Comparator.comparing(Parameter::getId));
-        return parameters;
-    }
-
-    /**
-     * Gets the parameter with the given id from the current dao.
-     *
-     * @param id
-     * @return
-     */
-    public Parameter getParameter(String id) {
-        return modelService.getModel().getParameter(id);
-    }
-
-    /**
-     * Gets the set of IDs representing all parameters from the current dao.
-     *
-     * @return
-     */
-    public Set<String> getParameterIds() {
-        return modelService.getModel().getParameterIds();
-    }
-
-    /**
-     * Gets a collection of all parameters for the current dao.
-     *
-     * @return
-     */
-    public Collection<Parameter> getParameters() {
-        return modelService.getModel().getParameters();
-    }
-
-    /**
-     * Gets a collection of all parameters for the current dao.
-     *
-     * @param element
-     * @param filter
-     * @return
-     */
-    public List<Parameter> getFilteredAndSortedParameterList(IDataElement element, String filter) {
-
-        List<Parameter> all = new ArrayList();
-        List<Parameter> locals = new ArrayList();
-        List<Parameter> others = new ArrayList();
-
-        modelService.getModel().getTransitions().forEach(transition -> {
-            if (transition.equals(element)) {
-                locals.addAll(transition.getLocalParameters());
-            } else {
-                others.addAll(transition.getLocalParameters());
-            }
-        });
-
-        locals.stream()
-                .filter(param -> filter(param, filter))
-                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
-                .forEach(param -> all.add(param));
-        modelService.getModel().getParameters().stream()
-                .filter(param -> param.getType() == Parameter.Type.GLOBAL
-                && filter(param, filter))
-                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
-                .forEach(param -> all.add(param));
-        others.stream()
-                .filter(param -> filter(param, filter))
-                .sorted((p1, p2) -> p1.getId().compareTo(p2.getId()))
-                .forEach(param -> all.add(param));
-
-        return all;
-    }
-
-    private boolean filter(Parameter param, String filter) {
-        return param.getId().contains(filter)
-                || param.getRelatedElement().getId().contains(filter)
-                //                || param.getRelatedElement().getName().contains(filter)
-                || ((IDataElement) param.getRelatedElement()).getLabelText().contains(filter);
-    }
-
-    public List<DataTransition> getReferenceChoices(String filter) {
-        List<DataTransition> list = new ArrayList();
-        modelService.getModel().getTransitions().stream()
-                .filter(transition
-                        -> transition.getId().toLowerCase().contains(filter)
-                //                        || transition.getName().toLowerCase().contains(filter)
-                || ((DataTransition) transition).getLabelText().toLowerCase().contains(filter))
-                .sorted((t1, t2) -> t1.toString().compareTo(t2.toString()))
-                .forEach(transition -> list.add((DataTransition) transition));
-        return list;
-    }
-
-    /**
      * Attempts to get a referencing parameter for a given candidate identifier.
      *
      * @param model
@@ -363,12 +477,12 @@ public class ParameterService
                     case PLACE:
                         param = parameterFactory.createReferencingParameter(candidate, element, ReferencingParameter.ReferenceType.TOKEN);
                     case TRANSITION:
-                        param = parameterFactory.createReferencingParameter(candidate, element, ReferencingParameter.ReferenceType.SPEED);   
+                        param = parameterFactory.createReferencingParameter(candidate, element, ReferencingParameter.ReferenceType.SPEED);
                 }
             } catch (Exception ex) {
                 throw new ParameterException(ex.getMessage());
             }
-        } 
+        }
 //        else if (candidate.matches(regexParamPlaceFlowNow) || candidate.matches(regexParamPlaceFlowTotal)) {
 //
 //            String[] tmp = candidate.split("_");
@@ -435,9 +549,8 @@ public class ParameterService
 
         return param;
     }
-    
-    // find all params that have related element that has its name changed. change value if its of type reference (recreate referncing parameter / reassign value and id)
 
+    // find all params that have related element that has its name changed. change value if its of type reference (recreate referncing parameter / reassign value and id)
     /**
      * Attempts to remove a parameter.
      *
@@ -457,71 +570,65 @@ public class ParameterService
             modelService.getModel().remove(param);
         }
     }
-    
+
     public void UpdateRelatedParameter(IDataElement data) {
-        
-        
+
         for (Parameter param : data.getRelatedParameters()) {
-            
+
             for (IElement elem : param.getUsingElements()) {
-                
+
             }
-            
+
         }
-        
+
     }
 
     /**
-     * Validates a function in relation to a given element. Ensures that all
-     * used parameters exist and that their access is not restricted (i.e.
-     * access to LOCAL parameters of a different element).
+     * Validates a function in relation to a given element.Ensures that all used
+     * parameters exist and that their access is not restricted (i.e. access to
+     * LOCAL parameters of a different element).
      *
      * @param function
      * @param element
+     * @return 
      * @throws ParameterException
      */
-    public void ValidateFunction(IDataElement element, String function) throws ParameterException {
-        ValidateFunction(modelService.getModel(), element, function);
+    public Function validateAndGetFunction(IDataElement element, String function) throws ParameterException {
+        return ParameterService.this.validateAndGetFunction(modelService.getModel(), element, function);
     }
 
     /**
-     * Validates a function in relation to a given element. Ensures that all
-     * used parameters exist and that their access is not restricted (i.e.
-     * access to LOCAL parameters of a different element).
+     * Validates a function in relation to a given element.Ensures that all
+ used parameters exist and that their access is not restricted (i.e. access to LOCAL parameters of a different element).
      *
      * @param model
-     * @param function
+     * @param functionString
      * @param element
+     * @return 
      * @throws ParameterException
      */
-    public void ValidateFunction(Model model, IElement element, String function) throws ParameterException {
+    public Function validateAndGetFunction(Model model, IElement element, String functionString) throws ParameterException {
 
+        Function func;
         Parameter param;
-        String[] candidates;
 
-        function = function.replace(" ", "");
-        candidates = function.split(functionBuilder.getOperatorExtRegex());
+        try {
+            functionString = functionString.replace(" ", "");
+            func = functionBuilder.build(functionString);
+        } catch (Exception ex) {
+            throw new ParameterException("Malformed function string!", ex);
+        }
+        
+        for (String candidate : func.getParameterIds()) {
+            
+            param = findParameter(model, candidate, element);
 
-        for (String candidate : candidates) {
-            if (!candidate.matches("")) {
-                if (!candidate.matches(functionBuilder.getNumberRegex())) { // candidate is NaN
-
-                    param = element.getLocalParameter(candidate);
-                    if (param == null) {
-                        param = model.getParameter(candidate);
-                    }
-                    if (param == null) {
-                        param = getReferencingParameter(model, candidate);
-                        if (param != null) {
-                            add(model, param);
-                        }
-                    }
-                    if (param == null) {
-                        throw new ParameterException("Parameter for candidate '" + candidate + "' cannot be generated!");
-                    }
-                }
+            if (param == null) {
+                throw new ParameterException("Parameter for candidate '" + candidate + "' cannot be generated!");
             }
         }
+        
+        return func;
     }
 
     /**
@@ -538,8 +645,8 @@ public class ParameterService
     }
 
     /**
-     * Validates the removal of a data element. Removal is valid if the element
-     * is not related to any parameters that are referenced by other elements.
+     * Validates the removal of a data element. Removal is only valid if none of
+     * the element's related referencing parameters are used by other elements.
      *
      * @param element
      * @throws ParameterException
@@ -564,13 +671,19 @@ public class ParameterService
             param.getUsingElements().remove(element);
             if (!param.getUsingElements().isEmpty()) {
                 param.getUsingElements().add(element);
-                throw new ParameterException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
+                throw new ParameterException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element!");
             }
             param.getUsingElements().add(element);
         } else {
             if (!param.getUsingElements().isEmpty()) {
-                throw new ParameterException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element.");
+                throw new ParameterException(element.getId() + "'s parameter '" + param.getId() + "' is referenced by another element!");
             }
         }
+    }
+
+    private boolean filter(Parameter param, String filter) {
+        return param.getId().contains(filter)
+                || param.getRelatedElement().getId().contains(filter)
+                || ((IDataElement) param.getRelatedElement()).getLabelText().contains(filter);
     }
 }

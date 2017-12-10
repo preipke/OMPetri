@@ -67,7 +67,7 @@ public abstract class Element implements IElement
     @Override
     public void addLocalParameter(Parameter param) {
         parametersLocal.put(param.getId(), param);
-        getRelatedParameters().add(param);
+//        getRelatedParameters().add(param);
     }
     
     @Override

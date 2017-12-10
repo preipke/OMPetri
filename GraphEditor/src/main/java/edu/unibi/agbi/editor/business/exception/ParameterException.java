@@ -14,4 +14,8 @@ public class ParameterException extends Exception
     public ParameterException(String msg) {
         super(msg);
     }
+    
+    public ParameterException(String msg, Throwable thr) {
+        super(msg, thr);
+    }
 }

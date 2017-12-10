@@ -43,7 +43,7 @@
                                         <TextField fx:id="inputUnit" promptText="Unit (optional)" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="2" />
                                         <Label text="Scope" GridPane.rowIndex="3" />
                                         <ChoiceBox fx:id="choiceScope" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                                        <ChoiceBox fx:id="choiceNode" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                                        <ChoiceBox fx:id="choiceRelatedElement" prefWidth="150.0" GridPane.columnIndex="2" GridPane.rowIndex="3" />
                                         <TextField fx:id="inputFilterNode" promptText="Filter by Node (ID, Name, Label)" GridPane.columnIndex="1" GridPane.columnSpan="2147483647" GridPane.rowIndex="4" />
                                     </children>
                                 </GridPane>

@@ -46,7 +46,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class PropertiesPanelController implements IPanel
 {
-    @Autowired private ModelService dataService;
+    @Autowired private ModelService modelService;
     @Autowired private FunctionBuilder functionBuilder;
     @Autowired private ParameterService parameterService;
     @Autowired private MessengerService messengerService;
@@ -105,7 +105,7 @@ public class PropertiesPanelController implements IPanel
         data = element;
 
         choiceColour.getItems().clear();
-        choiceColour.getItems().addAll(dataService.getModel().getColours());
+        choiceColour.getItems().addAll(modelService.getModel().getColours());
 
         propertiesPanel.getChildren().clear();
         if (element != null) {
@@ -216,7 +216,7 @@ public class PropertiesPanelController implements IPanel
                 if (ValidateNumberInput(inputTokenMax)) {
                     token.setValueMax(Double.parseDouble(inputTokenMax.getText().replace(",", ".")));
                 }
-                dataService.setPlaceToken(place, token);
+                modelService.setPlaceToken(place, token);
                 if (token.getValueStart() != 0) {
                     place.setTokenLabelText(Double.toString(token.getValueStart()));
                 } else {
@@ -235,7 +235,7 @@ public class PropertiesPanelController implements IPanel
             String input = inputFunction.getText().replace("\n", "");
 
             try {
-                parameterService.ValidateFunction(element, input);
+                parameterService.validateAndGetFunction(element, input);
                 ParseFunctionToImage(input);
 
                 inputLatestValid = input;
@@ -244,15 +244,15 @@ public class PropertiesPanelController implements IPanel
                 inputFunction.setStyle("-fx-border-color: red");
             }
 
-            try {
-                if (inputFunction.getText().isEmpty()) {
-                    dataService.setElementFunction(element, "1", (Colour) choiceColour.getSelectionModel().getSelectedItem());
-                } else {
-                    dataService.setElementFunction(element, inputLatestValid, (Colour) choiceColour.getSelectionModel().getSelectedItem());
-                }
-            } catch (DataException ex) {
-                messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
-            }
+//            try {
+//                if (inputFunction.getText().isEmpty()) {
+//                    modelService.setElementFunction(element, "1", (Colour) choiceColour.getSelectionModel().getSelectedItem());
+//                } else {
+//                    modelService.setElementFunction(element, inputLatestValid, (Colour) choiceColour.getSelectionModel().getSelectedItem());
+//                }
+//            } catch (DataException ex) {
+//                messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
+//            }
         }
     }
 
@@ -292,7 +292,7 @@ public class PropertiesPanelController implements IPanel
         menuPlaces.getItems().clear();
         menuTransitions.getItems().clear();
 
-        dataService.getModel().getPlaces().stream()
+        modelService.getModel().getPlaces().stream()
                 .filter(place
                         -> place.getId().toLowerCase().contains(filter)
 //                        || place.getName().toLowerCase().contains(filter)
@@ -380,7 +380,7 @@ public class PropertiesPanelController implements IPanel
             menuPlaces.setDisable(false);
         }
 
-        dataService.getModel().getTransitions().stream()
+        modelService.getModel().getTransitions().stream()
                 .filter(transition
                         -> transition.getId().toLowerCase().contains(filter)
 //                        || transition.getName().toLowerCase().contains(filter)
@@ -420,7 +420,7 @@ public class PropertiesPanelController implements IPanel
         menuLocalParams.getItems().clear();
         menuGlobalParams.getItems().clear();
 
-        parameterService.getLocalParameters(element).stream()
+        parameterService.getSortedLocalParameters(element).stream()
                 .filter(param -> param.getId().toLowerCase().contains(filter))
                 .forEach(param -> {
                     MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
@@ -437,7 +437,8 @@ public class PropertiesPanelController implements IPanel
             menuLocalParams.setDisable(false);
         }
 
-        parameterService.getGlobalParameters().stream()
+        parameterService.getSortedGlobalParameters(modelService.getModel())
+                .stream()
                 .filter(param -> param.getId().toLowerCase().contains(filter))
                 .forEach(param -> {
                     MenuItem item = new MenuItem(param.toString());

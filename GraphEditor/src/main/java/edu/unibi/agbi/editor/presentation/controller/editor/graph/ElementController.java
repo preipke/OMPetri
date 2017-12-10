@@ -21,6 +21,7 @@ import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
@@ -110,7 +111,6 @@ public class ElementController implements Initializable
 
     private IGraphElement element;
     private IDataElement data;
-    private String inputLatestValid;
 
     /**
      * Shows the details for the given graph element. The values are loaded from
@@ -344,28 +344,6 @@ public class ElementController implements Initializable
             modelService.changeSubtype(element, subtype);
         }
     }
-
-//    private void ParseArcWeight() {
-//
-//        if (ValidateNumberInput(inputArcWeight)) {
-//
-//            if (data instanceof DataArc) {
-//
-//                DataArc arc = (DataArc) data;
-//                Colour colour = (Colour) choiceColour.getSelectionModel().getSelectedItem();
-//
-//                try {
-//                    Weight weight = new Weight(colour);
-//                    if (!inputArcWeight.getText().isEmpty()) {
-//                        weight.setValue(String.valueOf(Double.parseDouble(inputArcWeight.getText().replace(",", "."))));
-//                    }
-//                    dataService.setArcWeight(arc, weight);
-//                } catch (NumberFormatException ex) {
-//                    messengerService.addException("Exception parsing weight value!", ex);
-//                }
-//            }
-//        }
-//    }
     
     private void ParseConstantChoice() {
         if (data instanceof IDataNode) {
@@ -385,13 +363,13 @@ public class ElementController implements Initializable
 
             try {
                 Token token = new Token(colour);
-                if (ValidateNumberInput(inputToken)) {
+                if (isNumberInputValid(inputToken)) {
                     token.setValueStart(Double.parseDouble(inputToken.getText().replace(",", ".")));
                 }
-                if (ValidateNumberInput(inputTokenMin)) {
+                if (isNumberInputValid(inputTokenMin)) {
                     token.setValueMin(Double.parseDouble(inputTokenMin.getText().replace(",", ".")));
                 }
-                if (ValidateNumberInput(inputTokenMax)) {
+                if (isNumberInputValid(inputTokenMax)) {
                     token.setValueMax(Double.parseDouble(inputTokenMax.getText().replace(",", ".")));
                 }
                 modelService.setPlaceToken(place, token);
@@ -406,44 +384,31 @@ public class ElementController implements Initializable
         }
     }
 
-    private void ParseFunction() {
+    private void ParseAndSetFunction() {
 
-        String input = inputFunction.getText().replace("\n", "");
-
-        try {
-            parameterService.ValidateFunction(data, input);
-            PrettyFormulaParser.parseToImage(input);
-
-            inputLatestValid = input;
-            setInputStatus(inputFunction, false);
-        } catch (Exception ex) {
-            setInputStatus(inputFunction, true);
-        }
+        Function func;
+        String input;
         
-        try {
-            if (inputFunction.getText().isEmpty()) {
-                modelService.setElementFunction(data, "1", (Colour) choiceColour.getSelectionModel().getSelectedItem());
-            } else {
-                modelService.setElementFunction(data, inputLatestValid, (Colour) choiceColour.getSelectionModel().getSelectedItem());
-            }
-        } catch (DataException ex) {
-            messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
-        }
-    }
-
-    private void setInputStatus(Control input, boolean isError) {
-        if (isError) {
-            input.setStyle("-fx-border-color: red");
-            statusMessage.setTextFill(Color.RED);
-            statusMessage.setText("Invalid!");
+        if (inputFunction.getText().isEmpty()) {
+            input = "1";
         } else {
-            input.setStyle("-fx-border-color: green");
-            statusMessage.setTextFill(Color.GREEN);
-            statusMessage.setText("Valid!");
+            input = inputFunction.getText().replace("\n", "");
+        }
+
+        try {
+            func = parameterService.validateAndGetFunction(data, input);
+            PrettyFormulaParser.parseToImage(input); // just for synthax validation
+            
+            modelService.setElementFunction(data, func, (Colour) choiceColour.getSelectionModel().getSelectedItem());
+            inputFunction.setStyle("-fx-border-color: green");
+            
+        } catch (Exception ex) {
+            inputFunction.setStyle("-fx-border-color: red");
+            messengerService.setLeftStatus("Cannot build function! " + ex.getMessage());
         }
     }
 
-    private boolean ValidateNumberInput(TextField input) {
+    private boolean isNumberInputValid(TextField input) {
         String value = input.getText().replace(",", ".");
         if (value.matches(functionBuilder.getNumberRegex())) {
             input.setStyle("-fx-border-color: green");
@@ -550,9 +515,9 @@ public class ElementController implements Initializable
             if (data != null) {
                 try {
                     StoreElementType(data);
-                    setInputStatus(choiceSubtype, false);
+                    choiceSubtype.setStyle("-fx-border-color: green");
                 } catch (DataException ex) {
-                    setInputStatus(choiceSubtype, true);
+                    choiceSubtype.setStyle("-fx-border-color: red");
                     messengerService.addException("Cannot change subtype!", ex);
                 }
             }
@@ -561,9 +526,9 @@ public class ElementController implements Initializable
         inputName.textProperty().addListener(cl -> {
             try {
                 modelService.changeId(data, inputName.getText());
-                setInputStatus(inputName, false);
+                inputName.setStyle("-fx-border-color: green");
             } catch (DataException ex) {
-                setInputStatus(inputName, true);
+                inputName.setStyle("-fx-border-color: red");
                 messengerService.addException("Cannot change element name!", ex);
             }
         });
@@ -575,7 +540,7 @@ public class ElementController implements Initializable
         inputToken.textProperty().addListener(cl -> ParsePlaceToken());
         inputTokenMin.textProperty().addListener(cl -> ParsePlaceToken());
         inputTokenMax.textProperty().addListener(cl -> ParsePlaceToken());
-        inputFunction.textProperty().addListener(e -> ParseFunction());
+        inputFunction.textProperty().addListener(e -> ParseAndSetFunction());
         
         listClusteredElements.setCellFactory(l -> new ClusterCellFormatter());
         listClusteredElements.getSelectionModel().selectedItemProperty().addListener(cl -> {

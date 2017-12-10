@@ -14,7 +14,7 @@ import edu.unibi.agbi.petrinet.model.Parameter;
  */
 public class ReferencingParameter extends Parameter
 {
-    private ReferenceType type;
+    private ReferenceType referenceType;
     
     public ReferencingParameter(String id, String value, IElement reference, ReferenceType type) {
         super(Parameter.Type.REFERENCE, id, value, reference);

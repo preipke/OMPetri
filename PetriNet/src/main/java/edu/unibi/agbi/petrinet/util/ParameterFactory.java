@@ -34,24 +34,48 @@ public class ParameterFactory
         Element.Type elementType = reference.getElementType();
         String value;
         
-        switch (type) {
+        switch (elementType) {
             
-            case SPEED:
-                if (elementType != Element.Type.TRANSITION) {
-                    throw new Exception("Reference type doesn't suit the given element type! (" + elementType + " -> " + type + ")");
-                }
-                value = "'" + reference.getId() + "'.actualSpeed";
-                break;
-            
-            case TOKEN:
-                if (elementType != Element.Type.PLACE) {
-                    throw new Exception("Reference type doesn't suit the given element type! (" + elementType + " -> " + type + ")");
-                }
-                value = "'" + reference.getId() + "'.t";
-                break;
+            case ARC:
                 
+                switch (type) {
+                    
+                    default:
+                        throw new Exception("Unhandled referencing type for arc parameter! Check factory implementation!");
+                    
+                }
+//                break;
+            
+            case PLACE:
+                
+                switch (type) {
+                    
+                    case TOKEN:
+                        value = "'" + reference.getId() + "'.t";
+                        break;
+
+                    default:
+                        throw new Exception("Unhandled referencing type for place parameter! Check factory implementation!");
+
+                }
+                break;
+            
+            case TRANSITION:
+                
+                switch (type) {
+                    
+                    case SPEED:
+                        value = "'" + reference.getId() + "'.actualSpeed";
+                        break;
+
+                    default:
+                        throw new Exception("Unhandled referencing type for transition parameter! Check factory implementation!");
+                    
+                }
+                break;
+
             default:
-                throw new Exception("Unhandled referencing parameter type!");
+                throw new Exception("Unhandled element type for referencing parameter! Check factory implementation!");
         }
         
         return new ReferencingParameter(id, value, reference, type);

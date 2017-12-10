@@ -25,6 +25,7 @@ import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
@@ -116,10 +117,31 @@ public class ModelService
     }
     
     /**
+     * Validate an ID to be available.
+     * 
+     * @param id
+     * @throws DataException 
+     */
+    private void validateIdAvailable(String id) throws DataException {
+        if (modelDaoActive.getModel().containsElement(id)) {
+            throw new DataException("The specified ID is already used by another element!");
+        }
+        if (modelDaoActive.getModel().containsParameter(id)) {
+            throw new DataException("The specified ID is already used by a parameter!");
+        }
+    }
+    
+    private void changeElementsId(IDataElement data, String id) {
+        
+        
+    }
+    
+    /**
      * Attempts to change the ID/name of a data element.
      * 
      * @param data
      * @param id 
+     * @throws DataException 
      */
     public synchronized void changeId(IDataElement data, String id) throws DataException {
         
@@ -131,29 +153,26 @@ public class ModelService
         
         try {
 
-            // Validate element ID to be available
-            if (modelDaoActive.getModel().contains(id)) {
-                throw new DataException("The specified ID is already used inside the model!");
-            }
+            // Validate ID 
+            validateIdAvailable(id);
             modelDaoActive.getModel().changeId(data, id);
-            
             
             
             if (data instanceof IDataNode) {
                 IDataNode node = (IDataNode) data;
                 
                 // Validate IDs for related arcs
-                for (IArc arc: node.getArcsIn()) {
-                    id = factoryService.getArcId(arc.getSource(), arc.getTarget());
-                    if (modelDaoActive.getModel().contains(id)) {
-                        throw new DataException("A resulting arc ID is already used inside the model!");
+                try {
+                    for (IArc arc : node.getArcsIn()) {
+                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                        validateIdAvailable(id);
                     }
-                }
-                for (IArc arc: node.getArcsOut()) {
-                    id = factoryService.getArcId(arc.getSource(), arc.getTarget());
-                    if (modelDaoActive.getModel().contains(id)) {
-                        throw new DataException("A resulting arc ID is already used inside the model!");
+                    for (IArc arc : node.getArcsOut()) {
+                        id = factoryService.getArcId(arc.getSource(), arc.getTarget());
+                        validateIdAvailable(id);
                     }
+                } catch (DataException ex) {
+                    throw new DataException("The resulting ID of a related arc is already used inside the model!");
                 }
                 
                 // Change IDs for related arcs
@@ -178,8 +197,11 @@ public class ModelService
             
             
         } catch (Exception ex) {
-
-            data.setId(oldId);
+            try {
+                modelDaoActive.getModel().changeId(data, oldId);
+            } catch (Exception exFatal) {
+                throw new DataException("A conflict was detected when changing an ID, but revoking the action failed! Possible data integrity breach!", exFatal);
+            }
             throw new DataException(ex.getMessage());
         }
         
@@ -734,9 +756,9 @@ public class ModelService
         modelDaoActive.setHasChanges(true);
     }
 
-    public synchronized void setElementFunction(IDataElement element, String functionString, Colour colour) throws DataException {
+    public synchronized void setElementFunction(IDataElement element, Function function, Colour colour) throws DataException {
         try {
-            parameterService.setFunction(modelDaoActive.getModel(), element, functionString, colour);
+            parameterService.setFunction(modelDaoActive.getModel(), element, function, colour);
             modelDaoActive.setHasChanges(true);
         } catch (Exception ex) {
             throw new DataException(ex.getMessage());

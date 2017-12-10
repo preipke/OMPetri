@@ -15,6 +15,7 @@ import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
 import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
@@ -46,7 +47,7 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class PropertiesController implements Initializable
 {
-    @Autowired private ModelService dataService;
+    @Autowired private ModelService modelService;
     @Autowired private FunctionBuilder functionBuilder;
     @Autowired private ParameterService parameterService;
     @Autowired private MessengerService messengerService;
@@ -75,7 +76,6 @@ public class PropertiesController implements Initializable
 
     private IDataElement data;
 
-    private String inputLatestValid;
     private int inputCaretPosition;
 
     public void setElement(IDataElement element) {
@@ -83,7 +83,7 @@ public class PropertiesController implements Initializable
         data = element;
 
         choiceColour.getItems().clear();
-        choiceColour.getItems().addAll(dataService.getModel().getColours());
+        choiceColour.getItems().addAll(modelService.getModel().getColours());
 
         parentContainer.getChildren().clear();
         if (element != null) {
@@ -173,7 +173,7 @@ public class PropertiesController implements Initializable
                 if (ValidateNumberInput(inputTokenMax)) {
                     token.setValueMax(Double.parseDouble(inputTokenMax.getText().replace(",", ".")));
                 }
-                dataService.setPlaceToken(place, token);
+                modelService.setPlaceToken(place, token);
                 if (token.getValueStart() != 0) {
                     place.setTokenLabelText(Double.toString(token.getValueStart()));
                 } else {
@@ -188,27 +188,26 @@ public class PropertiesController implements Initializable
     private void ParseFunction(IDataElement element) {
 
         if (element != null) {
-            
-            String input = inputFunction.getText().replace("\n", "");
 
-            try {
-                parameterService.ValidateFunction(element, input);
-                ParseFunctionToImage(input);
+            Function func;
+            String input;
 
-                inputLatestValid = input;
-                inputFunction.setStyle("-fx-border-color: green");
-            } catch (Exception ex) {
-                inputFunction.setStyle("-fx-border-color: red");
+            if (inputFunction.getText().isEmpty()) {
+                input = "1";
+            } else {
+                input = inputFunction.getText().replace("\n", "");
             }
 
             try {
-                if (inputFunction.getText().isEmpty()) {
-                    dataService.setElementFunction(element, "1", (Colour) choiceColour.getSelectionModel().getSelectedItem());
-                } else {
-                    dataService.setElementFunction(element, inputLatestValid, (Colour) choiceColour.getSelectionModel().getSelectedItem());
-                }
-            } catch (DataException ex) {
-                messengerService.addException("Cannot build function from input '" + inputLatestValid + "'!", ex);
+                func = parameterService.validateAndGetFunction(data, input);
+                ParseFunctionToImage(input);
+
+                modelService.setElementFunction(data, func, (Colour) choiceColour.getSelectionModel().getSelectedItem());
+                inputFunction.setStyle("-fx-border-color: green");
+                
+            } catch (Exception ex) {
+                inputFunction.setStyle("-fx-border-color: red");
+                messengerService.setLeftStatus("Cannot build function! " + ex.getMessage());
             }
         }
     }
@@ -249,11 +248,10 @@ public class PropertiesController implements Initializable
         menuPlaces.getItems().clear();
         menuTransitions.getItems().clear();
 
-        dataService.getModel().getPlaces().stream()
-                .filter(place
-                        -> place.getId().toLowerCase().contains(filter)
-//                        || place.getName().toLowerCase().contains(filter)
-                        || ((DataPlace) place).getLabelText().contains(filter))
+        modelService.getModel().getPlaces().stream()
+                .filter(place -> 
+                        place.getId().toLowerCase().contains(filter) || 
+                                ((DataPlace) place).getLabelText().contains(filter))
                 .forEach(place -> {
 
 //                    final Menu menuArcsIn = new Menu("Incoming Arcs");
@@ -337,11 +335,10 @@ public class PropertiesController implements Initializable
             menuPlaces.setDisable(false);
         }
 
-        dataService.getModel().getTransitions().stream()
-                .filter(transition
-                        -> transition.getId().toLowerCase().contains(filter)
-//                        || transition.getName().toLowerCase().contains(filter)
-                        || ((DataTransition) transition).getLabelText().contains(filter))
+        modelService.getModel().getTransitions().stream()
+                .filter(transition -> 
+                        transition.getId().toLowerCase().contains(filter) || 
+                                ((DataTransition) transition).getLabelText().contains(filter))
                 .forEach(transition -> {
 
 //                    MenuItem itemSpeed = new MenuItem("Speed | v(t)");
@@ -377,7 +374,8 @@ public class PropertiesController implements Initializable
         menuLocalParams.getItems().clear();
         menuGlobalParams.getItems().clear();
 
-        parameterService.getLocalParameters(element).stream()
+        parameterService.getSortedLocalParameters(element)
+                .stream()
                 .filter(param -> param.getId().toLowerCase().contains(filter))
                 .forEach(param -> {
                     MenuItem item = new MenuItem(param.getId() + " = " + param.getValue());
@@ -394,7 +392,8 @@ public class PropertiesController implements Initializable
             menuLocalParams.setDisable(false);
         }
 
-        parameterService.getGlobalParameters().stream()
+        parameterService.getSortedGlobalParameters(modelService.getModel())
+                .stream()
                 .filter(param -> param.getId().toLowerCase().contains(filter))
                 .forEach(param -> {
                     MenuItem item = new MenuItem(param.toString());

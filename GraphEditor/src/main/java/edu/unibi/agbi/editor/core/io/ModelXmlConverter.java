@@ -37,6 +37,7 @@ import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
 import edu.unibi.agbi.petrinet.util.FunctionBuilder;
+import edu.unibi.agbi.petrinet.util.ParameterFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -73,6 +74,7 @@ public class ModelXmlConverter
     @Autowired private ModelService dataService;
     @Autowired private HierarchyService hierarchyService;
     @Autowired private ParameterService parameterService;
+    @Autowired private ParameterFactory parameterFactory;
 
     private final String formatDateTime = "yy-MM-dd HH:mm:ss";
     private final String dtdModelData = "model.dtd";
@@ -253,14 +255,14 @@ public class ModelXmlConverter
         }
         for (Transition transition : dao.getModel().getTransitions()) {
             String functionString = transition.getFunction().toString();
-            parameterService.ValidateFunction(dao.getModel(), transition, functionString);
-            parameterService.setFunction(dao.getModel(), transition, functionString, null);
+            Function function = parameterService.validateAndGetFunction(dao.getModel(), transition, functionString);
+            parameterService.setFunction(dao.getModel(), transition, function, null);
         }
         for (Arc arc : dao.getModel().getArcs()) {
             for (Weight weight : arc.getWeights()) {
                 String functionString = weight.getFunction().toString();
-                parameterService.ValidateFunction(dao.getModel(), arc, functionString);
-                parameterService.setFunction(dao.getModel(), arc, functionString, weight.getColour());
+                Function function = parameterService.validateAndGetFunction(dao.getModel(), arc, functionString);
+                parameterService.setFunction(dao.getModel(), arc, function, weight.getColour());
             }
         }
         
@@ -615,20 +617,34 @@ public class ModelXmlConverter
         if (nodes.getLength() > 0) {
             if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 elem = (Element) nodes.item(0);
-                return functionBuilder.build(model, elem.getTextContent(), false);
+                return functionBuilder.build(elem.getTextContent());
             }
         }
-        return functionBuilder.build(model, "1", false);
+        return functionBuilder.build("1");
     }
 
-    private Parameter getParameter(Element elem, IElement element) {
-        Parameter param = new Parameter(
-                elem.getAttribute(attrId),
-                elem.getTextContent(),
-                elem.getAttribute(attrUnit),
-                Parameter.Type.valueOf(elem.getAttribute(attrType).toUpperCase()),
-                element
-        );
+    private Parameter getParameter(Element elem, IElement element) throws Exception {
+        
+        Parameter param;
+        
+        String id = elem.getAttribute(attrId);
+        String value = elem.getTextContent();
+        String unit = elem.getAttribute(attrUnit);
+        
+        switch (Parameter.Type.valueOf(elem.getAttribute(attrType).toUpperCase())) {
+            
+            case GLOBAL:
+                param = parameterFactory.createGlobalParameter(id, value, unit);
+                break;
+                
+            case LOCAL:
+                param = parameterFactory.createLocalParameter(id, value, unit, element);
+                break;
+                
+            default:
+                throw new Exception("Found unhandled parameter type!");
+        }
+        
         return param;
     }
 
