@@ -146,21 +146,6 @@ public class ModelService
     }
 
     /**
-     * Validates an ID to be available.
-     *
-     * @param id
-     * @throws DataException
-     */
-    public void validateIdAvailable(String id) throws DataException {
-        if (modelDaoActive.getModel().containsElement(id)) {
-            throw new DataException("The specified ID is already used by an element!");
-        }
-        if (modelDaoActive.getModel().containsParameter(id)) {
-            throw new DataException("The specified ID is already used by a parameter!");
-        }
-    }
-
-    /**
      * Attempts to change the ID/name of a data element.
      *
      * @param element
@@ -739,6 +724,21 @@ public class ModelService
                     throw new DataException("The nodes are already connected by a related element.");
                 }
             }
+        }
+    }
+
+    /**
+     * Validates an ID to be available.
+     *
+     * @param id
+     * @throws DataException
+     */
+    public void validateIdAvailable(String id) throws DataException {
+        if (modelDaoActive.getModel().containsElement(id)) {
+            throw new DataException("The specified ID is already used by an element!");
+        }
+        if (modelDaoActive.getModel().containsParameter(id)) {
+            throw new DataException("The specified ID is already used by a parameter!");
         }
     }
 

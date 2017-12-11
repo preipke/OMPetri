@@ -232,6 +232,8 @@ public class ParameterController implements Initializable
                 buttonApply.setDisable(true);
                 listParameters.setStyle("-fx-border-color: green");
                 
+                fillParameterList(data); // update parameter list to show changes
+                
             } catch (ParameterException ex) {
                 
                 messengerService.setRightStatus("Applying parameter changes failed!", ex);

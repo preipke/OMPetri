@@ -68,7 +68,7 @@ public class Place extends Node
     
     @Override
     public Parameter getLocalParameter(String id) {
-        throw new UnsupportedOperationException("A place is not supposed to have any local parameters!");
+        return null;
     }
     
     @Override
