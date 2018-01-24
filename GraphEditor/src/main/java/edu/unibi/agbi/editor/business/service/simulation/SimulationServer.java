@@ -165,11 +165,10 @@ public class SimulationServer extends Thread {
 
         while (!isSocketReady && countPortsChecked < 20) {
             try {
-                serverSocket = new java.net.ServerSocket(serverPort);
+                serverSocket = new java.net.ServerSocket(serverPort + countPortsChecked);
                 isSocketReady = true;
             } catch (IOException ex) {
-                System.out.println("Socket port '" + serverPort + "' already in use. Incrementing.");
-                serverPort++;
+                System.out.println("Socket port '" + (serverPort + countPortsChecked) + "' already in use. Incrementing.");
                 countPortsChecked++;
             }
         }

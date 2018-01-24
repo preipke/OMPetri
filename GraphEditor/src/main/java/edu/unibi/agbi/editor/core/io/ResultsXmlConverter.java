@@ -476,7 +476,9 @@ public class ResultsXmlConverter
         for (Object obj : data) {
             dataString += obj.toString() + ",";
         }
-        dataString = dataString.substring(0, dataString.length() - 1);
+        if (dataString.length() > 1) {
+            dataString = dataString.substring(0, dataString.length() - 1);
+        }
 
         elem.setTextContent(dataString);
 

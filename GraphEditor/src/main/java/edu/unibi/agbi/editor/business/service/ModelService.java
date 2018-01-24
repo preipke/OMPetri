@@ -598,8 +598,6 @@ public class ModelService
                     throw new DataException("A transition cannot inhibit a place!");
                 case TEST:
                     throw new DataException("A transition cannot test a place!");
-                case READ:
-                    throw new DataException("A transition cannot read a place!");
                 default:
                     throw new DataException("Validation for arc type '" + arc.getArcType() + "' is undefined!");
             }

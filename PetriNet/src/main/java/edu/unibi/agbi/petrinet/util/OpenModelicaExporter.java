@@ -65,7 +65,7 @@ public class OpenModelicaExporter
      */
     public File exportMO(String name, Model model, File file, ParameterFactory parameterFactory) throws IOException {
 
-        PrintWriter writer = new PrintWriter(file);
+        final PrintWriter writer = new PrintWriter(file);
 
         Collection<Arc> arcs = model.getArcs();
         Collection<Colour> colours = model.getColours();
@@ -101,7 +101,7 @@ public class OpenModelicaExporter
         /**
          * Settings.
          */
-        writer.append(INDENT + "inner PNlib.Settings");
+        writer.append(INDENT + "inner " + properties.getProperty("pnlib.settings"));
         writer.append(" settings(showTokenFlow = true)");
         writer.append(";");
         writer.println();
@@ -259,6 +259,9 @@ public class OpenModelicaExporter
             if (!isColoredPn && unit != null && !unit.isEmpty()) {
                 writer.append(",t(final unit=\"" + unit + "\")");
             }
+            
+            writer.append(writePlaceConflictResolution(place));
+            
             writer.append(")");
 //            writer.append(" annotation(Placement(visible=true, transformation(origin={0.0,0.0}, extent={{0,0}, {0,0}}, rotation=0)))");
             writer.append(";");
@@ -331,11 +334,11 @@ public class OpenModelicaExporter
             /**
              * Weights.
              */
-            tmp1 = getWeightString(parameterFactory, model, transition.getArcsIn(), colours);
+            tmp1 = writeWeights(parameterFactory, model, transition.getArcsIn(), colours);
             if (!tmp1.isEmpty()) {
                 writer.append(",arcWeightIn={" + tmp1 + "}");
             }
-            tmp1 = getWeightString(parameterFactory, model, transition.getArcsOut(), colours);
+            tmp1 = writeWeights(parameterFactory, model, transition.getArcsOut(), colours);
             if (!tmp1.isEmpty()) {
                 writer.append(",arcWeightOut={" + tmp1 + "}");
             }
@@ -369,10 +372,6 @@ public class OpenModelicaExporter
                     writer.append(properties.getProperty("pnlib.arc.inhibitory"));
                     break;
 
-                case READ:
-                    writer.append(properties.getProperty("pnlib.arc.read"));
-                    break;
-
                 case TEST:
                     writer.append(properties.getProperty("pnlib.arc.test"));
                     break;
@@ -398,12 +397,12 @@ public class OpenModelicaExporter
 
             switch (arc.getArcType()) {
                 case NORMAL:
-                    writer.append(getConnectionNormal(arc));
+                    writer.append(writeConnectionNormal(arc));
                     break;
 
                 case INHIBITORY:
                     try {
-                        writer.append(getConnectionNonNormal(arc));
+                        writer.append(writeConnectionNonNormal(arc));
                     } catch (IOException ex) {
                         throw new IOException(ex.getMessage() + " Inhibitory arc cannot connect transition to place.");
                     }
@@ -411,17 +410,9 @@ public class OpenModelicaExporter
 
                 case TEST:
                     try {
-                        writer.append(getConnectionNonNormal(arc));
+                        writer.append(writeConnectionNonNormal(arc));
                     } catch (IOException ex) {
                         throw new IOException(ex.getMessage() + " Text arc cannot connect transition to place.");
-                    }
-                    break;
-
-                case READ:
-                    try {
-                        writer.append(getConnectionNonNormal(arc));
-                    } catch (IOException ex) {
-                        throw new IOException(ex.getMessage() + " Read arc cannot connect transition to place.");
                     }
                     break;
 
@@ -442,7 +433,58 @@ public class OpenModelicaExporter
         return file;
     }
     
-    private String getWeightString(ParameterFactory parameterFactory, Model model, Collection<IArc> arcs, Collection<Colour> colours) throws IOException {
+    private String writePlaceConflictResolution(Place place) throws IOException {
+
+        String confRes, confResValue;
+        
+        if (place.getArcsOut().size() <= 1) {
+            return "";
+        }
+
+        switch (place.getConflictResolutionType()) {
+
+            case PRIORITY:
+                
+                confRes = ", enablingType=PNlib.Types.EnablingType.Priority, enablingPrioOut={";
+                
+                for (int i = 0; i < place.getArcsOut().size(); i++) {
+                    
+                    confResValue = String.valueOf(i+1);
+                    confRes += confResValue + ",";
+                }
+                
+                confRes = confRes.substring(0, confRes.length() - 1);
+                confRes += "}";
+                
+                break;
+
+            case PROBABILITY:
+                
+                confRes = ", enablingType=PNlib.Types.EnablingType.Probability, enablingProbOut={0.5,0.5}";
+                
+                for (IArc arcOut : place.getArcsOut()) {
+                    
+//                    confResValue = String.valueOf(arcOut.getConflictResolutionValue() / place.getArcsOut().size());
+//                    if (confResValue.length() > 5) {
+//                        confResValue = confRes.substring(0, 5);
+//                    }
+                    confResValue = arcOut.getConflictResolutionValue() + "/" + place.getArcsOut().size();
+                    confRes += confResValue + ",";
+                }
+                
+                confRes = confRes.substring(0, confRes.length() - 1);
+                confRes += "}";
+                
+                break;
+
+            default:
+                throw new IOException("Unhandled conflict resolution type detected!");
+        }
+
+        return confRes;
+    }
+    
+    private String writeWeights(ParameterFactory parameterFactory, Model model, Collection<IArc> arcs, Collection<Colour> colours) throws IOException {
         
         boolean isFirstColour, isFirst = true;
         boolean isColoredPn = colours.size() != 1;
@@ -489,12 +531,12 @@ public class OpenModelicaExporter
             function = null;
         }
         
-        if (arc.isDisabled() || weight == null
+        if (arc.isDisabled() || function == null
                 || arc.getSource().isConstant() || arc.getSource().isDisabled()
                 || arc.getTarget().isConstant() || arc.getTarget().isDisabled()) {
             return "0" + CMNT_START + getFunctionValueString(parameterFactory, model, arc, function) + CMNT_END;
         } else {
-            return getFunctionValueString(parameterFactory, model, arc, weight.getFunction());
+            return getFunctionValueString(parameterFactory, model, arc, function);
         }
     }
     
@@ -540,7 +582,7 @@ public class OpenModelicaExporter
         return functionString;
     }
 
-    private String getConnectionNormal(IArc arc) throws IOException {
+    private String writeConnectionNormal(IArc arc) throws IOException {
 
         boolean isDisabled = arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled();
         String connection;
@@ -567,7 +609,7 @@ public class OpenModelicaExporter
         return connection;
     }
 
-    private String getConnectionNonNormal(IArc arc) throws IOException {
+    private String writeConnectionNonNormal(IArc arc) throws IOException {
 
         boolean isDisabled = arc.isDisabled() || arc.getSource().isDisabled() || arc.getTarget().isDisabled();
         String connection;

@@ -557,6 +557,7 @@ public class ResultViewerController implements Initializable
             setStatus("Simulation data export successful!", Status.SUCCESS);
         } catch (Exception ex) {
             setStatus("Simulation data export failed!", Status.FAILURE);
+            ex.printStackTrace();
         }
     }
 

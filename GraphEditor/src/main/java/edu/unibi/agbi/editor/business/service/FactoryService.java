@@ -283,14 +283,6 @@ public class FactoryService
                     });
                     setElementStyle(arc, styleArcDefault, styleArcDefaultHead);
                     break;
-                case READ:
-                    arc.getShapes().forEach(s -> {
-                        IGraphArc a = (IGraphArc) s;
-                        a.setArrowHeadVisible(false);
-                        a.setCircleHeadVisible(true);
-                    });
-                    setElementStyle(arc, styleArcDefault, styleArcDefaultHead);
-                    break;
                 case TEST:
                     arc.getShapes().forEach(s -> {
                         IGraphArc a = (IGraphArc) s;

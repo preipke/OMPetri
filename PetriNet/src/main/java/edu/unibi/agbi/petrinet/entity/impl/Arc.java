@@ -85,6 +85,6 @@ public class Arc extends Element implements IArc
 
     public enum Type
     {
-        NORMAL, READ, INHIBITORY, TEST;
+        NORMAL, INHIBITORY, TEST;
     }
 }
