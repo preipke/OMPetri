@@ -1,6 +1,6 @@
 # Prerequisites
 - Java (JDK) 8 or higher (with JavaFX support, i.e. by Oracle)
-- OpenModelica 1.12.0 (Nightly Build) or higher
+- OpenModelica 1.12.0 (Stable Release)
 - Maven 3.3.x or higher
 
 # Building
