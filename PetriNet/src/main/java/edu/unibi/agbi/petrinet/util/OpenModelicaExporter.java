@@ -436,44 +436,62 @@ public class OpenModelicaExporter
     private String writePlaceConflictResolution(Place place) throws IOException {
 
         String confRes, confResValue;
-        
-        if (place.getArcsOut().size() <= 1) {
-            return "";
-        }
 
         switch (place.getConflictResolutionType()) {
 
             case PRIORITY:
                 
-                confRes = ", enablingType=PNlib.Types.EnablingType.Priority, enablingPrioOut={";
+                confRes = ", enablingType=" + properties.getProperty("pnlib.conflict.enablingtype.priority");
                 
-                for (int i = 0; i < place.getArcsOut().size(); i++) {
+                if (place.getArcsIn().size() > 1) {
                     
-                    confResValue = String.valueOf(i+1);
-                    confRes += confResValue + ",";
+                    confRes += ", enablingPrioIn={";
+                    for (int i = 0; i < place.getArcsIn().size(); i++) {
+                        confResValue = String.valueOf(i + 1);
+                        confRes += confResValue + ",";
+                    }
+                    confRes = confRes.substring(0, confRes.length() - 1);
+                    confRes += "}";
                 }
-                
-                confRes = confRes.substring(0, confRes.length() - 1);
-                confRes += "}";
-                
+
+                if (place.getArcsOut().size() > 1) {
+                    
+                    confRes += ", enablingPrioOut={";
+                    for (int i = 0; i < place.getArcsOut().size(); i++) {
+                        confResValue = String.valueOf(i + 1);
+                        confRes += confResValue + ",";
+                    }
+                    confRes = confRes.substring(0, confRes.length() - 1);
+                    confRes += "}";
+                }
+
                 break;
 
             case PROBABILITY:
-                
-                confRes = ", enablingType=PNlib.Types.EnablingType.Probability, enablingProbOut={0.5,0.5}";
-                
-                for (IArc arcOut : place.getArcsOut()) {
+
+                confRes = ", enablingType=" + properties.getProperty("pnlib.conflict.enablingtype.probability");
+
+                if (place.getArcsIn().size() > 1) {
                     
-//                    confResValue = String.valueOf(arcOut.getConflictResolutionValue() / place.getArcsOut().size());
-//                    if (confResValue.length() > 5) {
-//                        confResValue = confRes.substring(0, 5);
-//                    }
-                    confResValue = arcOut.getConflictResolutionValue() + "/" + place.getArcsOut().size();
-                    confRes += confResValue + ",";
+                    confRes += ", enablingProbIn={";
+                    for (IArc arcIn : place.getArcsIn()) {
+                        confResValue = arcIn.getConflictResolutionValue() + "/" + place.getArcsIn().size();
+                        confRes += confResValue + ",";
+                    }
+                    confRes = confRes.substring(0, confRes.length() - 1);
+                    confRes += "}";
                 }
-                
-                confRes = confRes.substring(0, confRes.length() - 1);
-                confRes += "}";
+
+                if (place.getArcsOut().size() > 1) {
+                    
+                    confRes += ", enablingProbOut={";
+                    for (IArc arcOut : place.getArcsOut()) {
+                        confResValue = arcOut.getConflictResolutionValue() + "/" + place.getArcsOut().size();
+                        confRes += confResValue + ",";
+                    }
+                    confRes = confRes.substring(0, confRes.length() - 1);
+                    confRes += "}";
+                }
                 
                 break;
 
