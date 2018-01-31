@@ -25,7 +25,7 @@ import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.entity.impl.Place.ConflictResolutionType;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Model;
@@ -122,7 +122,7 @@ public class ModelService
         return node;
     }
     
-    public synchronized void ChangeConflictResolutionType(ModelDao dao, DataPlace place, ConflictResolutionType resolutionType) throws DataException {
+    public synchronized void ChangeConflictResolutionStrategy(ModelDao dao, DataPlace place, ConflictResolutionStrategy resolutionType) throws DataException {
         /**
          * Validate...
          */

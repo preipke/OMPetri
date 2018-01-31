@@ -16,6 +16,7 @@ import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.petrinet.entity.IArc;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
@@ -76,7 +77,7 @@ public class PropertiesController implements Initializable
     @FXML private TextField inputTokenMax;
     @FXML private SwingNode imageFunction;
     
-    @FXML private ChoiceBox<Place.ConflictResolutionType> choiceConflictRes;
+    @FXML private ChoiceBox<ConflictResolutionStrategy> choiceConflictRes;
     @FXML private TextField inputConflictType;
     
     @FXML private HBox boxConflictValue;
@@ -485,9 +486,9 @@ public class PropertiesController implements Initializable
         if (element instanceof DataPlace) {
             DataPlace place = (DataPlace) element;
 
-            Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
+            ConflictResolutionStrategy conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
             if (conflictResType != null) {
-                modelService.ChangeConflictResolutionType(modelService.getDao(), place, conflictResType);
+                modelService.ChangeConflictResolutionStrategy(modelService.getDao(), place, conflictResType);
             }
         }
     }
@@ -550,7 +551,7 @@ public class PropertiesController implements Initializable
 //        inputWeight.textProperty().addListener(cl -> ParseArcWeight(data));
 
         choiceConflictRes.getItems().clear();
-        for (Place.ConflictResolutionType type : Place.ConflictResolutionType.values()) {
+        for (ConflictResolutionStrategy type : ConflictResolutionStrategy.values()) {
             choiceConflictRes.getItems().add(type);
         }
         choiceConflictRes.valueProperty().addListener(cl -> {

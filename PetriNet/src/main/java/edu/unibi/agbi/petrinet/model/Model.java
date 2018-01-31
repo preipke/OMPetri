@@ -16,9 +16,7 @@ import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter.ReferenceType;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**

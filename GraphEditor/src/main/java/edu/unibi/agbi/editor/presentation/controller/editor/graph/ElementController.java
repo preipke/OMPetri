@@ -21,7 +21,7 @@ import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -109,7 +109,7 @@ public class ElementController implements Initializable
     @FXML private TextField inputTokenMin;
     @FXML private TextField inputTokenMax;
     
-    @FXML private ChoiceBox<Place.ConflictResolutionType> choiceConflictRes;
+    @FXML private ChoiceBox<ConflictResolutionStrategy> choiceConflictRes;
     @FXML private TextField inputConflictType;
     
     @FXML private HBox boxConflictValue;
@@ -395,9 +395,9 @@ public class ElementController implements Initializable
         if (element instanceof DataPlace) {
             DataPlace place = (DataPlace) element;
 
-            Place.ConflictResolutionType conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
+            ConflictResolutionStrategy conflictResType = choiceConflictRes.getSelectionModel().getSelectedItem();
             if (conflictResType != null) {
-                modelService.ChangeConflictResolutionType(modelService.getDao(), place, conflictResType);
+                modelService.ChangeConflictResolutionStrategy(modelService.getDao(), place, conflictResType);
             }
         }
     }
@@ -605,7 +605,7 @@ public class ElementController implements Initializable
         });
         
         choiceConflictRes.getItems().clear();
-        for (Place.ConflictResolutionType type : Place.ConflictResolutionType.values()) {
+        for (ConflictResolutionStrategy type : ConflictResolutionStrategy.values()) {
             choiceConflictRes.getItems().add(type);
         }
         choiceConflictRes.valueProperty().addListener(cl -> {
@@ -615,7 +615,7 @@ public class ElementController implements Initializable
                     choiceConflictRes.setStyle("-fx-border-color: green");
                 } catch (DataException ex) {
                     choiceConflictRes.setStyle("-fx-border-color: red");
-                    messengerService.addException("Cannot change conflict resolution type!", ex);
+                    messengerService.addException("Cannot change conflict resolution strategy!", ex);
                 }
             }
         });

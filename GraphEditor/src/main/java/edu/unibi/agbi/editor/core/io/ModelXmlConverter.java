@@ -29,6 +29,7 @@ import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Function;
@@ -81,6 +82,8 @@ public class ModelXmlConverter
 
     private final String attrAuthor = "author";
     private final String attrColourId = "colourId";
+    private final String attrConflictResolutionStrategy = "conflictStrategy";
+    private final String attrConflictResolutionValue = "conflictValue";
     private final String attrConstant = "constant";
     private final String attrCurrentClusterId = "currentClusterId";
     private final String attrCurrentNodeId = "currentNodeId";
@@ -152,7 +155,7 @@ public class ModelXmlConverter
         if (nl.getLength() == 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 root = (Element) nl.item(0);
-                dao = getDataDao(root);
+                dao = readDataDao(root);
             } else {
                 throw new Exception("File import failed. Malformed 'Model' element.");
             }
@@ -172,7 +175,7 @@ public class ModelXmlConverter
 
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        dao.getModel().add(getColour((Element) nl.item(i)));
+                        dao.getModel().add(readColour((Element) nl.item(i)));
                     }
                 }
             }
@@ -191,7 +194,7 @@ public class ModelXmlConverter
                 // Each place
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        addPlace(dao, (Element) nl.item(i));
+                        readPlace(dao, (Element) nl.item(i));
                     }
                 }
             }
@@ -210,7 +213,7 @@ public class ModelXmlConverter
                 // Each transition
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        addTransition(dao, (Element) nl.item(i));
+                        readTransition(dao, (Element) nl.item(i));
                     }
                 }
             }
@@ -229,7 +232,7 @@ public class ModelXmlConverter
                 // Each arc
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        addArc(dao, (Element) nl.item(i));
+                        readArc(dao, (Element) nl.item(i));
                     }
                 }
             }
@@ -248,7 +251,7 @@ public class ModelXmlConverter
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
                         tmp = (Element) nl.item(i);
-                        parameterService.add(dao.getModel(), getParameter(tmp, dao.getModel().getElement(tmp.getAttribute(attrElementId))));
+                        parameterService.add(dao.getModel(), readParameter(tmp, dao.getModel().getElement(tmp.getAttribute(attrElementId))));
                     }
                 }
             }
@@ -272,14 +275,14 @@ public class ModelXmlConverter
         nl = root.getElementsByTagName(tagGraph);
         if (nl.getLength() >= 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                addGraph(dao, null, (Element) nl.item(0));
+                readGraph(dao, null, (Element) nl.item(0));
             }
         }
 
         return dao;
     }
 
-    private ModelDao getDataDao(Element elem) {
+    private ModelDao readDataDao(Element elem) {
         ModelDao dao = new ModelDao();
         dao.setAuthor(elem.getAttribute(attrAuthor));
         dao.setCreationDateTime(LocalDateTime.parse(elem.getAttribute(attrCreationDateTime), DateTimeFormatter.ofPattern(formatDateTime)));
@@ -301,7 +304,7 @@ public class ModelXmlConverter
      * @return
      * @throws Exception 
      */
-    private IGraphCluster addGraph(ModelDao dao, final Element clusterElement, final Element graphElement) throws Exception {
+    private IGraphCluster readGraph(ModelDao dao, final Element clusterElement, final Element graphElement) throws Exception {
         
         Element tmp, clusterChildElement, nodeElements = null, clusterElements = null;
         NodeList nl, nlCluster;
@@ -340,7 +343,7 @@ public class ModelXmlConverter
                                 
                                 tmp = (Element) nlCluster.item(j);
                                 if (tmp.getNodeName().contentEquals(tagGraph)) {
-                                    nodes.add(addGraph(dao, clusterChildElement, tmp));
+                                    nodes.add(readGraph(dao, clusterChildElement, tmp));
                                 }
                             }
                         }
@@ -380,7 +383,7 @@ public class ModelXmlConverter
         }
     }
 
-    private void addArc(ModelDao dao, final Element elem) throws Exception {
+    private void readArc(ModelDao dao, final Element elem) throws Exception {
 
         NodeList nl;
         Element tmp;
@@ -408,7 +411,7 @@ public class ModelXmlConverter
 
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        data.addWeight(getWeight((Element) nl.item(i), dao));
+                        data.addWeight(readWeight((Element) nl.item(i), dao));
                     }
                 }
             }
@@ -447,11 +450,11 @@ public class ModelXmlConverter
         if (elem.getAttribute(attrLabel) != null) {
             data.setLabelText(elem.getAttribute(attrLabel));
         }
+        data.setConflictResolutionValue(Double.parseDouble(elem.getAttribute(attrConflictResolutionValue)));
         data.setDescription(elem.getAttribute(attrDescription));
-//        data.setName(elem.getAttribute(attrName));
     }
 
-    private void addPlace(ModelDao dao, final Element elem) throws Exception {
+    private void readPlace(ModelDao dao, final Element elem) throws Exception {
 
         NodeList nodes;
         Element tmp;
@@ -474,13 +477,16 @@ public class ModelXmlConverter
 
                 for (int i = 0; i < nodes.getLength(); i++) {
                     if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        place.addToken(getToken((Element) nodes.item(i)));
+                        place.addToken(readToken((Element) nodes.item(i)));
                     }
                 }
             }
         }
         
         // Properties
+        if (elem.getAttribute(attrConflictResolutionStrategy) != null) {
+            place.setConflictResolutionType(ConflictResolutionStrategy.valueOf(elem.getAttribute(attrConflictResolutionStrategy)));
+        }
         if (elem.getAttribute(attrDisabled) != null) {
             place.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
         }
@@ -491,15 +497,14 @@ public class ModelXmlConverter
             place.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         place.setDescription(elem.getAttribute(attrDescription));
-//        place.setName(elem.getAttribute(attrName));
 
         /**
          * Node Shapes.
          */
-        addNodeShapes(dao, place, elem);
+        readNodeShapes(dao, place, elem);
     }
 
-    private void addTransition(ModelDao dao, final Element elem) throws Exception {
+    private void readTransition(ModelDao dao, final Element elem) throws Exception {
         
         NodeList nl;
         Element tmp;
@@ -523,7 +528,7 @@ public class ModelXmlConverter
 
                 for (int i = 0; i < nl.getLength(); i++) {
                     if (nl.item(i).getNodeType() == Node.ELEMENT_NODE) {
-                        parameterService.add(dao.getModel(), getParameter((Element) nl.item(i), transition));
+                        parameterService.add(dao.getModel(), readParameter((Element) nl.item(i), transition));
                     }
                 }
             }
@@ -537,16 +542,15 @@ public class ModelXmlConverter
             transition.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         transition.setDescription(elem.getAttribute(attrDescription));
-        transition.setFunction(getFunction(dao.getModel(), elem));
-//        transition.setName(elem.getAttribute(attrName));
+        transition.setFunction(readFunction(dao.getModel(), elem));
         
         /**
          * Node Shapes.
          */
-        addNodeShapes(dao, transition, elem);
+        readNodeShapes(dao, transition, elem);
     }
     
-    private void addNodeShapes(ModelDao dao, IDataNode data, final Element elem) throws Exception {
+    private void readNodeShapes(ModelDao dao, IDataNode data, final Element elem) throws Exception {
         
         NodeList nl;
         Element tmp;
@@ -604,7 +608,7 @@ public class ModelXmlConverter
         }
     }
 
-    private Colour getColour(Element elem) {
+    private Colour readColour(Element elem) {
         Colour colour = new Colour(
                 elem.getAttribute(attrId),
                 elem.getAttribute(attrDescription)
@@ -612,7 +616,7 @@ public class ModelXmlConverter
         return colour;
     }
 
-    private Function getFunction(Model model, Element elem) throws Exception {
+    private Function readFunction(Model model, Element elem) throws Exception {
         NodeList nodes = elem.getElementsByTagName(tagFunction);
         if (nodes.getLength() > 0) {
             if (nodes.item(0).getNodeType() == Node.ELEMENT_NODE) {
@@ -623,7 +627,7 @@ public class ModelXmlConverter
         return functionBuilder.build("1");
     }
 
-    private Parameter getParameter(Element elem, IElement element) throws Exception {
+    private Parameter readParameter(Element elem, IElement element) throws Exception {
         
         Parameter param;
         
@@ -648,7 +652,7 @@ public class ModelXmlConverter
         return param;
     }
 
-    private Token getToken(Element elem) {
+    private Token readToken(Element elem) {
         Token token = new Token(new Colour(elem.getAttribute(attrColourId), ""));
         token.setValueStart(Double.parseDouble(elem.getAttribute(attrStart)));
         token.setValueMin(Double.parseDouble(elem.getAttribute(attrMin)));
@@ -656,18 +660,18 @@ public class ModelXmlConverter
         return token;
     }
 
-    private Weight getWeight(Element elem, ModelDao dao) throws Exception {
+    private Weight readWeight(Element elem, ModelDao dao) throws Exception {
 //        Weight weight = new Weight(new Colour(elem.getAttribute(attrColourId), ""));
         Weight weight = new Weight(dao.getModel().getColour(elem.getAttribute(attrColourId)));
-        weight.setFunction(getFunction(dao.getModel(), elem));
+        weight.setFunction(readFunction(dao.getModel(), elem));
         return weight;
     }
     
     // </editor-fold>
     
-    // <editor-fold defaultstate="collapsed" desc="File export and related methods">
+    // <editor-fold defaultstate="collapsed" desc="Model export and all related methods">
 
-    public void exportXml(File file, ModelDao dao) throws IOException, ParserConfigurationException, TransformerException, FileNotFoundException {
+    public void writeXml(File file, ModelDao dao) throws IOException, ParserConfigurationException, TransformerException, FileNotFoundException {
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
@@ -690,16 +694,16 @@ public class ModelXmlConverter
         dao.setNextPlaceId(dao.getNextPlaceId() - 1);
         dao.setNextTransitionId(dao.getNextTransitionId() - 1);
         
-        model.appendChild(getArcsElement(dom, dao.getModel().getArcs()));
-        model.appendChild(getPlacesElement(dom, dao.getModel().getPlaces()));
-        model.appendChild(getTransitionsElement(dom, dao.getModel().getTransitions()));
-        model.appendChild(getColorsElement(dom, dao.getModel().getColours()));
-        model.appendChild(getGraphElement(dom, dao.getGraphRoot()));
+        model.appendChild(writeArcs(dom, dao.getModel().getArcs()));
+        model.appendChild(writePlaces(dom, dao.getModel().getPlaces()));
+        model.appendChild(writeTransitions(dom, dao.getModel().getTransitions()));
+        model.appendChild(writeColours(dom, dao.getModel().getColours()));
+        model.appendChild(writeGraph(dom, dao.getGraphRoot()));
             
         Element params = dom.createElement(tagParameters);
         dao.getModel().getParameters().forEach(param -> {
             if (param.getType() == Parameter.Type.GLOBAL) { // store global only, references are generated on import
-                params.appendChild(getParameterElement(dom, param));
+                params.appendChild(writeParameter(dom, param));
             }
         });
         model.appendChild(params);
@@ -721,7 +725,7 @@ public class ModelXmlConverter
         );
     }
     
-    private Element getArcsElement(Document dom, Collection arcs) throws IOException {
+    private Element writeArcs(Document dom, Collection arcs) throws IOException {
         
         Element elements = dom.createElement(tagArcs);
         
@@ -733,6 +737,7 @@ public class ModelXmlConverter
             a.setAttribute(attrType, data.getArcType().toString());
             a.setAttribute(attrSource, data.getSource().getId());
             a.setAttribute(attrTarget, data.getTarget().getId());
+            a.setAttribute(attrConflictResolutionValue, String.valueOf(data.getConflictResolutionValue()));
             if (data.isDisabled()) {
                 a.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
             }
@@ -745,20 +750,20 @@ public class ModelXmlConverter
             
             // Shapes
             if (!data.getShapes().isEmpty()) {
-                a.appendChild(getArcShapesElement(dom, data));
+                a.appendChild(writeConnections(dom, data));
             } else {
                 throw new IOException("No shape associated to arc data!");
             }
             
             // Weights
-            a.appendChild(getWeightsElement(dom, data));
+            a.appendChild(writeWeights(dom, data));
 
             elements.appendChild(a);
         }
         return elements;
     }
     
-    public Element getPlacesElement(Document dom, Collection places) throws IOException {
+    public Element writePlaces(Document dom, Collection places) throws IOException {
         
         Element elements = dom.createElement(tagPlaces);
         
@@ -768,6 +773,7 @@ public class ModelXmlConverter
             Element p = dom.createElement(tagPlace);
             p.setAttribute(attrId, data.getId());
             p.setAttribute(attrType, data.getPlaceType().toString());
+            p.setAttribute(attrConflictResolutionStrategy, data.getConflictResolutionType().toString());
             if (data.isDisabled()) {
                 p.setAttribute(attrDisabled, Boolean.toString(data.isDisabled()));
             }
@@ -789,13 +795,13 @@ public class ModelXmlConverter
             
             // Shapes
             if (!data.getShapes().isEmpty()) {
-                p.appendChild(getNodeShapesElement(dom, data));
+                p.appendChild(writeNode(dom, data));
             } else {
                 throw new IOException("No shape associated to arc data!");
             }
             
             // Tokens
-            p.appendChild(getTokensElement(dom, data));
+            p.appendChild(writeTokens(dom, data));
 
             elements.appendChild(p);
         }
@@ -803,7 +809,7 @@ public class ModelXmlConverter
         return elements;
     }
     
-    private Element getTransitionsElement(Document dom, Collection transitions) throws IOException {
+    private Element writeTransitions(Document dom, Collection transitions) throws IOException {
         Element elements = dom.createElement(tagTransitons);
         
         for (Object obj : transitions) {
@@ -831,7 +837,7 @@ public class ModelXmlConverter
             
             // Shapes
             if (!data.getShapes().isEmpty()) {
-                t.appendChild(getNodeShapesElement(dom, data));
+                t.appendChild(writeNode(dom, data));
             } else {
                 throw new IOException("No shape associated to arc data!");
             }
@@ -839,7 +845,7 @@ public class ModelXmlConverter
             // Local Parameters
             Element p = dom.createElement(tagParametersLocal);
             data.getLocalParameters().forEach(param -> {
-                p.appendChild(getParameterElement(dom, param));
+                p.appendChild(writeParameter(dom, param));
             });
             t.appendChild(p);
 
@@ -857,7 +863,7 @@ public class ModelXmlConverter
         return elements;
     }
     
-    public Element getArcShapesElement(Document dom, DataArc arc) throws IOException {
+    public Element writeConnections(Document dom, DataArc arc) throws IOException {
 
         Element shapes = dom.createElement(tagShapes);
         Element conn;
@@ -866,13 +872,13 @@ public class ModelXmlConverter
             IDataElement data = shape.getData();
             
             if (data.equals(arc)) {
-                conn = getArcShapeElement(dom, (GraphArc) shape);
+                conn = writeConnection(dom, (GraphArc) shape);
                 shapes.appendChild(conn);
                 
             } else if (data.getType() == DataType.CLUSTERARC) {
                 DataClusterArc dca = (DataClusterArc) data;
                 for (IGraphArc innerArc : dca.getStoredArcs().values()) {
-                    conn = getArcShapeElement(dom, innerArc);
+                    conn = writeConnection(dom, innerArc);
                     shapes.appendChild(conn);
                 }
                 
@@ -884,7 +890,7 @@ public class ModelXmlConverter
         return shapes;
     }
     
-    private Element getArcShapeElement(Document dom, IGraphArc connection) {
+    private Element writeConnection(Document dom, IGraphArc connection) {
         Element c = dom.createElement(tagConnection);
         c.setAttribute(attrId, connection.getId());
         c.setAttribute(attrSource, String.valueOf(connection.getSource().getId()));
@@ -892,7 +898,7 @@ public class ModelXmlConverter
         return c;
     }
     
-    private Element getNodeShapesElement(Document dom, IDataNode node) {
+    private Element writeNode(Document dom, IDataNode node) {
         Element elements = dom.createElement(tagShapes);
         for (IGraphElement shape : node.getShapes()) {
             Element n = dom.createElement(tagNode);
@@ -902,14 +908,14 @@ public class ModelXmlConverter
         return elements;
     }
     
-    private Element getGraphElement(Document dom, Graph graph) {
+    private Element writeGraph(Document dom, Graph graph) {
         Element elements = dom.createElement(tagGraph);
-        elements.appendChild(getClustersElement(dom, graph.getClusters()));
-        elements.appendChild(getNodesElement(dom, graph.getNodes()));
+        elements.appendChild(writeCluster(dom, graph.getClusters()));
+        elements.appendChild(writeNodes(dom, graph.getNodes()));
         return elements;
     }
     
-    private Element getClustersElement(Document dom, Collection<IGravisCluster> clusters) {
+    private Element writeCluster(Document dom, Collection<IGravisCluster> clusters) {
         
         Element elements = dom.createElement(tagClusters);
         Element c;
@@ -920,13 +926,13 @@ public class ModelXmlConverter
             c.setAttribute(attrLabel, ((IGraphCluster)cluster).getData().getLabelText());
 //            c.setAttribute(attrName, ((IGraphCluster)cluster).getData().getName());
             c.setAttribute(attrDescription, ((IGraphCluster)cluster).getData().getDescription());
-            c.appendChild(getGraphElement(dom, cluster.getGraph()));
+            c.appendChild(writeGraph(dom, cluster.getGraph()));
             elements.appendChild(c);
         }
         return elements;
     }
     
-    private Element getNodesElement(Document dom, Collection<IGravisNode> nodes) {
+    private Element writeNodes(Document dom, Collection<IGravisNode> nodes) {
         
         Element elements = dom.createElement(tagNodeShapes);
         Element n;
@@ -942,7 +948,7 @@ public class ModelXmlConverter
         return elements;
     }
     
-    private Element getColorsElement(Document dom, Collection<Colour> colors) {
+    private Element writeColours(Document dom, Collection<Colour> colors) {
         Element elements = dom.createElement(tagColours);
         colors.forEach(colour -> {
             Element c = dom.createElement(tagColour);
@@ -955,7 +961,7 @@ public class ModelXmlConverter
         return elements;
     }
     
-    private Element getParameterElement(Document dom, Parameter param) {
+    private Element writeParameter(Document dom, Parameter param) {
         Element p = dom.createElement(tagParameter);
         p.setAttribute(attrId, param.getId());
         p.setTextContent(param.getValue());
@@ -969,7 +975,7 @@ public class ModelXmlConverter
         return p;
     }
     
-    private Element getTokensElement(Document dom, DataPlace data) {
+    private Element writeTokens(Document dom, DataPlace data) {
         Element elements = dom.createElement(tagTokens);
         data.getTokens().forEach(token -> {
             Element t = dom.createElement(tagToken);
@@ -982,7 +988,7 @@ public class ModelXmlConverter
         return elements;
     }
     
-    private Element getWeightsElement(Document dom, IDataArc data) {
+    private Element writeWeights(Document dom, IDataArc data) {
         
         Element weights = dom.createElement(tagWeights);
         data.getWeights().forEach(weight -> {

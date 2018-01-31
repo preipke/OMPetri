@@ -126,7 +126,7 @@ public class FileMenuController implements Initializable
     
     private boolean SaveXml(ModelDao dao, File file) {
         try {
-            xmlModelConverter.exportXml(file, dao);
+            xmlModelConverter.writeXml(file, dao);
             messengerService.printMessage("XML export complete!");
             dataService.getDao().setFile(file);
             dataService.getDao().setHasChanges(false);

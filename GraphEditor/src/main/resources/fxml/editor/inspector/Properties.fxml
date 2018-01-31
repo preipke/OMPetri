@@ -97,8 +97,9 @@
         </GridPane>
         <GridPane fx:id="parentConflictType" hgap="5.0">
             <children>
-                <Label text="Conf. Res. Type" />
-                <ChoiceBox fx:id="choiceConflictRes" GridPane.columnIndex="1" />
+                <Label text="Conflict Resolution:" GridPane.columnSpan="2147483647" />
+                <Label text="Strategy" GridPane.rowIndex="1" />
+                <ChoiceBox fx:id="choiceConflictRes" GridPane.rowIndex="1" GridPane.columnIndex="1" />
             </children>
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" prefWidth="75.0" />
@@ -111,7 +112,7 @@
         <GridPane fx:id="parentConflictValue" hgap="5.0">
             <children>
                 <Label text="Conflict Resolution:" GridPane.columnSpan="2147483647" />
-                <Label text="Type" GridPane.rowIndex="1" />
+                <Label text="Strategy" GridPane.rowIndex="1" />
                 <Label text="Value" GridPane.rowIndex="2" />
                 <TextField fx:id="inputConflictType" text="0" GridPane.columnIndex="1" GridPane.rowIndex="1" disable="true" />
                 <HBox fx:id="boxConflictValue" GridPane.columnIndex="1" GridPane.rowIndex="2">

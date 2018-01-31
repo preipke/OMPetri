@@ -435,7 +435,12 @@ public class OpenModelicaExporter
     
     private String writePlaceConflictResolution(Place place) throws IOException {
 
-        String confRes, confResValue;
+        String confResValue;
+        String confRes, confResIn, confResOut;
+        int index;
+
+        confResIn = "";
+        confResOut = "";
 
         switch (place.getConflictResolutionType()) {
 
@@ -445,24 +450,38 @@ public class OpenModelicaExporter
                 
                 if (place.getArcsIn().size() > 1) {
                     
-                    confRes += ", enablingPrioIn={";
-                    for (int i = 0; i < place.getArcsIn().size(); i++) {
-                        confResValue = String.valueOf(i + 1);
-                        confRes += confResValue + ",";
+                    confResIn = ", enablingPrioIn={";
+                    index = 1;
+                    for (IArc arcIn : place.getArcsIn()) {
+                        if (!arcIn.isDisabled()) {
+                            confResValue = String.valueOf(index++);
+                            confResIn += confResValue + ",";
+                        }
                     }
-                    confRes = confRes.substring(0, confRes.length() - 1);
-                    confRes += "}";
+                    confResIn = confResIn.substring(0, confResIn.length() - 1);
+                    confResIn += "}";
+                    
+                    if (index == 1) {
+                        confResIn = "";
+                    }
                 }
 
                 if (place.getArcsOut().size() > 1) {
                     
-                    confRes += ", enablingPrioOut={";
-                    for (int i = 0; i < place.getArcsOut().size(); i++) {
-                        confResValue = String.valueOf(i + 1);
-                        confRes += confResValue + ",";
+                    confResOut = ", enablingPrioOut={";
+                    index = 1;
+                    for (IArc arcOut : place.getArcsOut()) {
+                        if (!arcOut.isDisabled()) {
+                            confResValue = String.valueOf(index++);
+                            confResOut += confResValue + ",";
+                        }
                     }
-                    confRes = confRes.substring(0, confRes.length() - 1);
-                    confRes += "}";
+                    confResOut = confResOut.substring(0, confResOut.length() - 1);
+                    confResOut += "}";
+                    
+                    if (index == 1) {
+                        confResOut = "";
+                    }
                 }
 
                 break;
@@ -473,24 +492,40 @@ public class OpenModelicaExporter
 
                 if (place.getArcsIn().size() > 1) {
                     
-                    confRes += ", enablingProbIn={";
+                    confResIn = ", enablingProbIn={";
+                    index = 1;
                     for (IArc arcIn : place.getArcsIn()) {
-                        confResValue = arcIn.getConflictResolutionValue() + "/" + place.getArcsIn().size();
-                        confRes += confResValue + ",";
+                        if (!arcIn.isDisabled()) {
+                            confResValue = arcIn.getConflictResolutionValue() + "/" + place.getArcsIn().size();
+                            confResIn += confResValue + ",";
+                            index++;
+                        }
                     }
-                    confRes = confRes.substring(0, confRes.length() - 1);
-                    confRes += "}";
+                    confResIn = confResIn.substring(0, confResIn.length() - 1);
+                    confResIn += "}";
+
+                    if (index == 1) {
+                        confResIn = "";
+                    }
                 }
 
                 if (place.getArcsOut().size() > 1) {
-                    
-                    confRes += ", enablingProbOut={";
+
+                    confResOut = ", enablingProbOut={";
+                    index = 1;
                     for (IArc arcOut : place.getArcsOut()) {
-                        confResValue = arcOut.getConflictResolutionValue() + "/" + place.getArcsOut().size();
-                        confRes += confResValue + ",";
+                        if (!arcOut.isDisabled()) {
+                            confResValue = arcOut.getConflictResolutionValue() + "/" + place.getArcsOut().size();
+                            confResOut += confResValue + ",";
+                            index++;
+                        }
                     }
-                    confRes = confRes.substring(0, confRes.length() - 1);
-                    confRes += "}";
+                    confResOut = confResOut.substring(0, confResOut.length() - 1);
+                    confResOut += "}";
+
+                    if (index == 1) {
+                        confResOut = "";
+                    }
                 }
                 
                 break;
@@ -499,7 +534,7 @@ public class OpenModelicaExporter
                 throw new IOException("Unhandled conflict resolution type detected!");
         }
 
-        return confRes;
+        return confRes + confResIn + confResOut;
     }
     
     private String writeWeights(ParameterFactory parameterFactory, Model model, Collection<IArc> arcs, Collection<Colour> colours) throws IOException {

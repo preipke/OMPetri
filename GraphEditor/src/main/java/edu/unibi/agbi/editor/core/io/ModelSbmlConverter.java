@@ -26,6 +26,7 @@ import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.util.Calculator;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.model.Token;
@@ -53,15 +54,22 @@ import org.w3c.dom.NodeList;
  * @author PR
  */
 @Component
-public class ModelSbmlConverter 
-{
-    @Autowired private FactoryService factoryService;
-    @Autowired private HierarchyService hierarchyService;
-    @Autowired private ParameterService parameterService;
-    @Autowired private FunctionFactory functionBuilder;
-    @Autowired private ParameterFactory parameterFactory;
-    @Autowired private Calculator calculator;
+public class ModelSbmlConverter {
 
+    @Autowired
+    private FactoryService factoryService;
+    @Autowired
+    private HierarchyService hierarchyService;
+    @Autowired
+    private ParameterService parameterService;
+    @Autowired
+    private FunctionFactory functionBuilder;
+    @Autowired
+    private ParameterFactory parameterFactory;
+    @Autowired
+    private Calculator calculator;
+
+    private final String tagConflictStrategy = "ConflictStrategy";
     private final String tagConnection = "reaction";
     private final String tagConnectionNode = "speciesReference";
     private final String tagConnectionSources = "listOfReactants";
@@ -79,6 +87,8 @@ public class ModelSbmlConverter
     private final String tagNodes = "listOfSpecies";
     private final String tagNode = "species";
     private final String tagParameter = "Parameter";
+    private final String tagProbability = "Probability";
+    private final String tagPriority = "Priority";
     private final String tagRefAvailable = "hasRef";
     private final String tagRefId = "RefID";
     private final String tagTokenMax = "tokenMax";
@@ -443,7 +453,7 @@ public class ModelSbmlConverter
         if (type == null || typeStrings == null) {
             throw new IOException("Node type not specified for '" + dataId + "' ('" + nodeId + "').");
         }
-        
+
         // Constant?
         nl = elem.getElementsByTagName(tagConstant);
         if (nl.getLength() == 1) {
@@ -452,7 +462,6 @@ public class ModelSbmlConverter
                 constant = Boolean.parseBoolean(tmp.getAttribute(attrConstant));
             }
         }
-        
 
         /**
          * Create element and node.
@@ -462,7 +471,6 @@ public class ModelSbmlConverter
             case PLACE:
                 if (data == null) {
                     data = getPlace(elem, dao, dataId, Place.Type.valueOf(typeStrings[0].toUpperCase()));
-//                    data.setName(dataId);
                     data.setConstant(constant);
                     try {
                         dao.getModel().add(data);
@@ -476,7 +484,6 @@ public class ModelSbmlConverter
             case TRANSITION:
                 if (data == null) {
                     data = getTransition(elem, dao, dataId, Transition.Type.valueOf(typeStrings[0].toUpperCase()));
-//                    data.setName(dataId);
                     data.setConstant(constant);
                     try {
                         dao.getModel().add(data);
@@ -529,11 +536,11 @@ public class ModelSbmlConverter
         }
         data.setLabelText(label);
         if (data.getType() == DataType.PLACE) {
-            
+
             DataPlace place = (DataPlace) data;
-            double tokenStart = 
-                    place.getTokens().iterator().next().getValueStart();
-            
+            double tokenStart
+                    = place.getTokens().iterator().next().getValueStart();
+
             if (tokenStart != 0) {
                 place.setTokenLabelText(Double.toString(tokenStart));
             } else {
@@ -563,9 +570,42 @@ public class ModelSbmlConverter
         return null;
     }
 
-    private DataPlace getPlace(final Element elem, ModelDao dao, String id, Place.Type type) {
+    private DataPlace getPlace(final Element elem, ModelDao dao, String id, Place.Type type) throws Exception {
+
+        NodeList nl;
+        Element tmp;
 
         DataPlace place = new DataPlace(id, type);
+
+        nl = elem.getElementsByTagName(tagConflictStrategy);
+        if (nl.getLength() == 1) {
+            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                tmp = (Element) nl.item(0);
+
+                switch (tmp.getAttribute(tagConflictStrategy)) {
+
+                    case "0": // none (default = priority in 1.12.0)
+                        place.setConflictResolutionType(ConflictResolutionStrategy.PRIORITY);
+                        break;
+
+                    case "1": // prio
+                        place.setConflictResolutionType(ConflictResolutionStrategy.PRIORITY);
+                        break;
+
+                    case "2": // prob
+                        place.setConflictResolutionType(ConflictResolutionStrategy.PROBABILITY);
+                        break;
+
+//                    case "3": // benefit
+//                        place.setConflictResolutionType(Place.ConflictResolutionType.BENEFIT);
+//                        break;
+                    default:
+                        throw new Exception("Unhandled conflict resolution strategy!");
+
+                }
+            }
+        }
+
         place.addToken(getToken(elem));
 
         return place;
@@ -595,9 +635,10 @@ public class ModelSbmlConverter
 
         NodeList nl;
         Element tmp;
+        String tmpStr;
 
-        String type;
-        DataArc.Type arcType = null;
+        DataArc arc;
+        DataArc.Type type = null;
         IGraphNode source = null, target = null;
         IGraphArc connection;
 
@@ -633,9 +674,9 @@ public class ModelSbmlConverter
         if (nl.getLength() == 1) {
             if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
                 tmp = (Element) nl.item(0);
-                type = tmp.getAttribute(attrType);
-                if (type.contentEquals("PN Edge")) {
-                    arcType = DataArc.Type.NORMAL;
+                tmpStr = tmp.getAttribute(attrType);
+                if (tmpStr.contentEquals("PN Edge")) {
+                    type = DataArc.Type.NORMAL;
                 } else {
                     throw new IOException("Unexcepted arc type '" + type + "'.");
                 }
@@ -646,38 +687,21 @@ public class ModelSbmlConverter
             throw new IOException("Arc source cannot be found!");
         } else if (target == null) {
             throw new IOException("Arc target cannot be found!");
-        } else if (arcType == null) {
+        } else if (type == null) {
             throw new IOException("Arc type was not specified!");
         }
 
-        DataArc data = new DataArc(
-                factoryService.getArcId(source.getData(), target.getData()),
-                source.getData(),
-                target.getData(),
-                arcType
-        );
-
-        if (source.getData().isDisabled() || target.getData().isDisabled()) {
-            data.setDisabled(true);
-        }
-//        data.setName(elem.getAttribute(attrName));
-
-        nl = elem.getElementsByTagName(tagWeight);
-        if (nl.getLength() == 1) {
-            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
-                data.addWeight(getWeight(dao, (Element) nl.item(0)));
-            }
-        }
+        arc = getArc(elem, dao, source, target, type);
 
         connection = new GraphArc(
                 factoryService.getConnectionId(source, target),
                 source,
                 target,
-                data
+                arc
         );
 
         try {
-            dao.getModel().add(data);
+            dao.getModel().add(arc);
         } catch (Exception ex) {
             throw new IOException(ex.getMessage());
         }
@@ -687,6 +711,78 @@ public class ModelSbmlConverter
         } catch (DataException ex) {
             throw new IOException(ex);
         }
+    }
+
+    private DataArc getArc(final Element elem, ModelDao dao, IGraphNode source, IGraphNode target, DataArc.Type type) throws Exception {
+
+        NodeList nl;
+        Element tmp;
+
+        DataArc arc;
+        DataPlace place;
+
+        arc = new DataArc(
+                factoryService.getArcId(source.getData(), target.getData()),
+                source.getData(),
+                target.getData(),
+                type
+        );
+
+        if (source.getData().getType() == DataType.PLACE) {
+            place = (DataPlace) source.getData();
+        } else {
+            place = (DataPlace) target.getData();
+        }
+
+        switch (place.getConflictResolutionType()) {
+
+            case PRIORITY:
+
+                nl = elem.getElementsByTagName(tagPriority);
+                if (nl.getLength() == 1) {
+                    if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                        tmp = (Element) nl.item(0);
+                        arc.setConflictResolutionValue(
+                                Double.parseDouble(tmp.getAttribute(tagPriority)));
+                    }
+                }
+
+                break;
+
+            case PROBABILITY:
+
+                nl = elem.getElementsByTagName(tagProbability);
+                if (nl.getLength() == 1) {
+                    if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                        tmp = (Element) nl.item(0);
+                        arc.setConflictResolutionValue(
+                                Double.parseDouble(tmp.getAttribute(tagProbability)));
+                    }
+                }
+
+                break;
+
+//            case BENEFIT:
+//                break;
+                
+            default:
+                throw new IOException("Unhandled conflict resolution type!");
+
+        }
+
+        if (source.getData().isDisabled() || target.getData().isDisabled()) {
+            arc.setDisabled(true);
+        }
+//        data.setName(elem.getAttribute(attrName));
+
+        nl = elem.getElementsByTagName(tagWeight);
+        if (nl.getLength() == 1) {
+            if (nl.item(0).getNodeType() == Node.ELEMENT_NODE) {
+                arc.addWeight(getWeight(dao, (Element) nl.item(0)));
+            }
+        }
+
+        return arc;
     }
 
     private Token getToken(final Element elem) {

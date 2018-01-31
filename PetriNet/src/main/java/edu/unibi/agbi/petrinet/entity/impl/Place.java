@@ -5,6 +5,7 @@
  */
 package edu.unibi.agbi.petrinet.entity.impl;
 
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.entity.abstr.Node;
 import edu.unibi.agbi.petrinet.model.Colour;
@@ -21,11 +22,11 @@ import java.util.Map;
 public class Place extends Node
 {
     private Type placeType;
-    private ConflictResolutionType conflictResType;
+    private ConflictResolutionStrategy conflictResType;
 
     private final Map<Colour, Token> token;
 
-    public Place(String id, Type placeType, ConflictResolutionType conflictResType) {
+    public Place(String id, Type placeType, ConflictResolutionStrategy conflictResType) {
         super(id, Element.Type.PLACE);
         this.placeType = placeType;
         this.conflictResType = conflictResType;
@@ -45,11 +46,11 @@ public class Place extends Node
         return token.values();
     }
     
-    public final void setConflictResolutionType(ConflictResolutionType conflictResType) {
+    public final void setConflictResolutionType(ConflictResolutionStrategy conflictResType) {
         this.conflictResType = conflictResType;
     }
     
-    public final ConflictResolutionType getConflictResolutionType() {
+    public final ConflictResolutionStrategy getConflictResolutionType() {
         return conflictResType;
     }
 
@@ -79,10 +80,5 @@ public class Place extends Node
     public enum Type
     {
         CONTINUOUS, DISCRETE;
-    }
-    
-    public enum ConflictResolutionType
-    {
-        PRIORITY, PROBABILITY;
     }
 }

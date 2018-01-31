@@ -42,7 +42,7 @@ public class ResultsXmlConverter
 {
     @Autowired private ModelService dataService;
 
-    private final String formatDateTime = "yy-MM-dd HH:mm:ss";
+    private final String formatDateTime = "yy-MM-dd HH:mm:ss.SSSSSSSSS";
     private final String dtdResultsData = "results.dtd";
 
     private final String attrAuthor = "author";
@@ -90,7 +90,7 @@ public class ResultsXmlConverter
             if (nlm.item(i).getNodeType() == Node.ELEMENT_NODE) {
                 model = (Element) nlm.item(i);
 
-                dao = getDao(daos, model);
+                dao = readModelDao(daos, model);
 
                 /**
                  * Simulations.
@@ -103,7 +103,7 @@ public class ResultsXmlConverter
                         /**
                          * References.
                          */
-                        references = getReferences(dao, sim.getElementsByTagName(tagElement));
+                        references = readReferences(dao, sim.getElementsByTagName(tagElement));
                         references.addFilterReference("time", null); // time must be present in variables
 
                         variables = new String[references.getFilterToElementReferences().keySet().size()];
@@ -116,7 +116,7 @@ public class ResultsXmlConverter
                         /**
                          * Results.
                          */
-                        addResults(simulation, sim.getElementsByTagName(tagData));
+                        readResults(simulation, sim.getElementsByTagName(tagData));
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class ResultsXmlConverter
         return simulations;
     }
 
-    private void addResults(Simulation simulation, final NodeList nld) {
+    private void readResults(Simulation simulation, final NodeList nld) {
 
         Element data;
         List<Object> values;
@@ -141,14 +141,13 @@ public class ResultsXmlConverter
         }
     }
 
-    private IElement getElement(ModelDao dao, final Element elem) throws Exception {
+    private IElement readElement(ModelDao dao, final Element elem) throws Exception {
 
         IElement element;
         Type type;
-        String id, name, subtype;
+        String id, subtype;
 
         id = elem.getAttribute(attrId);
-        name = elem.getAttribute(attrName);
         type = Type.valueOf(elem.getAttribute(attrType));
         subtype = elem.getAttribute(attrSubtype);
 
@@ -157,17 +156,14 @@ public class ResultsXmlConverter
             switch (type) {
                 case ARC:
                     element = new DataArc(id, Arc.Type.NORMAL);
-//                    element.setName(name);
 //                    dao.getModel().add((INode) element);
                     break;
                 case PLACE:
                     element = new DataPlace(id, Place.Type.valueOf(subtype));
-//                    element.setName(name);
                     dao.getModel().add(element);
                     break;
                 case TRANSITION:
                     element = new DataTransition(id, Transition.Type.valueOf(subtype));
-//                    element.setName(name);
                     dao.getModel().add(element);
                     break;
             }
@@ -176,7 +172,7 @@ public class ResultsXmlConverter
         return element;
     }
 
-    private References getReferences(ModelDao dao, final NodeList nle) throws IOException {
+    private References readReferences(ModelDao dao, final NodeList nle) throws IOException {
 
         NodeList nlr;
         Element elem, var;
@@ -188,7 +184,7 @@ public class ResultsXmlConverter
                 elem = (Element) nle.item(k);
 
                 try {
-                    element = getElement(dao, elem);
+                    element = readElement(dao, elem);
                 } catch (Exception ex) {
                     throw new IOException(ex.getMessage());
                 }
@@ -211,7 +207,7 @@ public class ResultsXmlConverter
         return references;
     }
 
-    private ModelDao getDao(List<ModelDao> daos, final Element elem) {
+    private ModelDao readModelDao(List<ModelDao> daos, final Element elem) {
 
         String author, id, name;
         ModelDao dao = null;
@@ -264,7 +260,7 @@ public class ResultsXmlConverter
         
         for (Simulation simulationResult : simulationResults) {
 
-            simulation = getSimulationElement(simulationResult, dom, models);
+            simulation = writeSimulation(simulationResult, dom, models);
             elements = (Element) simulation.getElementsByTagName(tagReferences).item(0);
             results = (Element) simulation.getElementsByTagName(tagResults).item(0);
             
@@ -283,23 +279,23 @@ public class ResultsXmlConverter
                     }
                 }
                 if (element == null) {
-                    element = getElementElement(dom.createElement(tagElement), elem);
+                    element = writeElement(dom.createElement(tagElement), elem);
                     elements.appendChild(element);
                 }
                 
                 for (String variable : simulationResult.getElementFilter(elem)) {
 
-                    element.appendChild(getVariableElement(dom, variable, false));
+                    element.appendChild(writeVariable(dom, variable, false));
                     if (elem.getElementType() == Type.ARC) {
                         continue; // skip arcs, data is stored in places, only need reference
                     }
-                    results.appendChild(getDataElement(dom, variable, simulationResult.getData(variable)));
+                    results.appendChild(writeDataValues(dom, variable, simulationResult.getData(variable)));
                 }
             }
         }
         dom.appendChild(models);
         
-        sendToFile(dom, file);
+        writeToFile(dom, file);
     }
 
     public void ExportResultSets(File file, List<ResultSet> resultSets) throws Exception {
@@ -316,7 +312,7 @@ public class ResultsXmlConverter
 
         for (ResultSet resultSet : resultSets) {
 
-            simulation = getSimulationElement(resultSet.getSimulation(), dom, models);
+            simulation = writeSimulation(resultSet.getSimulation(), dom, models);
             elements = (Element) simulation.getElementsByTagName(tagReferences).item(0);
             results = (Element) simulation.getElementsByTagName(tagResults).item(0);
             element = null;
@@ -332,22 +328,22 @@ public class ResultsXmlConverter
                 }
             }
             if (element == null) {
-                element = getElementElement(dom.createElement(tagElement), resultSet.getElement());
+                element = writeElement(dom.createElement(tagElement), resultSet.getElement());
                 elements.appendChild(element);
             }
 
             /**
              * Append data.
              */
-            element.appendChild(getVariableElement(dom, resultSet.getVariable(), resultSet.isShown()));
-            results.appendChild(getDataElement(dom, resultSet.getVariable(), resultSet.getData()));
+            element.appendChild(writeVariable(dom, resultSet.getVariable(), resultSet.isShown()));
+            results.appendChild(writeDataValues(dom, resultSet.getVariable(), resultSet.getData()));
         }
         dom.appendChild(models);
         
-        sendToFile(dom, file);
+        writeToFile(dom, file);
     }
     
-    private void sendToFile(Document dom, File file) throws Exception {
+    private void writeToFile(Document dom, File file) throws Exception {
         
         FileOutputStream fos = new FileOutputStream(file);
         
@@ -365,7 +361,7 @@ public class ResultsXmlConverter
         fos.close();
     }
 
-    private Element getSimulationElement(Simulation simulationResult, Document dom, final Element models) {
+    private Element writeSimulation(Simulation simulationResult, Document dom, final Element models) {
 
         Element model, simulations, simulation, elements, results;
         NamedNodeMap attributes;
@@ -428,14 +424,14 @@ public class ResultsXmlConverter
         }
         if (results == null) {
             results = dom.createElement(tagResults);
-            results.appendChild(getDataElement(dom, "time", simulationResult.getTimeData())); // append time data
+            results.appendChild(writeDataValues(dom, "time", simulationResult.getTimeData())); // append time data
             simulation.appendChild(results);
         }
 
         return simulation;
     }
 
-    private Element getElementElement(final Element elem, IElement element) {
+    private Element writeElement(final Element elem, IElement element) {
 
         elem.setAttribute(attrId, element.getId());
 //        elem.setAttribute(attrName, element.getName());
@@ -453,7 +449,7 @@ public class ResultsXmlConverter
         return elem;
     }
 
-    private Element getVariableElement(Document dom, String variableId, boolean show) {
+    private Element writeVariable(Document dom, String variableId, boolean show) {
 
         final Element elem;
 
@@ -464,7 +460,7 @@ public class ResultsXmlConverter
         return elem;
     }
 
-    private Element getDataElement(Document dom, String variableId, List<Object> data) {
+    private Element writeDataValues(Document dom, String variableId, List<Object> data) {
 
         final Element elem;
         String dataString;

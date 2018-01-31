@@ -134,8 +134,7 @@
                                     <columns>
                                         <TableColumn fx:id="columnDateTime" editable="false" maxWidth="1.7976931348623157E308" text="Date / Time" />
                                         <TableColumn fx:id="columnModel" editable="false" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Model" />
-                                        <TableColumn fx:id="columnElementId" editable="false" maxWidth="1.7976931348623157E308" prefWidth="30.0" text="ID" />
-                                        <TableColumn fx:id="columnElementName" editable="false" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Name" />
+                                        <TableColumn fx:id="columnElementId" editable="false" maxWidth="1.7976931348623157E308" prefWidth="90.0" text="ID" />
                                         <TableColumn fx:id="columnValueName" editable="false" maxWidth="1.7976931348623157E308" prefWidth="60.0" text="Value" />
                                         <TableColumn fx:id="columnValueStart" editable="false" prefWidth="40.0" text="Start" />
                                         <TableColumn fx:id="columnValueEnd" editable="false" prefWidth="40.0" text="End" />

@@ -11,6 +11,7 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,7 +28,7 @@ public final class DataPlace extends Place implements IDataNode
     private boolean isSticky = false;
 
     public DataPlace(String id, Place.Type type) {
-        super(id, type, Place.ConflictResolutionType.PRIORITY);
+        super(id, type, ConflictResolutionStrategy.PRIORITY);
         this.dataType = DataType.PLACE;
         this.shapes = new HashSet();
     }
