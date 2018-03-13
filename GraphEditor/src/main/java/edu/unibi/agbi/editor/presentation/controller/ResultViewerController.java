@@ -5,26 +5,16 @@
  */
 package edu.unibi.agbi.editor.presentation.controller;
 
-import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
-import edu.unibi.agbi.editor.core.data.entity.result.ResultSet;
-import edu.unibi.agbi.editor.business.service.ResultService;
 import edu.unibi.agbi.editor.business.exception.ResultsException;
-import edu.unibi.agbi.editor.core.io.ResultsXmlConverter;
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
-import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.petrinet.entity.abstr.Element;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.ResultService;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
+import edu.unibi.agbi.editor.core.data.entity.result.ResultSet;
+import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
+import edu.unibi.agbi.editor.core.io.ResultsXmlConverter;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import java.io.File;
-import java.net.URL;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.Set;
+import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import javafx.beans.property.ReadOnlyDoubleWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -35,27 +25,21 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart.Data;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import javafx.scene.control.CustomMenuItem;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+
+import java.io.File;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  *

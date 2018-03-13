@@ -5,19 +5,20 @@
  */
 package edu.unibi.agbi.editor.business.service;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
 import edu.unibi.agbi.editor.core.data.dao.SelectionDao;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
-import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
+import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
+import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
 import edu.unibi.agbi.gravisfx.entity.IGravisItem;
 import edu.unibi.agbi.gravisfx.entity.child.IGravisChild;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -113,6 +114,10 @@ public class SelectionService
                 }
             }
         }
+    }
+
+    public boolean isElementSelected(IGraphElement element) {
+        return element.getElementHandles().iterator().next().isSelected();
     }
 
     /**

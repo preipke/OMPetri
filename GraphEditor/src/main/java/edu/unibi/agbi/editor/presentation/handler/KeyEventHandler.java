@@ -5,20 +5,21 @@
  */
 package edu.unibi.agbi.editor.presentation.handler;
 
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.business.service.SelectionService;
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.business.service.HierarchyService;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.SelectionService;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
-import edu.unibi.agbi.editor.business.service.HierarchyService;
-import java.util.List;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  *

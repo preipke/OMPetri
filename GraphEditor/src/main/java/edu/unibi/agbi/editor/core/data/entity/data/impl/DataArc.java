@@ -10,6 +10,7 @@ import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
+
 import java.util.HashSet;
 import java.util.Set;
 

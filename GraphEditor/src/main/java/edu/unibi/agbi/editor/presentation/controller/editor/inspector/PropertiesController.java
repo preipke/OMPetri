@@ -6,47 +6,41 @@
 package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataPlace;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.business.service.ParameterService;
-import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
-import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.Colour;
+import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.model.Function;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.prettyformulafx.main.ImageComponent;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
-import java.awt.image.BufferedImage;
-import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
 import javafx.animation.PauseTransition;
 import javafx.embed.swing.SwingNode;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Orientation;
 import javafx.scene.Parent;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import javax.swing.SwingUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import javax.swing.*;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  *

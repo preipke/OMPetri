@@ -10,7 +10,6 @@ import edu.unibi.agbi.editor.presentation.controller.LogController;
 import edu.unibi.agbi.editor.presentation.controller.MainController;
 import edu.unibi.agbi.editor.presentation.controller.ResultViewerController;
 import edu.unibi.agbi.editor.presentation.handler.KeyEventHandler;
-import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -18,6 +17,8 @@ import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
 
 /**
  * Factory class used to generate the GUI.

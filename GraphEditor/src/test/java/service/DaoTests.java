@@ -1,21 +1,22 @@
 package service;
 
-import main.TestFXBase;
+import edu.unibi.agbi.editor.business.exception.DataException;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphCluster;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
-import edu.unibi.agbi.editor.business.exception.DataException;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
-import java.util.Collection;
-import java.util.List;
+import main.TestFXBase;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  *

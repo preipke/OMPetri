@@ -7,28 +7,25 @@ package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
 import edu.unibi.agbi.editor.business.exception.InputValidationException;
 import edu.unibi.agbi.editor.business.exception.ParameterException;
-import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
 import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
+import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
 import edu.unibi.agbi.petrinet.model.Parameter;
 import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

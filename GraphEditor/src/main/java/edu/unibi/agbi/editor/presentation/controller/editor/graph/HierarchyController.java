@@ -5,12 +5,10 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
-import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.HierarchyService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.Event;
 import javafx.event.EventDispatchChain;
 import javafx.event.EventDispatcher;
@@ -24,6 +22,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

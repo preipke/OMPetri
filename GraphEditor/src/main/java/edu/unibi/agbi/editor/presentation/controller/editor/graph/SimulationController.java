@@ -6,22 +6,19 @@
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
 import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.core.util.GuiFactory;
 import edu.unibi.agbi.editor.business.service.SimulationService;
+import edu.unibi.agbi.editor.core.util.GuiFactory;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Controller;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TextField;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Controller;
 
 /**
  *

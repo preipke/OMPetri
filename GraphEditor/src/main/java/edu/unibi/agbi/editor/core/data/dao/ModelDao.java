@@ -8,10 +8,11 @@ package edu.unibi.agbi.editor.core.data.dao;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
 import edu.unibi.agbi.petrinet.model.Model;
-import java.io.File;
-import java.time.LocalDateTime;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+
+import java.io.File;
+import java.time.LocalDateTime;
 
 /**
  *

@@ -5,21 +5,15 @@
  */
 package edu.unibi.agbi.editor.business.service;
 
+import edu.unibi.agbi.editor.business.exception.ResultsException;
 import edu.unibi.agbi.editor.core.data.dao.ResultsDao;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
-import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
 import edu.unibi.agbi.editor.core.data.entity.result.ResultSet;
-import edu.unibi.agbi.editor.business.exception.ResultsException;
+import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
 import edu.unibi.agbi.editor.core.util.Utility;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
@@ -28,6 +22,8 @@ import javafx.scene.control.TableView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  *

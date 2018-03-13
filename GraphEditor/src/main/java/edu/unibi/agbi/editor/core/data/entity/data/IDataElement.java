@@ -7,6 +7,7 @@ package edu.unibi.agbi.editor.core.data.entity.data;
 
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.petrinet.entity.IElement;
+
 import java.util.Set;
 
 /**

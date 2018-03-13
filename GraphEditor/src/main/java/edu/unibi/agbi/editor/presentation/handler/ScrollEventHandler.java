@@ -5,8 +5,8 @@
  */
 package edu.unibi.agbi.editor.presentation.handler;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
 import javafx.scene.input.ScrollEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

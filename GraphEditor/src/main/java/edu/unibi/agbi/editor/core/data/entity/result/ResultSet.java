@@ -7,9 +7,10 @@ package edu.unibi.agbi.editor.core.data.entity.result;
 
 import edu.unibi.agbi.editor.business.exception.ResultsException;
 import edu.unibi.agbi.petrinet.entity.IElement;
+import javafx.scene.chart.XYChart;
+
 import java.util.List;
 import java.util.Objects;
-import javafx.scene.chart.XYChart;
 
 /**
  * Data structure for storing a result set. Contains a data series aswell as

@@ -5,19 +5,15 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.menu;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
-import edu.unibi.agbi.editor.presentation.controller.MainController;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.io.ModelSbmlConverter;
 import edu.unibi.agbi.editor.core.io.ModelXmlConverter;
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.presentation.controller.MainController;
+import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -28,10 +24,15 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

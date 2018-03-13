@@ -6,9 +6,10 @@
 package io;
 
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
-import java.util.List;
 import main.TestFXBase;
 import org.junit.Test;
+
+import java.util.List;
 
 /**
  *

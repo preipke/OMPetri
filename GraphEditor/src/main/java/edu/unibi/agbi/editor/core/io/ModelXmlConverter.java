@@ -5,6 +5,9 @@
  */
 package edu.unibi.agbi.editor.core.io;
 
+import edu.unibi.agbi.editor.business.service.HierarchyService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
@@ -21,33 +24,22 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphTransition;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.HierarchyService;
-import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
-import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
-import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.Model;
-import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.model.Token;
-import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.model.*;
 import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -57,12 +49,15 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  *

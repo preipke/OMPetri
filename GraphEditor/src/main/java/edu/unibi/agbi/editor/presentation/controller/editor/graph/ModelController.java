@@ -6,13 +6,14 @@
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

@@ -3,10 +3,11 @@ package edu.unibi.agbi.editor;
 import edu.unibi.agbi.editor.core.util.GuiFactory;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import javax.annotation.PostConstruct;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Boot and configuration class.

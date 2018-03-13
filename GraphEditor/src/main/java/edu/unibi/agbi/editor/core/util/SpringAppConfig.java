@@ -8,10 +8,11 @@ package edu.unibi.agbi.editor.core.util;
 import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.io.IOException;
-import java.util.ResourceBundle;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.io.IOException;
+import java.util.ResourceBundle;
 
 /**
  *

@@ -12,6 +12,7 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.gravisfx.entity.child.GravisChildLabel;
 import edu.unibi.agbi.petrinet.entity.impl.Place;
 import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
+
 import java.util.HashSet;
 import java.util.Set;
 

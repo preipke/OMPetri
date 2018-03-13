@@ -25,17 +25,9 @@ import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
-import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.Model;
-import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.model.Token;
-import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.model.*;
 import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.util.ArrayList;
-import java.util.List;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -43,6 +35,9 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *

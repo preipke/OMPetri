@@ -5,22 +5,15 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
-import edu.unibi.agbi.editor.core.util.GuiFactory;
+import edu.unibi.agbi.editor.business.exception.ResultsException;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.ResultService;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.result.ResultSet;
 import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.business.service.ResultService;
-import edu.unibi.agbi.editor.business.exception.ResultsException;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import edu.unibi.agbi.editor.core.util.GuiFactory;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -32,6 +25,12 @@ import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  *

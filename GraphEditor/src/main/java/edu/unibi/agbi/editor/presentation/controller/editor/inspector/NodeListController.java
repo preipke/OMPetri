@@ -5,16 +5,11 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.InspectorController;
-import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
-import java.net.URL;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ResourceBundle;
-import java.util.Set;
+import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
+import edu.unibi.agbi.editor.presentation.controller.editor.InspectorController;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -28,6 +23,12 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.Set;
 
 /**
  *

@@ -5,10 +5,8 @@
  */
 package edu.unibi.agbi.editor.business.service;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.HierarchyController;
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataCluster;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataClusterArc;
@@ -16,24 +14,22 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphCluster;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
-import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphArc;
+import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphCluster;
 import edu.unibi.agbi.editor.core.util.Calculator;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.HierarchyController;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
 import edu.unibi.agbi.gravisfx.entity.root.GravisType;
 import edu.unibi.agbi.gravisfx.entity.root.connection.IGravisConnection;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisCluster;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.entity.util.GravisShapeHandle;
 import edu.unibi.agbi.gravisfx.graph.Graph;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  *

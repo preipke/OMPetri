@@ -5,28 +5,20 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor;
 
-import edu.unibi.agbi.editor.business.service.FactoryService;
-import edu.unibi.agbi.editor.business.service.HierarchyService;
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.ElementController;
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.HierarchyController;
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.ModelController;
-import edu.unibi.agbi.editor.presentation.controller.menu.FileMenuController;
-import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
-import edu.unibi.agbi.editor.presentation.handler.ScrollEventHandler;
+import edu.unibi.agbi.editor.business.service.*;
 import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.business.service.SelectionService;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.ElementController;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.HierarchyController;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.ModelController;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.ZoomController;
+import edu.unibi.agbi.editor.presentation.controller.menu.FileMenuController;
+import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
+import edu.unibi.agbi.editor.presentation.handler.ScrollEventHandler;
 import javafx.beans.Observable;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -36,16 +28,17 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.SubScene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  *
@@ -113,7 +106,7 @@ public class GraphController implements Initializable
         dao.getGraphPane().maxWidthProperty().bind(scene.widthProperty());
         dao.getGraphPane().getStyleClass().add(paneStyleClass);
         
-        mouseEventHandler.registerTo(dao.getGraphPane());
+        mouseEventHandler.registerMouseEventHandlersToPane(dao.getGraphPane());
         scrollEventHandler.registerTo(dao);
         
         StackPane pane = new StackPane();

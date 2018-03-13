@@ -5,27 +5,28 @@
  */
 package edu.unibi.agbi.editor.business.service;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.graph.SimulationController;
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
-import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
 import edu.unibi.agbi.editor.business.exception.ResultsException;
 import edu.unibi.agbi.editor.business.exception.SimulationException;
 import edu.unibi.agbi.editor.business.service.simulation.SimulationCompiler;
 import edu.unibi.agbi.editor.business.service.simulation.SimulationExecuter;
 import edu.unibi.agbi.editor.business.service.simulation.SimulationServer;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
+import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
 import edu.unibi.agbi.editor.core.util.Utility;
-import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
+import edu.unibi.agbi.editor.presentation.controller.editor.graph.SimulationController;
 import edu.unibi.agbi.petrinet.model.References;
+import edu.unibi.agbi.petrinet.util.OpenModelicaExporter;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
+import javafx.application.Platform;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.application.Platform;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 /**
  *

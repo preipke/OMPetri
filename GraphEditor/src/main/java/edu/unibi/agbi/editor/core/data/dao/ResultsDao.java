@@ -5,18 +5,19 @@
  */
 package edu.unibi.agbi.editor.core.data.dao;
 
-import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
 import edu.unibi.agbi.editor.core.data.entity.result.ResultSet;
+import edu.unibi.agbi.editor.core.data.entity.result.Simulation;
 import edu.unibi.agbi.petrinet.entity.IElement;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.control.TableView;
 import org.springframework.stereotype.Repository;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *

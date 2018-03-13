@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="GraphEditor" />
+        <module name="GraVisFX" />
+        <module name="PetriNet" />
+        <module name="PrettyFormula" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="GraphEditor" target="1.8" />
+      <module name="GraVisFX" target="1.8" />
+      <module name="GraVisFX-PetriNet-Editor" target="1.8" />
+      <module name="PetriNet" target="1.8" />
+      <module name="PrettyFormula" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

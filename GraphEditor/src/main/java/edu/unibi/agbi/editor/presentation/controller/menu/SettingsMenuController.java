@@ -5,10 +5,11 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.menu;
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.fxml.Initializable;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

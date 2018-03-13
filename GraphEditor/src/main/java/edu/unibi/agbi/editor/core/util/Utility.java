@@ -5,8 +5,6 @@
  */
 package edu.unibi.agbi.editor.core.util;
 
-import java.io.File;
-
 /**
  *
  * @author PR

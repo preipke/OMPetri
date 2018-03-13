@@ -9,13 +9,14 @@ import edu.unibi.agbi.editor.business.service.MessengerService;
 import edu.unibi.agbi.editor.core.util.GuiFactory;
 import edu.unibi.agbi.editor.presentation.controller.LogController;
 import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

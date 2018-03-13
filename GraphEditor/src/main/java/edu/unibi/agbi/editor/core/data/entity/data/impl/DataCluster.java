@@ -14,6 +14,7 @@ import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.petrinet.entity.IArc;
 import edu.unibi.agbi.petrinet.entity.abstr.Element;
 import edu.unibi.agbi.petrinet.model.Parameter;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;

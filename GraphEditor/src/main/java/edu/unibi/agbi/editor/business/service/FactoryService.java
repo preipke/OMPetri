@@ -24,11 +24,12 @@ import edu.unibi.agbi.petrinet.entity.INode;
 import edu.unibi.agbi.petrinet.model.Colour;
 import edu.unibi.agbi.petrinet.model.Token;
 import edu.unibi.agbi.petrinet.model.Weight;
-import java.time.LocalDateTime;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 /**
  * Handles name/ID generation for elements and parameters in a model.
@@ -211,10 +212,15 @@ public class FactoryService
             default:
                 throw new DataException("Cannot clone the given type of element! [" + data.getType() + "]");
         }
-        Point2D pos = calculator.getCorrectedPosition(modelDao.getGraph(), posX, posY);
+        
+        Point2D pos;
+        pos = calculator.getCorrectedPosition(modelDao.getGraph(), posX, posY);
+        pos = calculator.getPositionInGrid(pos, modelDao.getGraph());
+        
         clone.translateXProperty().set(pos.getX() - clone.getCenterOffsetX());
         clone.translateYProperty().set(pos.getY() - clone.getCenterOffsetY());
         clone.getLabels().get(0).setText(data.getLabelText());
+        
         return clone;
     }
 

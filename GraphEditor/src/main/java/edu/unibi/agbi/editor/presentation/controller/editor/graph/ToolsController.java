@@ -5,22 +5,19 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
-import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import edu.unibi.agbi.editor.business.exception.DataException;
-import edu.unibi.agbi.editor.business.service.FactoryService;
+import edu.unibi.agbi.editor.business.service.*;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.business.service.SelectionService;
-import edu.unibi.agbi.editor.business.service.HierarchyService;
-import java.net.URL;
-import java.util.ResourceBundle;
+import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

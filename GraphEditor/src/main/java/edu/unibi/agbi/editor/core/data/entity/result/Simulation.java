@@ -5,19 +5,14 @@
  */
 package edu.unibi.agbi.editor.core.data.entity.result;
 
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.business.exception.ResultsException;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.model.References;
-import java.time.format.DateTimeFormatter;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * A data structure for storing the results of a simulation. Contains all results

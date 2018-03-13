@@ -5,18 +5,9 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.inspector.ConnectionsController;
-import edu.unibi.agbi.editor.presentation.controller.editor.inspector.IdentifierController;
-import edu.unibi.agbi.editor.presentation.controller.editor.inspector.NodeListController;
-import edu.unibi.agbi.editor.presentation.controller.editor.inspector.ParameterController;
-import edu.unibi.agbi.editor.presentation.controller.editor.inspector.PropertiesController;
-import edu.unibi.agbi.editor.presentation.controller.editor.inspector.QuickResultsController;
-import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.business.service.ModelService;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
+import edu.unibi.agbi.editor.presentation.controller.editor.inspector.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
@@ -24,6 +15,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  *

@@ -7,6 +7,8 @@ package edu.unibi.agbi.editor.presentation.controller.editor.inspector;
 
 import edu.unibi.agbi.editor.business.exception.DataException;
 import edu.unibi.agbi.editor.business.service.FactoryService;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
 import edu.unibi.agbi.editor.core.data.entity.data.impl.DataPlace;
@@ -16,24 +18,21 @@ import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphArc;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphPlace;
 import edu.unibi.agbi.editor.core.data.entity.graph.impl.GraphTransition;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Control;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *

@@ -5,52 +5,36 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
-import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
-import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import edu.unibi.agbi.editor.business.exception.DataException;
+import edu.unibi.agbi.editor.business.service.MessengerService;
+import edu.unibi.agbi.editor.business.service.ModelService;
+import edu.unibi.agbi.editor.business.service.ParameterService;
 import edu.unibi.agbi.editor.core.data.entity.data.DataType;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataElement;
 import edu.unibi.agbi.editor.core.data.entity.data.IDataNode;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataArc;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataClusterArc;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataPlace;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
-import edu.unibi.agbi.editor.core.data.entity.data.impl.DataCluster;
+import edu.unibi.agbi.editor.core.data.entity.data.impl.*;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
-import edu.unibi.agbi.editor.business.service.ModelService;
-import edu.unibi.agbi.editor.business.service.MessengerService;
-import edu.unibi.agbi.editor.business.service.ParameterService;
+import edu.unibi.agbi.editor.presentation.controller.editor.GraphController;
+import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import edu.unibi.agbi.petrinet.entity.IArc;
-import edu.unibi.agbi.petrinet.model.ConflictResolutionStrategy;
-import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.Token;
-import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.model.*;
 import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.prettyformulafx.main.PrettyFormulaParser;
-import java.net.URL;
-import java.util.Collection;
-import java.util.List;
-import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitMenuButton;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputControl;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.Collection;
+import java.util.List;
+import java.util.ResourceBundle;
 
 /**
  *

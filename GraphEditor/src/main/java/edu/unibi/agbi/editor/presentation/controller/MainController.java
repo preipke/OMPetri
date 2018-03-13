@@ -5,14 +5,10 @@
  */
 package edu.unibi.agbi.editor.presentation.controller;
 
-import edu.unibi.agbi.editor.presentation.controller.menu.FileMenuController;
-import edu.unibi.agbi.editor.core.data.dao.ModelDao;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.business.service.SimulationService;
-import java.net.URL;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import edu.unibi.agbi.editor.core.data.dao.ModelDao;
+import edu.unibi.agbi.editor.presentation.controller.menu.FileMenuController;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -23,6 +19,11 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 
 /**
  *

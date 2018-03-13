@@ -12,21 +12,14 @@ import edu.unibi.agbi.editor.core.data.entity.data.impl.DataTransition;
 import edu.unibi.agbi.petrinet.entity.IElement;
 import edu.unibi.agbi.petrinet.entity.impl.Arc;
 import edu.unibi.agbi.petrinet.entity.impl.Transition;
-import edu.unibi.agbi.petrinet.model.Colour;
-import edu.unibi.agbi.petrinet.model.Function;
-import edu.unibi.agbi.petrinet.model.Model;
-import edu.unibi.agbi.petrinet.model.Parameter;
-import edu.unibi.agbi.petrinet.model.Weight;
+import edu.unibi.agbi.petrinet.model.*;
 import edu.unibi.agbi.petrinet.model.parameter.ReferencingParameter.ReferenceType;
 import edu.unibi.agbi.petrinet.util.FunctionFactory;
 import edu.unibi.agbi.petrinet.util.ParameterFactory;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  *

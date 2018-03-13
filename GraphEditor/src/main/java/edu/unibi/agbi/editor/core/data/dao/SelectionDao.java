@@ -6,11 +6,10 @@
 package edu.unibi.agbi.editor.core.data.dao;
 
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import org.springframework.stereotype.Repository;
 
 /**
  *

@@ -5,16 +5,17 @@
  */
 package edu.unibi.agbi.editor.core.util;
 
-import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.core.data.entity.graph.IGraphNode;
+import edu.unibi.agbi.editor.presentation.handler.MouseEventHandler;
 import edu.unibi.agbi.gravisfx.entity.root.node.IGravisNode;
 import edu.unibi.agbi.gravisfx.graph.Graph;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
-import java.util.Collection;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
 
 /**
  *

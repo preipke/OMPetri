@@ -5,18 +5,18 @@
  */
 package edu.unibi.agbi.editor.presentation.controller.editor.graph;
 
-import edu.unibi.agbi.editor.core.data.entity.graph.IGraphElement;
 import edu.unibi.agbi.editor.business.service.ModelService;
 import edu.unibi.agbi.editor.core.util.Calculator;
 import edu.unibi.agbi.gravisfx.graph.GraphPane;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+
+import java.net.URL;
+import java.util.ResourceBundle;
 
 /**
  *
