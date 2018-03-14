@@ -2,3 +2,5 @@
 /GraVisFX/target/
 /PetriNet/target/
 /PrettyFormula/target/
+/.idea
+*.iml
