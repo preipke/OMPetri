@@ -444,13 +444,15 @@ public class ModelXmlConverter
         }
         
         // Properties
-        if (elem.getAttribute(attrDisabled) != null) {
+        if (elem.getAttributeNode(attrDisabled) != null) {
             data.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
         }
-        if (elem.getAttribute(attrLabel) != null) {
+        if (elem.getAttributeNode(attrLabel) != null) {
             data.setLabelText(elem.getAttribute(attrLabel));
         }
-        data.setConflictResolutionValue(Double.parseDouble(elem.getAttribute(attrConflictResolutionValue)));
+        if (elem.getAttributeNode(attrConflictResolutionValue) != null) {
+            data.setConflictResolutionValue(Double.parseDouble(elem.getAttribute(attrConflictResolutionValue)));
+        }
         data.setDescription(elem.getAttribute(attrDescription));
     }
 
@@ -484,16 +486,16 @@ public class ModelXmlConverter
         }
         
         // Properties
-        if (elem.getAttribute(attrConflictResolutionStrategy) != null) {
+        if (elem.getAttributeNode(attrConflictResolutionStrategy) != null) {
             place.setConflictResolutionType(ConflictResolutionStrategy.valueOf(elem.getAttribute(attrConflictResolutionStrategy)));
         }
-        if (elem.getAttribute(attrDisabled) != null) {
+        if (elem.getAttributeNode(attrDisabled) != null) {
             place.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
         }
-        if (elem.getAttribute(attrConstant) != null) {
+        if (elem.getAttributeNode(attrConstant) != null) {
             place.setConstant(Boolean.valueOf(elem.getAttribute(attrConstant)));
         }
-        if (elem.getAttribute(attrSticky) != null) {
+        if (elem.getAttributeNode(attrSticky) != null) {
             place.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         place.setDescription(elem.getAttribute(attrDescription));
@@ -535,10 +537,10 @@ public class ModelXmlConverter
         }
 
         // Properties
-        if (elem.getAttribute(attrDisabled) != null) {
+        if (elem.getAttributeNode(attrDisabled) != null) {
             transition.setDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
         }
-        if (elem.getAttribute(attrSticky) != null) {
+        if (elem.getAttributeNode(attrSticky) != null) {
             transition.setSticky(Boolean.valueOf(elem.getAttribute(attrSticky)));
         }
         transition.setDescription(elem.getAttribute(attrDescription));
@@ -579,7 +581,7 @@ public class ModelXmlConverter
                                 throw new IOException("Malformed node type '" + data.getType() + "'. Cannot create shape.");
                         }
                         
-//                        if (elem.getAttribute(attrDisabled) != null) { // not useful here as arcs are created later and carry their own disabled state
+//                        if (elem.getAttributeNode(attrDisabled) != null) { // not useful here as arcs are created later and carry their own disabled state
 //                            shape.setElementDisabled(Boolean.valueOf(elem.getAttribute(attrDisabled)));
 //                        }
                         
@@ -588,7 +590,7 @@ public class ModelXmlConverter
                 }
             }
         }
-        if (elem.getAttribute(attrLabel) != null) {
+        if (elem.getAttributeNode(attrLabel) != null) {
             data.setLabelText(elem.getAttribute(attrLabel));
         }
         if (data.getType() == DataType.PLACE) {
@@ -661,7 +663,6 @@ public class ModelXmlConverter
     }
 
     private Weight readWeight(Element elem, ModelDao dao) throws Exception {
-//        Weight weight = new Weight(new Colour(elem.getAttribute(attrColourId), ""));
         Weight weight = new Weight(dao.getModel().getColour(elem.getAttribute(attrColourId)));
         weight.setFunction(readFunction(dao.getModel(), elem));
         return weight;
