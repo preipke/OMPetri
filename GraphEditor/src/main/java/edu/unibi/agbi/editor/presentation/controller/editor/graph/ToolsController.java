@@ -26,9 +26,8 @@ import java.util.ResourceBundle;
 @Component
 public class ToolsController implements Initializable
 {
-    @Autowired private FactoryService factoryService;
+    @Autowired private ModelService modelService;
     @Autowired private HierarchyService hierarchyService;
-    @Autowired private ModelService dataService;
     @Autowired private SelectionService selectionService;
     @Autowired private MessengerService messengerService;
     
@@ -48,16 +47,12 @@ public class ToolsController implements Initializable
     }
     
     public void EnableCreatingNodes() {
-        try {
-            mouseEventHandler.setNodeCreationMode();
-        } catch (Exception ex) {
-            messengerService.addException("Cannot switch to node creation mode!", ex);
-        }
+        mouseEventHandler.setNodeCreationMode();
     }
     
     private void CreateCluster() {
         try {
-            hierarchyService.cluster(dataService.getDao(), selectionService.getSelectedElements());
+            hierarchyService.cluster(modelService.getDao(), selectionService.getSelectedElements());
             hierarchyController.update();
         } catch (DataException ex) {
             messengerService.addException(ex);
@@ -70,7 +65,7 @@ public class ToolsController implements Initializable
     }
     
     private void RemoveSelected() {
-        dataService.remove(selectionService.getSelectedElements());
+        modelService.remove(selectionService.getSelectedElements());
         selectionService.unselectAll();
     }
 

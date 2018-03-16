@@ -409,7 +409,7 @@ public class ModelService
         IGraphNode shape;
 
         Point2D posCenter = calculator.getCenterN(nodes);
-        Point2D posMouse = calculator.getCorrectedMousePositionLatest(modelDaoActive.getGraph());
+        Point2D posMouse = calculator.getCorrectedLatestMousePositionInGraph(modelDaoActive.getGraph());
 
         for (int i = 0; i < nodes.size(); i++) {
 

@@ -535,11 +535,7 @@ public class ElementController implements Initializable
         
         buttonClone.setOnAction(eh -> {
             if (data instanceof IDataNode) {
-                try {
-                    mouseEventHandler.setCloningMode((IDataNode) data);
-                } catch (Exception ex) {
-                    messengerService.addException("Cannot clone node!", ex);
-                }
+                mouseEventHandler.setCloningMode((IDataNode) data);
             }
         });
         buttonDisable.setOnAction(eh -> {

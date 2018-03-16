@@ -46,7 +46,7 @@ public class KeyEventHandler
 
         if (event.getCode().equals(KeyCode.ESCAPE)) {
             
-            mouseEventHandler.UnlockEditorMode();
+            mouseEventHandler.setEditModeToFreeMode();
             selectionService.unselectAll();
             
         } else if (event.getCode().equals(KeyCode.DELETE)) {

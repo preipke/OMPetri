@@ -170,7 +170,7 @@ public class FactoryService
         }
         
         Point2D pos;
-        pos = calculator.getCorrectedPosition(modelDao.getGraph(), posX, posY);
+        pos = calculator.getCorrectedPositionInGraph(modelDao.getGraph(), posX, posY);
         pos = calculator.getPositionInGrid(pos, modelDao.getGraph());
             
         shape.translateXProperty().set(pos.getX() - shape.getCenterOffsetX());
@@ -214,7 +214,7 @@ public class FactoryService
         }
         
         Point2D pos;
-        pos = calculator.getCorrectedPosition(modelDao.getGraph(), posX, posY);
+        pos = calculator.getCorrectedPositionInGraph(modelDao.getGraph(), posX, posY);
         pos = calculator.getPositionInGrid(pos, modelDao.getGraph());
         
         clone.translateXProperty().set(pos.getX() - clone.getCenterOffsetX());

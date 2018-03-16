@@ -86,18 +86,18 @@ public class Calculator
         return new Point2D(x, y);
     }
 
-    public Point2D getCorrectedPosition(Graph graph, double posX, double posY) {
+    public Point2D getCorrectedPositionInGraph(Graph graph, double posX, double posY) {
         double x, y;
         x = (posX - graph.translateXProperty().get()) / graph.getScale().getX();
         y = (posY - graph.translateYProperty().get()) / graph.getScale().getY();
         return new Point2D(x, y);
     }
 
-    public Point2D getCorrectedMousePositionLatest(Graph graph) {
-        return getCorrectedPosition(
+    public Point2D getCorrectedLatestMousePositionInGraph(Graph graph) {
+        return getCorrectedPositionInGraph(
                 graph,
-                mouseEventHandler.getMouseMovedEventLatest().getX(),
-                mouseEventHandler.getMouseMovedEventLatest().getY()
+                mouseEventHandler.getEventMouseDraggedOrMovedLatest().getX(),
+                mouseEventHandler.getEventMouseDraggedOrMovedLatest().getY()
         );
     }
 
