@@ -74,6 +74,7 @@ public class MouseEventHandler {
     private MouseEvent eventMouseDraggedPrevious;
     @Getter
     private MouseEvent eventMousePressedLatest;
+    private MouseEvent eventMousePressedPrevious;
     @Getter
     private MouseEvent eventMouseReleasedLatest;
 
@@ -103,52 +104,15 @@ public class MouseEventHandler {
 
     private void onMousePressed(final MouseEvent event, GraphPane pane) {
 
-        eventMouseDraggedPrevious = event; // used for dragging to avoid initial null pointer
         if (eventMousePressedLatest != null) {
             eventMousePressedLatest.consume(); // avoids multiple pause transitions
+            eventMousePressedPrevious = eventMousePressedLatest;
         }
         eventMousePressedLatest = event;
 
-        // Left clicking.
-        if (event.isPrimaryButtonDown()) { // Holding shift will open the selection rectangle in a following handler.
+        if (event.isPrimaryButtonDown()) {
 
-            if (event.isShiftDown()) {
-
-                if (!event.isControlDown()) {
-                    selectionService.unselectAll();
-                }
-
-            } else if (event.getTarget() instanceof IGravisItem) { // Clicking any graph element, including label.
-
-                setEditModeToFreeMode();
-
-                final IGraphNode node = getGraphNodeFromEventTarget(event);
-
-                if (node != null) {
-
-                    if (!selectionService.isElementSelected(node)) {
-
-                        if (!event.isControlDown()) {
-                            selectElementAndDeselectOthers(node);
-                        }
-                    }
-
-                    if (event.getClickCount() == 2) {
-                        if (node instanceof GraphCluster) {
-                            openClusterNode((GraphCluster) node);
-                            return;
-                        }
-                    }
-
-                    resetTransitionEnablingArcCreation(event, node);
-                }
-
-            } else { // Clicking the pane.
-
-                if (!event.isControlDown()) {
-                    selectionService.unselectAll();
-                }
-            }
+            editModeCurrentlyActive.performMousePressedActionPrimaryButton(event, pane);
 
         } else {
 
@@ -158,19 +122,22 @@ public class MouseEventHandler {
 
     private void onMouseDragged(MouseEvent event, GraphPane pane) {
 
-        eventMousePressedLatest.consume(); // for PauseTransition
+        eventMousePressedLatest.consume(); // for PauseTransition, avoid creating new arc
+        eventMouseDraggedPrevious = eventMouseDraggedOrMovedLatest;
         eventMouseDraggedOrMovedLatest = event;
 
-            if (event.isPrimaryButtonDown()) {
+        if (event.isPrimaryButtonDown()) {
 
-                getCurrentlyActiveEditMode().performMouseDraggedAction(event, pane);
+            getCurrentlyActiveEditMode().performMouseDraggedAction(event, pane);
 
-            } else if (event.isSecondaryButtonDown()) {
+        } else if (event.isSecondaryButtonDown()) {
 
-                translatePaneByDistanceBetweenEvents(pane, eventMouseDraggedOrMovedLatest, eventMouseDraggedPrevious);
+            if (eventMouseDraggedPrevious == null) {
+                eventMouseDraggedPrevious = eventMousePressedLatest; // avoid initial null pointer
             }
 
-        eventMouseDraggedPrevious = event;
+            translatePaneByDistanceBetweenEvents(pane, eventMouseDraggedOrMovedLatest, eventMouseDraggedPrevious);
+        }
     }
 
     private void onMouseReleased(final MouseEvent event, GraphPane pane) {
@@ -180,11 +147,12 @@ public class MouseEventHandler {
         }
         eventMouseReleasedLatest = event;
 
-        getCurrentlyActiveEditMode().performMouseReleasedAction(event, pane);
+        getCurrentlyActiveEditMode()
+                .performMouseReleasedAction(event, pane);
     }
 
     private void onMouseClicked(MouseEvent event) {
-        eventMousePressedLatest.consume();
+        eventMousePressedLatest.consume(); // for PauseTransition, avoid creating new arc, in case mouse has not been dragged
         event.consume();
     }
 
@@ -199,6 +167,88 @@ public class MouseEventHandler {
         editModeCurrentlyActive = freeMode;
     }
 
+    public synchronized void setCloningMode(IDataNode dataToClone) {
+        setCurrentlyActiveEditMode(nodeCloningMode);
+        this.nodeStoredForCloning = dataToClone;
+    }
+
+    public synchronized void setNodeCreationMode() {
+        setCurrentlyActiveEditMode(nodeCreationMode);
+    }
+
+    public void defaultMousePressedActionPrimaryButtonDown(MouseEvent event) {
+
+        IGraphNode node;
+
+        if (!event.isShiftDown() && // holding shift will open selection rectangle
+                event.getTarget() instanceof IGravisItem) { // clicking any graph element, including label.
+
+            setEditModeToFreeMode();
+
+            node = getGraphNodeFromEventTarget(event);
+
+            if (node != null) {
+
+                if (!selectionService.isElementSelected(node)) {
+                    if (!event.isControlDown()) {
+                        selectElementAndUnselectOthers(node);
+                    }
+                }
+
+                resetTransitionEnablingArcCreation(event, node);
+
+                openClusterNodeOnDoubleClick(event, node);
+            }
+
+        } else { // Clicking the pane.
+
+            if (!event.isControlDown()) {
+                selectionService.unselectAll();
+            }
+        }
+    }
+
+    private void openClusterNodeOnDoubleClick(MouseEvent event, IGraphNode node) {
+
+        if (event.getClickCount() == 2) {
+
+            if (eventMousePressedPrevious != null) {
+
+                if (eventMousePressedPrevious.getPickResult() ==
+                        eventMousePressedLatest.getPickResult()) {
+
+                    if (node instanceof GraphCluster) {
+                        openClusterNode((GraphCluster) node);
+                    }
+                }
+            }
+        }
+    }
+
+    public void defaultMouseDraggedAction(MouseEvent event, GraphPane pane) {
+
+        setEditModeToFreeMode();
+
+        IGraphNode node = getGraphNodeFromEventTarget(event);
+
+        if (event.isShiftDown() || node == null) {
+
+            enableSelectionRectangle(pane);
+
+        } else {
+
+            setCurrentlyActiveEditMode(draggingMode);
+        }
+    }
+
+    public boolean isPrimaryButtonDownForLatestMousePressedEvent() {
+        if (eventMousePressedLatest != null) {
+            return eventMousePressedLatest.isPrimaryButtonDown();
+        } else {
+            return false;
+        }
+    }
+
     private synchronized void setCurrentlyActiveEditMode(IEditMode mode) {
 
         if (getCurrentlyActiveEditMode() != mode) {
@@ -211,23 +261,6 @@ public class MouseEventHandler {
 
                 messengerService.addMessage("Changing edit mode is blocked! Switch to free mode first.");
             }
-        }
-    }
-
-    public synchronized void setCloningMode(IDataNode dataToClone) {
-        setCurrentlyActiveEditMode(nodeCloningMode);
-        this.nodeStoredForCloning = dataToClone;
-    }
-
-    public synchronized void setNodeCreationMode() {
-        setCurrentlyActiveEditMode(nodeCreationMode);
-    }
-
-    public boolean isPrimaryButtonDownForLatestMousePressedEvent() {
-        if (eventMousePressedLatest != null) {
-            return eventMousePressedLatest.isPrimaryButtonDown();
-        } else {
-            return false;
         }
     }
 
@@ -261,26 +294,10 @@ public class MouseEventHandler {
         hierarchyService.open(node, dataService.getDao());
     }
 
-    private void selectElementAndDeselectOthers(IGraphElement element) {
+    private void selectElementAndUnselectOthers(IGraphElement element) {
         selectionService.unselectAll();
         selectionService.select(element);
         selectionService.highlightRelated(element);
-    }
-
-    public void performGeneralMouseDraggedAction(MouseEvent event, GraphPane pane) {
-
-        setEditModeToFreeMode();
-
-        IGraphNode node = getGraphNodeFromEventTarget(event);
-
-        if (event.isShiftDown() || node == null) {
-
-            enableSelectionRectangle(pane);
-
-        } else {
-
-            setCurrentlyActiveEditMode(draggingMode);
-        }
     }
 
     private void translatePaneByDistanceBetweenEvents(GraphPane pane, MouseEvent currentEvent, MouseEvent previousEvent) {

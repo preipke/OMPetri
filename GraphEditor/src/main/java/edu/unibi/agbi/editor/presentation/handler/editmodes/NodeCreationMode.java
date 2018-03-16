@@ -26,13 +26,13 @@ public class NodeCreationMode implements IEditMode {
     }
 
     @Override
-    public void performMousePressedAction(MouseEvent event, GraphPane pane) {
-
+    public void performMousePressedActionPrimaryButton(MouseEvent event, GraphPane pane) {
+        mouseEventHandler.defaultMousePressedActionPrimaryButtonDown(event);
     }
 
     @Override
     public void performMouseDraggedAction(MouseEvent event, GraphPane pane) {
-        mouseEventHandler.performGeneralMouseDraggedAction(event, pane);
+        mouseEventHandler.defaultMouseDraggedAction(event, pane);
     }
 
     @Override

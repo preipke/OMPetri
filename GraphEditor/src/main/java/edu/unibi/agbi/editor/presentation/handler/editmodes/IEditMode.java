@@ -7,7 +7,7 @@ public interface IEditMode {
 
     public void performMouseMovedAction(final MouseEvent event, GraphPane pane);
 
-    public void performMousePressedAction(final MouseEvent event, GraphPane pane);
+    public void performMousePressedActionPrimaryButton(final MouseEvent event, GraphPane pane);
 
     public void performMouseDraggedAction(final MouseEvent event, GraphPane pane);
 

@@ -36,8 +36,8 @@ public class DraggingMode implements IEditMode {
     }
 
     @Override
-    public void performMousePressedAction(MouseEvent event, GraphPane pane) {
-
+    public void performMousePressedActionPrimaryButton(MouseEvent event, GraphPane pane) {
+        mouseEventHandler.defaultMousePressedActionPrimaryButtonDown(event);
     }
 
     @Override
