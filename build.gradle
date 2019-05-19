@@ -4,7 +4,7 @@
 plugins {
     id 'java'
     //id 'application'
-    id 'org.openjfx.javafxplugin' version '0.0.7'
+    id 'org.openjfx.javafxplugin' version '0.0.7' apply false
 }
 allprojects {
     group = 'edu.unibi.agbi'
